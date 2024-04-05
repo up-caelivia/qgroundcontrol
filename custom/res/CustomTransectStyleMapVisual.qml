@@ -76,7 +76,7 @@ Item {
         borderColor:        "black"
         interiorColor:      QGroundControl.globalPalette.surveyPolygonInterior
         altColor:           QGroundControl.globalPalette.surveyPolygonTerrainCollision
-        interiorOpacity:    0.5 * _root.opacity
+        interiorOpacity:    0.3 * _root.opacity
     }
 
     // Full set of transects lines. Shown when item is selected.
