@@ -249,7 +249,6 @@
 		<file alias="QGroundControl/FlightMap/MissionItemIndicator.qml">../src/FlightMap/MapItems/MissionItemIndicator.qml</file>
 		<file alias="QGroundControl/FlightMap/MissionItemIndicatorDrag.qml">../src/FlightMap/MapItems/MissionItemIndicatorDrag.qml</file>
 		<file alias="QGroundControl/FlightMap/MissionItemView.qml">../src/FlightMap/MapItems/MissionItemView.qml</file>
-		<file alias="QGroundControl/FlightMap/MissionLineView.qml">../src/FlightMap/MapItems/MissionLineView.qml</file>
 		<file alias="QGroundControl/FlightMap/PhotoVideoControl.qml">../src/FlightMap/Widgets/PhotoVideoControl.qml</file>
 		<file alias="QGroundControl/FlightMap/PlanMapItems.qml">../src/FlightMap/MapItems/PlanMapItems.qml</file>
 		<file alias="QGroundControl/FlightMap/PolygonEditor.qml">../src/FlightMap/MapItems/PolygonEditor.qml</file>

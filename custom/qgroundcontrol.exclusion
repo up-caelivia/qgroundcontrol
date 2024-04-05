@@ -6,7 +6,7 @@
 
 <file alias="QGroundControl/Controls/TransectStyleMapVisuals.qml">src/PlanView/TransectStyleMapVisuals.qml</file>
 
-
+<file alias="QGroundControl/FlightMap/MissionLineView.qml">src/FlightMap/MapItems/MissionLineView.qml</file>
 
 <file alias="GPSIndicator.qml">src/ui/toolbar/GPSIndicator.qml</file>
 
