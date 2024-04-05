@@ -4,8 +4,6 @@
 	</qresource>
 	<qresource prefix="/toolbar">
 		<file alias="ArmedIndicator.qml">../src/ui/toolbar/ArmedIndicator.qml</file>
-		<file alias="BatteryIndicator.qml">../src/ui/toolbar/BatteryIndicator.qml</file>
-		<file alias="GPSIndicator.qml">../src/ui/toolbar/GPSIndicator.qml</file>
 		<file alias="GPSRTKIndicator.qml">../src/ui/toolbar/GPSRTKIndicator.qml</file>
 		<file alias="JoystickIndicator.qml">../src/ui/toolbar/JoystickIndicator.qml</file>
 		<file alias="LinkIndicator.qml">../src/ui/toolbar/LinkIndicator.qml</file>
@@ -102,7 +100,6 @@
 		<file alias="QGroundControl/Controls/FWLandingPatternMapVisual.qml">../src/PlanView/FWLandingPatternMapVisual.qml</file>
 		<file alias="QGroundControl/Controls/GeoFenceEditor.qml">../src/PlanView/GeoFenceEditor.qml</file>
 		<file alias="QGroundControl/Controls/GeoFenceMapVisuals.qml">../src/PlanView/GeoFenceMapVisuals.qml</file>
-		<file alias="QGroundControl/Controls/HorizontalFactValueGrid.qml">../src/QmlControls/HorizontalFactValueGrid.qml</file>
 		<file alias="QGroundControl/Controls/IndicatorButton.qml">../src/QmlControls/IndicatorButton.qml</file>
 		<file alias="QGroundControl/Controls/InstrumentValueLabel.qml">../src/QmlControls/InstrumentValueLabel.qml</file>
 		<file alias="QGroundControl/Controls/InstrumentValueValue.qml">../src/QmlControls/InstrumentValueValue.qml</file>
@@ -112,7 +109,6 @@
 		<file alias="QGroundControl/Controls/LogReplayStatusBar.qml">../src/QmlControls/LogReplayStatusBar.qml</file>
 		<file alias="QGroundControl/Controls/MainStatusIndicator.qml">../src/ui/toolbar/MainStatusIndicator.qml</file>
 		<file alias="QGroundControl/Controls/FlightModeMenuIndicator.qml">../src/ui/toolbar/FlightModeMenuIndicator.qml</file>
-		<file alias="QGroundControl/Controls/MainToolBar.qml">../src/ui/toolbar/MainToolBar.qml</file>
 		<file alias="QGroundControl/Controls/MainWindowSavedState.qml">../src/QmlControls/MainWindowSavedState.qml</file>
 		<file alias="QGroundControl/Controls/MAVLinkChart.qml">../src/QmlControls/MAVLinkChart.qml</file>
 		<file alias="QGroundControl/Controls/MAVLinkMessageButton.qml">../src/QmlControls/MAVLinkMessageButton.qml</file>
@@ -214,7 +210,6 @@
 		<file alias="QGroundControl/FlightDisplay/FlyViewToolStrip.qml">../src/FlightDisplay/FlyViewToolStrip.qml</file>
 		<file alias="QGroundControl/FlightDisplay/FlyViewToolStripActionList.qml">../src/FlightDisplay/FlyViewToolStripActionList.qml</file>
 		<file alias="QGroundControl/FlightDisplay/FlyViewVideo.qml">../src/FlightDisplay/FlyViewVideo.qml</file>
-		<file alias="QGroundControl/FlightDisplay/FlyViewWidgetLayer.qml">../src/FlightDisplay/FlyViewWidgetLayer.qml</file>
 		<file alias="QGroundControl/FlightDisplay/GuidedActionActionList.qml">../src/FlightDisplay/GuidedActionActionList.qml</file>
 		<file alias="QGroundControl/FlightDisplay/GuidedActionConfirm.qml">../src/FlightDisplay/GuidedActionConfirm.qml</file>
 		<file alias="QGroundControl/FlightDisplay/GuidedActionsController.qml">../src/FlightDisplay/GuidedActionsController.qml</file>
