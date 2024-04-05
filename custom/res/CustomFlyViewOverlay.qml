@@ -20,7 +20,6 @@ import QGroundControl.ScreenTools   1.0
 import QGroundControl.FactSystem    1.0
 import QGroundControl.FlightMap     1.0
 import QGroundControl.FlightDisplay 1.0
-// import Custom.Widgets.CustomAttitudeWidget 1.0
 import Custom.Widgets 1.0
 
 Item {
