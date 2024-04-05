@@ -12,4 +12,7 @@
 
 <file alias="BatteryIndicator.qml">src/ui/toolbar/BatteryIndicator.qml</file>
 
+<file alias="QGroundControl/FlightMap/MapLineArrow.qml">src/MissionManager/MapLineArrow.qml</file>
+
+
 

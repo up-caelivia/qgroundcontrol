@@ -17,6 +17,7 @@
         <file alias="QGroundControl/Controls/MainToolBar.qml">res/CustomMainToolbar.qml</file>
         <file alias="QGroundControl/Controls/TransectStyleMapVisuals.qml">res/CustomTransectStyleMapVisual.qml</file>
         <file alias="QGroundControl/FlightMap/MissionLineView.qml">res/CustomMissionLineView.qml</file>
+        <file alias="QGroundControl/FlightMap/MapLineArrow.qml">res/CustomMapLineArraw.qml</file>
     </qresource>
     <qresource prefix="/toolbar">
         <file alias="GPSIndicator.qml">res/CustomGPSIndicator.qml</file>
