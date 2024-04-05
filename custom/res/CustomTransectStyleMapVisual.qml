@@ -84,8 +84,8 @@ Item {
         id: fullTransectsComponent
 
         MapPolyline {
-            line.color: "white"
-            line.width: 2
+            line.color: "yellow"
+            line.width: 5
             path:       _transectPoints
             visible:    _currentItem
             opacity:    _root.opacity
@@ -97,8 +97,8 @@ Item {
         id: entryTransectComponent
 
         MapPolyline {
-            line.color: "white"
-            line.width: 2
+            line.color: "yellow"
+            line.width: 5
             path:       _showPartialEntryExit ? [ _transectPoints[0], _transectPoints[1] ] : []
             visible:    _showPartialEntryExit
             opacity:    _root.opacity
