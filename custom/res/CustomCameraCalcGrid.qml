@@ -60,12 +60,66 @@ Column {
             FactTextField {
                 Layout.preferredWidth:  _root._fieldWidth
                 fact:                   cameraCalc.frontalOverlap
+                onUpdated:                  frontSlider.value = cameraCalc.frontalOverlap.value
+
             }
             FactTextField {
                 Layout.preferredWidth:  _root._fieldWidth
                 fact:                   cameraCalc.sideOverlap
+                onUpdated:                  sideSlider.value = cameraCalc.sideOverlap.value
+
             }
         }
+
+
+        RowLayout {
+            anchors.left:   parent.left
+            anchors.right:  parent.right
+            spacing:        _margin
+
+            QGCLabel {
+                text: qsTr("Front Lap ")
+                // width: parent.width*0.3
+            }
+
+            QGCSlider {
+                id:                     frontSlider
+                minimumValue:           0
+                maximumValue:           85
+                stepSize:               1
+                tickmarksEnabled:       false
+                Layout.fillWidth:       true
+                Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+                onValueChanged:         cameraCalc.frontalOverlap.value = value
+                Component.onCompleted:  value = cameraCalc.frontalOverlap.value
+                updateValueWhileDragging: true
+            }
+        }
+
+        RowLayout {
+            anchors.left:   parent.left
+            anchors.right:  parent.right
+            spacing:        _margin
+
+            QGCLabel {
+                text: qsTr("Side Lap    ")
+                // width: parent.width * 0.3 // Set the width explicitly
+            }
+
+            QGCSlider {
+                id:                     sideSlider
+                minimumValue:           0
+                maximumValue:           85
+                stepSize:               1
+                tickmarksEnabled:       false
+                Layout.fillWidth:       true
+                Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+                onValueChanged:         cameraCalc.sideOverlap.value = value
+                Component.onCompleted:  value = cameraCalc.sideOverlap.value
+                updateValueWhileDragging: true
+            }
+        }
+
 
         QGCLabel {
             wrapMode:               Text.WordWrap
@@ -94,15 +148,14 @@ Column {
                 altitudeMode:               cameraCalc.distanceMode
                 enabled:                    fixedDistanceRadio.checked
                 Layout.fillWidth:           true
-                onUpdated:              angleSlider.value = cameraCalc.distanceToSurface.value
+                onUpdated:                  altitudeSlider.value = cameraCalc.distanceToSurface.value
 
             }
 
-
             QGCSlider {
-                id:                     angleSlider
+                id:                     altitudeSlider
                 minimumValue:           0
-                maximumValue:           359
+                maximumValue:           200
                 stepSize:               1
                 tickmarksEnabled:       false
                 Layout.fillWidth:       true
