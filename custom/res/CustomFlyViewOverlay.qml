@@ -20,7 +20,7 @@ import QGroundControl.ScreenTools   1.0
 import QGroundControl.FactSystem    1.0
 import QGroundControl.FlightMap     1.0
 import QGroundControl.FlightDisplay 1.0
-
+// import Custom.Widgets.CustomAttitudeWidget 1.0
 import Custom.Widgets 1.0
 
 Item {
@@ -84,45 +84,42 @@ Item {
             anchors.leftMargin: 12
 
             QGCColoredImage {
-                           height:                 _indicatorsHeight
-                           width:                  height
-                           source:                 "/custom/img/altitude.svg"
-                           fillMode:               Image.PreserveAspectFit
-                           sourceSize.height:      height
-                           Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
-                           color:                  qgcPal.text
+               height:                 _indicatorsHeight
+               width:                  height
+               source:                 "/custom/img/altitude.svg"
+               fillMode:               Image.PreserveAspectFit
+               sourceSize.height:      height
+               Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
+               color:                  qgcPal.text
 
                        }
 
-                       QGCLabel {
-                           text:                   _altitude
-                           color:                  _indicatorsColor
-                           font.pointSize:         ScreenTools.mediumFontPointSize
-                           Layout.fillWidth:       true
-                           Layout.minimumWidth:    indicatorValueWidth
-                           // horizontalAlignment:    firstLabel.horizontalAlignment
-                       }
+           QGCLabel {
+               text:                   _altitude
+               color:                  _indicatorsColor
+               font.pointSize:         ScreenTools.mediumFontPointSize
+               Layout.fillWidth:       true
+               Layout.minimumWidth:    indicatorValueWidth
+           }
 
+           QGCColoredImage {
+               height:                 _indicatorsHeight
+               width:                  height
+               source:                   "/custom/img/distance.svg"
+               fillMode:               Image.PreserveAspectFit
+               sourceSize.height:      height
+               Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
+               color:                  qgcPal.text
 
-                       QGCColoredImage {
-                           height:                 _indicatorsHeight
-                           width:                  height
-                           source:                   "/custom/img/distance.svg"
-                           fillMode:               Image.PreserveAspectFit
-                           sourceSize.height:      height
-                           Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
-                           color:                  qgcPal.text
+           }
 
-                       }
-
-                       QGCLabel {
-                           text:                   _activeVehicle ? ('0000' + _activeVehicle.distanceToHome.value.toFixed(0)).slice(-5) + ' ' + _activeVehicle.distanceToHome.units : "0000"
-                           color:                  _indicatorsColor
-                           font.pointSize:         ScreenTools.mediumFontPointSize
-                           Layout.fillWidth:       true
-                           Layout.minimumWidth:    indicatorValueWidth
-                           // horizontalAlignment:    firstLabel.horizontalAlignment
-                       }
+           QGCLabel {
+               text:                   _activeVehicle ? ('0000' + _activeVehicle.distanceToHome.value.toFixed(0)).slice(-5) + ' ' + _activeVehicle.distanceToHome.units : "0000"
+               color:                  _indicatorsColor
+               font.pointSize:         ScreenTools.mediumFontPointSize
+               Layout.fillWidth:       true
+               Layout.minimumWidth:    indicatorValueWidth
+           }
 
         }
 
@@ -167,38 +164,29 @@ Item {
                 font.pointSize:         ScreenTools.mediumFontPointSize
                 Layout.fillWidth:       true
                 Layout.minimumWidth:    indicatorValueWidth
-               // horizontalAlignment:    firstLabel.horizontalAlignment
             }
 
             QGCColoredImage {
-                            height:                 _indicatorsHeight
-                            width:                  height
-                            source:                 "/custom/img/vertical_speed.svg"
-                            fillMode:               Image.PreserveAspectFit
-                            sourceSize.height:      height
-                            Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
-                            color:                  qgcPal.text
-                        }
+                height:                 _indicatorsHeight
+                width:                  height
+                source:                 "/custom/img/vertical_speed.svg"
+                fillMode:               Image.PreserveAspectFit
+                sourceSize.height:      height
+                Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
+                color:                  qgcPal.text
+            }
 
-                        QGCLabel {
-                            text:                   _activeVehicle ? _activeVehicle.climbRate.value.toFixed(1) + ' ' + _activeVehicle.climbRate.units : " 0.0"
-                            color:                  _indicatorsColor
-                            font.pointSize:         ScreenTools.mediumFontPointSize
-                            Layout.fillWidth:       true
-                            Layout.minimumWidth:    indicatorValueWidth
-                            // horizontalAlignment:    firstLabel.horizontalAlignment
-                        }
+            QGCLabel {
+                text:                   _activeVehicle ? _activeVehicle.climbRate.value.toFixed(1) + ' ' + _activeVehicle.climbRate.units : " 0.0"
+                color:                  _indicatorsColor
+                font.pointSize:         ScreenTools.mediumFontPointSize
+                Layout.fillWidth:       true
+                Layout.minimumWidth:    indicatorValueWidth
+            }
 
 
         }
 
-
-
-        // HorizontalFactValueGrid {
-        //     id:                     valueArea
-        //     // userSettingsGroup:      telemetryBarUserSettingsGroup
-        //     // defaultSettingsGroup:   telemetryBarDefaultSettingsGroup
-        // }
     }
 
 

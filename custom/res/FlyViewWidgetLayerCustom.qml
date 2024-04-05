@@ -163,7 +163,7 @@ Item {
         id:                 telemetryPanel
         x:                  recalcXPosition()
         anchors.margins:    _toolsMargin
-        visible: false
+        visible: false // ! nasconde la barra
 
         property real bottomEdgeCenterInset: 0
         property real rightEdgeCenterInset: 0

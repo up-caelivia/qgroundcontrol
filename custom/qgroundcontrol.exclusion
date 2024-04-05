@@ -4,9 +4,6 @@
 
 <file alias="QGroundControl/Controls/MainToolBar.qml">src/ui/toolbar/MainToolBar.qml</file>
 
-<file alias="QGroundControl/Controls/HorizontalFactValueGrid.qml">src/QmlControls/HorizontalFactValueGrid.qml</file>
-
-
 <file alias="GPSIndicator.qml">src/ui/toolbar/GPSIndicator.qml</file>
 
 <file alias="BatteryIndicator.qml">src/ui/toolbar/BatteryIndicator.qml</file>

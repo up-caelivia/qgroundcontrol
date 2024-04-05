@@ -31,8 +31,6 @@
         <file alias="QGroundControl/FlightDisplay/FlyViewCustomLayer.qml">res/CustomFlyViewOverlay.qml</file>
         <file alias="QGroundControl/FlightDisplay/FlyViewWidgetLayer.qml">res/FlyViewWidgetLayerCustom.qml</file>
         <file alias="QGroundControl/Controls/MainToolBar.qml">res/CustomMainToolbar.qml</file>
-        <file alias="QGroundControl/Controls/HorizontalFactValueGrid.qml">res/CustomHorizontalFactValueGrid.qml</file>
-
     </qresource>
 
     <qresource prefix="/toolbar">
