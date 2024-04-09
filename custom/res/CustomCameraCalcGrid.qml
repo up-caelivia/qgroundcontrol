@@ -153,7 +153,7 @@ Column {
 
             QGCSlider {
                 id:                     altitudeSlider
-                minimumValue:           0
+                minimumValue:           1
                 maximumValue:           200
                 stepSize:               1
                 tickmarksEnabled:       false
@@ -163,12 +163,13 @@ Column {
                 onValueChanged:         cameraCalc.distanceToSurface.value = value
                 Component.onCompleted:  value = cameraCalc.distanceToSurface.value
                 updateValueWhileDragging: true
+                enabled:                    fixedDistanceRadio.checked
             }
 
             QGCRadioButton {
                 id:                     fixedImageDensityRadio
                 leftPadding:            0
-                text:                   qsTr("Grnd Res")
+                text:                   qsTr("Ground Res")
                 checked:                !cameraCalc.valueSetIsDistance.value
                 onClicked:              cameraCalc.valueSetIsDistance.value = 0
             }
