@@ -19,6 +19,8 @@
         <file alias="QGroundControl/Controls/CameraCalcGrid.qml">res/CustomCameraCalcGrid.qml</file>
         <file alias="QGroundControl/FlightMap/MissionLineView.qml">res/CustomMissionLineView.qml</file>
         <file alias="QGroundControl/FlightMap/MapLineArrow.qml">res/CustomMapLineArraw.qml</file>
+        <file alias="QGroundControl/Controls/QGCMapPolygonVisuals.qml">res/CustomMapPolygonVisuals.qml</file>
+
     </qresource>
     <qresource prefix="/toolbar">
         <file alias="GPSIndicator.qml">res/CustomGPSIndicator.qml</file>

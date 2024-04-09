@@ -120,7 +120,6 @@ Column {
             }
         }
 
-
         QGCLabel {
             wrapMode:               Text.WordWrap
             text:                   qsTr("Select one:")

@@ -142,7 +142,6 @@
 		<file alias="QGroundControl/Controls/QGCListView.qml">../src/QmlControls/QGCListView.qml</file>
 		<file alias="QGroundControl/Controls/QGCMapCircleVisuals.qml">../src/MissionManager/QGCMapCircleVisuals.qml</file>
 		<file alias="QGroundControl/Controls/QGCMapLabel.qml">../src/QmlControls/QGCMapLabel.qml</file>
-		<file alias="QGroundControl/Controls/QGCMapPolygonVisuals.qml">../src/MissionManager/QGCMapPolygonVisuals.qml</file>
 		<file alias="QGroundControl/Controls/QGCMapPolylineVisuals.qml">../src/MissionManager/QGCMapPolylineVisuals.qml</file>
 		<file alias="QGroundControl/Controls/QGCMenu.qml">../src/QmlControls/QGCMenu.qml</file>
 		<file alias="QGroundControl/Controls/QGCMenuItem.qml">../src/QmlControls/QGCMenuItem.qml</file>

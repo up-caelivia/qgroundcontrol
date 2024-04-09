@@ -16,4 +16,7 @@
 
 <file alias="QGroundControl/Controls/CameraCalcGrid.qml">src/PlanView/CameraCalcGrid.qml</file>
 
+<file alias="QGroundControl/Controls/QGCMapPolygonVisuals.qml">src/MissionManager/QGCMapPolygonVisuals.qml</file>
+
+
 
