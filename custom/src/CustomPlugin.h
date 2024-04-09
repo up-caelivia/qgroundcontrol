@@ -16,7 +16,6 @@
 
 class CustomOptions;
 class CustomPlugin;
-// class CustomSettings;
 
 
 class CustomFlyViewOptions : public QGCFlyViewOptions

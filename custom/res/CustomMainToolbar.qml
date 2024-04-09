@@ -18,6 +18,8 @@ import QGroundControl.Palette               1.0
 import QGroundControl.MultiVehicleManager   1.0
 import QGroundControl.ScreenTools           1.0
 import QGroundControl.Controllers           1.0
+import Custom.Widgets 1.0
+
 
 Rectangle {
     id:     _root
@@ -86,6 +88,8 @@ Rectangle {
         }
     }
 
+
+
     // connected or disconnected label
     MainStatusIndicator {
 
@@ -120,6 +124,16 @@ Rectangle {
             source:             currentToolbar === flyViewToolbar ?
                                     "qrc:/toolbar/MainToolBarIndicators.qml" :
                                     (currentToolbar == planViewToolbar ? "qrc:/qml/PlanToolBarIndicators.qml" : "")
+        }
+
+        FlightTimeWidget {
+            id: tf
+            anchors.left:       indicatorLoader.right
+            anchors.top:        parent.top
+            anchors.bottom:     parent.bottom
+            // anchors.leftMargin: 10
+            anchors.margins: ScreenTools.defaultFontPixelHeight * 0.66
+            visible:            _activeVehicle
         }
     }
 

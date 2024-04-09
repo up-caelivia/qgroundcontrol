@@ -134,7 +134,7 @@ bool CustomPlugin::overrideSettingsGroupVisibility(QString name)
 //     }
 // }
 
-// // // We override this so we can get access to QQmlApplicationEngine and use it to register our qml module
+// We override this so we can get access to QQmlApplicationEngine and use it to register our qml module
 QQmlApplicationEngine* CustomPlugin::createQmlApplicationEngine(QObject* parent)
 {
     QQmlApplicationEngine* qmlEngine = QGCCorePlugin::createQmlApplicationEngine(parent);
