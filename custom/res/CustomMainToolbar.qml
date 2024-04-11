@@ -133,7 +133,7 @@ Rectangle {
             anchors.bottom:     parent.bottom
             // anchors.leftMargin: 10
             anchors.margins: ScreenTools.defaultFontPixelHeight * 0.66
-            visible:            _activeVehicle
+            visible:            _activeVehicle && currentToolbar === flyViewToolbar
         }
     }
 
