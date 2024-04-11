@@ -18,10 +18,22 @@ import QGroundControl.Palette               1.0
 
 //-------------------------------------------------------------------------
 //-- Flight Time Indicator
+
 Item {
     id:             _root
     width:          (ftValuesColumn.x + ftValuesColumn.width) * 1.1
     property var _activeVehicle: QGroundControl.multiVehicleManager.activeVehicle
+
+    function secondsToHHMMSS(timeS) {
+        var sec_num = parseInt(timeS, 10);
+        var hours   = Math.floor(sec_num / 3600);
+        var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+        var seconds = sec_num - (hours * 3600) - (minutes * 60);
+        if (hours   < 10) {hours   = "0"+hours;}
+        if (minutes < 10) {minutes = "0"+minutes;}
+        if (seconds < 10) {seconds = "0"+seconds;}
+        return hours+":"+ minutes+':'+seconds;
+    }
 
 
     QGCColoredImage {
@@ -43,10 +55,42 @@ Item {
         anchors.left:           ftIcon.right
         leftPadding: 10
 
+
         QGCLabel {
             color:                      qgcPal.buttonText
-            text: _activeVehicle ? _activeVehicle.getFact("flightTime").valueString : ""
+            text: "Flight Time: " + ( _activeVehicle ?  _activeVehicle.getFact("flightTime").valueString : "--/--")
         }
+
+        QGCLabel {
+            color:                      qgcPal.buttonText
+            text: "Time Remaining: " + (_activeVehicle ? getTimeRemaningEstimate() : "--/--")
+
+
+            function getTimeRemaningEstimate() {
+
+                var time_remaining_tot = 0;
+                var i = 0;
+
+                for (var battery in _activeVehicle.batteries)
+                    if( !isNaN(battery.timeRemaining) ) {
+
+                        time_remaining_tot += battery.timeRemaining.rawValue;
+                        i++;
+
+                    }
+
+                if (i==0)
+                    return "--/--";
+
+                return _root.secondsToHHMMSS(time_remaining/i);
+
+            }
+        }
+
+
+
     }
+
+
 
 }
