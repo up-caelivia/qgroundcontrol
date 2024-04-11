@@ -188,9 +188,6 @@ Item {
 
     }
 
-
-
-
     Rectangle {
         id:                     attitudeIndicator
         anchors.horizontalCenter: parent.horizontalCenter
@@ -212,7 +209,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
         }
 
-        QGCCompassWidget {
+        CustomCompassWidget {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             anchors.rightMargin: 10

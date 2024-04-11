@@ -1,2 +1,8 @@
 //        <file alias="PaperPlane.svg">src/ui/toolbar/Images/PaperPlane.svg</file>
 
+<file alias="vehicleArrowOpaque.svg">src/FlightMap/Images/vehicleArrowOpaque.svg</file>
+<file alias="vehicleArrowOutline.svg">src/FlightMap/Images/vehicleArrowOutline.svg</file>
+
+<file alias="compassInstrumentArrow.svg">src/FlightMap/Images/compassInstrumentArrow.svg</file>
+
+
