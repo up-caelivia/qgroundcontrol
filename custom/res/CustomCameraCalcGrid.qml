@@ -155,6 +155,7 @@ Column {
                 id:                     altitudeSlider
                 minimumValue:           1
                 maximumValue:           200
+                value:                  50
                 stepSize:               1
                 tickmarksEnabled:       false
                 Layout.fillWidth:       true

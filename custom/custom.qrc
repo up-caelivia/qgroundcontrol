@@ -5,6 +5,7 @@
         <file alias="horizontal_speed.svg">res/Images/horizontal_speed.svg</file>
         <file alias="vertical_speed.svg">res/Images/vertical_speed.svg</file>
         <file alias="CustomAppIcon.png">res/Images/CustomAppIcon.png</file>
+        <file alias="waypoint.svg">res/Images/waypoint.svg</file>
     </qresource>
     <qresource prefix="/qmlimages/">
         <file alias="vehicleArrowOpaque.svg">res/Images/vehicleArrowOpaque.svg</file>
@@ -24,6 +25,7 @@
         <file alias="QGroundControl/Controls/MainToolBar.qml">res/CustomMainToolbar.qml</file>
         <file alias="QGroundControl/Controls/TransectStyleMapVisuals.qml">res/CustomTransectStyleMapVisual.qml</file>
         <file alias="QGroundControl/Controls/CameraCalcGrid.qml">res/CustomCameraCalcGrid.qml</file>
+        <file alias="QGroundControl/Controls/MissionItemIndexLabel.qml">res/CustomMissionItemIndexLabel.qml</file>
         <file alias="QGroundControl/FlightMap/MissionLineView.qml">res/CustomMissionLineView.qml</file>
         <file alias="QGroundControl/FlightMap/MapLineArrow.qml">res/CustomMapLineArraw.qml</file>
         <file alias="QGroundControl/Controls/QGCMapPolygonVisuals.qml">res/CustomMapPolygonVisuals.qml</file>
