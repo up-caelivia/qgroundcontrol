@@ -20,11 +20,12 @@ import QGroundControl.Palette   1.0
 MapItemView {
     property bool showSpecialVisual: false
     delegate: MapPolyline {
+
         line.width: 4
         // Note: Special visuals for ROI are hacked out for now since they are not working correctly
         line.color: _terrainCollision ?
-                        "red" :
-                        (false/*showSpecialVisual*/ ? "green" : QGroundControl.globalPalette.mapMissionTrajectory)
+                        "#FF0000" :
+                        (false/*showSpecialVisual*/ ? "green" : "#FFA500")//QGroundControl.globalPalette.mapMissionTrajectory)
         z:          QGroundControl.zOrderWaypointLines
         path:       object && object.coordinate1.isValid && object.coordinate2.isValid ? [ object.coordinate1, object.coordinate2 ] : []
 
