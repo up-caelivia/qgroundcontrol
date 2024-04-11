@@ -50,7 +50,7 @@ Item {
     }
 
     Column {
-        id:                     ftValuesColumn
+        id:                     names
         anchors.verticalCenter: parent.verticalCenter
         anchors.left:           ftIcon.right
         leftPadding: 10
@@ -58,12 +58,34 @@ Item {
 
         QGCLabel {
             color:                      qgcPal.buttonText
-            text: "Flight Time: " + ( _activeVehicle ?  _activeVehicle.getFact("flightTime").valueString : "--/--")
+            text: "Flight Time: "
         }
 
         QGCLabel {
             color:                      qgcPal.buttonText
-            text: "Time Remaining: " + (_activeVehicle ? getTimeRemaningEstimate() : "--/--")
+            text: "Time Remaining: "
+        }
+
+
+
+    }
+
+
+    Column {
+        id:                     ftValuesColumn
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.left:           names.right
+        leftPadding: 5
+
+
+        QGCLabel {
+            color:                      qgcPal.buttonText
+            text:  _activeVehicle ?  _activeVehicle.getFact("flightTime").valueString : "--/--"
+        }
+
+        QGCLabel {
+            color:                      getBatteryColor()
+            text: _activeVehicle ? getTimeRemaningEstimate() : "--/--"
 
 
             function getTimeRemaningEstimate() {
@@ -83,8 +105,49 @@ Item {
                     return "--/--";
 
                 return _root.secondsToHHMMSS(time_remaining/i);
+            }
+
+
+            function getBatteryColor() {
+
+                if(!_activeVehicle)
+                    return qgcPal.buttonText
+
+                var orange = 0;
+                var red = 0;
+                var num = 0;
+
+                for (var battery in _activeVehicle.batteries)
+                    if( !isNaN(battery.chargeState) ) {
+
+                        num++;
+                        switch (battery.chargeState.rawValue) {
+                        case MAVLink.MAV_BATTERY_CHARGE_STATE_LOW:
+                            orange++;
+                            break;
+                        case MAVLink.MAV_BATTERY_CHARGE_STATE_CRITICAL:
+                        case MAVLink.MAV_BATTERY_CHARGE_STATE_EMERGENCY:
+                        case MAVLink.MAV_BATTERY_CHARGE_STATE_FAILED:
+                        case MAVLink.MAV_BATTERY_CHARGE_STATE_UNHEALTHY:
+                            red++;
+                            break;
+                        }
+                    }
+
+                if(num == 0)
+                    return qgcPal.buttonText
+
+                if (red == num)
+                    return qgcPal.colorRed
+
+                if(orange == num || (orange + red == num))
+                    return qgcPal.colorOrange
+
+                return qgcPal.buttonText
 
             }
+
+
         }
 
 
