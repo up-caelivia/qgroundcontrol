@@ -62,93 +62,141 @@ Item {
     }
 
     Rectangle {
-        id:                     fig1
-        anchors.verticalCenter: attitudeIndicator.verticalCenter
-        anchors.right:          attitudeIndicator.left
-        anchors.rightMargin:    -attitudeIndicator.width / 3
-        width: 240
-        height:                 attitudeIndicator.height * 0.85
-        radius:                 10
-        color:                  qgcPal.window
+        anchors.horizontalCenter: attitudeIndicator.horizontalCenter
+        anchors.bottom: attitudeIndicator.top
+        anchors.bottomMargin: - attitudeIndicator.height / 3
+        width: attitudeIndicator.width*0.65
+        height: attitudeIndicator.height * 0.60
+        radius: 10
+        color: qgcPal.window
 
-        GridLayout {
-                    id:                     vehicleStatusGrid1
-                    columnSpacing:          ScreenTools.defaultFontPixelWidth  * 2
-                    rowSpacing:             ScreenTools.defaultFontPixelHeight * 0.5
-                    columns:                2
+        property real _indicatorsHeight: ScreenTools.defaultFontPixelHeight * 2
 
-            property real   _indicatorsHeight:      ScreenTools.defaultFontPixelHeight *2
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.leftMargin: 12
+        QGCColoredImage {
+                       id: img1
+                       height:                 _indicatorsHeight
+                       width:                  height
+                       source:                 "/custom/img/vertical_speed.svg"
+                       fillMode:               Image.PreserveAspectFit
+                       sourceSize.height:      height
+                       //Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
+                       color:                  qgcPal.text
+                       anchors.left: parent.left
+                       anchors.leftMargin: ScreenTools.defaultFontPixelWidth  * 4
 
-            QGCColoredImage {
-               height:                 _indicatorsHeight
-               width:                  height
-               source:                 "/custom/img/altitude.svg"
-               fillMode:               Image.PreserveAspectFit
-               sourceSize.height:      height
-               Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
-               color:                  qgcPal.text
-
+                       anchors.bottomMargin: + attitudeIndicator.height / 3 + ScreenTools.defaultFontPixelWidth  * 2
+                       anchors.bottom: parent.bottom
                        }
 
-           QGCLabel {
-               text:                   _altitude
-               color:                  _indicatorsColor
-               font.pointSize:         ScreenTools.mediumFontPointSize
-               Layout.fillWidth:       true
-               Layout.minimumWidth:    indicatorValueWidth
-           }
+                   QGCLabel {
+                       text:                   _activeVehicle ? _activeVehicle.climbRate.value.toFixed(1) + ' ' + _activeVehicle.climbRate.units : " 0.0"
+                       color:                  _indicatorsColor
+                       font.pointSize:         ScreenTools.mediumFontPointSize
+                       //Layout.fillWidth:       true
+                       //Layout.minimumWidth:    indicatorValueWidth
+                       anchors.left: img1.right
+                       anchors.leftMargin: ScreenTools.defaultFontPixelWidth
+                       //anchors.leftMargin: 5
+                       anchors.bottomMargin: + attitudeIndicator.height / 3 + ScreenTools.defaultFontPixelWidth  * 2
+                       anchors.bottom: parent.bottom
 
-           QGCColoredImage {
-               height:                 _indicatorsHeight
-               width:                  height
-               source:                   "/custom/img/distance.svg"
-               fillMode:               Image.PreserveAspectFit
-               sourceSize.height:      height
-               Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
-               color:                  qgcPal.text
+                   }
 
-           }
+                   QGCColoredImage {
+                       height:                 _indicatorsHeight
+                       width:                  height
+                       source:                   "/custom/img/distance.svg"
+                       fillMode:               Image.PreserveAspectFit
+                       sourceSize.height:      height
+                       color:                  qgcPal.text
+                       anchors.right: txt2.left
+                       anchors.rightMargin: ScreenTools.defaultFontPixelWidth
+                       anchors.bottomMargin: + attitudeIndicator.height / 3 + ScreenTools.defaultFontPixelWidth  * 2
+                       anchors.bottom: parent.bottom
 
-           QGCLabel {
-               text:                   _activeVehicle ? ('0000' + _activeVehicle.distanceToHome.value.toFixed(0)).slice(-5) + ' ' + _activeVehicle.distanceToHome.units : "0000"
-               color:                  _indicatorsColor
-               font.pointSize:         ScreenTools.mediumFontPointSize
-               Layout.fillWidth:       true
-               Layout.minimumWidth:    indicatorValueWidth
-           }
+                   }
 
-        }
+                   QGCLabel {
+                       id: txt2
+                       text:                   _activeVehicle && !isNaN(_activeVehicle.distanceToHome.value) ? (('0000' + _activeVehicle.distanceToHome.value.toFixed(0)).slice(-4) + ' ' + _activeVehicle.distanceToHome.units) : "--/--"
+                       color:                  _indicatorsColor
+                       font.pointSize:         ScreenTools.mediumFontPointSize
+                       anchors.right: parent.right
+                       anchors.rightMargin: ScreenTools.defaultFontPixelWidth  * 4
+                       anchors.bottomMargin: + attitudeIndicator.height / 3 + ScreenTools.defaultFontPixelWidth  * 2
+                       anchors.bottom: parent.bottom
 
-
+                   }
     }
 
+
     Rectangle {
-        id:                     fig2
         anchors.verticalCenter: attitudeIndicator.verticalCenter
-        anchors.left:          attitudeIndicator.right
-        anchors.leftMargin:    -attitudeIndicator.width / 3
-        width: 240
-        height:                 attitudeIndicator.height * 0.85
+        anchors.right:          attitudeIndicator.left
+        anchors.rightMargin:  ScreenTools.defaultFontPixelHeight * 0.4  // -attitudeIndicator.width / 3
+        width:  attitudeIndicator.width*0.5
+        height: attitudeIndicator.height * 0.60
         radius:                 10
         color:                  qgcPal.window
 
-
         GridLayout {
-                    id:                     vehicleStatusGrid2
                     columnSpacing:          ScreenTools.defaultFontPixelWidth  * 2
                     rowSpacing:             ScreenTools.defaultFontPixelHeight * 0.5
-                    columns:                2
+                    columns:                1
 
             property real   _indicatorsHeight:      ScreenTools.defaultFontPixelHeight *2
-            anchors.right: parent.right
+            //anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
-            anchors.rightMargin: 12
+            anchors.horizontalCenter: parent.horizontalCenter
+            //anchors.rightMargin: 12
 
             QGCColoredImage {
-                height:                 _indicatorsHeight
+                height:                 _indicatorsHeight * 1.4
+                width:                  height
+                source:                 "/custom/img/altitude.svg"
+                fillMode:               Image.PreserveAspectFit
+                sourceSize.height:      height
+                Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
+                color:                  qgcPal.text
+            }
+
+            QGCLabel {
+                text:                   _altitude
+                color:                  _indicatorsColor
+                font.pointSize:         ScreenTools.largeFontPointSize * 1.4
+                Layout.fillWidth:       true
+                Layout.minimumWidth:    indicatorValueWidth
+                Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
+                font.weight: Font.Bold
+
+            }
+        }
+    }
+
+
+
+    Rectangle {
+        anchors.verticalCenter: attitudeIndicator.verticalCenter
+        anchors.left:          attitudeIndicator.right
+        anchors.leftMargin:  ScreenTools.defaultFontPixelHeight * 0.4  // -attitudeIndicator.width / 3
+        width:  attitudeIndicator.width*0.5
+        height: attitudeIndicator.height * 0.60
+        radius:                 10
+        color:                  qgcPal.window
+
+        GridLayout {
+                    columnSpacing:          ScreenTools.defaultFontPixelWidth  * 2
+                    rowSpacing:             ScreenTools.defaultFontPixelHeight * 0.5
+                    columns:                1
+
+            property real   _indicatorsHeight:      ScreenTools.defaultFontPixelHeight *2
+            //anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.horizontalCenter: parent.horizontalCenter
+            //anchors.rightMargin: 12
+
+            QGCColoredImage {
+                height:                 _indicatorsHeight * 1.4
                 width:                  height
                 source:                 "/custom/img/horizontal_speed.svg"
                 fillMode:               Image.PreserveAspectFit
@@ -158,34 +206,16 @@ Item {
             }
 
             QGCLabel {
-                text:                   _activeVehicle ? _activeVehicle.groundSpeed.value.toFixed(1) + ' ' + _activeVehicle.groundSpeed.units : "0.0"
+                text:                   _activeVehicle ? _activeVehicle.groundSpeed.value.toFixed(1) + ' ' + _activeVehicle.groundSpeed.units : "--/--"
                 color:                  _indicatorsColor
-                font.pointSize:         ScreenTools.mediumFontPointSize
+                font.pointSize:         ScreenTools.largeFontPointSize * 1.4
                 Layout.fillWidth:       true
                 Layout.minimumWidth:    indicatorValueWidth
-            }
-
-            QGCColoredImage {
-                height:                 _indicatorsHeight
-                width:                  height
-                source:                 "/custom/img/vertical_speed.svg"
-                fillMode:               Image.PreserveAspectFit
-                sourceSize.height:      height
                 Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
-                color:                  qgcPal.text
+                font.weight: Font.Bold
+
             }
-
-            QGCLabel {
-                text:                   _activeVehicle ? _activeVehicle.climbRate.value.toFixed(1) + ' ' + _activeVehicle.climbRate.units : " 0.0"
-                color:                  _indicatorsColor
-                font.pointSize:         ScreenTools.mediumFontPointSize
-                Layout.fillWidth:       true
-                Layout.minimumWidth:    indicatorValueWidth
-            }
-
-
         }
-
     }
 
     Rectangle {
