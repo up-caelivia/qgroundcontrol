@@ -7,6 +7,12 @@
         <file alias="CustomAppIcon.png">res/Images/CustomAppIcon.png</file>
         <file alias="waypoint.svg">res/Images/waypoint.svg</file>
     </qresource>
+
+    <qresource prefix="/res">
+        <file alias="QGCLogoFull">res/Images/QGCLogoFull.svg</file>
+        <file alias="QGCLogoWhite">res/Images/QGCLogoWhite.svg</file>
+    </qresource>
+
     <qresource prefix="/qmlimages/">
         <file alias="vehicleArrowOpaque.svg">res/Images/vehicleArrowOpaque.svg</file>
         <file alias="vehicleArrowOutline.svg">res/Images/vehicleArrowOutline.svg</file>
