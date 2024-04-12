@@ -56,7 +56,7 @@ public:
     QString                 brandImageIndoor                (void) const final { return QStringLiteral("/custom/img/CustomAppIcon.png");}
     QString                 brandImageOutdoor               (void) const final {    return QStringLiteral("/custom/img/CustomAppIcon.png");}
     bool                    overrideSettingsGroupVisibility (QString name) final;
-    // void                    paletteOverride                 (QString colorName, QGCPalette::PaletteColorInfo_t& colorInfo) final;
+    void                    paletteOverride                 (QString colorName, QGCPalette::PaletteColorInfo_t& colorInfo) final;
     QQmlApplicationEngine*  createQmlApplicationEngine      (QObject* parent) final;
 
     private:
