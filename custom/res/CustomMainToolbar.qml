@@ -54,14 +54,17 @@ Rectangle {
     }
 
     Rectangle {
-        anchors.fill:   viewButtonRow
+        // anchors.fill:   mainIndicator
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.top: parent.top
+        width: parent.width - (mainIndicator.x + mainIndicator.width) - 10
         visible:        currentToolbar === flyViewToolbar
 
         gradient: Gradient {
             orientation: Gradient.Horizontal
-            GradientStop { position: 0;                                     color: _mainStatusBGColor }
-            GradientStop { position: currentButton.x + currentButton.width; color: _mainStatusBGColor }
-            GradientStop { position: 1;                                     color: _root.color }
+            GradientStop { position: 1;                         color: _mainStatusBGColor }
+            GradientStop { position: 0;                         color: _root.color }
         }
     }
 
