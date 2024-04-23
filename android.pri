@@ -10,8 +10,8 @@ ANDROID_PACKAGE_CUSTOM_SOURCE_DIR   = $$PWD/custom/android                  # Or
 
 android_source_dir_target.target = $$ANDROID_PACKAGE_SOURCE_DIR/AndroidManifest.xml
 android_source_dir_target.commands = \
-    $$QMAKE_MKDIR $$ANDROID_PACKAGE_SOURCE_DIR && \
-    $$QMAKE_COPY_DIR $$ANDROID_PACKAGE_QGC_SOURCE_DIR/* $$ANDROID_PACKAGE_SOURCE_DIR
+   $$QMAKE_MKDIR $$ANDROID_PACKAGE_SOURCE_DIR && \
+   $$QMAKE_COPY_DIR $$ANDROID_PACKAGE_QGC_SOURCE_DIR/* $$ANDROID_PACKAGE_SOURCE_DIR
 PRE_TARGETDEPS += $$android_source_dir_target.target
 QMAKE_EXTRA_TARGETS += android_source_dir_target
 exists($$ANDROID_PACKAGE_CUSTOM_SOURCE_DIR/AndroidManifest.xml) {
