@@ -71,6 +71,19 @@ Rectangle {
         }
 
         QGCButton {
+
+            id:                 connectButton
+            text:               qsTr("Connect")
+            visible:            !_activeVehicle
+
+            onClicked:
+            {
+               if(QGroundControl.linkManager.linkConfigurations && QGroundControl.linkManager.linkConfigurations.get(0) && !QGroundControl.linkManager.linkConfigurations.get(0).link)
+                    QGroundControl.linkManager.createConnectedLink(QGroundControl.linkManager.linkConfigurations.get(0))
+            }
+        }
+
+        QGCButton {
             id:                 disconnectButton
             text:               qsTr("Disconnect")
             onClicked:          _activeVehicle.closeVehicle()
@@ -87,7 +100,7 @@ Rectangle {
         x: parent.width - width - ScreenTools.defaultFontPixelWidth * 2
         anchors.verticalCenter: parent.verticalCenter
         visible:                currentToolbar === flyViewToolbar
-        // color: _mainStatusBGColor
+        //color: _mainStatusBGColor
         // function getX(){
         //     return brand_image.visible ? parent.width - width - brand_image.width - 40 : parent.width - width - 10
         // }

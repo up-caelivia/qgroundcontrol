@@ -194,9 +194,9 @@ QQmlApplicationEngine* CustomPlugin::createQmlApplicationEngine(QObject* parent)
     qmlEngine->addImportPath("qrc:/Custom/Widgets");
 
 
-    #ifdef QT_DEBUG     // start with a custom connection only in debug build!
-        MockLink::startPX4MockLink(true);
-    #endif
+    // #ifdef QT_DEBUG     // start with a custom connection only in debug build!
+    //     MockLink::startPX4MockLink(true);
+    // #endif
 
     return qmlEngine;
 }
