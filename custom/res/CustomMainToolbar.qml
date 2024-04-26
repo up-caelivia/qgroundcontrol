@@ -25,6 +25,7 @@ Rectangle {
     id:     _root
     color:  qgcPal.toolbarBackground
 
+
     property int currentToolbar: flyViewToolbar
 
     readonly property int flyViewToolbar:   0
@@ -83,7 +84,7 @@ Rectangle {
     MainStatusIndicator {
 
         id: mainIndicator
-        x: parent.width - width - 10
+        x: parent.width - width - ScreenTools.defaultFontPixelWidth * 2
         anchors.verticalCenter: parent.verticalCenter
         visible:                currentToolbar === flyViewToolbar
         // color: _mainStatusBGColor

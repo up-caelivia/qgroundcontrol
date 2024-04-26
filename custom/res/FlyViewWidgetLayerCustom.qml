@@ -131,7 +131,8 @@ Item {
 
     PhotoVideoControl {
         id:                     photoVideoControl
-        anchors.margins:    _toolsMargin
+        anchors.rightMargin:  2*_toolsMargin
+        anchors.topMargin:    _toolsMargin
         anchors.right:          parent.right
         width:                  _rightPanelWidth
         anchors.top:            parent.top
