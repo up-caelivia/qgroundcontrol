@@ -31,6 +31,7 @@ import QGroundControl.Vehicle       1.0
 Item {
     id: _root
 
+
     property var    parentToolInsets
     property var    totalToolInsets:        _totalToolInsets
     property var    mapControl
@@ -96,7 +97,7 @@ Item {
     }
 
     MultiVehicleList {
-        anchors.margins:    _toolsMargin
+        anchors.topMargin:    _toolsMargin
         anchors.top:        multiVehiclePanelSelector.bottom
         anchors.right:      parent.right
         width:              _rightPanelWidth
@@ -130,33 +131,12 @@ Item {
 
     PhotoVideoControl {
         id:                     photoVideoControl
-        anchors.margins:        _toolsMargin
+        anchors.margins:    _toolsMargin
         anchors.right:          parent.right
         width:                  _rightPanelWidth
+        anchors.top:            parent.top
 
         property real rightEdgeCenterInset: visible ? parent.width - x : 0
-
-        state:                  _verticalCenter ? "verticalCenter" : "topAnchor"
-        states: [
-            State {
-                name: "verticalCenter"
-                AnchorChanges {
-                    target:                 photoVideoControl
-                    anchors.top:            undefined
-                    anchors.verticalCenter: _root.verticalCenter
-                }
-            },
-            State {
-                name: "topAnchor"
-                AnchorChanges {
-                    target:                 photoVideoControl
-                    anchors.verticalCenter: undefined
-                    anchors.top:            instrumentPanel.bottom
-                }
-            }
-        ]
-
-        property bool _verticalCenter: !QGroundControl.settingsManager.flyViewSettings.alternateInstrumentPanel.rawValue
     }
 
     TelemetryValuesBar {
