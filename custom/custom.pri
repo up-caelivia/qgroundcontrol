@@ -36,14 +36,14 @@ message(Custom QGC Version: $${CUSTOM_QGC_VERSION})
 DEFINES += CUSTOMHEADER=\"\\\"CustomPlugin.h\\\"\"
 DEFINES += CUSTOMCLASS=CustomPlugin
 
-TARGET   = CustomQGroundControl
+TARGET   = QGroundControlUP
 DEFINES += QGC_APPLICATION_NAME='"\\\"QGroundControl UP version \\\""'
 
 DEFINES += QGC_ORG_NAME=\"\\\"qgroundcontrol.org\\\"\"
 DEFINES += QGC_ORG_DOMAIN=\"\\\"org.qgroundcontrol\\\"\"
 
-QGC_APP_NAME        = "Custom QGroundControl"
-QGC_BINARY_NAME     = "CustomQGroundControl"
+QGC_APP_NAME        = "QGroundControlUP"
+QGC_BINARY_NAME     = "QGroundControlUP"
 QGC_ORG_NAME        = "Custom"
 QGC_ORG_DOMAIN      = "org.custom"
 QGC_ANDROID_PACKAGE = "org.custom.qgroundcontrol"
