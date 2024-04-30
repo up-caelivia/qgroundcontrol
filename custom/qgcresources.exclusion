@@ -6,7 +6,7 @@
 <file alias="compassInstrumentArrow.svg">src/FlightMap/Images/compassInstrumentArrow.svg</file>
 
 <file alias="compassInstrumentArrow.svg">src/FlightMap/Images/compassInstrumentArrow.svg</file>
-
-
 <file alias="QGCLogoFull">/resources/QGCLogoFull.svg</file>
 <file alias="QGCLogoWhite">/resources/QGCLogoWhite.svg</file>
+
+<file>resources/icons/qgroundcontrol.ico</file>

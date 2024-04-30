@@ -11,6 +11,7 @@
     <qresource prefix="/res">
         <file alias="QGCLogoFull">res/Images/QGCLogoFull.svg</file>
         <file alias="QGCLogoWhite">res/Images/QGCLogoWhite.svg</file>
+        <file alias="resources/icons/qgroundcontrol.ico">res/Images/QGCLogoFull.ico</file>
     </qresource>
 
     <qresource prefix="/qmlimages/">

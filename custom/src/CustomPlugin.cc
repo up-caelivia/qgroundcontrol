@@ -35,6 +35,7 @@ CustomPlugin::CustomPlugin(QGCApplication *app, QGCToolbox* toolbox)
 {
     _options = new CustomOptions(this, this);
     QCoreApplication::setApplicationName(QStringLiteral("QGroundControlUP"));  // set the folder on document to save the options
+    QApplication::setWindowIcon(QIcon(":/res/resources/icons/qgroundcontrol.ico"));
 }
 
 
