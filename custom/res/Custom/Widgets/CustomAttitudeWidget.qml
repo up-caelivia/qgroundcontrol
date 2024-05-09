@@ -135,4 +135,8 @@ Item {
         property string _headingString2: _headingString.length === 1 ? "0" + _headingString : _headingString
         property string _headingString3: _headingString2.length === 2 ? "0" + _headingString2 : _headingString2
     }
+
+
+
+
 }

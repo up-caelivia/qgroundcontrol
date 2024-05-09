@@ -43,6 +43,7 @@ Item {
     property string _messageTitle:          ""
     property string _messageText:           ""
     property real   _toolsMargin:           ScreenTools.defaultFontPixelWidth * 0.75
+    property bool _selected1: false
 
 
     QGCToolInsets {
@@ -358,6 +359,29 @@ Item {
             anchors.rightMargin: 10
             size: parent.height * 0.90
             vehicle: globals.activeVehicle
+        }
+
+        Column {
+
+            anchors.top: parent.top
+            anchors.horizontalCenter:   parent.horizontalCenter
+
+
+            QGCRadioButton {
+                id:                     yoyo1
+                leftPadding:            0
+                text:                   "Camera 1"
+                checked:                !!_selected1
+                onClicked:              _selected1 = true
+            }
+
+            QGCRadioButton {
+                id:                     yoyo2
+                leftPadding:            0
+                text:                   "Camera 2"
+                checked:                !_selected1
+                onClicked:              _selected1 = false
+            }
         }
 
     }
