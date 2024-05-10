@@ -147,7 +147,6 @@
 		<file alias="QGroundControl/Controls/QGCMouseArea.qml">../src/QmlControls/QGCMouseArea.qml</file>
 		<file alias="QGroundControl/Controls/QGCMovableItem.qml">../src/QmlControls/QGCMovableItem.qml</file>
 		<file alias="QGroundControl/Controls/QGCPopupDialog.qml">../src/QmlControls/QGCPopupDialog.qml</file>
-		<file alias="QGroundControl/Controls/QGCPipOverlay.qml">../src/QmlControls/QGCPipOverlay.qml</file>
 		<file alias="QGroundControl/Controls/QGCPipState.qml">../src/QmlControls/QGCPipState.qml</file>
 		<file alias="QGroundControl/Controls/QGCRadioButton.qml">../src/QmlControls/QGCRadioButton.qml</file>
 		<file alias="QGroundControl/Controls/QGCSimpleMessageDialog.qml">../src/QmlControls/QGCSimpleMessageDialog.qml</file>
@@ -197,7 +196,6 @@
 		<file alias="QGroundControl/FactControls/qmldir">../src/QmlControls/QGroundControl/FactControls/qmldir</file>
 		<file alias="QGroundControl/FlightDisplay/FlightDisplayViewVideo.qml">../src/FlightDisplay/FlightDisplayViewVideo.qml</file>
 		<file alias="QGroundControl/FlightDisplay/FlightDisplayViewWidgets.qml">../src/FlightDisplay/FlightDisplayViewWidgets.qml</file>
-		<file alias="QGroundControl/FlightDisplay/FlyView.qml">../src/FlightDisplay/FlyView.qml</file>
 		<file alias="QGroundControl/FlightDisplay/FlyViewInstrumentPanel.qml">../src/FlightDisplay/FlyViewInstrumentPanel.qml</file>
 		<file alias="QGroundControl/FlightDisplay/FlyViewMap.qml">../src/FlightDisplay/FlyViewMap.qml</file>
 		<file alias="QGroundControl/FlightDisplay/FlyViewMissionCompleteDialog.qml">../src/FlightDisplay/FlyViewMissionCompleteDialog.qml</file>

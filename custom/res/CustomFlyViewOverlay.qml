@@ -283,18 +283,21 @@ Item {
 
 
 
+
     // RIGHT BOX !
     Rectangle {
+
         id: right_box
-        //anchors.verticalCenter: attitudeIndicator.verticalCenter
+
         anchors.left:          attitudeIndicator.right
+        anchors.bottom : attitudeIndicator.bottom
+
         anchors.leftMargin:  ScreenTools.defaultFontPixelHeight * 0.4  // -attitudeIndicator.width / 3
         width:  attitudeIndicator.width*0.6
         height: attitudeIndicator.height * 0.65
-        radius:                 ScreenTools.defaultFontPixelWidth
-        color:                  qgcPal.window
-        anchors.bottom : attitudeIndicator.bottom
 
+        radius:                 ScreenTools.defaultFontPixelHeight
+        color:                  qgcPal.window
 
         GridLayout {
                     columnSpacing:          ScreenTools.defaultFontPixelWidth  * 2
@@ -329,6 +332,7 @@ Item {
             }
         }
     }
+
 
     Rectangle {
         id:                     attitudeIndicator

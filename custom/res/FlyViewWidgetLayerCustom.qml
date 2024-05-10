@@ -131,11 +131,11 @@ Item {
 
     PhotoVideoControl {
         id:                     photoVideoControl
-        anchors.rightMargin:  2*_toolsMargin
+        anchors.margins:  _toolsMargin
         anchors.topMargin:    _toolsMargin
-        anchors.right:          parent.right
-        width:                  _rightPanelWidth
-        anchors.top:            parent.top
+        anchors.left:          parent.left
+        width:                  _rightPanelWidth * 0.8
+        anchors.bottom:            parent.bottom
 
         property real rightEdgeCenterInset: visible ? parent.width - x : 0
     }
