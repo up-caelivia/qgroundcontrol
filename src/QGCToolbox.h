@@ -67,12 +67,6 @@ public:
     QGCCorePlugin*              corePlugin              () { return _corePlugin; }
     SettingsManager*            settingsManager         () { return _settingsManager; }
     ADSBVehicleManager*         adsbVehicleManager      () { return _adsbVehicleManager; }
-
-
-    void setCamera1() {_videoManager = _videoManager1;}
-    void setCamera2() {_videoManager = _videoManager2;}
-
-
 #if defined(QGC_ENABLE_PAIRING)
     PairingManager*             pairingManager          () { return _pairingManager; }
 #endif
@@ -107,16 +101,11 @@ private:
     UASMessageHandler*          _uasMessageHandler      = nullptr;
     FollowMe*                   _followMe               = nullptr;
     QGCPositionManager*         _qgcPositionManager     = nullptr;
+    VideoManager*               _videoManager           = nullptr;
     MAVLinkLogManager*          _mavlinkLogManager      = nullptr;
     QGCCorePlugin*              _corePlugin             = nullptr;
     SettingsManager*            _settingsManager        = nullptr;
     ADSBVehicleManager*         _adsbVehicleManager     = nullptr;
-
-    VideoManager*               _videoManager           = nullptr;
-    VideoManager*               _videoManager1           = nullptr;
-    VideoManager*               _videoManager2           = nullptr;
-
-
 #if defined(QGC_ENABLE_PAIRING)
     PairingManager*             _pairingManager         = nullptr;
 #endif

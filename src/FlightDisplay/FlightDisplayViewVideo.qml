@@ -205,5 +205,4 @@ Item {
             property int zoom: 0
         }
     }
-
 }
