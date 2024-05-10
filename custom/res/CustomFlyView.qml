@@ -69,12 +69,9 @@ Item {
 
     QGCToolInsets {
         id:                     _toolInsets
-        leftEdgeBottomInset:    _pipOverlay.visible ? _pipOverlay.x + _pipOverlay.width : 0
-        bottomEdgeLeftInset:    _pipOverlay.visible ? parent.height - _pipOverlay.y : 0
+        // rightEdgeTopInset:    _pipOverlay.visible ? _pipOverlay.x + _pipOverlay.width : 0
+        // topEdgeRightInset:    _pipOverlay.visible ? parent.height - _pipOverlay.y : 0
     }
-
-
-
 
 
     FlyViewWidgetLayer {
@@ -82,7 +79,9 @@ Item {
         anchors.top:            parent.top
         anchors.bottom:         parent.bottom
         anchors.left:           parent.left
-        anchors.right:          guidedValueSlider.visible ? guidedValueSlider.left : parent.right
+        anchors.right:           parent.right
+
+        // anchors.right:          guidedValueSlider.visible ? guidedValueSlider.left : parent.right
         z:                      _fullItemZorder + 1
 
 
