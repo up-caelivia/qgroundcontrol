@@ -93,7 +93,7 @@ Rectangle {
 
 
 
-    // connected or disconnected label
+    // manual and the other on the right
     MainStatusIndicator {
 
         id: mainIndicator
