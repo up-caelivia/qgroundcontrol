@@ -45,6 +45,113 @@ Item {
     property real   _toolsMargin:           ScreenTools.defaultFontPixelWidth * 0.75
 
 
+
+    function showCriticalVehicleMessage(message) {
+        mainWindow.hideIndicatorPopup()
+
+        if (criticalVehicleMessagePopup.visible || QGroundControl.videoManager.fullScreen) {
+            // We received additional wanring message while an older warning message was still displayed.
+            // When the user close the older one drop the message indicator tool so they can see the rest of them.
+            criticalVehicleMessagePopup.dropMessageIndicatorOnClose = true
+        } else {
+            criticalVehicleMessagePopup.criticalVehicleMessage      = message
+            criticalVehicleMessagePopup.dropMessageIndicatorOnClose = false
+            criticalVehicleMessagePopup.open()
+        }
+    }
+
+    Popup {
+        id:                 criticalVehicleMessagePopup
+        y:                  ScreenTools.defaultFontPixelHeight
+        x:                  Math.round((mainWindow.width - width) * 0.5)
+        width:              mainWindow.width  * 0.55
+        height:             criticalVehicleMessageText.contentHeight + ScreenTools.defaultFontPixelHeight * 2
+        modal:              false
+        focus:              true
+        closePolicy:        Popup.CloseOnEscape
+
+        property alias  criticalVehicleMessage:        criticalVehicleMessageText.text
+        property bool   dropMessageIndicatorOnClose:   false
+
+        background: Rectangle {
+            anchors.fill:   parent
+            color:          qgcPal.alertBackground
+            radius:         ScreenTools.defaultFontPixelHeight * 0.5
+            border.color:   qgcPal.alertBorder
+            border.width:   2
+
+            Rectangle {
+                anchors.horizontalCenter:   parent.horizontalCenter
+                anchors.top:                parent.top
+                anchors.topMargin:          -(height / 2)
+                color:                      qgcPal.alertBackground
+                radius:                     ScreenTools.defaultFontPixelHeight * 0.25
+                border.color:               qgcPal.alertBorder
+                border.width:               1
+                width:                      vehicleWarningLabel.contentWidth + _margins
+                height:                     vehicleWarningLabel.contentHeight + _margins
+
+                property real _margins: ScreenTools.defaultFontPixelHeight * 0.25
+
+                QGCLabel {
+                    id:                 vehicleWarningLabel
+                    anchors.centerIn:   parent
+                    text:               qsTr("Vehicle Error")
+                    font.pointSize:     ScreenTools.smallFontPointSize
+                    color:              qgcPal.alertText
+                }
+            }
+
+            Rectangle {
+                id:                         additionalErrorsIndicator
+                anchors.horizontalCenter:   parent.horizontalCenter
+                anchors.bottom:             parent.bottom
+                anchors.bottomMargin:       -(height / 2)
+                color:                      qgcPal.alertBackground
+                radius:                     ScreenTools.defaultFontPixelHeight * 0.25
+                border.color:               qgcPal.alertBorder
+                border.width:               1
+                width:                      additionalErrorsLabel.contentWidth + _margins
+                height:                     additionalErrorsLabel.contentHeight + _margins
+                visible:                    criticalVehicleMessagePopup.dropMessageIndicatorOnClose
+
+                property real _margins: ScreenTools.defaultFontPixelHeight * 0.25
+
+                QGCLabel {
+                    id:                 additionalErrorsLabel
+                    anchors.centerIn:   parent
+                    text:               qsTr("Additional errors received")
+                    font.pointSize:     ScreenTools.smallFontPointSize
+                    color:              qgcPal.alertText
+                }
+            }
+        }
+
+        QGCLabel {
+            id:                 criticalVehicleMessageText
+            width:              criticalVehicleMessagePopup.width - ScreenTools.defaultFontPixelHeight
+            anchors.centerIn:   parent
+            wrapMode:           Text.WordWrap
+            color:              qgcPal.alertText
+            textFormat:         TextEdit.RichText
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                criticalVehicleMessagePopup.close()
+                if (criticalVehicleMessagePopup.dropMessageIndicatorOnClose) {
+                    criticalVehicleMessagePopup.dropMessageIndicatorOnClose = false;
+                    QGroundControl.multiVehicleManager.activeVehicle.resetErrorLevelMessages();
+                    toolbar.dropMessageIndicatorTool();
+                }
+            }
+        }
+    }
+
+
+
+
     QGCToolInsets {
         id:                     _totalToolInsets
         leftEdgeTopInset:       parentToolInsets.leftEdgeTopInset
@@ -61,75 +168,6 @@ Item {
         bottomEdgeRightInset:   parent.height - attitudeIndicator.y
     }
 
-
-    // UPPER BOX !
-    // Rectangle {
-    //     anchors.horizontalCenter: attitudeIndicator.horizontalCenter
-    //     anchors.bottom: attitudeIndicator.top
-    //     anchors.bottomMargin: - attitudeIndicator.height / 3
-    //     width: attitudeIndicator.width*0.65
-    //     height: attitudeIndicator.height * 0.55
-    //     radius: ScreenTools.defaultFontPixelWidth
-    //     color: qgcPal.window
-
-    //     property real _indicatorsHeight: ScreenTools.defaultFontPixelHeight * 2
-
-    //     QGCColoredImage {
-    //                    id: img1
-    //                    height:                 _indicatorsHeight
-    //                    width:                  height
-    //                    source:                 "/custom/img/vertical_speed.svg"
-    //                    fillMode:               Image.PreserveAspectFit
-    //                    sourceSize.height:      height
-    //                    //Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
-    //                    color:                  qgcPal.text
-    //                    anchors.left: parent.left
-    //                    anchors.leftMargin: ScreenTools.defaultFontPixelWidth  * 4
-
-    //                    anchors.bottomMargin: + attitudeIndicator.height / 3 + ScreenTools.defaultFontPixelWidth  * 2
-    //                    anchors.bottom: parent.bottom
-    //                    }
-
-    //                QGCLabel {
-    //                    text:                   _activeVehicle ? _activeVehicle.climbRate.value.toFixed(1) + ' ' + _activeVehicle.climbRate.units : " 0.0"
-    //                    color:                  _indicatorsColor
-    //                    font.pointSize:         ScreenTools.mediumFontPointSize
-    //                    //Layout.fillWidth:       true
-    //                    //Layout.minimumWidth:    indicatorValueWidth
-    //                    anchors.left: img1.right
-    //                    anchors.leftMargin: ScreenTools.defaultFontPixelWidth
-    //                    //anchors.leftMargin: 5
-    //                    anchors.bottomMargin: + attitudeIndicator.height / 3 + ScreenTools.defaultFontPixelWidth  * 2
-    //                    anchors.bottom: parent.bottom
-
-    //                }
-
-    //                QGCColoredImage {
-    //                    height:                 _indicatorsHeight
-    //                    width:                  height
-    //                    source:                   "/custom/img/distance.svg"
-    //                    fillMode:               Image.PreserveAspectFit
-    //                    sourceSize.height:      height
-    //                    color:                  qgcPal.text
-    //                    anchors.right: txt2.left
-    //                    anchors.rightMargin: ScreenTools.defaultFontPixelWidth
-    //                    anchors.bottomMargin: + attitudeIndicator.height / 3 + ScreenTools.defaultFontPixelWidth  * 2
-    //                    anchors.bottom: parent.bottom
-
-    //                }
-
-    //                QGCLabel {
-    //                    id: txt2
-    //                    text:                   _activeVehicle && !isNaN(_activeVehicle.distanceToHome.value) ? (('0000' + _activeVehicle.distanceToHome.value.toFixed(0)).slice(-4) + ' ' + _activeVehicle.distanceToHome.units) : "--/--"
-    //                    color:                  _indicatorsColor
-    //                    font.pointSize:         ScreenTools.mediumFontPointSize
-    //                    anchors.right: parent.right
-    //                    anchors.rightMargin: ScreenTools.defaultFontPixelWidth  * 4
-    //                    anchors.bottomMargin: + attitudeIndicator.height / 3 + ScreenTools.defaultFontPixelWidth  * 2
-    //                    anchors.bottom: parent.bottom
-
-    //                }
-    // }
 
 
 
@@ -195,7 +233,6 @@ Item {
        // anchors.verticalCenter: attitudeIndicator.verticalCenter
         anchors.bottom : attitudeIndicator.bottom
 
-
         radius:                 ScreenTools.defaultFontPixelHeight
         color:                  qgcPal.window
 
@@ -210,7 +247,7 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
             //anchors.rightMargin: 12
 
-            QGCColoredImage {
+            QGCColoredImage {                
                 height:                 _indicatorsHeight * 1.4
                 width:                  height
                 source:                 "/custom/img/altitude.svg"
@@ -221,6 +258,8 @@ Item {
             }
 
             QGCLabel {
+
+
                 text:                   _altitude
                 color:                  _indicatorsColor
                 font.pointSize:         ScreenTools.largeFontPointSize * 1.4
@@ -230,6 +269,19 @@ Item {
                 font.weight: Font.Bold
 
             }
+        }
+    }
+
+
+    Rectangle {
+        property double value: _activeVehicle ? (isNaN(_activeVehicle.altitudeRelative.value) ? 0.0 : _activeVehicle.altitudeRelative.value) : 0.0
+        onValueChanged: {
+
+            var alt = _activeVehicle.altitudeRelative.rawValue;
+
+            showCriticalVehicleMessage("Above 120m")
+            console.log("CHIAMATO");
+
         }
     }
 
