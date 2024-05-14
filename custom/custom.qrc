@@ -38,9 +38,10 @@
         <file alias="QGroundControl/Controls/QGCMapPolygonVisuals.qml">res/CustomMapPolygonVisuals.qml</file>
         <file alias="QGroundControl/Controls/MainStatusIndicator.qml">res/CustomMainStatusIndicator.qml</file>
 
+        <file alias="QGroundControl/Controls/FlightModeMenuIndicator.qml">res/CustomFlightModeMenuIndicator.qml</file>
+
         <file alias="QGroundControl/Controls/QGCPipOverlay.qml">res/CustomQGCPipOverlay.qml</file>
         <file alias="QGroundControl/FlightDisplay/FlyView.qml">res/CustomFlyView.qml</file>
-
 
     </qresource>
     <qresource prefix="/toolbar">
