@@ -544,6 +544,8 @@ ApplicationWindow {
         }
     }
 
+    function closeCriticalVehicleMessage()  { criticalVehicleMessagePopup.close() }
+
     Popup {
         id:                 criticalVehicleMessagePopup
         y:                  ScreenTools.defaultFontPixelHeight

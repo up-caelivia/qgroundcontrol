@@ -48,6 +48,45 @@ Item {
     property real   _rightPanelWidth:       ScreenTools.defaultFontPixelWidth * 30
     property alias  _gripperMenu:           gripperOptions
 
+    property bool _isLowSpeed: false
+    property double defaultLoitSpeed: 0.0
+    property double defaultWPNavSpeed: 0.0
+
+    property bool loaded: false
+
+
+    function showCriticalVehicleMessage(message) {
+        mainWindow.closeCriticalVehicleMessage()
+        mainWindow.showCriticalVehicleMessage(message)
+    }
+
+
+   Timer {
+       id: timer
+       interval: 5000 // 5000 ms = 5 seconds
+       running: _activeVehicle
+       repeat: false
+       onTriggered: {
+           loaded = true
+           loadDynamicObject()
+       }
+   }
+
+    function loadDynamicObject() {
+        var object  = Qt.createQmlObject(' import QGroundControl.Controllers   1.0;
+                                            ParameterEditorController {
+                                                 id: controller
+                                             }', _controller)
+        _controller.object = object
+
+    }
+
+   Item {
+           id: _controller
+           property var object
+   }
+
+
     QGCToolInsets {
         id:                     _totalToolInsets
         leftEdgeTopInset:       toolStrip.leftEdgeTopInset
@@ -286,6 +325,87 @@ Item {
 
         property real topEdgeCenterInset: visible ? y + height : 0
     }
+
+
+    function setValueSpeed(loit, wpnav, lowSpeedMode) {
+
+        var par_found = false
+        var loit_speed
+        var wpnav_speed
+
+        _controller.object.searchText = "LOIT_SPEED"
+
+        for( var i = 0; i < _controller.object.parameters.rowCount(); i++ ) {
+
+            if ( _controller.object.parameters.get(i).name == "LOIT_SPEED")  {
+                loit_speed = _controller.object.parameters.get(i)
+                par_found = true
+
+                if(lowSpeedMode)
+                {defaultLoitSpeed = loit_speed.value}
+
+                loit_speed.value = loit
+                loit_speed.valueChanged(loit_speed.value)
+
+                break
+            }
+        }
+
+
+        _controller.object.searchText = "WPNAV_SPEED"
+
+        for( var i = 0; i < _controller.object.parameters.rowCount(); i++ ) {
+            if ( _controller.object.parameters.get(i).name == "WPNAV_SPEED")  {
+                wpnav_speed = _controller.object.parameters.get(i)
+                par_found = par_found && true
+
+                if(lowSpeedMode){
+                    defaultWPNavSpeed = wpnav_speed.value
+                }
+
+                wpnav_speed.value = wpnav
+                wpnav_speed.valueChanged(wpnav_speed.value)
+
+                break
+            }
+        }
+
+        _controller.object.parametersChanged()
+
+        if (!par_found)
+            console.log("Not found the parameters for low speed mode")
+    }
+
+
+
+
+    QGCButton {
+
+        property string _text: _isLowSpeed ? "DISABLE LOW SPEED MODE" : "ENABLE LOW SPEED MODE"
+
+        id:                 lowSpeedButton
+        anchors.top:        mapScale.bottom
+        anchors.left:       toolStrip.right
+        anchors.margins:    _toolsMargin
+        anchors.topMargin:    _toolsMargin * 2
+        text:               _text
+        visible: loaded
+        onClicked: {
+
+            _isLowSpeed = ! _isLowSpeed
+
+            if (!_isLowSpeed) {
+                showCriticalVehicleMessage("LOW SPEED MODE DISABLED")
+                setValueSpeed(defaultLoitSpeed, defaultWPNavSpeed, _isLowSpeed)
+                return
+            }
+
+            showCriticalVehicleMessage("LOW SPEED MODE ACTIVATED")
+            setValueSpeed(260, 260, _isLowSpeed)
+
+        }
+    }
+
 
     Component {
         id: preFlightChecklistPopup
