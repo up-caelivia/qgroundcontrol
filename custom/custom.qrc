@@ -42,6 +42,8 @@
 
         <file alias="QGroundControl/Controls/QGCPipOverlay.qml">res/CustomQGCPipOverlay.qml</file>
         <file alias="QGroundControl/FlightDisplay/FlyView.qml">res/CustomFlyView.qml</file>
+        <file alias="MainRootWindow.qml">res/CustomMainRootWindow.qml</file>
+
 
     </qresource>
     <qresource prefix="/toolbar">

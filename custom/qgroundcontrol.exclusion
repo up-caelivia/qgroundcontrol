@@ -28,6 +28,9 @@
 
 <file alias="QGroundControl/Controls/FlightModeMenuIndicator.qml">src/ui/toolbar/FlightModeMenuIndicator.qml</file>
 
+<file alias="MainRootWindow.qml">src/ui/MainRootWindow.qml</file>
+
+
 
 
 
