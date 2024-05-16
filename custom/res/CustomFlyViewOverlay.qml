@@ -44,9 +44,11 @@ Item {
     property string _messageText:           ""
     property real   _toolsMargin:           ScreenTools.defaultFontPixelWidth * 0.75
 
+    property bool message: false
 
 
     function showCriticalVehicleMessage(message) {
+        mainWindow.closeCriticalVehicleMessage()
         mainWindow.showCriticalVehicleMessage(message)
     }
 
@@ -62,7 +64,12 @@ Item {
 
             if ((value > 120 && _activeVehicle.altitudeRelative.units == "m") || ( value > 393.7 && _activeVehicle.altitudeRelative.units == "ft")) {
                 showCriticalVehicleMessage("Above 120m")
+                message = true
                 console.log("INFO: Vehicle above 120m");
+            } else {
+                if(message && mainWindows.getCriticalVehicleMessage() == "Above 120m") {
+                    mainWindow.closeCriticalVehicleMessage()
+                }
             }
         }
     }
