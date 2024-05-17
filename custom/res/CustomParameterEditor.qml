@@ -26,18 +26,24 @@ Item {
     property Fact   _editorDialogFact: Fact { }
     property int    _rowHeight:         ScreenTools.defaultFontPixelHeight * 2
     property int    _rowWidth:          10 // Dynamic adjusted at runtime
-    property bool   _searchFilter:      searchText.text.trim() != "" || controller.showModifiedOnly  ///< true: showing results of search
     property var    _searchResults      ///< List of parameter names from search results
     property var    _activeVehicle:     QGroundControl.multiVehicleManager.activeVehicle
     property bool   _showRCToParam:     _activeVehicle.px4Firmware
     property var    _appSettings:       QGroundControl.settingsManager.appSettings
     property var    _controller:        controller
 
+    property bool   _searchFilter:      searchText.text.trim() != "" || controller.showModifiedOnly  ///< true: showing results of search
+    property list<Fact> factList
+    property var factNames: ["LOIT_SPEED", "WPNAV_SPEED", "FENCE_ALT_MAX"]
+
+    property bool developer: false
+
     ParameterEditorController {
         id: controller
     }
 
     ExclusiveGroup { id: sectionGroup }
+
 
     //---------------------------------------------
     //-- Header
@@ -46,6 +52,7 @@ Item {
         anchors.left:   parent.left
         anchors.right:  parent.right
         spacing:        ScreenTools.defaultFontPixelWidth
+        visible: developer
 
         Timer {
             id:         clearTimer
@@ -90,12 +97,16 @@ Item {
         }
     } // Row - Header
 
+
+
+
     QGCButton {
-        anchors.top:    header.top
-        anchors.bottom: header.bottom
+        id: tools
+        // anchors.top:    header.top
+        // anchors.bottom: header.bottom
         anchors.right:  parent.right
         text:           qsTr("Tools")
-        visible:        !_searchFilter
+       // visible:        !_searchFilter
         onClicked:      toolsMenu.popup()
     }
 
@@ -153,6 +164,8 @@ Item {
         }
     }
 
+
+
     /// Group buttons
     QGCFlickable {
         id :                groupScroll
@@ -163,7 +176,7 @@ Item {
         pixelAligned:       true
         contentHeight:      groupedViewCategoryColumn.height
         flickableDirection: Flickable.VerticalFlick
-        visible:            !_searchFilter
+        visible:            (!_searchFilter) && (developer)
 
         ColumnLayout {
             id:             groupedViewCategoryColumn
@@ -216,54 +229,97 @@ Item {
         }
     }
 
+
+
+
+
+
+
+
+
+
+    // -----------------------------------------------------------------------------------------------------------------------------
+
+    function getModel() {
+
+        for (var i = 0; i < factNames.length; ++i) {
+
+            var name = factNames[i]
+            controller.searchText = name
+
+            for( var j = 0; j < controller.parameters.rowCount(); j++ ) {
+
+                if ( controller.parameters.get(j).name == name)  {
+                    factList.push(controller.parameters.get(j))
+                    break
+                }
+            }
+
+        }
+    }
+
+
+
+    Component.onCompleted: {
+        if (!developer)
+          getModel() // Trigger the initial population of factList
+      }
+
+    function getText(modelFact)   {
+               if(modelFact.enumStrings.length === 0) {
+                   return modelFact.valueString + " " + modelFact.units
+               }
+
+               if(modelFact.bitmaskStrings.length != 0) {
+                   return modelFact.selectedBitmaskStrings.join(',')
+               }
+
+               return modelFact.enumStringValue
+    }
+
+
     /// Parameter list
     QGCListView {
         id:                 editorListView
         anchors.leftMargin: ScreenTools.defaultFontPixelWidth
-        anchors.left:       _searchFilter ? parent.left : groupScroll.right
+        anchors.left:       developer ? groupScroll.right  : parent.left
         anchors.right:      parent.right
-        anchors.top:        header.bottom
+        anchors.top:        tools.bottom
         anchors.bottom:     parent.bottom
         orientation:        ListView.Vertical
-        model:              controller.parameters
+        model:              developer ? controller.parameters : factList
         cacheBuffer:        height > 0 ? height * 2 : 0
         clip:               true
 
         delegate: Rectangle {
+            id: itemDelegate
             height: _rowHeight
             width:  _rowWidth
             color:  Qt.rgba(0,0,0,0)
+            anchors.horizontalCenter: developer ? undefined : parent.horizontalCenter
 
             Row {
                 id:     factRow
                 spacing: Math.ceil(ScreenTools.defaultFontPixelWidth * 0.5)
                 anchors.verticalCenter: parent.verticalCenter
 
-                property Fact modelFact: object
+                property Fact modelFact: developer ? object : factList[index]
 
                 QGCLabel {
                     id:     nameLabel
                     width:  ScreenTools.defaultFontPixelWidth  * 20
                     text:   factRow.modelFact.name
                     clip:   true
+
                 }
 
                 QGCLabel {
                     id:     valueLabel
                     width:  ScreenTools.defaultFontPixelWidth  * 20
                     color:  factRow.modelFact.defaultValueAvailable ? (factRow.modelFact.valueEqualsDefault ? qgcPal.text : qgcPal.warningText) : qgcPal.text
-                    text:   {
-                        if(factRow.modelFact.enumStrings.length === 0) {
-                            return factRow.modelFact.valueString + " " + factRow.modelFact.units
-                        }
-
-                        if(factRow.modelFact.bitmaskStrings.length != 0) {
-                            return factRow.modelFact.selectedBitmaskStrings.join(',')
-                        }
-
-                        return factRow.modelFact.enumStringValue
-                    }
+                    text:  getText(factRow.modelFact)
                     clip:   true
+
                 }
 
                 QGCLabel {
