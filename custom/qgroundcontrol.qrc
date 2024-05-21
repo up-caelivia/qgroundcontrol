@@ -115,7 +115,6 @@
 		<file alias="QGroundControl/Controls/MultiRotorMotorDisplay.qml">../src/QmlControls/MultiRotorMotorDisplay.qml</file>
 		<file alias="QGroundControl/Controls/OfflineMapButton.qml">../src/QmlControls/OfflineMapButton.qml</file>
 		<file alias="QGroundControl/Controls/ParameterDiffDialog.qml">../src/QmlControls/ParameterDiffDialog.qml</file>
-		<file alias="QGroundControl/Controls/ParameterEditorDialog.qml">../src/QmlControls/ParameterEditorDialog.qml</file>
 		<file alias="QGroundControl/Controls/PIDTuning.qml">../src/QmlControls/PIDTuning.qml</file>
 		<file alias="QGroundControl/Controls/PlanEditToolbar.qml">../src/PlanView/PlanEditToolbar.qml</file>
 		<file alias="QGroundControl/Controls/PreFlightCheckButton.qml">../src/QmlControls/PreFlightCheckButton.qml</file>

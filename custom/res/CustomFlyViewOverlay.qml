@@ -36,7 +36,7 @@ Item {
     property var    _sepColor:              qgcPal.globalTheme === QGCPalette.Light ? Qt.rgba(0,0,0,0.5) : Qt.rgba(1,1,1,0.5)
     property color  _indicatorsColor:       qgcPal.text
     property bool   _isVehicleGps:          _activeVehicle ? _activeVehicle.gps.count.rawValue > 1 && _activeVehicle.gps.hdop.rawValue < 1.4 : false
-    property string _altitude:              _activeVehicle ? (isNaN(_activeVehicle.altitudeRelative.value) ? "0.0" : _activeVehicle.altitudeRelative.value.toFixed(1)) + ' ' + _activeVehicle.altitudeRelative.units : "0.0"
+    property string _altitude:              _activeVehicle ? (isNaN(_activeVehicle.altitudeRelative.value) ? "0.0" : _activeVehicle.altitudeRelative.value.toFixed(1)) + ' ' + _activeVehicle.altitudeRelative.units : "--/--"
     property string _distanceStr:           isNaN(_distance) ? "0" : _distance.toFixed(0) + ' ' + QGroundControl.unitsConversion.appSettingsHorizontalDistanceUnitsString
     property real   _heading:               _activeVehicle   ? _activeVehicle.heading.rawValue : 0
     property real   _distance:              _activeVehicle ? _activeVehicle.distanceToHome.rawValue : 0
@@ -232,7 +232,7 @@ Item {
             }
 
             QGCLabel {
-                text:                  _activeVehicle ? _activeVehicle.climbRate.value.toFixed(1) + ' ' + _activeVehicle.climbRate.units : " 0.0"
+                text:                  _activeVehicle ? _activeVehicle.climbRate.value.toFixed(1) + ' ' + _activeVehicle.climbRate.units : " --/--"
                 color:                  _indicatorsColor
                 font.pointSize:         ScreenTools.mediumFontPointSize
                 Layout.fillWidth:       true
@@ -306,7 +306,7 @@ Item {
         height: parent.height / 4
         width:                  height * 1.98
         radius:                 height * 0.5
-        color:                  qgcPal.windowShade
+        color:                  qgcPal.window   //qgcPal.windowShade
 
         CustomAttitudeWidget {
             id:                 attitude

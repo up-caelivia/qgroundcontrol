@@ -24,6 +24,8 @@ Item {
     id:         _root
 
     property Fact   _editorDialogFact: Fact { }
+    property int _indexSelected: 0
+
     property int    _rowHeight:         ScreenTools.defaultFontPixelHeight * 2
     property int    _rowWidth:          10 // Dynamic adjusted at runtime
     property var    _searchResults      ///< List of parameter names from search results
@@ -34,7 +36,12 @@ Item {
 
     property bool   _searchFilter:      searchText.text.trim() != "" || controller.showModifiedOnly  ///< true: showing results of search
     property list<Fact> factList
+
     property var factNames: ["LOIT_SPEED", "WPNAV_SPEED", "FENCE_ALT_MAX"]
+    property var factDescription: ["Maximum speed reached by drone in loiter mode. Warning: in altitude hold mode speed is not limited", "Maximum speed reached by drone during automatic mission", ""]
+    property var factGoodNames: ["Maximum loiter speed", "Maximum auto speed", "Maximum altitude"]
+    property var factMin: [200, 200, 10]
+    property var factMax: [1500, 1500, 200]
 
     property bool developer: false
 
@@ -105,6 +112,7 @@ Item {
         // anchors.top:    header.top
         // anchors.bottom: header.bottom
         anchors.right:  parent.right
+        anchors.rightMargin: ScreenTools.defaultFontPixelWidth
         text:           qsTr("Tools")
        // visible:        !_searchFilter
         onClicked:      toolsMenu.popup()
@@ -251,6 +259,8 @@ Item {
 
                 if ( controller.parameters.get(j).name == name)  {
                     factList.push(controller.parameters.get(j))
+                    //controller.parameters.get(j).shortDescription = "Maximum speed reached by drone in loiter mode. Warning: in altitude hold mode speed is not limited."
+
                     break
                 }
             }
@@ -267,7 +277,15 @@ Item {
 
     function getText(modelFact)   {
                if(modelFact.enumStrings.length === 0) {
+
+                   if(developer)
+                       return modelFact.valueString + " " + modelFact.units
+
+                   if (modelFact.units == "cm/s")
+                       return (modelFact.rawValue / 100).toFixed(2) + " " + "m/s"
+
                    return modelFact.valueString + " " + modelFact.units
+
                }
 
                if(modelFact.bitmaskStrings.length != 0) {
@@ -293,7 +311,7 @@ Item {
 
         delegate: Rectangle {
             id: itemDelegate
-            height: _rowHeight
+            height: developer ? _rowHeight : descriptionId.height + ScreenTools.defaultFontPixelHeight //_rowHeight
             width:  _rowWidth
             color:  Qt.rgba(0,0,0,0)
             anchors.horizontalCenter: developer ? undefined : parent.horizontalCenter
@@ -308,9 +326,8 @@ Item {
                 QGCLabel {
                     id:     nameLabel
                     width:  ScreenTools.defaultFontPixelWidth  * 20
-                    text:   factRow.modelFact.name
+                    text:   factGoodNames[index]//factRow.modelFact.name
                     clip:   true
-
                 }
 
                 QGCLabel {
@@ -319,11 +336,19 @@ Item {
                     color:  factRow.modelFact.defaultValueAvailable ? (factRow.modelFact.valueEqualsDefault ? qgcPal.text : qgcPal.warningText) : qgcPal.text
                     text:  getText(factRow.modelFact)
                     clip:   true
-
                 }
 
                 QGCLabel {
-                    text:   factRow.modelFact.shortDescription
+                    id: descriptionId
+                    text: getDesc()
+                    width: ScreenTools.defaultFontPixelWidth  * 30
+                    wrapMode: developer ? Text.NoWrap : Text.Wrap
+
+                    function getDesc() {
+                        if(developer || factDescription[index] == "")
+                            return factRow.modelFact.shortDescription
+                        return factDescription[index]
+                    }
                 }
 
                 Component.onCompleted: {
@@ -347,6 +372,7 @@ Item {
                 acceptedButtons:    Qt.LeftButton
                 onClicked: {
                     _editorDialogFact = factRow.modelFact
+                    _indexSelected = index
                     editorDialogComponent.createObject(mainWindow).open()
                 }
             }
@@ -377,6 +403,9 @@ Item {
         ParameterEditorDialog {
             fact:           _editorDialogFact
             showRCToParam:  _showRCToParam
+            developer: developer
+            max: factMax[_indexSelected]
+            min: factMin[_indexSelected]
         }
     }
 

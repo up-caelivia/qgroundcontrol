@@ -26,7 +26,6 @@ Item {
     width:          batteryIndicatorRow.width
 
     property bool showIndicator: true
-
     property var _activeVehicle: QGroundControl.multiVehicleManager.activeVehicle
 
     Row {
@@ -41,12 +40,11 @@ Item {
                 anchors.top:        parent.top
                 anchors.bottom:     parent.bottom
                 sourceComponent:    batteryVisual
-
-
                 property var battery: object
             }
         }
     }
+
     MouseArea {
         anchors.fill:   parent
         onClicked: {
@@ -121,34 +119,34 @@ Item {
                 }
             }
 
-            Column {
-                id: batteryValuesColumn2
-                anchors.verticalCenter: parent.verticalCenter
-                leftPadding: 10
-                rightPadding: 10  // if more batteries
+            // Column {
+            //     id: batteryValuesColumn2
+            //     anchors.verticalCenter: parent.verticalCenter
+            //     leftPadding: 10
+            //     rightPadding: 10  // if more batteries
 
-                QGCLabel {
-                    anchors.horizontalCenter: power.horizontalCenter
-                    color: getBatteryColor()
-                    text: battery.current.valueString + " " + battery.current.units
-                }
+            //     QGCLabel {
+            //         anchors.horizontalCenter: power.horizontalCenter
+            //         color: getBatteryColor()
+            //         text: battery.current.valueString + " " + battery.current.units
+            //     }
 
-                QGCLabel {
-                    id: power
-                    color: getBatteryColor()
-                    text: getPower()
-                }
-            }
+            //     QGCLabel {
+            //         id: power
+            //         color: getBatteryColor()
+            //         text: getPower()
+            //     }
+            // }
 
-            function getPower() {
+            // function getPower() {
 
-                if (!isNaN(battery.current.rawValue) && !isNaN(battery.voltage.rawValue)) {
-                    return (battery.voltage.rawValue * battery.current.rawValue).toFixed(2) + " W";
-                }
+            //     if (!isNaN(battery.current.rawValue) && !isNaN(battery.voltage.rawValue)) {
+            //         return (battery.voltage.rawValue * battery.current.rawValue).toFixed(2) + " W";
+            //     }
 
-                return "--.-- W";
+            //     return "--.-- W";
 
-            }
+            // }
 
 
         }

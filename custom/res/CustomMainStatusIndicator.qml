@@ -33,9 +33,14 @@ RowLayout {
     // manual
     FlightModeMenuIndicator {
         id:                     flightModeMenu
-        Layout.preferredHeight: _root.height
-        fontPointSize:          _vehicleInAir ?  ScreenTools.largeFontPointSize : ScreenTools.defaultFontPointSize
+        // Layout.preferredHeight: _root.height
+        Layout.alignment: Qt.AlignVCenter
+        height: parent.height * 1.5
+
+        // Layout.Center:
+        fontPointSize:         ScreenTools.largeFontPointSize
         visible:                _activeVehicle
+
     }
 
     Item {
@@ -46,7 +51,10 @@ RowLayout {
     QGCLabel {
         id:             mainStatusLabel
         text:           mainStatusText()
-        font.pointSize: _vehicleInAir ? ScreenTools.defaultFontPointSize : ScreenTools.largeFontPointSize
+        font.pointSize: _activeVehicle ? ScreenTools.defaultFontPointSize : ScreenTools.largeFontPointSize
+        Layout.alignment: Qt.AlignVCenter
+        // height: parent.height
+
 
         property string _commLostText:      qsTr("Link Lost")
         property string _readyToFlyText:    qsTr("Ready To Fly")

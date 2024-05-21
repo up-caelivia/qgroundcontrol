@@ -37,7 +37,7 @@
         <file alias="QGroundControl/FlightMap/MapLineArrow.qml">res/CustomMapLineArraw.qml</file>
         <file alias="QGroundControl/Controls/QGCMapPolygonVisuals.qml">res/CustomMapPolygonVisuals.qml</file>
         <file alias="QGroundControl/Controls/MainStatusIndicator.qml">res/CustomMainStatusIndicator.qml</file>
-
+        <file alias="QGroundControl/Controls/ParameterEditorDialog.qml">res/CustomParameterEditorDialog.qml</file>
         <file alias="QGroundControl/Controls/FlightModeMenuIndicator.qml">res/CustomFlightModeMenuIndicator.qml</file>
         <file alias="QGroundControl/Controls/ParameterEditor.qml">res/CustomParameterEditor.qml</file>
         <file alias="QGroundControl/Controls/QGCPipOverlay.qml">res/CustomQGCPipOverlay.qml</file>

@@ -73,7 +73,7 @@ Item {
         id:             borderRect
         anchors.fill:   parent
         radius:         width / 2
-        color:          qgcPal.window
+        color:          qgcPal.windowShade  // qgcPal.window
         border.color:   qgcPal.text
         border.width:   1
     }
