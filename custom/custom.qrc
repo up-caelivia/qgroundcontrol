@@ -44,6 +44,8 @@
         <file alias="QGroundControl/Controls/QGCPipOverlay.qml">res/CustomQGCPipOverlay.qml</file>
         <file alias="QGroundControl/FlightDisplay/FlyView.qml">res/CustomFlyView.qml</file>
         <file alias="MainRootWindow.qml">res/CustomMainRootWindow.qml</file>
+        <file alias="QGroundControl/FlightMap/PhotoVideoControl.qml">res/CustomPhotoVideoControl.qml</file>
+
 
 
     </qresource>
