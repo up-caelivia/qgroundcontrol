@@ -27,6 +27,9 @@ import QGroundControl.Palette       1.0
 import QGroundControl.ScreenTools   1.0
 import QGroundControl.Vehicle       1.0
 
+import Custom.Widgets 1.0
+
+
 // This is the ui overlay layer for the widgets/tools for Fly View
 Item {
     id: _root
@@ -99,9 +102,34 @@ Item {
         topEdgeCenterInset:     mapScale.topEdgeCenterInset
         topEdgeRightInset:      instrumentPanel.topEdgeRightInset
         bottomEdgeLeftInset:    virtualJoystickMultiTouch.visible ? virtualJoystickMultiTouch.bottomEdgeLeftInset : parentToolInsets.bottomEdgeLeftInset
-        bottomEdgeCenterInset:  telemetryPanel.bottomEdgeCenterInset
+        //bottomEdgeCenterInset:  telemetryPanel.bottomEdgeCenterInset
         bottomEdgeRightInset:   virtualJoystickMultiTouch.visible ? virtualJoystickMultiTouch.bottomEdgeRightInset : parentToolInsets.bottomEdgeRightInset
     }
+
+
+    PhotoVideoControl {
+        id:                     photoVideoControl
+        anchors.margins:  _toolsMargin
+        anchors.topMargin:    _toolsMargin
+        anchors.left:          parent.left
+        width:                  _rightPanelWidth * 0.8
+        anchors.bottom:            parent.bottom
+
+        property real rightEdgeCenterInset: visible ? parent.width - x : 0
+    }
+
+    CustomSpeedSelector {
+        id:                     speedControl
+        anchors.margins:  _toolsMargin
+        anchors.topMargin:    _toolsMargin
+        anchors.right:          parent.right
+        width:                  _rightPanelWidth * 0.8
+        anchors.bottom:            parent.bottom
+
+        property real rightEdgeCenterInset: visible ? parent.width - x : 0
+    }
+
+
 
     FlyViewMissionCompleteDialog {
         missionController:      _missionController
@@ -168,100 +196,6 @@ Item {
         property real topEdgeRightInset: visible ? y + height : 0
     }
 
-    PhotoVideoControl {
-        id:                     photoVideoControl
-        anchors.margins:  _toolsMargin
-        anchors.topMargin:    _toolsMargin
-        anchors.left:          parent.left
-        width:                  _rightPanelWidth * 0.8
-        anchors.bottom:            parent.bottom
-
-        property real rightEdgeCenterInset: visible ? parent.width - x : 0
-    }
-
-    TelemetryValuesBar {
-        id:                 telemetryPanel
-        x:                  recalcXPosition()
-        anchors.margins:    _toolsMargin
-        visible: false // ! nasconde la barra
-
-        property real bottomEdgeCenterInset: 0
-        property real rightEdgeCenterInset: 0
-
-        // States for custom layout support
-        states: [
-            State {
-                name: "bottom"
-                when: telemetryPanel.bottomMode
-
-                AnchorChanges {
-                    target: telemetryPanel
-                    anchors.top: undefined
-                    anchors.bottom: parent.bottom
-                    anchors.right: undefined
-                    anchors.verticalCenter: undefined
-                }
-
-                PropertyChanges {
-                    target: telemetryPanel
-                    x: recalcXPosition()
-                    bottomEdgeCenterInset: visible ? parent.height-y : 0
-                    rightEdgeCenterInset: 0
-                }
-            },
-
-            State {
-                name: "right-video"
-                when: !telemetryPanel.bottomMode && photoVideoControl.visible
-
-                AnchorChanges {
-                    target: telemetryPanel
-                    anchors.top: photoVideoControl.bottom
-                    anchors.bottom: undefined
-                    anchors.right: parent.right
-                    anchors.verticalCenter: undefined
-                }
-                PropertyChanges {
-                    target: telemetryPanel
-                    bottomEdgeCenterInset: 0
-                    rightEdgeCenterInset: visible ? parent.width - x : 0
-                }
-            },
-
-            State {
-                name: "right-novideo"
-                when: !telemetryPanel.bottomMode && !photoVideoControl.visible
-
-                AnchorChanges {
-                    target: telemetryPanel
-                    anchors.top: undefined
-                    anchors.bottom: undefined
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-                PropertyChanges {
-                    target: telemetryPanel
-                    bottomEdgeCenterInset: 0
-                    rightEdgeCenterInset: visible ? parent.width - x : 0
-                }
-            }
-        ]
-
-        function recalcXPosition() {
-            // First try centered
-            var halfRootWidth   = _root.width / 2
-            var halfPanelWidth  = telemetryPanel.width / 2
-            var leftX           = (halfRootWidth - halfPanelWidth) - _toolsMargin
-            var rightX          = (halfRootWidth + halfPanelWidth) + _toolsMargin
-            if (leftX >= parentToolInsets.leftEdgeBottomInset || rightX <= parentToolInsets.rightEdgeBottomInset ) {
-                // It will fit in the horizontalCenter
-                return halfRootWidth - halfPanelWidth
-            } else {
-                // Anchor to left edge
-                return parentToolInsets.leftEdgeBottomInset + _toolsMargin
-            }
-        }
-    }
 
     //-- Virtual Joystick
     Loader {
@@ -299,7 +233,6 @@ Item {
         visible:                !QGroundControl.videoManager.fullScreen
 
         onDisplayPreFlightChecklist: preFlightChecklistPopup.createObject(mainWindow).open()
-
 
         property real topEdgeLeftInset: visible ? y + height : 0
         property real leftEdgeTopInset: visible ? x + width : 0
