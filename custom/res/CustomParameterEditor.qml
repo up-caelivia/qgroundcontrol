@@ -42,6 +42,7 @@ Item {
     property var factGoodNames: ["Maximum loiter speed", "Maximum auto speed", "Maximum altitude"]
     property var factMin: [200, 200, 10]
     property var factMax: [1500, 1500, 200]
+    property var factEditable: [false, true, true]
 
     property bool developer: false
 
@@ -370,6 +371,8 @@ Item {
             MouseArea {
                 anchors.fill:       parent
                 acceptedButtons:    Qt.LeftButton
+                enabled: factEditable[index]
+
                 onClicked: {
                     _editorDialogFact = factRow.modelFact
                     _indexSelected = index
@@ -399,6 +402,7 @@ Item {
 
     Component {
         id: editorDialogComponent
+
 
         ParameterEditorDialog {
             fact:           _editorDialogFact

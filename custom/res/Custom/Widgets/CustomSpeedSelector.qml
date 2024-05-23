@@ -23,6 +23,8 @@ import QGroundControl.Controllers       1.0
 import QGroundControl.FactSystem        1.0
 import QGroundControl.FactControls      1.0
 
+//TODO: check values
+
 Rectangle {
     height:     mainLayout.height + (_margins * 2)
     color:      Qt.rgba(qgcPal.window.r, qgcPal.window.g, qgcPal.window.b, 0.5)
@@ -31,9 +33,81 @@ Rectangle {
     property real   _margins:                                   ScreenTools.defaultFontPixelHeight / 2
     property var    _activeVehicle:                             QGroundControl.multiVehicleManager.activeVehicle
     property bool   _secondButton:                    false
-    property bool _lowSpeedActive: false
+    property bool   _isLowSpeed: false
+    property var _controller
+    property var modality: _activeVehicle ? _activeVehicle.flightMode : ""
+
+    onModalityChanged: {
+
+        if(modality != "Loiter" && _isLowSpeed) {
+            showCriticalVehicleMessage("LOW SPEED MODE NOT AVAILABLE")
+        }
+
+        if(modality == "Loiter" && _isLowSpeed) {
+            showCriticalVehicleMessage("LOW SPEED MODE ACTIVATED")
+        }
+
+    }
+
+    property double defaultLoitSpeed: 0.0
+    // property double defaultWPNavSpeed: 0.0
 
     QGCPalette { id: qgcPal; colorGroupEnabled: enabled }
+
+    function showCriticalVehicleMessage(message) {
+        mainWindow.closeCriticalVehicleMessage()
+        mainWindow.showCriticalVehicleMessage(message)
+    }
+
+    function setValueSpeed(loit, lowSpeedMode) {
+
+        var par_found = false
+        var loit_speed
+        // var wpnav_speed
+
+        _controller.object.searchText = "LOIT_SPEED"
+
+        for( var i = 0; i < _controller.object.parameters.rowCount(); i++ ) {
+
+            if ( _controller.object.parameters.get(i).name == "LOIT_SPEED")  {
+                loit_speed = _controller.object.parameters.get(i)
+                par_found = true
+
+                if(lowSpeedMode)
+                {defaultLoitSpeed = loit_speed.value}
+
+                loit_speed.value = loit
+                loit_speed.valueChanged(loit_speed.value)
+
+                break
+            }
+        }
+
+
+        // _controller.object.searchText = "WPNAV_SPEED"
+
+        // for( var i = 0; i < _controller.object.parameters.rowCount(); i++ ) {
+        //     if ( _controller.object.parameters.get(i).name == "WPNAV_SPEED")  {
+        //         wpnav_speed = _controller.object.parameters.get(i)
+        //         par_found = par_found && true
+
+        //         if(lowSpeedMode){
+        //             defaultWPNavSpeed = wpnav_speed.value
+        //         }
+
+        //         wpnav_speed.value = wpnav
+        //         wpnav_speed.valueChanged(wpnav_speed.value)
+
+        //         break
+        //     }
+        // }
+
+        _controller.object.parametersChanged()
+
+        if (!par_found)
+            console.log("Not found the parameters for low speed mode")
+    }
+
 
 
     ColumnLayout {
@@ -50,6 +124,7 @@ Rectangle {
             height:             width / 2
             color:              qgcPal.windowShadeLight
             radius:             height * 0.5
+            opacity: _isLowSpeed ? 0.5 : 1
 
             // First Button
             Rectangle {
@@ -66,7 +141,7 @@ Rectangle {
                     height:             parent.height * 0.5
                     width:              height
                     anchors.centerIn:   parent
-                    source:             "/qmlimages/camera_video.svg"
+                    source:             "/custom/img/n.svg"
                     fillMode:           Image.PreserveAspectFit
                     sourceSize.height:  height
                     color:              _secondButton ? qgcPal.text : qgcPal.colorGreen
@@ -74,8 +149,11 @@ Rectangle {
 
                 MouseArea {
                     anchors.fill:   parent
-                    enabled:        true
-                    onClicked:      {_secondButton = false}
+                    enabled:        !_isLowSpeed
+                    onClicked:      {
+                        _secondButton = false
+                        setValueSpeed(500, false)
+                    }
                 }
             }
             // Second Button
@@ -88,11 +166,12 @@ Rectangle {
                 anchors.right:          parent.right
                 border.color:           qgcPal.text
                 border.width:           _secondButton ? 1 : 0
+
                 QGCColoredImage {
                     height:             parent.height * 0.5
                     width:              height
                     anchors.centerIn:   parent
-                    source:             "/qmlimages/camera_photo.svg"
+                    source:             "/custom/img/h.svg"
                     fillMode:           Image.PreserveAspectFit
                     sourceSize.height:  height
                     color:              _secondButton ? qgcPal.colorGreen : qgcPal.text
@@ -100,8 +179,13 @@ Rectangle {
 
                 MouseArea {
                     anchors.fill:   parent
-                    enabled:        true
-                    onClicked:      {_secondButton = true}
+                    enabled:        !_isLowSpeed
+                    onClicked:      {
+
+                        _secondButton = true
+                        setValueSpeed(1000, false)
+
+                    }
                 }
             }
         }
@@ -117,19 +201,54 @@ Rectangle {
             border.color:       qgcPal.buttonText
             border.width:       3
 
-            Rectangle {
-                anchors.centerIn:   parent
-                width:              parent.width * 0.7
-                height:             width
-                radius:             width * 0.5
-                color:              _lowSpeedActive ? qgcPal.colorRed : qgcPal.colorGrey
-            }
+            // Rectangle {
+            //     anchors.centerIn:   parent
+            //     width:              parent.width * 0.7
+            //     height:             width
+            //     radius:             width * 0.5
+            //     // color:              _isLowSpeed ? qgcPal.colorRed : qgcPal.colorGrey
+
+                QGCColoredImage {
+                    height:             parent.height * 0.5
+                    width:              height
+                    anchors.centerIn:   parent
+                    source:             "/custom/img/slow.svg"
+                    fillMode:           Image.PreserveAspectFit
+                    sourceSize.height:  height
+                    color:              _secondButton ? qgcPal.colorGreen : qgcPal.text
+                }
+
+
+
+            // }
 
             MouseArea {
                 anchors.fill:   parent
-                onClicked:      {_lowSpeedActive = !_lowSpeedActive}//toggleShooting()
+                        onClicked: {
+
+                                           _isLowSpeed = ! _isLowSpeed
+
+                                           if (!_isLowSpeed) {
+                                               showCriticalVehicleMessage("LOW SPEED MODE DISABLED")
+                                               setValueSpeed(defaultLoitSpeed, _isLowSpeed)
+                                               return
+                                           }
+
+                                           if(modality != "Loiter") {
+                                               showCriticalVehicleMessage("LOW SPEED MODE NOT AVAILABLE")
+                                               // TODO: change icon
+                                           } else {
+                                               showCriticalVehicleMessage("LOW SPEED MODE ACTIVATED")
+                                           }
+
+
+                                           setValueSpeed(260, _isLowSpeed)
+
+                                       }
             }
         }
+
+
 
 
     }
