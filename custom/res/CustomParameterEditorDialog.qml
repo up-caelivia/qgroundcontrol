@@ -50,15 +50,23 @@ QGCPopupDialog {
 
     QGCPalette { id: qgcPal; colorGroupEnabled: true }
 
+    property var oldValue: fact.value
+
     onAccepted: {
 
         var errStringCustom = developer ? "" : customControl()
         console.log(errStringCustom)
 
-        if(errStringCustom != "") {
-            validationError.text = errStringCustom
-            preventClose = true
-            return
+        if (validationError.text.includes("press another time on the save button") && oldValue == valueField.text) {}   // ok save
+        else {
+
+            if(errStringCustom != "") {
+                validationError.text = errStringCustom
+                preventClose = true
+                oldValue = valueField.text
+                return
+            }
+
         }
 
         if (bitmaskColumn.visible && !manualEntry.checked) {
@@ -90,6 +98,9 @@ QGCPopupDialog {
 
         if (value > max || value < min)
             return "Value must be between " + min.toFixed(2) + " and " + max.toFixed(2)
+
+        if (fact.name == "FENCE_ALT_MAX" && value > 120)
+            return "Attention: value above 120m. If you want to continue, press another time on the save button."
 
         return ""
     }

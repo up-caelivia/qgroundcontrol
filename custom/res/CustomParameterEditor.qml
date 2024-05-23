@@ -334,9 +334,18 @@ Item {
                 QGCLabel {
                     id:     valueLabel
                     width:  ScreenTools.defaultFontPixelWidth  * 20
-                    color:  factRow.modelFact.defaultValueAvailable ? (factRow.modelFact.valueEqualsDefault ? qgcPal.text : qgcPal.warningText) : qgcPal.text
+                    color:  getColor()
                     text:  getText(factRow.modelFact)
                     clip:   true
+
+                    function getColor() {
+
+                        if (factGoodNames[index] == "Maximum altitude" && parseFloat(factRow.modelFact.value) > 120)
+                            return qgcPal.warningText
+                        return qgcPal.text
+
+                    }
+
                 }
 
                 QGCLabel {
