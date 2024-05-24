@@ -20,6 +20,11 @@ import QGroundControl.Controllers   1.0
 import QGroundControl.FactSystem    1.0
 import QGroundControl.FactControls  1.0
 
+import Custom.Constants 1.0
+
+
+
+
 Item {
     id:         _root
 
@@ -44,11 +49,12 @@ Item {
     property var factMax: [1500, 1500, 200]
     property var factEditable: [false, true, true]
 
-    property bool developer: false
+    property bool developer: Constants.developer
 
     ParameterEditorController {
         id: controller
     }
+
 
     ExclusiveGroup { id: sectionGroup }
 
@@ -70,6 +76,7 @@ Item {
             onTriggered: {
                 searchText.text = ""
                 controller.searchText = ""
+                console.log(developer)
             }
         }
 

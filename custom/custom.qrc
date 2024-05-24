@@ -11,14 +11,12 @@
         <file alias="n.svg">res/Images/n.svg</file>
         <file alias="alert.svg">res/Images/alert.svg</file>
     </qresource>
-
     <qresource prefix="/res">
         <file alias="QGCLogoFull">res/Images/QGCLogoFull.svg</file>
         <file alias="QGCLogoWhite">res/Images/QGCLogoWhite.svg</file>
         <file alias="resources/icons/qgroundcontrol.ico">res/Images/QGCLogoFull.ico</file>
     </qresource>
-
-    <qresource prefix="/qmlimages/">
+    <qresource prefix="/qmlimages">
         <file alias="vehicleArrowOpaque.svg">res/Images/vehicleArrowOpaque.svg</file>
         <file alias="vehicleArrowOutline.svg">res/Images/vehicleArrowOutline.svg</file>
         <file alias="compassInstrumentArrow.svg">res/Images/compassInstrumentArrow.svg</file>
@@ -30,6 +28,10 @@
         <file alias="Custom/Widgets/FlightTimeWidget.qml">res/Custom/Widgets/FlightTimeWidget.qml</file>
         <file alias="Custom/Widgets/CustomSpeedSelector.qml">res/Custom/Widgets/CustomSpeedSelector.qml</file>
         <file alias="Custom/Widgets/qmldir">res/Custom/Widgets/qmldir</file>
+    </qresource>
+    <qresource prefix="/Custom/Constants">
+        <file alias="Custom/Constants/Constants.qml">res/Custom/Constants/Constants.qml</file>
+        <file alias="Custom/Constants/qmldir">res/Custom/Constants/qmldir</file>
     </qresource>
     <qresource prefix="/qml">
         <file alias="QGroundControl/FlightDisplay/FlyViewCustomLayer.qml">res/CustomFlyViewOverlay.qml</file>
@@ -49,9 +51,6 @@
         <file alias="QGroundControl/FlightDisplay/FlyView.qml">res/CustomFlyView.qml</file>
         <file alias="MainRootWindow.qml">res/CustomMainRootWindow.qml</file>
         <file alias="QGroundControl/FlightMap/PhotoVideoControl.qml">res/CustomPhotoVideoControl.qml</file>
-
-
-
     </qresource>
     <qresource prefix="/toolbar">
         <file alias="GPSIndicator.qml">res/CustomGPSIndicator.qml</file>
