@@ -20,6 +20,9 @@ import QGroundControl.FactSystem    1.0
 import QGroundControl.FactControls  1.0
 import QGroundControl.ScreenTools   1.0
 
+import Custom.Constants 1.0
+
+
 QGCPopupDialog {
     id:         root
     title:      qsTr("Parameter Editor")
@@ -41,10 +44,10 @@ QGCPopupDialog {
     property bool   _allowDefaultReset:         fact.defaultValueAvailable && (QGroundControl.corePlugin.showAdvancedUI || !_editingParameter)
     property bool   _showCombo:                 fact.enumStrings.length !== 0 && fact.bitmaskStrings.length === 0 && !validate
 
-    // custom property
-    property bool developer
-    property double max
-    property double min
+    property int selectedIndex
+    property double max: Constants.factMax[selectedIndex]
+    property double min: Constants.factMax[selectedIndex]
+    property bool developer: Constants.developer
 
     ParameterEditorController { id: controller; }
 
@@ -99,7 +102,7 @@ QGCPopupDialog {
         if (value > max || value < min)
             return "Value must be between " + min.toFixed(2) + " and " + max.toFixed(2)
 
-        if (fact.name == "FENCE_ALT_MAX" && value > 120)
+        if (fact.name == "FENCE_ALT_MAX" && value > Constants.maxAltitudeWarning)
             return "Attention: value above 120m. If you want to continue, press another time on the save button."
 
         return ""

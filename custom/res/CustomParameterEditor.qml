@@ -23,8 +23,6 @@ import QGroundControl.FactControls  1.0
 import Custom.Constants 1.0
 
 
-
-
 Item {
     id:         _root
 
@@ -42,12 +40,12 @@ Item {
     property bool   _searchFilter:      searchText.text.trim() != "" || controller.showModifiedOnly  ///< true: showing results of search
     property list<Fact> factList
 
-    property var factNames: ["LOIT_SPEED", "WPNAV_SPEED", "FENCE_ALT_MAX"]
-    property var factDescription: ["Maximum speed reached by drone in loiter mode. Warning: in altitude hold mode speed is not limited", "Maximum speed reached by drone during automatic mission", ""]
-    property var factGoodNames: ["Maximum loiter speed", "Maximum auto speed", "Maximum altitude"]
-    property var factMin: [200, 200, 10]
-    property var factMax: [1500, 1500, 200]
-    property var factEditable: [false, true, true]
+    property var factNames: Constants.factNames
+    property var factDescription: Constants.factDescription
+    property var factGoodNames: Constants.factGoodNames
+    property var factMin: Constants.factMin
+    property var factMax: Constants.factMax
+    property var factEditable: Constants.factEditable
 
     property bool developer: Constants.developer
 
@@ -267,8 +265,6 @@ Item {
 
                 if ( controller.parameters.get(j).name == name)  {
                     factList.push(controller.parameters.get(j))
-                    //controller.parameters.get(j).shortDescription = "Maximum speed reached by drone in loiter mode. Warning: in altitude hold mode speed is not limited."
-
                     break
                 }
             }
@@ -347,7 +343,7 @@ Item {
 
                     function getColor() {
 
-                        if (factGoodNames[index] == "Maximum altitude" && parseFloat(factRow.modelFact.value) > 120)
+                        if (factGoodNames[index] == "Maximum altitude" && parseFloat(factRow.modelFact.value) > Constants.maxAltitudeWarning)
                             return qgcPal.warningText
                         return qgcPal.text
 
@@ -419,13 +415,13 @@ Item {
     Component {
         id: editorDialogComponent
 
-
         ParameterEditorDialog {
             fact:           _editorDialogFact
             showRCToParam:  _showRCToParam
-            developer: developer
-            max: factMax[_indexSelected]
-            min: factMin[_indexSelected]
+            selectedIndex: _indexSelected
+            // developer: developer
+            // max: factMax[_indexSelected]
+            // min: factMin[_indexSelected]
         }
     }
 
