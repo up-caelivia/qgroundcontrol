@@ -24,6 +24,9 @@ import QGroundControl.Controllers   1.0
 import QGroundControl.ArduPilot     1.0
 import QGroundControl.QGCPositionManager    1.0
 
+import Custom.Constants 1.0
+
+
 SetupPage {
     id:             sensorsPage
     pageComponent:  sensorsPageComponent
@@ -339,7 +342,7 @@ SetupPage {
 
                 Column {
                     spacing: Math.round(ScreenTools.defaultFontPixelHeight / 2)
-                    visible: sensorParams.rgCompassAvailable[index]
+                    visible: sensorParams.rgCompassAvailable[index] && Constants.developer
 
                     QGCLabel {
                         text: compassLabel(index)
@@ -446,14 +449,27 @@ SetupPage {
                         }
                     }
 
+
+
+
+
                     Column {
                         width:      40 * ScreenTools.defaultFontPixelWidth
                         spacing:    ScreenTools.defaultFontPixelHeight
 
                         QGCLabel {
+                          width:      parent.width
+                          wrapMode:   Text.WordWrap
+                          text:       qsTr(`Press OK to proceed with the calibration`)
+                          visible:    !Constants.developer
+                        }
+
+
+                        QGCLabel {
                             width:      parent.width
                             wrapMode:   Text.WordWrap
                             text:       _orientationDialogHelp
+                            visible:    Constants.developer
                         }
 
                         Column {
@@ -464,11 +480,15 @@ SetupPage {
                                 indexModel: false
                                 fact:       boardRot
                             }
+
+                            visible:    Constants.developer
+
                         }
 
                         Column {
 
-                            visible: _orientationDialogCalType == _calTypeAccel
+                            visible: _orientationDialogCalType == _calTypeAccel && Constants.developer
+
                             spacing: ScreenTools.defaultFontPixelHeight
 
                             QGCLabel {
@@ -491,12 +511,13 @@ SetupPage {
                         QGCLabel {
                             id:         magneticDeclinationLabel
                             width:      parent.width
-                            visible:    globals.activeVehicle.sub && _orientationsDialogShowCompass
+                            visible:    globals.activeVehicle.sub && _orientationsDialogShowCompass && Constants.developer
+
                             text:       qsTr("Magnetic Declination")
                         }
 
                         Column {
-                            visible:            magneticDeclinationLabel.visible
+                            visible:            magneticDeclinationLabel.visible && Constants.developer
                             anchors.margins:    ScreenTools.defaultFontPixelWidth
                             anchors.left:       parent.left
                             anchors.right:      parent.right
@@ -519,12 +540,12 @@ SetupPage {
                             }
                         }
 
-                        Item { height: ScreenTools.defaultFontPixelHeight; width: 10 } // spacer
+                        Item { height: ScreenTools.defaultFontPixelHeight; width: 10 ; visible: Constants.developer} // spacer
 
                         QGCLabel {
                             id:         northCalibrationLabel
                             width:      parent.width
-                            visible:    _orientationsDialogShowCompass
+                            visible:    _orientationsDialogShowCompass && Constants.developer
                             wrapMode:   Text.WordWrap
                             text:       qsTr("Fast compass calibration given vehicle position and yaw. This ") +
                                         qsTr("results in zero diagonal and off-diagonal elements, so is only ") +
@@ -534,7 +555,7 @@ SetupPage {
                         }
 
                         Column {
-                            visible:            northCalibrationLabel.visible
+                            visible:            northCalibrationLabel.visible && Constants.developer
                             anchors.margins:    ScreenTools.defaultFontPixelWidth
                             anchors.left:       parent.left
                             anchors.right:      parent.right
@@ -590,8 +611,10 @@ SetupPage {
 
                         }
                     }
+
                 }
-            }
+                }
+
 
             Component {
                 id: compassMotDialogComponent

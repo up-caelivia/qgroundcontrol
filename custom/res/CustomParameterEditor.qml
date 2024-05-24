@@ -296,6 +296,10 @@ Item {
                    if (modelFact.units == "cm/s")
                        return (modelFact.rawValue / 100).toFixed(2) + " " + "m/s"
 
+                   if (modelFact.units == "cm")
+                       return (modelFact.rawValue / 100).toFixed(2) + " " + "m"
+
+
                    return modelFact.valueString + " " + modelFact.units
 
                }
@@ -323,7 +327,7 @@ Item {
 
         delegate: Rectangle {
             id: itemDelegate
-            height: developer ? _rowHeight : descriptionId.height + ScreenTools.defaultFontPixelHeight //_rowHeight
+            height: developer ? _rowHeight : Math.max(descriptionId.height, nameLabel.height) + ScreenTools.defaultFontPixelHeight //_rowHeight
             width:  _rowWidth
             color:  Qt.rgba(0,0,0,0)
             anchors.horizontalCenter: developer ? undefined : parent.horizontalCenter
@@ -338,8 +342,10 @@ Item {
                 QGCLabel {
                     id:     nameLabel
                     width:  ScreenTools.defaultFontPixelWidth  * 20
-                    text:   factGoodNames[index]//factRow.modelFact.name
+                    text:   developer ? factRow.modelFact.name : factGoodNames[index]
                     clip:   true
+                    opacity: developer ? 1 : factEditable[index] ? 1 : 0.5
+                    wrapMode: developer ? Text.NoWrap : Text.Wrap
                 }
 
                 QGCLabel {
@@ -347,7 +353,10 @@ Item {
                     width:  ScreenTools.defaultFontPixelWidth  * 20
                     color:  getColor()
                     text:  getText(factRow.modelFact)
+                    wrapMode: developer ? Text.NoWrap : Text.Wrap
+                    horizontalAlignment: developer ? undefined : Text.AlignHCenter
                     clip:   true
+                    opacity: developer ? 1 : factEditable[index] ? 1 : 0.5
 
                     function getColor() {
 
@@ -364,6 +373,8 @@ Item {
                     text: getDesc()
                     width: ScreenTools.defaultFontPixelWidth  * 30
                     wrapMode: developer ? Text.NoWrap : Text.Wrap
+                    opacity: developer ? 1 : factEditable[index] ? 1 : 0.5
+
 
                     function getDesc() {
                         if(developer || factDescription[index] == "")
@@ -391,7 +402,7 @@ Item {
             MouseArea {
                 anchors.fill:       parent
                 acceptedButtons:    Qt.LeftButton
-                enabled: factEditable[index]
+                enabled: developer ? true : factEditable[index]
 
                 onClicked: {
                     _editorDialogFact = factRow.modelFact

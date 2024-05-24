@@ -23,7 +23,8 @@ import QGroundControl.Controllers       1.0
 import QGroundControl.FactSystem        1.0
 import QGroundControl.FactControls      1.0
 
-//TODO: check values
+import Custom.Constants  1.0
+
 
 Rectangle {
     height:     mainLayout.height + (_margins * 2)
@@ -32,10 +33,47 @@ Rectangle {
 
     property real   _margins:                                   ScreenTools.defaultFontPixelHeight / 2
     property var    _activeVehicle:                             QGroundControl.multiVehicleManager.activeVehicle
-    property bool   _secondButton:                    false
-    property bool   _isLowSpeed: false
+    property bool   _isHighSpeed:                    false
+    property bool   _isLowSpeed:                     false
     property var _controller
     property var modality: _activeVehicle ? _activeVehicle.flightMode : ""
+
+
+    function setModality() {
+
+        for( var j = 0; j < Constants.factSpeedNames.length; j++) {
+
+            _controller.object.searchText = Constants.factSpeedNames[j];
+
+            for( var i = 0; i < _controller.object.parameters.rowCount(); i++ ) {
+
+                var fact = _controller.object.parameters.get(i)
+
+                if ( fact.name == Constants.factSpeedNames[j])  {
+
+                    if(_isLowSpeed) {
+                        fact.value = Constants.lowSpeed[j]
+                    }
+                    else {
+
+                        if(_isHighSpeed)
+                            fact.value = Constants.highSpeed[j]
+                        else
+                            fact.value = Constants.normalSpeed[j]
+                    }
+
+                    fact.valueChanged(fact.value)
+                    break
+                }
+            }
+        }
+         _controller.object.parametersChanged()
+    }
+
+    onVisibleChanged: {
+        if (visible)
+            setModality()
+    }
 
     onModalityChanged: {
 
@@ -49,66 +87,12 @@ Rectangle {
 
     }
 
-    property double defaultLoitSpeed: 0.0
-    // property double defaultWPNavSpeed: 0.0
-
     QGCPalette { id: qgcPal; colorGroupEnabled: enabled }
 
     function showCriticalVehicleMessage(message) {
         mainWindow.closeCriticalVehicleMessage()
         mainWindow.showCriticalVehicleMessage(message)
     }
-
-    function setValueSpeed(loit, lowSpeedMode) {
-
-        var par_found = false
-        var loit_speed
-        // var wpnav_speed
-
-        _controller.object.searchText = "LOIT_SPEED"
-
-        for( var i = 0; i < _controller.object.parameters.rowCount(); i++ ) {
-
-            if ( _controller.object.parameters.get(i).name == "LOIT_SPEED")  {
-                loit_speed = _controller.object.parameters.get(i)
-                par_found = true
-
-                if(lowSpeedMode)
-                {defaultLoitSpeed = loit_speed.value}
-
-                loit_speed.value = loit
-                loit_speed.valueChanged(loit_speed.value)
-
-                break
-            }
-        }
-
-
-        // _controller.object.searchText = "WPNAV_SPEED"
-
-        // for( var i = 0; i < _controller.object.parameters.rowCount(); i++ ) {
-        //     if ( _controller.object.parameters.get(i).name == "WPNAV_SPEED")  {
-        //         wpnav_speed = _controller.object.parameters.get(i)
-        //         par_found = par_found && true
-
-        //         if(lowSpeedMode){
-        //             defaultWPNavSpeed = wpnav_speed.value
-        //         }
-
-        //         wpnav_speed.value = wpnav
-        //         wpnav_speed.valueChanged(wpnav_speed.value)
-
-        //         break
-        //     }
-        // }
-
-        _controller.object.parametersChanged()
-
-        if (!par_found)
-            console.log("Not found the parameters for low speed mode")
-    }
-
-
 
     ColumnLayout {
         id:                         mainLayout
@@ -131,11 +115,11 @@ Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 width:                  parent.height
                 height:                 parent.height
-                color:                  _secondButton ? qgcPal.windowShadeLight : qgcPal.window
+                color:                  _isHighSpeed ? qgcPal.windowShadeLight : qgcPal.window
                 radius:                 height * 0.5
                 anchors.left:           parent.left
                 border.color:           qgcPal.text
-                border.width:           _secondButton ? 0 : 1
+                border.width:           _isHighSpeed ? 0 : 1
 
                 QGCColoredImage {
                     height:             parent.height * 0.5
@@ -144,15 +128,15 @@ Rectangle {
                     source:             "/custom/img/n.svg"
                     fillMode:           Image.PreserveAspectFit
                     sourceSize.height:  height
-                    color:              _secondButton ? qgcPal.text : qgcPal.colorGreen
+                    color:              _isHighSpeed ? qgcPal.text : qgcPal.colorGreen
                 }
 
                 MouseArea {
                     anchors.fill:   parent
                     enabled:        !_isLowSpeed
                     onClicked:      {
-                        _secondButton = false
-                        setValueSpeed(500, false)
+                        _isHighSpeed = false
+                        setModality()
                     }
                 }
             }
@@ -161,11 +145,11 @@ Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 width:                  parent.height
                 height:                 parent.height
-                color:                  _secondButton ? qgcPal.window : qgcPal.windowShadeLight
+                color:                  _isHighSpeed ? qgcPal.window : qgcPal.windowShadeLight
                 radius:                 height * 0.5
                 anchors.right:          parent.right
                 border.color:           qgcPal.text
-                border.width:           _secondButton ? 1 : 0
+                border.width:           _isHighSpeed ? 1 : 0
 
                 QGCColoredImage {
                     height:             parent.height * 0.5
@@ -174,7 +158,7 @@ Rectangle {
                     source:             "/custom/img/h.svg"
                     fillMode:           Image.PreserveAspectFit
                     sourceSize.height:  height
-                    color:              _secondButton ? qgcPal.colorGreen : qgcPal.text
+                    color:              _isHighSpeed ? qgcPal.colorGreen : qgcPal.text
                 }
 
                 MouseArea {
@@ -182,8 +166,8 @@ Rectangle {
                     enabled:        !_isLowSpeed
                     onClicked:      {
 
-                        _secondButton = true
-                        setValueSpeed(1000, false)
+                        _isHighSpeed = true
+                        setModality()
 
                     }
                 }
@@ -215,7 +199,7 @@ Rectangle {
                     source:             "/custom/img/alert.svg"
                     fillMode:           Image.PreserveAspectFit
                     sourceSize.height:  height
-                    color:              _secondButton ? qgcPal.colorGreen : qgcPal.text
+                    color:              _isHighSpeed ? qgcPal.colorGreen : qgcPal.text
                 }
 
 
@@ -230,7 +214,7 @@ Rectangle {
 
                                            if (!_isLowSpeed) {
                                                showCriticalVehicleMessage("LOW SPEED MODE DISABLED")
-                                               setValueSpeed(defaultLoitSpeed, _isLowSpeed)
+                                               setModality()
                                                return
                                            }
 
@@ -241,16 +225,10 @@ Rectangle {
                                                showCriticalVehicleMessage("LOW SPEED MODE ACTIVATED")
                                            }
 
-
-                                           setValueSpeed(260, _isLowSpeed)
-
+                                           setModality()
                                        }
             }
         }
-
-
-
-
     }
 
 }
