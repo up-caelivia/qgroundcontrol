@@ -212,7 +212,7 @@ Rectangle {
                     height:             parent.height * 0.5
                     width:              height
                     anchors.centerIn:   parent
-                    source:             "/custom/img/slow.svg"
+                    source:             "/custom/img/alert.svg"
                     fillMode:           Image.PreserveAspectFit
                     sourceSize.height:  height
                     color:              _secondButton ? qgcPal.colorGreen : qgcPal.text
