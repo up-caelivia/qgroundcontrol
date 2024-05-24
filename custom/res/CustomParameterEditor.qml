@@ -46,7 +46,6 @@ Item {
     property var factMin: Constants.factMin
     property var factMax: Constants.factMax
     property var factEditable: Constants.factEditable
-
     property bool developer: Constants.developer
 
     ParameterEditorController {
@@ -263,15 +262,19 @@ Item {
 
             for( var j = 0; j < controller.parameters.rowCount(); j++ ) {
 
-                if ( controller.parameters.get(j).name == name)  {
-                    factList.push(controller.parameters.get(j))
+                var fact = controller.parameters.get(j)
+
+                if ( fact.name == name)  {
+                    factList.push(fact)
+
+                    if(fact.name == "FENCE_ALT_MAX")
+                        Constants.lastMaxHeight = parseFloat(fact.value)
                     break
                 }
             }
 
         }
     }
-
 
 
     Component.onCompleted: {
@@ -284,6 +287,11 @@ Item {
 
                    if(developer)
                        return modelFact.valueString + " " + modelFact.units
+
+                   if (modelFact.name == "FENCE_ALT_MAX"){
+                        return (Constants.lastMaxHeight).toFixed(0) + " " + "m"
+                       //  return (parseFloat(modelFact.valueString) / Constants.altitudeFactor).toFixed(0) + " " + "m"
+                    }
 
                    if (modelFact.units == "cm/s")
                        return (modelFact.rawValue / 100).toFixed(2) + " " + "m/s"
@@ -343,7 +351,7 @@ Item {
 
                     function getColor() {
 
-                        if (factGoodNames[index] == "Maximum altitude" && parseFloat(factRow.modelFact.value) > Constants.maxAltitudeWarning)
+                        if (factGoodNames[index] == "Maximum altitude" && Constants.lastMaxHeight > Constants.maxAltitudeWarning)
                             return qgcPal.warningText
                         return qgcPal.text
 

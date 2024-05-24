@@ -46,7 +46,7 @@ QGCPopupDialog {
 
     property int selectedIndex
     property double max: Constants.factMax[selectedIndex]
-    property double min: Constants.factMax[selectedIndex]
+    property double min: Constants.factMin[selectedIndex]
     property bool developer: Constants.developer
 
     ParameterEditorController { id: controller; }
@@ -82,7 +82,13 @@ QGCPopupDialog {
         } else {
             var errorString = fact.validate(valueField.text, forceSave.checked)
             if (errorString === "") {
-                fact.value = valueField.text
+
+                if (fact.name == "FENCE_ALT_MAX"){
+                    Constants.lastMaxHeight = parseFloat(valueField.text)
+                    fact.value = (parseFloat(valueField.text) * Constants.altitudeFactor).toFixed(4)
+                }
+                else
+                    fact.value = valueField.text
                 fact.valueChanged(fact.value)
                 valueChanged()
             } else {
@@ -152,7 +158,7 @@ QGCPopupDialog {
             QGCTextField {
                 id:                 valueField
                 width:              _editFieldWidth
-                text:               validate ? validateValue : fact.valueString
+                text:               getText()
                 unitsLabel:         fact.units
                 showUnits:          fact.units != ""
                 focus:              setFocus && visible
@@ -160,6 +166,19 @@ QGCPopupDialog {
                                         Qt.ImhNone :
                                         Qt.ImhFormattedNumbersOnly  // Forces use of virtual numeric keyboard
                 visible:            !_showCombo || validate || manualEntry.checked
+
+                function getText() {
+
+                    if (validate)
+                        return validateValue
+
+                    if (fact.name == "FENCE_ALT_MAX"){
+                        return (Constants.lastMaxHeight).toFixed(0)
+                    }
+
+                    return fact.valueString
+                }
+
             }
 
             QGCComboBox {
