@@ -23,5 +23,6 @@ QtObject {
     readonly property var highSpeed: [1000, 150, 250, 60]
 
     readonly property var settingToShow: ["Motors", "Safety"]
+    readonly property int compassNumber: 1
 
 }

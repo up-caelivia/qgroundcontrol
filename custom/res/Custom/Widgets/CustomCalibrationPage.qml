@@ -281,7 +281,7 @@ SetupPage {
                         spacing:    ScreenTools.defaultFontPixelHeight
 
                         Repeater {
-                            model:      3
+                            model:      Constants.compassNumber
                             delegate:   singleCompassOnboardResultsComponent
                         }
 
