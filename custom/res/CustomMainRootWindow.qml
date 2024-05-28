@@ -160,7 +160,7 @@ ApplicationWindow {
     }
 
     function showSetupTool() {
-        showTool(qsTr("Vehicle Setup"), "SetupView.qml", "/qmlimages/Gears.svg")
+        showTool(qsTr("Vehicle Setup"), "CustomSetupView.qml", "/qmlimages/Gears.svg")
     }
 
     function showSettingsTool() {

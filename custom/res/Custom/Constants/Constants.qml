@@ -22,4 +22,6 @@ QtObject {
     readonly property var normalSpeed: [500, 100, 150, 45]
     readonly property var highSpeed: [1000, 150, 250, 60]
 
+    readonly property var settingToShow: ["Motors", "Safety"]
+
 }
