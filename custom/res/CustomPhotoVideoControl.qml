@@ -181,8 +181,8 @@ Rectangle {
         // using the unified properties/functions.
         Rectangle {
             Layout.alignment:   Qt.AlignHCenter
-            width:              ScreenTools.defaultFontPixelWidth * 10
-            height:             width / 2
+            width:              ScreenTools.defaultFontPixelWidth * 11
+            height:             ScreenTools.defaultFontPixelWidth * 10 / 2
             color:              qgcPal.windowShadeLight
             radius:             height * 0.5
             visible:            _showModeIndicator

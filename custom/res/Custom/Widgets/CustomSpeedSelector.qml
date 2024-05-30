@@ -104,11 +104,10 @@ Rectangle {
         // Speed Selector
         Rectangle {
             Layout.alignment:   Qt.AlignHCenter
-            width:              ScreenTools.defaultFontPixelWidth * 10
-            height:             width / 2
+            width:              ScreenTools.defaultFontPixelWidth * 11
+            height:             ScreenTools.defaultFontPixelWidth * 10 / 2
             color:              qgcPal.windowShadeLight
             radius:             height * 0.5
-            opacity: _isLowSpeed ? 0.5 : 1
 
             // First Button
             Rectangle {
@@ -120,9 +119,11 @@ Rectangle {
                 anchors.left:           parent.left
                 border.color:           qgcPal.text
                 border.width:           _isHighSpeed ? 0 : 1
+                opacity: _isLowSpeed ? 0.6 : 1
+
 
                 QGCColoredImage {
-                    height:             parent.height * 0.5
+                    height:             parent.height * 3 // * 0.5
                     width:              height
                     anchors.centerIn:   parent
                     source:             "/custom/img/n.svg"
@@ -150,15 +151,19 @@ Rectangle {
                 anchors.right:          parent.right
                 border.color:           qgcPal.text
                 border.width:           _isHighSpeed ? 1 : 0
+                opacity: _isLowSpeed ? 0.6 : 1
+
+
 
                 QGCColoredImage {
-                    height:             parent.height * 0.5
+                    height:             parent.height * 3
                     width:              height
                     anchors.centerIn:   parent
                     source:             "/custom/img/h.svg"
                     fillMode:           Image.PreserveAspectFit
                     sourceSize.height:  height
                     color:              _isHighSpeed ? qgcPal.colorGreen : qgcPal.text
+
                 }
 
                 MouseArea {
@@ -179,54 +184,56 @@ Rectangle {
         Rectangle {
             Layout.alignment:   Qt.AlignHCenter
             color:              Qt.rgba(0,0,0,0)
-            width:              ScreenTools.defaultFontPixelWidth * 6
+            width:              ScreenTools.defaultFontPixelWidth * 8
             height:             width
             radius:             width * 0.5
             border.color:       qgcPal.buttonText
             border.width:       3
 
-            // Rectangle {
-            //     anchors.centerIn:   parent
-            //     width:              parent.width * 0.7
-            //     height:             width
-            //     radius:             width * 0.5
-            //     // color:              _isLowSpeed ? qgcPal.colorRed : qgcPal.colorGrey
 
-                QGCColoredImage {
-                    height:             parent.height * 0.5
-                    width:              height
-                    anchors.centerIn:   parent
-                    source:             "/custom/img/alert.svg"
-                    fillMode:           Image.PreserveAspectFit
-                    sourceSize.height:  height
-                    color:              _isHighSpeed ? qgcPal.colorGreen : qgcPal.text
-                }
+            Rectangle {
+                anchors.centerIn:   parent
+                //Layout.alignment:   Qt.AlignHCenter
+                color:              qgcPal.window
+                width:              parent.width * 0.85
+                height:             width
+                radius:             width * 0.5
+                //border.color:       qgcPal.buttonText
+                //border.width:       3
 
+            QGCColoredImage {
+                height:             _isLowSpeed ? (modality != "Loiter" ? parent.height * 0.5 : parent.height * 1.8 ) :  parent.height * 1.8
+                width:              height
+                anchors.centerIn:   parent
+                source:             _isLowSpeed ? (modality != "Loiter" ? "/custom/img/alert.svg" : "/custom/img/slow.svg" ) :  "/custom/img/slow.svg"
+                fillMode:           Image.PreserveAspectFit
+                sourceSize.height:  height
+                color:              _isLowSpeed ? (modality != "Loiter" ? qgcPal.alertBackground : qgcPal.colorGreen ) : qgcPal.text
+            }
 
-
-            // }
+            }
 
             MouseArea {
                 anchors.fill:   parent
                         onClicked: {
 
-                                           _isLowSpeed = ! _isLowSpeed
+                               _isLowSpeed = ! _isLowSpeed
 
-                                           if (!_isLowSpeed) {
-                                               showCriticalVehicleMessage("LOW SPEED MODE DISABLED")
-                                               setModality()
-                                               return
-                                           }
+                               if (!_isLowSpeed) {
+                                   showCriticalVehicleMessage("LOW SPEED MODE DISABLED")
+                                   setModality()
+                                   return
+                               }
 
-                                           if(modality != "Loiter") {
-                                               showCriticalVehicleMessage("LOW SPEED MODE NOT AVAILABLE")
-                                               // TODO: change icon
-                                           } else {
-                                               showCriticalVehicleMessage("LOW SPEED MODE ACTIVATED")
-                                           }
+                               if(modality != "Loiter") {
+                                   showCriticalVehicleMessage("LOW SPEED MODE NOT AVAILABLE")
+                                   // TODO: change icon
+                               } else {
+                                   showCriticalVehicleMessage("LOW SPEED MODE ACTIVATED")
+                               }
 
-                                           setModality()
-                                       }
+                               setModality()
+                           }
             }
         }
     }

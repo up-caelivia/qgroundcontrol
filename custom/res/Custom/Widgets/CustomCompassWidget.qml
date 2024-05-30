@@ -65,7 +65,7 @@ Item {
     }
 
     readonly property bool _showAdditionalIndicatorsCompass:     QGroundControl.settingsManager.flyViewSettings.showAdditionalIndicatorsCompass.value && !usedByMultipleVehicleList
-    readonly property bool _lockNoseUpCompass:        QGroundControl.settingsManager.flyViewSettings.lockNoseUpCompass.value
+    readonly property bool _lockNoseUpCompass:        true
 
     QGCPalette { id: qgcPal; colorGroupEnabled: enabled }
 
@@ -134,8 +134,8 @@ Item {
 
         Image {
             id:                 pointer
-            width:              size * 0.35
-            source:             vehicle ? vehicle.vehicleImageCompass : ""
+            width:              size * 1.2 //* 0.35
+            source:             vehicle ? "/qmlimages/compassInstrumentArrow.svg" : ""
             mipmap:             true
             sourceSize.width:   width
             fillMode:           Image.PreserveAspectFit
@@ -165,12 +165,13 @@ Item {
 
 
         Rectangle {
-            anchors.centerIn:   parent
+            //anchors.centerIn:   parent
             width:              size * 0.35
             height:             size * 0.2
-            border.color:       qgcPal.text
-            color:              qgcPal.window
-            opacity:            0.65
+            color:              "transparent"
+
+            y: parent.height / 1.94
+            anchors.horizontalCenter: parent.horizontalCenter
 
             QGCLabel {
                 text:               _headingString3
