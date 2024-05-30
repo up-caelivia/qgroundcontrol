@@ -310,6 +310,7 @@ ApplicationWindow {
                                 mainWindow.showSetupTool()
                             }
                         }
+                        visible: globals.activeVehicle
                     }
 
                     SubMenuButton {

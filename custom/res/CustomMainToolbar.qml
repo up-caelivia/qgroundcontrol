@@ -75,11 +75,30 @@ Rectangle {
             id:                 connectButton
             text:               qsTr("Connect")
             visible:            !_activeVehicle
+            enabled:            getEnable() //count > 1  && (obj == undefined || obj.link != null)// the first one is at 14550
+
+            property var count: model.count
+            property var model: QGroundControl.linkManager.linkConfigurations
+
+            function getEnable() {
+
+                for (var i = 0; i < count; i++)
+                    if (model.get(i).localPort == 14551 && !model.get(i).link) {
+                        return true
+                    }
+
+                return false
+            }
+
 
             onClicked:
-            {
-               if(QGroundControl.linkManager.linkConfigurations && QGroundControl.linkManager.linkConfigurations.get(0) && !QGroundControl.linkManager.linkConfigurations.get(0).link)
-                    QGroundControl.linkManager.createConnectedLink(QGroundControl.linkManager.linkConfigurations.get(0))
+            {                
+                for (var i = 0; i < count; i++)
+                    if (model.get(i).localPort == 14551 && !model.get(i).link) {
+                        QGroundControl.linkManager.createConnectedLink(model.get(i))
+                        console.log("Try to connect")
+                        break
+                    }
             }
         }
 

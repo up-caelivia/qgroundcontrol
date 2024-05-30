@@ -154,7 +154,7 @@ SetupPage {
                 id:                         controller
                 statusLog:                  statusTextArea
                 progressBar:                progressBar
-                nextButton:                 nextButton
+                //nextButton:                 nextButton
                 cancelButton:               cancelButton
                 orientationCalAreaHelpText: orientationCalAreaHelpText
 
@@ -708,13 +708,13 @@ SetupPage {
                     anchors.left:       buttonColumn.left
                     spacing:            buttonColumn.spacing
 
-                    QGCButton {
-                        id:         nextButton
-                        width:      _buttonWidth
-                        text:       qsTr("Next")
-                        enabled:    false
-                        onClicked:  controller.nextClicked()
-                    }
+                    // QGCButton {
+                    //     id:         nextButton
+                    //     width:      _buttonWidth
+                    //     text:       qsTr("Next")
+                    //     enabled:    false
+                    //     onClicked:  controller.nextClicked()
+                    // }
 
                     QGCButton {
                         id:         cancelButton
