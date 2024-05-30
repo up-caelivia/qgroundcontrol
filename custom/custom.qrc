@@ -31,9 +31,7 @@
         <file alias="Megaphone.svg">res/Images/Megaphone.svg</file>
         <file alias="crossHair.svg">res/Images/crossHair.svg</file>
         <file alias="pilotIcon.svg">res/Images/PilotIcon.svg</file>
-
-
-
+        <file alias="ROI.svg">res/Images/ROI.svg</file>
     </qresource>
     <qresource prefix="/Custom/Widgets">
         <file alias="Custom/Widgets/CustomArtificialHorizon.qml">res/Custom/Widgets/CustomArtificialHorizon.qml</file>
