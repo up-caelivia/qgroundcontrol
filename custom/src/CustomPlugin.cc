@@ -201,7 +201,7 @@ QQmlApplicationEngine* CustomPlugin::createQmlApplicationEngine(QObject* parent)
 
 
     #ifdef QT_DEBUG     // start with a custom connection only in debug build!
-        MockLink::startAPMArduCopterMockLink(true);
+        MockLink::startAPMArduCopterMockLink(false);
     #endif
 
     return qmlEngine;

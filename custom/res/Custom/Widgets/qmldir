@@ -5,4 +5,7 @@ CustomAttitudeWidget    1.0     CustomAttitudeWidget.qml
 CustomCompassWidget    1.0     CustomCompassWidget.qml
 FlightTimeWidget    1.0     FlightTimeWidget.qml
 CustomSpeedSelector     1.0     CustomSpeedSelector.qml
+Safety     1.0     Safety.qml
+SafetyFull     1.0     SafetyFull.qml
+
 

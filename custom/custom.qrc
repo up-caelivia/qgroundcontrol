@@ -27,6 +27,8 @@
         <file alias="Custom/Widgets/CustomCompassWidget.qml">res/Custom/Widgets/CustomCompassWidget.qml</file>
         <file alias="Custom/Widgets/FlightTimeWidget.qml">res/Custom/Widgets/FlightTimeWidget.qml</file>
         <file alias="Custom/Widgets/CustomSpeedSelector.qml">res/Custom/Widgets/CustomSpeedSelector.qml</file>
+        <file alias="Custom/Widgets/Safety.qml">res/Custom/Widgets/Safety.qml</file>
+        <file alias="Custom/Widgets/SafetyFull.qml">res/Custom/Widgets/SafetyFull.qml</file>
         <file alias="Custom/Widgets/qmldir">res/Custom/Widgets/qmldir</file>
     </qresource>
     <qresource prefix="/Custom/Constants">
