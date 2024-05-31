@@ -2,12 +2,18 @@
 <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 72 72">
   <defs>
     <style>
-      .cls-1, .cls-2 {
-        stroke-width: 0px;
+      .cls-1, .cls-2, .cls-3 {
+        fill: none;
       }
 
-      .cls-1, .cls-3, .cls-4 {
-        fill: none;
+      .cls-1, .cls-3 {
+        stroke: #fff;
+        stroke-miterlimit: 10;
+        stroke-width: 3px;
+      }
+
+      .cls-2, .cls-4 {
+        stroke-width: 0px;
       }
 
       .cls-5 {
@@ -18,47 +24,45 @@
         clip-path: url(#clippath);
       }
 
-      .cls-2 {
+      .cls-4 {
         fill: #fff;
       }
 
-      .cls-3, .cls-4 {
-        stroke: #fff;
-        stroke-miterlimit: 10;
-        stroke-width: 2px;
-      }
-
-      .cls-4 {
+      .cls-3 {
         stroke-linecap: round;
       }
     </style>
     <clipPath id="clippath">
-      <rect class="cls-1" x="13.5" y="14.5" width="20.8" height="45.4"/>
+      <rect class="cls-2" x="5.5" y="4" width="30.5" height="66.5"/>
     </clipPath>
     <clipPath id="clippath-1">
-      <rect class="cls-1" x="34.3" y="14.5" width="20.8" height="45.4"/>
+      <rect class="cls-2" x="36" y="4" width="30.5" height="66.5"/>
     </clipPath>
   </defs>
-  <g id="_Ripetizione_specchio_" data-name="&amp;lt;Ripetizione specchio&amp;gt;">
+  <g id="_Ripetizione_specchio_" data-name=" Ripetizione specchio ">
     <g class="cls-6">
-      <polyline class="cls-1" points="34.3 14.5 34.3 36.6 34.3 59.9"/>
-      <line class="cls-4" x1="34.3" y1="36.6" x2="22.3" y2="49.1"/>
-      <line class="cls-4" x1="22.3" y1="24.1" x2="34.3" y2="36.6"/>
-      <circle class="cls-4" cx="22.3" cy="24.1" r="7.8"/>
-      <circle class="cls-3" cx="22.3" cy="49.1" r="7.8"/>
-      <circle class="cls-2" cx="22.3" cy="24.1" r="2.1"/>
-      <circle class="cls-2" cx="22.3" cy="49.1" r="2.1"/>
+      <g>
+        <polyline class="cls-2" points="36 4 36 36.3 36 70.4"/>
+        <line class="cls-3" x1="36" y1="36.3" x2="18.4" y2="54.6"/>
+        <line class="cls-3" x1="18.4" y1="18" x2="36" y2="36.3"/>
+        <circle class="cls-3" cx="18.4" cy="18" r="11.4"/>
+        <circle class="cls-1" cx="18.4" cy="54.6" r="11.4"/>
+        <circle class="cls-4" cx="18.4" cy="18" r="3.1"/>
+        <circle class="cls-4" cx="18.4" cy="54.6" r="3.1"/>
+      </g>
     </g>
   </g>
-  <g id="_Ripetizione_specchio_-2" data-name="&amp;lt;Ripetizione specchio&amp;gt;">
+  <g id="_Ripetizione_specchio_-2" data-name=" Ripetizione specchio -2">
     <g class="cls-5">
-      <polyline class="cls-1" points="34.3 14.5 34.3 36.6 34.3 59.9"/>
-      <line class="cls-4" x1="34.3" y1="36.6" x2="46.3" y2="49.1"/>
-      <line class="cls-4" x1="46.3" y1="24.1" x2="34.3" y2="36.6"/>
-      <circle class="cls-4" cx="46.3" cy="24.1" r="7.8"/>
-      <circle class="cls-3" cx="46.3" cy="49.1" r="7.8"/>
-      <circle class="cls-2" cx="46.3" cy="24.1" r="2.1"/>
-      <circle class="cls-2" cx="46.3" cy="49.1" r="2.1"/>
+      <g>
+        <polyline class="cls-2" points="36 4 36 36.3 36 70.4"/>
+        <line class="cls-3" x1="36" y1="36.3" x2="53.6" y2="54.6"/>
+        <line class="cls-3" x1="53.6" y1="18" x2="36" y2="36.3"/>
+        <circle class="cls-3" cx="53.6" cy="18" r="11.4"/>
+        <circle class="cls-1" cx="53.6" cy="54.6" r="11.4"/>
+        <circle class="cls-4" cx="53.6" cy="18" r="3.1"/>
+        <circle class="cls-4" cx="53.6" cy="54.6" r="3.1"/>
+      </g>
     </g>
   </g>
 </svg>

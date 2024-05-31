@@ -181,28 +181,28 @@ Rectangle {
 
 
         // Central Button
-        Rectangle {
-            Layout.alignment:   Qt.AlignHCenter
-            color:              Qt.rgba(0,0,0,0)
-            width:              ScreenTools.defaultFontPixelWidth * 8
-            height:             width
-            radius:             width * 0.5
-            border.color:       qgcPal.buttonText
-            border.width:       3
+        // Rectangle {
+        //     Layout.alignment:   Qt.AlignHCenter
+        //     color:              Qt.rgba(0,0,0,0)
+        //     width:              ScreenTools.defaultFontPixelWidth * 8
+        //     height:             width
+        //     radius:             width * 0.5
+        //     border.color:       qgcPal.buttonText
+        //     border.width:       3
 
 
             Rectangle {
-                anchors.centerIn:   parent
-                //Layout.alignment:   Qt.AlignHCenter
+                //anchors.centerIn:   parent
+                Layout.alignment:   Qt.AlignHCenter
                 color:              qgcPal.window
-                width:              parent.width * 0.85
+                width:              ScreenTools.defaultFontPixelWidth * 7 //parent.width * 0.85
                 height:             width
                 radius:             width * 0.5
-                //border.color:       qgcPal.buttonText
-                //border.width:       3
+                border.color:       qgcPal.buttonText
+                border.width:       3
 
             QGCColoredImage {
-                height:             _isLowSpeed ? (modality != "Loiter" ? parent.height * 0.5 : parent.height * 1.8 ) :  parent.height * 1.8
+                height:             _isLowSpeed ? (modality != "Loiter" ? parent.height * 0.5 : parent.height * 1.6 ) :  parent.height * 1.6
                 width:              height
                 anchors.centerIn:   parent
                 source:             _isLowSpeed ? (modality != "Loiter" ? "/custom/img/alert.svg" : "/custom/img/slow.svg" ) :  "/custom/img/slow.svg"
@@ -211,7 +211,7 @@ Rectangle {
                 color:              _isLowSpeed ? (modality != "Loiter" ? qgcPal.alertBackground : qgcPal.colorGreen ) : qgcPal.text
             }
 
-            }
+            // }
 
             MouseArea {
                 anchors.fill:   parent

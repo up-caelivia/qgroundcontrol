@@ -23,3 +23,4 @@
         <file alias="Megaphone.svg">src/ui/toolbar/Images/Megaphone.svg</file>
 
         <file alias="crossHair.svg">src/FlightMap/Images/crossHair.svg</file>
+        <file alias="TelemRSSI.svg">src/ui/toolbar/Images/TelemRSSI.svg</file>

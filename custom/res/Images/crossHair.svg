@@ -11,9 +11,9 @@
       }
 
       .cls-2, .cls-3 {
-        stroke: #e73444;
+        stroke: #83f52c;
         stroke-miterlimit: 10;
-        stroke-width: 4px;
+        stroke-width: 6px;
       }
 
       .cls-3 {
@@ -24,5 +24,5 @@
   <rect class="cls-1" width="288" height="36"/>
   <line class="cls-2" y1="18" x2="72" y2="18"/>
   <line class="cls-2" x1="288" y1="18" x2="216" y2="18"/>
-  <polyline class="cls-3" points="194.5 31.1 144 18 93.5 31.1"/>
+  <path class="cls-3" d="M194.5,31.1l-48.7-12.6c-1.2-.3-2.4-.3-3.5,0l-48.7,12.6"/>
 </svg>

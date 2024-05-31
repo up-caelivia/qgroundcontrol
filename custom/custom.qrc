@@ -17,8 +17,8 @@
         <file alias="resources/icons/qgroundcontrol.ico">res/Images/QGCLogoFull.ico</file>
     </qresource>
     <qresource prefix="/qmlimages">
-        <file alias="vehicleArrowOpaque.svg">res/Images/vehicleArrowOpaque.svg</file>
-        <file alias="vehicleArrowOutline.svg">res/Images/vehicleArrowOutline.svg</file>
+        <file alias="vehicleArrowOpaque.svg">res/Images/Puntatore1.svg</file>
+        <file alias="vehicleArrowOutline.svg">res/Images/Puntatore1.svg</file>
         <file alias="compassInstrumentArrow.svg">res/Images/compassInstrumentArrow.svg</file>
         <file alias="attitudePointer.svg">res/Images/attitudePointer.svg</file>
         <file alias="MapAddMission.svg">res/Images/MapAddMission.svg</file>
@@ -33,6 +33,7 @@
         <file alias="ROI.svg">res/Images/ROI.svg</file>
         <file alias="compassInstrumentDial.svg">res/Images/compassInstrumentDial.svg</file>
         <file alias="attitudeDial.svg">res/Images/attitudeDial.svg</file>
+        <file alias="TelemRSSI.svg">res/Images/TelemRSSI.svg</file>
     </qresource>
     <qresource prefix="/Custom/Widgets">
         <file alias="Custom/Widgets/CustomArtificialHorizon.qml">res/Custom/Widgets/CustomArtificialHorizon.qml</file>

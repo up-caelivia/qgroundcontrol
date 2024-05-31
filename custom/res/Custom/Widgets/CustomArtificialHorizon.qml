@@ -40,21 +40,41 @@ Item {
                 GradientStop { position: 0.5;  color: Qt.hsla(0.6, 0.5, 0.55) }
             }
         }
+        // Rectangle {
+        //     id: ground
+        //     height: sky.height / 2
+        //     anchors {
+        //         left:   sky.left;
+        //         right:  sky.right;
+        //         bottom: sky.bottom
+        //     }
+        //     smooth: true
+        //     antialiasing: true
+        //     gradient: Gradient {
+        //         GradientStop { position: 0.0;  color: Qt.hsla(0.25,  0.5, 0.45) }
+        //         GradientStop { position: 0.25; color: Qt.hsla(0.25, 0.75, 0.25) }
+        //     }
+        // }
+
         Rectangle {
             id: ground
             height: sky.height / 2
             anchors {
-                left:   sky.left;
-                right:  sky.right;
+                left:   sky.left
+                right:  sky.right
                 bottom: sky.bottom
             }
             smooth: true
             antialiasing: true
             gradient: Gradient {
-                GradientStop { position: 0.0;  color: Qt.hsla(0.25,  0.5, 0.45) }
-                GradientStop { position: 0.25; color: Qt.hsla(0.25, 0.75, 0.25) }
+                GradientStop { position: 0.0;  color: Qt.hsla(0.083, 0.5, 0.3) }   // Darker brown
+                GradientStop { position: 0.25; color: Qt.hsla(0.083, 0.6, 0.4) }   // Medium brown
+                GradientStop { position: 0.5;  color: Qt.hsla(0.083, 0.7, 0.5) }   // Lighter brown
+                GradientStop { position: 1.0;  color: Qt.hsla(0.083, 0.8, 0.6) }   // Lightest brown
             }
         }
+
+
         transform: [
             Translate {
                 y:  angularScale
