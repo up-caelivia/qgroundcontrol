@@ -74,7 +74,7 @@ Rectangle {
 
             id:                 connectButton
             text:               qsTr("Connect")
-            visible:            !_activeVehicle
+            visible:            !_activeVehicle && 0
             enabled:            getEnable() //count > 1  && (obj == undefined || obj.link != null)// the first one is at 14550
 
             property var count: model.count

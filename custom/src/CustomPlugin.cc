@@ -16,6 +16,17 @@
 #include "qcoreapplication.h"
 #include "SettingsManager.h"
 
+#include "AutoConnectSettings.h"
+#include "VideoSettings.h"
+#include "AppSettings.h"
+#include "QGCApplication.h"
+#include "QGCToolbox.h"
+#include "MultiVehicleManager.h"
+// #include "JoystickManager.h"
+// #include "HorizontalFactValueGrid.h"
+// #include "InstrumentValueData.h"
+#include <list>
+
 
 CustomFlyViewOptions::CustomFlyViewOptions(CustomOptions* options, QObject* parent)
     : QGCFlyViewOptions(options, parent) {}
@@ -47,7 +58,9 @@ bool CustomPlugin::overrideSettingsGroupVisibility(QString name)
 {
     // We have set up our own specific brand imaging. Hide the brand image settings such that the end user
     // can't change it.
-    if (name == BrandImageSettings::name) {
+
+    //qDebug() << "Setting name: " << name;
+    if (name == BrandImageSettings::name || name == AutoConnectSettings::name) {
         return false;
     }
     return true;
@@ -206,3 +219,78 @@ QQmlApplicationEngine* CustomPlugin::createQmlApplicationEngine(QObject* parent)
 
     return qmlEngine;
 }
+
+
+bool CustomPlugin::adjustSettingMetaData(const QString& settingsGroup, FactMetaData& metaData)
+{
+    if (settingsGroup == AppSettings::settingsGroup) {
+        // //-- Default herelink fontsize of 10, it is a nice starting point
+        // if (metaData.name() == AppSettings::appFontPointSizeName) {
+        //     uint32_t fontSize = 10;
+        //     metaData.setRawDefaultValue(fontSize);
+        //     // Show setting in ui
+        //     return true;
+        // }
+
+        //-- Default Palette Dark
+        if (metaData.name() == AppSettings::indoorPaletteName) {
+            QVariant outdoorPalette;
+            outdoorPalette = 1;
+            metaData.setRawDefaultValue(outdoorPalette);
+            return true;
+        }
+    }
+
+    if (settingsGroup == AutoConnectSettings::settingsGroup) {
+        // We have to adjust the Herelink UDP autoconnect settings for the AirLink
+        if (metaData.name() == AutoConnectSettings::udpListenPortName) {
+            metaData.setRawDefaultValue(14551);
+        } else if (metaData.name() == AutoConnectSettings::udpTargetHostIPName) {
+            metaData.setRawDefaultValue(QStringLiteral("127.0.0.1"));
+        } else if (metaData.name() == AutoConnectSettings::udpTargetHostPortName) {
+            metaData.setRawDefaultValue(15552);
+        } else {
+            // Disable all the other autoconnect types
+            const std::list<const char *> disabledAndHiddenSettings = {
+                AutoConnectSettings::autoConnectPixhawkName,
+                AutoConnectSettings::autoConnectSiKRadioName,
+                AutoConnectSettings::autoConnectPX4FlowName,
+                AutoConnectSettings::autoConnectRTKGPSName,
+                AutoConnectSettings::autoConnectLibrePilotName,
+                AutoConnectSettings::autoConnectNmeaPortName,
+                AutoConnectSettings::autoConnectZeroConfName,
+            };
+            for (const char * disabledAndHiddenSetting : disabledAndHiddenSettings) {
+                if (disabledAndHiddenSetting == metaData.name()) {
+                    metaData.setRawDefaultValue(false);
+                }
+            }
+        }
+    } else if (settingsGroup == VideoSettings::settingsGroup) {
+        if (metaData.name() == VideoSettings::rtspTimeoutName) {
+            metaData.setRawDefaultValue(60);
+        }
+        else if (metaData.name() == VideoSettings::videoSourceName) {
+            metaData.setRawDefaultValue(VideoSettings::videoSourceHerelinkAirUnit);
+        }
+    } else if (settingsGroup == AppSettings::settingsGroup) {
+        if (metaData.name() == AppSettings::androidSaveToSDCardName) {
+            metaData.setRawDefaultValue(true);
+        }
+    }
+
+    return true; // Show all settings in ui
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

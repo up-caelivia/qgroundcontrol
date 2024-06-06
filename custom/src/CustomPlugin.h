@@ -13,6 +13,7 @@
 
 #include "QGCCorePlugin.h"
 #include "QGCOptions.h"
+#include <QObject>
 
 class CustomOptions;
 class CustomPlugin;
@@ -28,7 +29,6 @@ public:
 };
 
 
-
 class CustomOptions : public QGCOptions
 {
 public:
@@ -42,8 +42,6 @@ private:
 };
 
 
-
-
 class CustomPlugin : public QGCCorePlugin
 {
     Q_OBJECT
@@ -51,12 +49,13 @@ public:
     CustomPlugin(QGCApplication* app, QGCToolbox *toolbox);
     ~CustomPlugin() {}
 
-//     // Overrides from QGCCorePlugin
+    // Overrides from QGCCorePlugin
     QGCOptions*             options                         (void) final {return _options;}
     QString                 brandImageIndoor                (void) const final { return QStringLiteral("/custom/img/CustomAppIcon.png");}
     QString                 brandImageOutdoor               (void) const final {    return QStringLiteral("/custom/img/CustomAppIcon.png");}
     bool                    overrideSettingsGroupVisibility (QString name) final;
     void                    paletteOverride                 (QString colorName, QGCPalette::PaletteColorInfo_t& colorInfo) final;
+    bool        adjustSettingMetaData                  (const QString& settingsGroup, FactMetaData& metaData) override;
     QQmlApplicationEngine*  createQmlApplicationEngine      (QObject* parent) final;
 
     private:
