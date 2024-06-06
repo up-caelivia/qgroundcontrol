@@ -52,10 +52,8 @@
     <qresource prefix="/qml">
         <file alias="CustomCalibrationPage.qml">res/Custom/Widgets/CustomCalibrationPage.qml</file>
         <file alias="CustomSetupView.qml">res/Custom/Widgets/CustomSetupView.qml</file>
-
         <file alias="QGroundControl/FlightMap/FlightMap.qml">res/CustomFlightMap.qml</file>
-
-
+        <file alias="GeneralSettings.qml">res/GeneralSettings.qml</file>
         <file alias="QGroundControl/FlightDisplay/FlyViewCustomLayer.qml">res/CustomFlyViewOverlay.qml</file>
         <file alias="QGroundControl/FlightDisplay/FlyViewWidgetLayer.qml">res/FlyViewWidgetLayerCustom.qml</file>
         <file alias="QGroundControl/Controls/MainToolBar.qml">res/CustomMainToolbar.qml</file>

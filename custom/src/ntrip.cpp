@@ -162,7 +162,7 @@ void NTRIPTCPLink::_hardwareConnect()
 void NTRIPTCPLink::_parse(const QByteArray &buffer)
 {
 
-    //qDebug() << "AAAAAA: " << buffer;
+    qDebug() << "AAAAAA: " << buffer;
 
     for(const uint8_t byte : buffer) {
         if(_state == NTRIPState::waiting_for_rtcm_header) {
