@@ -65,12 +65,16 @@ QML_IMPORT_PATH += \
 # Our own, custom sources
 SOURCES += \
     $$PWD/src/CustomPlugin.cc \
+    $$PWD/src/NTRIPSettings.cpp \
+    $$PWD/src/ntrip.cpp
 
 SOURCES += \
     $$PWD/src/VideoStreamControl.cc \
 
 HEADERS += \
     $$PWD/src/CustomPlugin.h \
+    $$PWD/src/NTRIPSettings.h \
+    $$PWD/src/ntrip.h
 
 HEADERS += \
     $$PWD/src/VideoStreamControl.h \
