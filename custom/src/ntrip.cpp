@@ -208,8 +208,8 @@ void NTRIPTCPLink::_readBytes(void)
             startTimer();
         } else {
             qCWarning(NTRIPLog) << "Server responded with " << line;
-
             qgcApp()->showAppMessage("Unable to start NTRIP");
+            return;
 
             // TODO: Handle failure. Reconnect?
             // Just move into parsing mode and hope for now.
