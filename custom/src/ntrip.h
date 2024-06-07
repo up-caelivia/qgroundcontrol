@@ -74,6 +74,9 @@ private:
 
     // VRS Timer
     QTimer*          _vrsSendTimer;
+    QTimer*          _requestTimer;
+
+    static const int _reqSendRateMSecs = 10000;
     static const int _vrsSendRateMSecs = 3000;
 
     RTCMParsing *_rtcm_parsing{nullptr};

@@ -18,7 +18,7 @@
 #include "ADSBVehicleManager.h"
 #include "QGCPalette.h"
 #include "QmlUnitsConversion.h"
-//#include "ntrip.h"
+#include "ntrip.h"
 
 #if defined(QGC_ENABLE_PAIRING)
 #include "PairingManager.h"

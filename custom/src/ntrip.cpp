@@ -110,7 +110,14 @@ NTRIPTCPLink::~NTRIPTCPLink(void)
 
 void NTRIPTCPLink::run(void)
 {
-    _hardwareConnect();
+
+    _requestTimer = new QTimer();
+    _requestTimer->setInterval(_reqSendRateMSecs);
+    _requestTimer->setSingleShot(false);
+    QObject::connect(_requestTimer, &QTimer::timeout, this, &NTRIPTCPLink::_hardwareConnect);
+    _requestTimer->start();
+
+    //_hardwareConnect();
     exec();
 }
 
@@ -131,16 +138,24 @@ void NTRIPTCPLink::startTimer(void) {
 
 void NTRIPTCPLink::_hardwareConnect()
 {
+
+    // if(_socket != nullptr)
+    //     return;
+
+    //qDebug() << "AAAAAAA: timer2 fire!";
+
     _socket = new QTcpSocket();
     QObject::connect(_socket, &QTcpSocket::readyRead, this, &NTRIPTCPLink::_readBytes);
     _socket->connectToHost(_hostAddress, static_cast<quint16>(_port));
 
     // Give the socket a second to connect to the other side otherwise error out
-    if (!_socket->waitForConnected(1000)) {
+    if (!_socket->waitForConnected(2000)) {
         qCDebug(NTRIPLog) << "NTRIP Socket failed to connect";
-        emit error(_socket->errorString());
+        //emit error(_socket->errorString());
+        QObject::disconnect(_socket, &QTcpSocket::readyRead, this, &NTRIPTCPLink::_readBytes);
         delete _socket;
         _socket = nullptr;
+
         return;
     }
 
@@ -162,7 +177,7 @@ void NTRIPTCPLink::_hardwareConnect()
 void NTRIPTCPLink::_parse(const QByteArray &buffer)
 {
 
-    qDebug() << "AAAAAA: " << buffer;
+    //qDebug() << "AAAAAA: " << buffer;
 
     for(const uint8_t byte : buffer) {
         if(_state == NTRIPState::waiting_for_rtcm_header) {
@@ -200,6 +215,11 @@ void NTRIPTCPLink::_readBytes(void)
     if (!_socket) {
         return;
     }
+
+    //reset timer
+    _requestTimer->stop();
+    _requestTimer->start(_reqSendRateMSecs);
+
 
     if(_state == NTRIPState::waiting_for_http_response) {
         QString line = _socket->readLine();

@@ -31,7 +31,7 @@
 #include "SettingsManager.h"
 #include "QGCApplication.h"
 #include "ADSBVehicleManager.h"
-#include "NTRIP.h"
+#include "ntrip.h"
 #if defined(QGC_ENABLE_PAIRING)
 #include "PairingManager.h"
 #endif

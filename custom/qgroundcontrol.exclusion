@@ -39,6 +39,9 @@
 
         <file alias="QGroundControl/FlightMap/FlightMap.qml">src/FlightMap/FlightMap.qml</file>
 
+        <file alias="GeneralSettings.qml">src/ui/preferences/GeneralSettings.qml</file>
+
+
 
 
 
