@@ -72,10 +72,16 @@ NTRIPTCPLink::NTRIPTCPLink(const QString& hostAddress,
             _whitelist.insert(msg_int);
         }
     }
+
+    qDebug() << "AAAAAAA: " << _whitelist;
+
+
     qCDebug(NTRIPLog) << "whitelist: " << _whitelist;
+
     if (!_rtcm_parsing) {
         _rtcm_parsing = new RTCMParsing();
     }
+
     _rtcm_parsing->reset();
     _state = NTRIPState::uninitialised;
 
@@ -139,9 +145,10 @@ void NTRIPTCPLink::startTimer(void) {
 void NTRIPTCPLink::_hardwareConnect()
 {
 
+    qDebug() << "start timer";
+
     // if(_socket != nullptr)
     //     return;
-
     //qDebug() << "AAAAAAA: timer2 fire!";
 
     _socket = new QTcpSocket();
@@ -151,6 +158,9 @@ void NTRIPTCPLink::_hardwareConnect()
     // Give the socket a second to connect to the other side otherwise error out
     if (!_socket->waitForConnected(2000)) {
         qCDebug(NTRIPLog) << "NTRIP Socket failed to connect";
+
+        qDebug() << "Socket failed to connect";
+
         //emit error(_socket->errorString());
         QObject::disconnect(_socket, &QTcpSocket::readyRead, this, &NTRIPTCPLink::_readBytes);
         delete _socket;
@@ -190,22 +200,25 @@ void NTRIPTCPLink::_parse(const QByteArray &buffer)
             _state = NTRIPState::waiting_for_rtcm_header;
             QByteArray message((char*)_rtcm_parsing->message(), static_cast<int>(_rtcm_parsing->messageLength()));
 
-            emit RTCMDataUpdate(message);
-
-            //qDebug() << "AAAAAAA: good message received!";
-
-            _rtcm_parsing->reset();
-
+            // emit RTCMDataUpdate(message);
+            // _rtcm_parsing->reset();
             //TODO: Restore the following when upstreamed in Driver repo
             //uint16_t id = _rtcm_parsing->messageId();
-            //uint16_t id = ((uint8_t)message[3] << 4) | ((uint8_t)message[4] >> 4);
-            // if(_whitelist.empty() || _whitelist.contains(id)) {
-            //     emit RTCMDataUpdate(message);
-            //     qCDebug(NTRIPLog) << "Sending " << id << "of size " << message.length();
-            // } else {
-            //     qCDebug(NTRIPLog) << "Ignoring " << id;
-            // }
-            //_rtcm_parsing->reset();
+
+            uint16_t id = ((uint8_t)message[3] << 4) | ((uint8_t)message[4] >> 4);
+
+            //qDebug() << "AAAA:" << id;
+
+
+            if(_whitelist.empty() || _whitelist.contains(id)) {
+                emit RTCMDataUpdate(message);
+                qCDebug(NTRIPLog) << "Sending " << id << "of size " << message.length();
+                qDebug() << "AAAAAAA: " << message;
+
+            } else {
+                qCDebug(NTRIPLog) << "Ignoring " << id;
+            }
+            _rtcm_parsing->reset();
         }
     }
 }
@@ -242,19 +255,26 @@ void NTRIPTCPLink::_readBytes(void)
 
 void NTRIPTCPLink::_sendNMEA() {
 
-    #ifdef QT_DEBUG  // coordinate of PADUA by chatGPT
+    #ifdef QT_DEBUG  // coordinate of ISMEC by google maps
         double lat = 45.4064; //gcsPosition.latitude();
         double lng = 11.8768; //gcsPosition.longitude();
         double alt = 20; //gcsPosition.altitude();
     #else
 
+    // double lat = 45.698357; //gcsPosition.latitude();
+    // double lng = 11.776829; //gcsPosition.longitude();
+    // double alt = 20; //gcsPosition.altitude();
+
         QGeoCoordinate gcsPosition = _toolbox->qgcPositionManager()->gcsPosition();
+
         if(!gcsPosition.isValid()) {
             return;
         }
         double lat = gcsPosition.latitude();
         double lng = gcsPosition.longitude();
         double alt = gcsPosition.altitude();
+
+
     #endif
 
 
@@ -287,6 +307,8 @@ void NTRIPTCPLink::_sendNMEA() {
         }
 
         qCDebug(NTRIPLog) << "NMEA Message : " << nmeaMessage->toUtf8();
+
+        delete nmeaMessage;
     }
 }
 
