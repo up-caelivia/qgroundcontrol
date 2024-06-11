@@ -50,15 +50,15 @@
 {
     "name":                 "ntripWhitelist",
     "shortDesc":     "RTCM Message Whitelist",
-    "longDesc":      "RTCM Messages to send over mavlink. Leave blank for all messages",
+    "longDesc":      "RTCM Messages to send over mavlink. Leave blank for all messages. Format: x,y",
     "type":          "string",
     "default":       "",
     "qgcRebootRequired":    true
 },
 {
     "name":                 "ntripEnableVRS",
-    "shortDesc":     "Enable NTRIP VRS",
-    "longDesc":      "Check to Enable VRS RTK",
+    "shortDesc":     "Enable NTRIP GGA (VRS/Smart)",
+    "longDesc":      "Check to Enable GGA sharing of ground control station position to the NTRIP server",
     "type":                 "bool",
     "default":         true,
     "qgcRebootRequired":    true

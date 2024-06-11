@@ -100,6 +100,12 @@ NTRIPTCPLink::~NTRIPTCPLink(void)
             _vrsSendTimer = nullptr;
         }
 
+
+        _requestTimer->stop();
+        QObject::disconnect(_requestTimer, &QTimer::timeout, this, &NTRIPTCPLink::_hardwareConnect);
+        delete _requestTimer;
+        _requestTimer = nullptr;
+
         QObject::disconnect(_socket, &QTcpSocket::readyRead, this, &NTRIPTCPLink::_readBytes);
         _socket->disconnectFromHost();
         _socket->deleteLater();
