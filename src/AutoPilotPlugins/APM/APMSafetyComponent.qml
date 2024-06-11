@@ -18,7 +18,7 @@ import QGroundControl.Palette       1.0
 import QGroundControl.Controls      1.0
 import QGroundControl.ScreenTools   1.0
 
-import Custom.Constants 1.0
+import Constants 1.0
 import Custom.Widgets 1.0
 
 

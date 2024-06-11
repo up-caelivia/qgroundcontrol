@@ -24,7 +24,7 @@ import QGroundControl.Controllers   1.0
 import QGroundControl.ArduPilot     1.0
 import QGroundControl.QGCPositionManager    1.0
 
-import Custom.Constants 1.0
+import Constants 1.0
 
 
 SetupPage {

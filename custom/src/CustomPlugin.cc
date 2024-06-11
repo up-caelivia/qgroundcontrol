@@ -22,6 +22,7 @@
 #include "QGCApplication.h"
 #include "QGCToolbox.h"
 #include "MultiVehicleManager.h"
+#include "Constants.h"
 // #include "JoystickManager.h"
 // #include "HorizontalFactValueGrid.h"
 // #include "InstrumentValueData.h"
@@ -211,6 +212,7 @@ QQmlApplicationEngine* CustomPlugin::createQmlApplicationEngine(QObject* parent)
     qmlEngine->addImportPath("qrc:/Custom/Widgets");
     qmlEngine->addImportPath("qrc:/Custom/Constants");
 
+    qmlRegisterSingletonType<Constants>("Constants", 1, 0, "Constants", constants_singleton_provider);
 
 
     #ifdef QT_DEBUG     // start with a custom connection only in debug build!

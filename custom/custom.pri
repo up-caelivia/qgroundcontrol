@@ -74,6 +74,7 @@ SOURCES += \
 HEADERS += \
     $$PWD/src/CustomPlugin.h \
     $$PWD/src/NTRIPSettings.h \
+    $$PWD/src/constants.h \
     $$PWD/src/ntrip.h
 
 HEADERS += \

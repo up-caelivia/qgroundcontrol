@@ -14,8 +14,8 @@
 #include "SettingsManager.h"
 #include "PositionManager.h"
 #include "NTRIPSettings.h"
-
 #include <QDebug>
+
 
 NTRIP::NTRIP(QGCApplication* app, QGCToolbox* toolbox)
     : QGCTool(app, toolbox)
@@ -73,7 +73,7 @@ NTRIPTCPLink::NTRIPTCPLink(const QString& hostAddress,
         }
     }
 
-    qDebug() << "AAAAAAA: " << _whitelist;
+   // qDebug() << "AAAAAAA: " << _whitelist;
 
 
     qCDebug(NTRIPLog) << "whitelist: " << _whitelist;
@@ -145,11 +145,7 @@ void NTRIPTCPLink::startTimer(void) {
 void NTRIPTCPLink::_hardwareConnect()
 {
 
-    qDebug() << "start timer";
-
-    // if(_socket != nullptr)
-    //     return;
-    //qDebug() << "AAAAAAA: timer2 fire!";
+   // qDebug() << "start timer";
 
     _socket = new QTcpSocket();
     QObject::connect(_socket, &QTcpSocket::readyRead, this, &NTRIPTCPLink::_readBytes);
@@ -213,7 +209,7 @@ void NTRIPTCPLink::_parse(const QByteArray &buffer)
             if(_whitelist.empty() || _whitelist.contains(id)) {
                 emit RTCMDataUpdate(message);
                 qCDebug(NTRIPLog) << "Sending " << id << "of size " << message.length();
-                qDebug() << "AAAAAAA: " << message;
+                //qDebug() << "AAAAAAA: " << message;
 
             } else {
                 qCDebug(NTRIPLog) << "Ignoring " << id;

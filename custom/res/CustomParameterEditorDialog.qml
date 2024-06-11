@@ -20,7 +20,7 @@ import QGroundControl.FactSystem    1.0
 import QGroundControl.FactControls  1.0
 import QGroundControl.ScreenTools   1.0
 
-import Custom.Constants 1.0
+import Constants 1.0
 
 
 QGCPopupDialog {
