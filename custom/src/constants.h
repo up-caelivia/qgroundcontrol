@@ -60,6 +60,7 @@ public:
     QVector<QString> settingToShow() const { return {"Motors", "Safety"}; }
     int compassNumber() const { return 1; }
 
+    static QObject* constants_singleton_provider(QQmlEngine* engine, QJSEngine* scriptEngine);
 
 signals:
     void lastMaxHeightChanged();
@@ -67,20 +68,6 @@ signals:
 private:
     int m_lastMaxHeight;
 };
-
-
-static QObject* constants_singleton_provider(QQmlEngine* engine, QJSEngine* scriptEngine) {
-    Q_UNUSED(engine)
-    Q_UNUSED(scriptEngine)
-
-    static Constants* constants = nullptr;
-
-    if (constants == nullptr)
-        constants = new Constants();
-
-    return constants;
-}
-
 
 
 
