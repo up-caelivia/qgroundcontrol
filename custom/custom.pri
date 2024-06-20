@@ -66,6 +66,7 @@ QML_IMPORT_PATH += \
 SOURCES += \
     $$PWD/src/CustomPlugin.cc \
     $$PWD/src/NTRIPSettings.cpp \
+    $$PWD/src/constants.cpp \
     $$PWD/src/ntrip.cpp
 
 SOURCES += \
