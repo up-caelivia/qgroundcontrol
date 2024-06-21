@@ -13,7 +13,7 @@ import QtQuick 2.12
 QtObject {
     property var    vehicle
 
-    property bool   telemetryAvailable: vehicle && vehicle.distanceSensors.telemetryAvailable
+    property bool   telemetryAvailable: (vehicle && vehicle.distanceSensors.telemetryAvailable) ? true : false
 
     signal rotationValueChanged ///< Signalled when any available rotation value changes
 

@@ -262,4 +262,12 @@ Item {
         visible: selector
 
     }
+
+    CustomRadarWidget{
+
+        anchors.left:          parent.left
+        // width:                  _rightPanelWidth * 0.7
+        anchors.bottom:         photoVideoControl.top
+        anchors.margins:  _toolsMargin
+    }
 }
