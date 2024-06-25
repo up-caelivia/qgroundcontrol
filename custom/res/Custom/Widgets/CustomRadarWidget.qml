@@ -21,6 +21,7 @@ Item {
     id: root
     height: size * 1.2
     width: size
+    visible: proximityValues.telemetryAvailable
 
     property real   _margins:           ScreenTools.defaultFontPixelHeight / 2
     property var    _activeVehicle:     QGroundControl.multiVehicleManager.activeVehicle
@@ -38,6 +39,7 @@ Item {
 
     property real distance:             proximityValues.rotationNoneValue
 
+
     ProximityRadarValues {
         id:                     proximityValues
         vehicle:                root.vehicle
@@ -47,7 +49,6 @@ Item {
         anchors.fill: parent
         color: Qt.rgba(qgcPal.window.r, qgcPal.window.g, qgcPal.window.b, 0.5)
         radius: _margins
-        visible: proximityValues.telemetryAvailable
 
         Rectangle {
             id: scale
