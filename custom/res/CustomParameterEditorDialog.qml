@@ -48,6 +48,7 @@ QGCPopupDialog {
     property double max: Constants.factMax[selectedIndex]
     property double min: Constants.factMin[selectedIndex]
     property bool developer: Constants.developer
+    property bool factor: ( fact.units == "cm" || fact.units == "cm/s" ) ? true : false
 
     ParameterEditorController { id: controller; }
 
@@ -58,7 +59,7 @@ QGCPopupDialog {
     onAccepted: {
 
         var errStringCustom = developer ? "" : customControl()
-        console.log(errStringCustom)
+        //console.log(errStringCustom)
 
         if (validationError.text.includes("press another time on the save button") && oldValue == valueField.text) {}   // ok save
         else {
@@ -80,15 +81,19 @@ QGCPopupDialog {
             fact.enumIndex = factCombo.currentIndex
             valueChanged()
         } else {
-            var errorString = fact.validate(valueField.text, forceSave.checked)
+
+
+            var stringConverted = factor ? (parseFloat(valueField.text)*100).toFixed(0) : valueField.text
+
+            var errorString = fact.validate(stringConverted, forceSave.checked)
             if (errorString === "") {
 
                 if (fact.name == "FENCE_ALT_MAX"){
-                    Constants.lastMaxHeight = parseFloat(valueField.text)
-                    fact.value = (parseFloat(valueField.text) * Constants.altitudeFactor).toFixed(4)
+                    Constants.lastMaxHeight = parseFloat(stringConverted)
+                    fact.value = (parseFloat(stringConverted) * Constants.altitudeFactor).toFixed(4)
                 }
                 else
-                    fact.value = valueField.text
+                    fact.value = stringConverted
                 fact.valueChanged(fact.value)
                 valueChanged()
             } else {
@@ -103,10 +108,11 @@ QGCPopupDialog {
 
 
     function customControl() {
-        var value = parseFloat(valueField.text)
+
+        var value = factor ? (parseFloat(valueField.text)*100).toFixed(2) : valueField.text
 
         if (value > max || value < min)
-            return "Value must be between " + min.toFixed(2) + " and " + max.toFixed(2)
+            return "Value must be between " + (factor ? min/100 : min).toFixed(2) + " and " + (factor ? max/100 : max).toFixed(2)
 
         if (fact.name == "FENCE_ALT_MAX" && value > Constants.maxAltitudeWarning)
             return "Attention: value above 120m. If you want to continue, press another time on the save button."
@@ -159,7 +165,7 @@ QGCPopupDialog {
                 id:                 valueField
                 width:              _editFieldWidth
                 text:               getText()
-                unitsLabel:         fact.units
+                unitsLabel:         getUnits()
                 showUnits:          fact.units != ""
                 focus:              setFocus && visible
                 inputMethodHints:   (fact.typeIsString || ScreenTools.isiOS) ? // iOS numeric keyboard has no done button, we can't use it
@@ -167,16 +173,21 @@ QGCPopupDialog {
                                         Qt.ImhFormattedNumbersOnly  // Forces use of virtual numeric keyboard
                 visible:            !_showCombo || validate || manualEntry.checked
 
+
+                function getUnits() {
+                    return fact.units.replace(/cm/g, "m")
+                }
+
                 function getText() {
 
                     if (validate)
-                        return validateValue
+                        return  validateValue
 
                     if (fact.name == "FENCE_ALT_MAX"){
                         return (Constants.lastMaxHeight).toFixed(0)
                     }
 
-                    return fact.valueString
+                    return factor ? (parseFloat(fact.valueString)/100).toFixed(2) : fact.valueString
                 }
 
             }
@@ -247,7 +258,15 @@ QGCPopupDialog {
             Layout.fillWidth:   true
             wrapMode:           Text.WordWrap
             visible:            fact.longDescription != ""
-            text:               fact.longDescription
+            text:               unit_transform()
+
+            function unit_transform() {
+
+                var desc = fact.longDescription
+                return desc.replace(/cm/g, "m")
+
+            }
+
         }
 
         Row {
@@ -255,12 +274,12 @@ QGCPopupDialog {
 
             QGCLabel {
                 id:         minValueDisplay
-                text:       qsTr("Min: ") + min
+                text:       qsTr("Min: ") + (factor ? min/100 : min)
                 visible:    !fact.minIsDefaultForType
             }
 
             QGCLabel {
-                text:       qsTr("Max: ") + max
+                text:       qsTr("Max: ") + (factor ? max/100 : max)
                 visible:    !fact.maxIsDefaultForType
             }
 
