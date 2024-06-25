@@ -482,7 +482,7 @@ Rectangle {
                         Layout.preferredHeight: unitsGrid.height + (_margins * 2)
                         Layout.preferredWidth:  unitsGrid.width + (_margins * 2)
                         color:                  qgcPal.windowShade
-                        visible:                miscSectionLabel.visible
+                        visible:                QGroundControl.settingsManager.unitsSettings.visible
                         Layout.fillWidth:       true
 
                         GridLayout {

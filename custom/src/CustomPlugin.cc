@@ -60,10 +60,18 @@ bool CustomPlugin::overrideSettingsGroupVisibility(QString name)
     // We have set up our own specific brand imaging. Hide the brand image settings such that the end user
     // can't change it.
 
+    Constants constant;
+
+    if(constant.developer())
+        return true;
+
+
     //qDebug() << "Setting name: " << name;
-    if (name == BrandImageSettings::name || name == AutoConnectSettings::name) {
+    if (name == BrandImageSettings::name || name == AutoConnectSettings::name || name == UnitsSettings::name || name == ADSBVehicleManagerSettings::name || name == RTKSettings::name || name == PlanViewSettings::name) {
         return false;
     }
+
+
     return true;
 }
 
