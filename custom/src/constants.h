@@ -41,7 +41,7 @@ public:
     QVector<bool> factEditable() const { return {false, true, true, true, true, true, true}; }
 
     int maxAltitudeWarning() const { return 120; }
-    double altitudeFactor() const { return 0.95; }
+    double altitudeFactor() const { return 1.0; }
 
     int lastMaxHeight() const { return m_lastMaxHeight; }
 

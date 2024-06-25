@@ -2659,6 +2659,15 @@ void Vehicle::_announceArmedChanged(bool armed)
     }
 }
 
+
+void Vehicle::announceAltitude()
+{
+    _say("Warning: above 120 meters");
+}
+
+
+
+
 void Vehicle::_setFlying(bool flying)
 {
     if (_flying != flying) {

@@ -63,11 +63,12 @@ Item {
                 return;
 
             if ((value > 120 && _activeVehicle.altitudeRelative.units == "m") || ( value > 393.7 && _activeVehicle.altitudeRelative.units == "ft")) {
-                showCriticalVehicleMessage("Above 120m")
+                showCriticalVehicleMessage("WARNING : Above 120m")
+                _activeVehicle.announceAltitude();
                 message = true
                 console.log("INFO: Vehicle above 120m");
             } else {
-                if(message && mainWindows.getCriticalVehicleMessage() == "Above 120m") {
+                if(message && mainWindows.getCriticalVehicleMessage() == "WARNING : Above 120m") {
                     mainWindow.closeCriticalVehicleMessage()
                 }
             }
