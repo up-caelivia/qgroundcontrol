@@ -265,9 +265,9 @@ Item {
 
     CustomRadarWidget{
 
-        anchors.left:          parent.left
+        anchors.right:          parent.right
         // width:                  _rightPanelWidth * 0.7
-        anchors.bottom:         photoVideoControl.top
+        anchors.bottom:         speedControl.top
         anchors.margins:  _toolsMargin
     }
 }
