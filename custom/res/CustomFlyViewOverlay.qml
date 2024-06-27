@@ -44,9 +44,6 @@ Item {
     property string _messageText:           ""
     property real   _toolsMargin:           ScreenTools.defaultFontPixelWidth * 0.75
 
-    property bool message: false
-
-
     function showCriticalVehicleMessage(message) {
         mainWindow.closeCriticalVehicleMessage()
         mainWindow.showCriticalVehicleMessage(message)
@@ -57,19 +54,26 @@ Item {
         property double value: _activeVehicle ? (isNaN(_activeVehicle.altitudeRelative.value) ? 0.0 : _activeVehicle.altitudeRelative.value) : 0.0
         //property string value:              _activeVehicle ? (isNaN(_activeVehicle.altitudeRelative.value) ? "0.0" : _activeVehicle.altitudeRelative.value.toFixed(1)) + ' ' + _activeVehicle.altitudeRelative.units : "0.0"
 
+        property bool above120: false
+
         onValueChanged: {
 
             if (_activeVehicle == null || _activeVehicle.altitudeRelative == null)
                 return;
 
             if ((value > 120 && _activeVehicle.altitudeRelative.units == "m") || ( value > 393.7 && _activeVehicle.altitudeRelative.units == "ft")) {
-                showCriticalVehicleMessage("WARNING : Above 120m")
-                _activeVehicle.announceAltitude();
-                message = true
+
+                if(!above) {
+                    showCriticalVehicleMessage("WARNING : Above 120m")
+                    _activeVehicle.announceAltitude();
+                }
+
+                above = true
                 console.log("INFO: Vehicle above 120m");
             } else {
-                if(message && mainWindows.getCriticalVehicleMessage() == "WARNING : Above 120m") {
+                if(above && mainWindows.getCriticalVehicleMessage() == "WARNING : Above 120m") {
                     mainWindow.closeCriticalVehicleMessage()
+                    above = false
                 }
             }
         }
@@ -92,6 +96,99 @@ Item {
         bottomEdgeCenterInset:  parentToolInsets.bottomEdgeCenterInset
         bottomEdgeRightInset:   parent.height - attitudeIndicator.y
     }
+
+
+    ProximityRadarValues {
+        id:                     proximityValues
+        vehicle:                _activeVehicle
+    }
+
+    // TOP BOX !
+    Rectangle {
+        anchors.horizontalCenter: attitudeIndicator.horizontalCenter
+        anchors.bottom: attitudeIndicator.top
+        anchors.bottomMargin: ScreenTools.defaultFontPixelHeight * 0.1
+        visible: proximityValues.telemetryAvailable && !isNaN(proximityValues.rotationNoneValue)
+
+        width: attitudeIndicator.width * 0.6
+        height: attitudeIndicator.height * 0.3
+        radius: ScreenTools.defaultFontPixelHeight
+        color: qgcPal.window
+
+        GridLayout {
+            columnSpacing: ScreenTools.defaultFontPixelWidth * 0.3
+            rowSpacing: ScreenTools.defaultFontPixelHeight * 0.3
+            columns: 2
+
+            property real _indicatorsHeight: ScreenTools.defaultFontPixelHeight
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.horizontalCenter: parent.horizontalCenter
+
+
+            QGCColoredImage {
+                height: _indicatorsHeight
+                width: height
+                source: "/custom/img/vertical_speed.svg"
+                fillMode: Image.PreserveAspectFit
+                sourceSize.height: height
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
+                color: qgcPal.text
+            }
+
+            QGCLabel {
+                id: distanceLabel
+                text: distance.toFixed(1) + " m"
+                font.pointSize: ScreenTools.mediumFontPointSize
+                Layout.fillWidth: true
+                Layout.minimumWidth: indicatorValueWidth
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
+
+                property real distance: proximityValues.rotationNoneValue
+
+
+                property color normalColor: {
+                    if (distance < 10)
+                        return "orange"
+                    return _indicatorsColor
+                }
+
+                color: normalColor // Default color setting based on distance
+
+                SequentialAnimation on color {
+                    id: pulseAnimation
+                    loops: Animation.Infinite
+                    ColorAnimation {
+                        from: "white"
+                        to: "red"
+                        duration: 200
+                    }
+                    ColorAnimation {
+                        from: "red"
+                        to: "white"
+                        duration: 200
+                    }
+                }
+
+                Component.onCompleted: {
+                    // Start or stop the animation based on the initial distance
+                    pulseAnimation.running = distance < 5
+                }
+
+                onDistanceChanged: {
+                    // Restart animation when distance changes
+                    pulseAnimation.running = distance < 5
+                    if (distance < 5) {
+                        color = "white"
+                    } else {
+                        color = normalColor
+                    }
+                }
+            }
+        }
+    }
+
+
+
 
 
 
@@ -295,6 +392,7 @@ Item {
             }
         }
     }
+
 
 
     Rectangle {

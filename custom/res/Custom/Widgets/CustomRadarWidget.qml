@@ -19,11 +19,11 @@ import Constants  1.0
 
 Item {
     id: root
-    height: size * 1.2
+    height: size * 1.2 + labelHeight
     width: size
-    visible: proximityValues.telemetryAvailable
+    visible: proximityValues.telemetryAvailable && !isNaN(proximityValues.rotationPitch270Value)
 
-    property real   _margins:           ScreenTools.defaultFontPixelHeight / 2
+    property real   _margins:           ScreenTools.defaultFontPixelHeight / 4
     property var    _activeVehicle:     QGroundControl.multiVehicleManager.activeVehicle
     property bool   _isHighSpeed:       false
     property bool   _isLowSpeed:        false
@@ -31,13 +31,15 @@ Item {
 
     property real size:                 ScreenTools.isAndroid ? 300 : 100
     property real _reticleHeight:       1
-    property real _reticleSpacing:      size * 0.15
+    property real _reticleSpacing:      size * 0.10
     property real _reticleSlot:         _reticleSpacing + _reticleHeight
     property real _longDash:            size * 0.35
     property real _shortDash:           size * 0.25
     property real _fontSize:            ScreenTools.defaultFontPointSize * 0.75
 
-    property real distance:             proximityValues.rotationNoneValue
+    property real distance:             proximityValues.rotationPitch270Value //proximityValues.rotationNoneValue
+    property real maxDistance:          50  //proximityValues.maxDistance
+    property real labelHeight:          50  // Height for the "Front radar" label
 
 
     ProximityRadarValues {
@@ -46,7 +48,34 @@ Item {
     }
 
     Rectangle {
-        anchors.fill: parent
+        id: radarLabelBackground
+        color: "black"
+        opacity: 0.6
+        radius: 4
+        anchors.top: parent.top
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: radarLabel.width + 10
+        height: radarLabel.height + 6
+
+        Text {
+            id: radarLabel
+            text: "RADAR ALT"
+            anchors.centerIn: parent
+            font.pointSize: ScreenTools.defaultFontPointSize
+            font.bold: true
+            color: "white"
+            opacity: 100
+            style: Text.Outline
+            styleColor: "black"
+        }
+    }
+
+    Rectangle {
+        anchors.top: radarLabelBackground.bottom
+        anchors.topMargin: _margins
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
         color: Qt.rgba(qgcPal.window.r, qgcPal.window.g, qgcPal.window.b, 0.5)
         radius: _margins
 
@@ -65,9 +94,9 @@ Item {
                     spacing: _reticleSpacing
 
                     Repeater {
-                        model: proximityValues.maxDistance / 5 + 1
+                        model: maxDistance / 5 + 1
                         Rectangle {
-                            property int _pitch: proximityValues.maxDistance - modelData * 5
+                            property int _pitch: maxDistance - modelData * 5
                             anchors.horizontalCenter: parent.horizontalCenter
                             anchors.horizontalCenterOffset: +(_longDash / 2 * 1.2)
 
@@ -98,21 +127,31 @@ Item {
                     color: get_color()
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.horizontalCenterOffset: +(_longDash / 2 * 1.2)
+                    y: parent.height * (1 - distance / maxDistance) - height / 2
+                    visible: distance > 0 && distance < maxDistance
 
-                    y: parent.height * (1 - distance / proximityValues.maxDistance) - height / 2
-                    visible: distance > 0 && distance < proximityValues.maxDistance
-
-                    Text {
-                        id: distanceText
-                        text: distance.toFixed(1) + " m"
-                        color: distanceBar.get_color()
-                        font.bold: true
-                        font.pointSize: _fontSize * 1.2
-                        style: Text.Outline
-                        styleColor: "black"
+                    Rectangle {
+                        id: textBackground
+                        color: "black"
+                        opacity: 0.6
+                        radius: 4
                         anchors.bottom: distanceBar.top
-                        anchors.bottomMargin: 5
+                        anchors.bottomMargin: 2
                         anchors.horizontalCenter: distanceBar.horizontalCenter
+                        width: distanceText.width + 10
+                        height: distanceText.height + 6
+
+                        Text {
+                            id: distanceText
+                            text: distance.toFixed(1) + " m"
+                            color: distanceBar.get_color()
+                            font.bold: true
+                            font.pointSize: _fontSize * 1.2
+                            anchors.centerIn: parent
+                            opacity: 100
+                            style: Text.Outline
+                            styleColor: "black"
+                        }
                     }
 
                     function get_color() {
@@ -120,8 +159,9 @@ Item {
                             return "red"
                         if (distance < 20)
                             return "orange"
-                        return "green"
+                        return Qt.rgba(0.224, 1.0, 0.078, 1.0) // Verde molto acceso
                     }
+
                 }
             }
         }

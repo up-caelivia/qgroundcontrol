@@ -36,6 +36,9 @@ QtObject {
     property string rotationYaw270ValueString:  _distanceSensors ? _distanceSensors.rotationYaw270.valueString : _noValueStr
     property string rotationYaw315ValueString:  _distanceSensors ? _distanceSensors.rotationYaw315.valueString : _noValueStr
 
+    property string rotationPitch270ValueString:  _distanceSensors ? _distanceSensors.rotationPitch270.valueString : _noValueStr
+    property real rotationPitch270Value:  _distanceSensors ? _distanceSensors.rotationPitch270.value : NaN
+
     property var    rgRotationValues:           [ rotationNoneValue, rotationYaw45Value, rotationYaw90Value, rotationYaw135Value, rotationYaw180Value, rotationYaw225Value, rotationYaw270Value, rotationYaw315Value ]
     property var    rgRotationValueStrings:     [ rotationNoneValueString, rotationYaw45ValueString, rotationYaw90ValueString, rotationYaw135ValueString, rotationYaw180ValueString, rotationYaw225ValueString, rotationYaw270ValueString, rotationYaw315ValueString ]
 
