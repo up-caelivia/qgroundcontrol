@@ -545,9 +545,9 @@ ApplicationWindow {
         }
     }
 
-    function closeCriticalVehicleMessage()  { criticalVehicleMessagePopup.close() }
 
-    function getCriticalVehicleMessage() { return criticalVehicleMessage}
+    function closeCriticalVehicleMessage()  { criticalVehicleMessagePopup.close() }
+    function getCriticalVehicleMessage() { return criticalVehicleMessagePopup.criticalVehicleMessage}
 
     Popup {
         id:                 criticalVehicleMessagePopup

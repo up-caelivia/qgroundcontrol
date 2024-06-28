@@ -52,8 +52,6 @@ Item {
     Rectangle {
 
         property double value: _activeVehicle ? (isNaN(_activeVehicle.altitudeRelative.value) ? 0.0 : _activeVehicle.altitudeRelative.value) : 0.0
-        //property string value:              _activeVehicle ? (isNaN(_activeVehicle.altitudeRelative.value) ? "0.0" : _activeVehicle.altitudeRelative.value.toFixed(1)) + ' ' + _activeVehicle.altitudeRelative.units : "0.0"
-
         property bool above120: false
 
         onValueChanged: {
@@ -63,22 +61,25 @@ Item {
 
             if ((value > 120 && _activeVehicle.altitudeRelative.units == "m") || ( value > 393.7 && _activeVehicle.altitudeRelative.units == "ft")) {
 
-                if(!above) {
+                if(!above120) {
                     showCriticalVehicleMessage("WARNING : Above 120m")
+                    console.log("INFO: Vehicle above 120m");
                     _activeVehicle.announceAltitude();
                 }
 
-                above = true
-                console.log("INFO: Vehicle above 120m");
+                above120 = true
+
             } else {
-                if(above && mainWindows.getCriticalVehicleMessage() == "WARNING : Above 120m") {
+
+                if(above120 && mainWindow.getCriticalVehicleMessage() == "WARNING : Above 120m") {
                     mainWindow.closeCriticalVehicleMessage()
-                    above = false
                 }
+
+                above120 = false
+
             }
         }
     }
-
 
 
     QGCToolInsets {
