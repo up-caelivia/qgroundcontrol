@@ -10,6 +10,8 @@
         <file alias="h.svg">res/Images/ButtonsLettering3.svg</file>
         <file alias="n.svg">res/Images/ButtonsLettering2.svg</file>
         <file alias="alert.svg">res/Images/alert.svg</file>
+        <file alias="MovimentoY.svg">res/Images/MovimentoY.svg</file>
+        <file alias="MovimentoZ.svg">res/Images/MovimentoZ.svg</file>
     </qresource>
     <qresource prefix="/res">
         <file alias="QGCLogoFull">res/Images/QGCLogoFull.svg</file>

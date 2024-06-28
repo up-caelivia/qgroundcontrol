@@ -19,11 +19,11 @@ import Constants  1.0
 
 Item {
     id: root
-    height: size * 1.2 + labelHeight
+    height: size * 1.15
     width: size
     visible: proximityValues.telemetryAvailable && !isNaN(proximityValues.rotationPitch270Value)
 
-    property real   _margins:           ScreenTools.defaultFontPixelHeight / 4
+    property real   _margins:           ScreenTools.defaultFontPixelHeight / 6
     property var    _activeVehicle:     QGroundControl.multiVehicleManager.activeVehicle
     property bool   _isHighSpeed:       false
     property bool   _isLowSpeed:        false
@@ -31,7 +31,7 @@ Item {
 
     property real size:                 ScreenTools.isAndroid ? 300 : 100
     property real _reticleHeight:       1
-    property real _reticleSpacing:      size * 0.10
+    property real _reticleSpacing:      size * 0.08
     property real _reticleSlot:         _reticleSpacing + _reticleHeight
     property real _longDash:            size * 0.35
     property real _shortDash:           size * 0.25
@@ -39,7 +39,7 @@ Item {
 
     property real distance:             proximityValues.rotationPitch270Value //proximityValues.rotationNoneValue
     property real maxDistance:          50  //proximityValues.maxDistance
-    property real labelHeight:          50  // Height for the "Front radar" label
+    //property real labelHeight:          50  // Height for the "Front radar" label
 
 
     ProximityRadarValues {
@@ -51,7 +51,7 @@ Item {
         id: radarLabelBackground
         color: "black"
         opacity: 0.6
-        radius: 4
+        radius: 5
         anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
         width: radarLabel.width + 10
@@ -77,7 +77,7 @@ Item {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         color: Qt.rgba(qgcPal.window.r, qgcPal.window.g, qgcPal.window.b, 0.5)
-        radius: _margins
+        radius: ScreenTools.defaultFontPixelWidth * 2
 
         Rectangle {
             id: scale
