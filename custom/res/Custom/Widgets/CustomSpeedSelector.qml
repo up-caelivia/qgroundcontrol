@@ -94,6 +94,9 @@ Rectangle {
         mainWindow.showCriticalVehicleMessage(message)
     }
 
+    MouseArea {
+        anchors.fill:   parent
+
     ColumnLayout {
         id:                         mainLayout
         anchors.margins:            _margins
@@ -169,6 +172,7 @@ Rectangle {
                 MouseArea {
                     anchors.fill:   parent
                     enabled:        !_isLowSpeed
+
                     onClicked:      {
 
                         _isHighSpeed = true
@@ -237,5 +241,5 @@ Rectangle {
             }
         }
     }
-
+}
 }

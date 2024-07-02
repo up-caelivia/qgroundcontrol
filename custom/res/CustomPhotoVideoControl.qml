@@ -142,6 +142,10 @@ Rectangle {
         }
     }
 
+    MouseArea {
+        anchors.fill:   parent
+
+
     Timer {
         id:             simplePhotoCaptureTimer
         interval:       500
@@ -335,28 +339,28 @@ Rectangle {
             ColumnLayout {
                 spacing: _margins
 
-                GridLayout {
-                    Layout.margins: ScreenTools.defaultFontPixelWidth
-                    columns:        3
+                // GridLayout {
+                //     Layout.margins: ScreenTools.defaultFontPixelWidth
+                //     columns:        3
 
-                    QGCLabel {
-                        text:               qsTr("video source used: HDMI ") + (_videoStreamSettings.cameraId.rawValue + 1)
-                        Layout.columnSpan:  3
-                    }
-                    QGCLabel {
-                        text:               qsTr("Select: ")
-                    }
-                    QGCButton {
-                        text:               qsTr("HDMI 1")
-                        enabled:            !QGroundControl.videoManager.videoStreamControl.settingInProgress
-                        onClicked:          _videoStreamSettings.cameraId.rawValue = 0
-                    }
-                    QGCButton {
-                        text:               qsTr("HDMI 2")
-                        enabled:            !QGroundControl.videoManager.videoStreamControl.settingInProgress
-                        onClicked:          _videoStreamSettings.cameraId.rawValue = 1
-                    }
-                }
+                //     QGCLabel {
+                //         text:               qsTr("video source used: HDMI ") + (_videoStreamSettings.cameraId.rawValue + 1)
+                //         Layout.columnSpan:  3
+                //     }
+                //     QGCLabel {
+                //         text:               qsTr("Select: ")
+                //     }
+                //     QGCButton {
+                //         text:               qsTr("HDMI 1")
+                //         enabled:            !QGroundControl.videoManager.videoStreamControl.settingInProgress
+                //         onClicked:          _videoStreamSettings.cameraId.rawValue = 0
+                //     }
+                //     QGCButton {
+                //         text:               qsTr("HDMI 2")
+                //         enabled:            !QGroundControl.videoManager.videoStreamControl.settingInProgress
+                //         onClicked:          _videoStreamSettings.cameraId.rawValue = 1
+                //     }
+                // }
 
                 GridLayout {
                     id:     gridLayout
@@ -606,4 +610,5 @@ Rectangle {
             }
         }
     }
+}
 }
