@@ -1,0 +1,82 @@
+<RCC>
+    <qresource prefix="/custom/img">
+        <file alias="altitude.svg">res/Images/altitude.svg</file>
+        <file alias="distance.svg">res/Images/distance.svg</file>
+        <file alias="horizontal_speed.svg">res/Images/horizontal_speed.svg</file>
+        <file alias="vertical_speed.svg">res/Images/vertical_speed.svg</file>
+        <file alias="CustomAppIcon.png">res/Images/CustomAppIcon.png</file>
+        <file alias="waypoint.svg">res/Images/waypoint.svg</file>
+        <file alias="slow.svg">res/Images/ButtonsLettering1.svg</file>
+        <file alias="h.svg">res/Images/ButtonsLettering3.svg</file>
+        <file alias="n.svg">res/Images/ButtonsLettering2.svg</file>
+        <file alias="alert.svg">res/Images/alert.svg</file>
+        <file alias="MovimentoY.svg">res/Images/MovimentoY.svg</file>
+        <file alias="MovimentoZ.svg">res/Images/MovimentoZ.svg</file>
+    </qresource>
+    <qresource prefix="/res">
+        <file alias="QGCLogoFull">res/Images/QGCLogoFull.svg</file>
+        <file alias="QGCLogoWhite">res/Images/QGCLogoWhite.svg</file>
+        <file alias="resources/icons/qgroundcontrol.ico">res/Images/QGCLogoFull.ico</file>
+    </qresource>
+    <qresource prefix="/qmlimages">
+        <file alias="vehicleArrowOpaque.svg">res/Images/Puntatore1.svg</file>
+        <file alias="vehicleArrowOutline.svg">res/Images/Puntatore1.svg</file>
+        <file alias="compassInstrumentArrow.svg">res/Images/compassInstrumentArrow.svg</file>
+        <file alias="attitudePointer.svg">res/Images/attitudePointer.svg</file>
+        <file alias="MapAddMission.svg">res/Images/MapAddMission.svg</file>
+        <file alias="MapAddMissionBlack.svg">res/Images/MapAddMissionBlack.svg</file>
+        <file alias="PaperPlane.svg">res/Images/PaperPlane.svg</file>
+        <file alias="MapSync.svg">res/Images/MapSync.svg</file>
+        <file alias="MapSyncBlack.svg">res/Images/MapSync.svg</file>
+        <file alias="MapSyncChanged.svg">res/Images/MapSync.svg</file>
+        <file alias="Megaphone.svg">res/Images/Megaphone.svg</file>
+        <file alias="crossHair.svg">res/Images/crossHair.svg</file>
+        <file alias="pilotIcon.svg">res/Images/PilotIcon.svg</file>
+        <file alias="ROI.svg">res/Images/ROI.svg</file>
+        <file alias="compassInstrumentDial.svg">res/Images/compassInstrumentDial.svg</file>
+        <file alias="attitudeDial.svg">res/Images/attitudeDial.svg</file>
+        <file alias="TelemRSSI.svg">res/Images/TelemRSSI.svg</file>
+    </qresource>
+    <qresource prefix="/Custom/Widgets">
+        <file alias="Custom/Widgets/CustomArtificialHorizon.qml">res/Custom/Widgets/CustomArtificialHorizon.qml</file>
+        <file alias="Custom/Widgets/CustomAttitudeWidget.qml">res/Custom/Widgets/CustomAttitudeWidget.qml</file>
+        <file alias="Custom/Widgets/CustomCompassWidget.qml">res/Custom/Widgets/CustomCompassWidget.qml</file>
+        <file alias="Custom/Widgets/FlightTimeWidget.qml">res/Custom/Widgets/FlightTimeWidget.qml</file>
+        <file alias="Custom/Widgets/CustomSpeedSelector.qml">res/Custom/Widgets/CustomSpeedSelector.qml</file>
+        <file alias="Custom/Widgets/Safety.qml">res/Custom/Widgets/Safety.qml</file>
+        <file alias="Custom/Widgets/SafetyFull.qml">res/Custom/Widgets/SafetyFull.qml</file>
+        <file alias="Custom/Widgets/CustomRadarWidget.qml">res/Custom/Widgets/CustomRadarWidget.qml</file>
+        <file alias="Custom/Widgets/qmldir">res/Custom/Widgets/qmldir</file>
+    </qresource>
+    <qresource prefix="/Custom/Constants">
+        <file alias="Custom/Constants/Constants.qml">res/Custom/Constants/Constants.qml</file>
+        <file alias="Custom/Constants/qmldir">res/Custom/Constants/qmldir</file>
+    </qresource>
+    <qresource prefix="/qml">
+        <file alias="CustomCalibrationPage.qml">res/Custom/Widgets/CustomCalibrationPage.qml</file>
+        <file alias="CustomSetupView.qml">res/Custom/Widgets/CustomSetupView.qml</file>
+        <file alias="QGroundControl/FlightMap/FlightMap.qml">res/CustomFlightMap.qml</file>
+        <file alias="GeneralSettings.qml">res/CustomGeneralSettings.qml</file>
+        <file alias="QGroundControl/FlightDisplay/FlyViewCustomLayer.qml">res/CustomFlyViewOverlay.qml</file>
+        <file alias="QGroundControl/FlightDisplay/FlyViewWidgetLayer.qml">res/FlyViewWidgetLayerCustom.qml</file>
+        <file alias="QGroundControl/Controls/MainToolBar.qml">res/CustomMainToolbar.qml</file>
+        <file alias="QGroundControl/Controls/TransectStyleMapVisuals.qml">res/CustomTransectStyleMapVisual.qml</file>
+        <file alias="QGroundControl/Controls/CameraCalcGrid.qml">res/CustomCameraCalcGrid.qml</file>
+        <file alias="QGroundControl/Controls/MissionItemIndexLabel.qml">res/CustomMissionItemIndexLabel.qml</file>
+        <file alias="QGroundControl/FlightMap/MissionLineView.qml">res/CustomMissionLineView.qml</file>
+        <file alias="QGroundControl/FlightMap/MapLineArrow.qml">res/CustomMapLineArraw.qml</file>
+        <file alias="QGroundControl/Controls/QGCMapPolygonVisuals.qml">res/CustomMapPolygonVisuals.qml</file>
+        <file alias="QGroundControl/Controls/MainStatusIndicator.qml">res/CustomMainStatusIndicator.qml</file>
+        <file alias="QGroundControl/Controls/ParameterEditorDialog.qml">res/CustomParameterEditorDialog.qml</file>
+        <file alias="QGroundControl/Controls/FlightModeMenuIndicator.qml">res/CustomFlightModeMenuIndicator.qml</file>
+        <file alias="QGroundControl/Controls/ParameterEditor.qml">res/CustomParameterEditor.qml</file>
+        <file alias="QGroundControl/Controls/QGCPipOverlay.qml">res/CustomQGCPipOverlay.qml</file>
+        <file alias="QGroundControl/FlightDisplay/FlyView.qml">res/CustomFlyView.qml</file>
+        <file alias="MainRootWindow.qml">res/CustomMainRootWindow.qml</file>
+        <file alias="QGroundControl/FlightMap/PhotoVideoControl.qml">res/CustomPhotoVideoControl.qml</file>
+    </qresource>
+    <qresource prefix="/toolbar">
+        <file alias="GPSIndicator.qml">res/CustomGPSIndicator.qml</file>
+        <file alias="BatteryIndicator.qml">res/CustomBatteryIndicator.qml</file>
+    </qresource>
+</RCC>

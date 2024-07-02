@@ -105,6 +105,8 @@
 #include "RemoteIDManager.h"
 #include "CustomAction.h"
 #include "CustomActionManager.h"
+#include "constants.h"
+
 
 #if defined(QGC_ENABLE_PAIRING)
 #include "PairingManager.h"

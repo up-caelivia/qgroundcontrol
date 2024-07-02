@@ -877,6 +877,11 @@ void Vehicle::_orbitTelemetryTimeout()
     emit orbitActiveChanged(false);
 }
 
+void Vehicle::announceAltitude()
+{
+    _say("Warning: above 120 meters");
+}
+
 void Vehicle::_handleCameraImageCaptured(const mavlink_message_t& message)
 {
     mavlink_camera_image_captured_t feedback;

@@ -68,8 +68,9 @@ Rectangle {
                 anchors.left:           parent.left
                 anchors.right:          parent.right
                 horizontalAlignment:    Text.AlignHCenter
-                font.pointSize:         ScreenTools.smallFontPointSize
+                font.pointSize:         ScreenTools.mediumFontPointSize
                 visible:                title != ""
+                font.bold:              true
             }
 
             Repeater {

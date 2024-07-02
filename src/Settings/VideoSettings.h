@@ -37,6 +37,9 @@ public:
     DEFINE_SETTINGFACT(lowLatencyMode)
     DEFINE_SETTINGFACT(forceVideoDecoder)
 
+    // Herelink HDMI source switching
+    DEFINE_SETTINGFACT(cameraId)
+
     enum VideoDecoderOptions {
         ForceVideoDecoderDefault = 0,
         ForceVideoDecoderSoftware,

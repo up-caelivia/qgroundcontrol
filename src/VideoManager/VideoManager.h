@@ -21,6 +21,8 @@
 #include "VideoReceiver.h"
 #include "QGCToolbox.h"
 #include "SubtitleWriter.h"
+#include "VideoStreamControl.h"
+
 
 Q_DECLARE_LOGGING_CATEGORY(VideoManagerLog)
 
@@ -57,6 +59,10 @@ public:
     Q_PROPERTY(bool             recording               READ    recording                                   NOTIFY recordingChanged)
     Q_PROPERTY(QSize            videoSize               READ    videoSize                                   NOTIFY videoSizeChanged)
 
+    // Specific to Herelink only, to manage HDMI switching
+    Q_PROPERTY(VideoStreamControl* videoStreamControl   READ    videoStreamControl                          CONSTANT)
+
+
     virtual bool        hasVideo            ();
     virtual bool        isGStreamer         ();
     virtual bool        isUvc               ();
@@ -87,6 +93,9 @@ public:
         const quint32 size = _videoSize;
         return QSize((size >> 16) & 0xFFFF, size & 0xFFFF);
     }
+
+    VideoStreamControl* videoStreamControl () { return _videoStreamControl; }
+
 
 // FIXME: AV: they should be removed after finishing multiple video stream support
 // new arcitecture does not assume direct access to video receiver from QML side, even if it works for now
@@ -176,6 +185,8 @@ protected:
     QString                 _uvcVideoSourceID;
     bool                    _fullScreen             = false;
     Vehicle*                _activeVehicle          = nullptr;
+    VideoStreamControl*     _videoStreamControl     = nullptr;
+
 };
 
 #endif

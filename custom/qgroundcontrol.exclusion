@@ -1,0 +1,52 @@
+<file alias="QGroundControl/FlightDisplay/FlyViewCustomLayer.qml">src/FlightDisplay/FlyViewCustomLayer.qml</file>
+
+<file alias="QGroundControl/FlightDisplay/FlyViewWidgetLayer.qml">src/FlightDisplay/FlyViewWidgetLayer.qml</file>
+
+<file alias="QGroundControl/Controls/MainToolBar.qml">src/ui/toolbar/MainToolBar.qml</file>
+
+<file alias="QGroundControl/Controls/TransectStyleMapVisuals.qml">src/PlanView/TransectStyleMapVisuals.qml</file>
+
+<file alias="QGroundControl/FlightMap/MissionLineView.qml">src/FlightMap/MapItems/MissionLineView.qml</file>
+
+<file alias="GPSIndicator.qml">src/ui/toolbar/GPSIndicator.qml</file>
+
+<file alias="BatteryIndicator.qml">src/ui/toolbar/BatteryIndicator.qml</file>
+
+<file alias="QGroundControl/FlightMap/MapLineArrow.qml">src/MissionManager/MapLineArrow.qml</file>
+
+<file alias="QGroundControl/Controls/CameraCalcGrid.qml">src/PlanView/CameraCalcGrid.qml</file>
+
+<file alias="QGroundControl/Controls/QGCMapPolygonVisuals.qml">src/MissionManager/QGCMapPolygonVisuals.qml</file>
+
+<file alias="QGroundControl/Controls/MissionItemIndexLabel.qml">src/QmlControls/MissionItemIndexLabel.qml</file>
+
+<file alias="QGroundControl/Controls/MainStatusIndicator.qml">src/ui/toolbar/MainStatusIndicator.qml</file>
+
+<file alias="QGroundControl/Controls/QGCPipOverlay.qml">src/QmlControls/QGCPipOverlay.qml</file>
+
+<file alias="QGroundControl/FlightDisplay/FlyView.qml">src/FlightDisplay/FlyView.qml</file>
+
+<file alias="QGroundControl/Controls/FlightModeMenuIndicator.qml">src/ui/toolbar/FlightModeMenuIndicator.qml</file>
+
+<file alias="MainRootWindow.qml">src/ui/MainRootWindow.qml</file>
+
+<file alias="QGroundControl/Controls/ParameterEditor.qml">src/QmlControls/ParameterEditor.qml</file>
+
+<file alias="QGroundControl/Controls/ParameterEditorDialog.qml">src/QmlControls/ParameterEditorDialog.qml</file>
+
+<file alias="QGroundControl/FlightMap/PhotoVideoControl.qml">src/FlightMap/Widgets/PhotoVideoControl.qml</file>
+
+
+        <file alias="QGroundControl/FlightMap/FlightMap.qml">src/FlightMap/FlightMap.qml</file>
+
+        <file alias="GeneralSettings.qml">src/ui/preferences/GeneralSettings.qml</file>
+
+
+
+
+
+
+
+
+
+

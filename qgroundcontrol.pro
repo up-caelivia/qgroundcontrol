@@ -805,17 +805,20 @@ HEADERS += \
     src/comm/SerialLink.h \
 }
 
+HEADERS += \
+    src/GPS/Drivers/src/rtcm.h \
+    src/GPS/RTCM/RTCMMavlink.h \
+
+
 !MobileBuild {
 HEADERS += \
     src/GPS/Drivers/src/gps_helper.h \
-    src/GPS/Drivers/src/rtcm.h \
     src/GPS/Drivers/src/ashtech.h \
     src/GPS/Drivers/src/ubx.h \
     src/GPS/Drivers/src/sbf.h \
     src/GPS/GPSManager.h \
     src/GPS/GPSPositionMessage.h \
     src/GPS/GPSProvider.h \
-    src/GPS/RTCM/RTCMMavlink.h \
     src/GPS/definitions.h \
     src/GPS/satellite_info.h \
     src/GPS/sensor_gps.h \
@@ -1052,16 +1055,19 @@ contains (DEFINES, QGC_ENABLE_PAIRING) {
     }
 }
 
+SOURCES += \
+    src/GPS/RTCM/RTCMMavlink.cc \
+    src/GPS/Drivers/src/rtcm.cpp \
+
+
 !MobileBuild {
 SOURCES += \
     src/GPS/Drivers/src/gps_helper.cpp \
-    src/GPS/Drivers/src/rtcm.cpp \
     src/GPS/Drivers/src/ashtech.cpp \
     src/GPS/Drivers/src/ubx.cpp \
     src/GPS/Drivers/src/sbf.cpp \
     src/GPS/GPSManager.cc \
     src/GPS/GPSProvider.cc \
-    src/GPS/RTCM/RTCMMavlink.cc \
     src/Joystick/JoystickSDL.cc \
     src/RunGuard.cc \
 }

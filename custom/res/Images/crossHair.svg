@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 288 36">
+  <defs>
+    <style>
+      .cls-1 {
+        stroke-width: 0px;
+      }
+
+      .cls-1, .cls-2, .cls-3 {
+        fill: none;
+      }
+
+      .cls-2, .cls-3 {
+        stroke: #83f52c;
+        stroke-miterlimit: 10;
+        stroke-width: 6px;
+      }
+
+      .cls-3 {
+        stroke-linecap: round;
+      }
+    </style>
+  </defs>
+  <rect class="cls-1" width="288" height="36"/>
+  <line class="cls-2" y1="18" x2="72" y2="18"/>
+  <line class="cls-2" x1="288" y1="18" x2="216" y2="18"/>
+  <path class="cls-3" d="M194.5,31.1l-48.7-12.6c-1.2-.3-2.4-.3-3.5,0l-48.7,12.6"/>
+</svg>

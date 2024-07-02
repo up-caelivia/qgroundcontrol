@@ -552,7 +552,7 @@ Item {
                     },
                     ToolStripAction {
                         text:               _missionController.isROIActive ? qsTr("Cancel ROI") : qsTr("ROI")
-                        iconSource:         "/qmlimages/MapAddMission.svg"
+                        iconSource:         "/qmlimages/ROI.svg"
                         enabled:            !_missionController.onlyInsertTakeoffValid
                         visible:            toolStrip._isMissionLayer && _planMasterController.controllerVehicle.roiModeSupported
                         checkable:          !_missionController.isROIActive

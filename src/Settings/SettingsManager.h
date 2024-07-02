@@ -29,6 +29,8 @@
 #include "ADSBVehicleManagerSettings.h"
 #include <QVariantList>
 #include "RemoteIDSettings.h"
+#include "NTRIPSettings.h"
+
 
 /// Provides access to all app settings
 class SettingsManager : public QGCTool
@@ -50,6 +52,8 @@ public:
     Q_PROPERTY(QObject* offlineMapsSettings             READ offlineMapsSettings            CONSTANT)
     Q_PROPERTY(QObject* firmwareUpgradeSettings         READ firmwareUpgradeSettings        CONSTANT)
     Q_PROPERTY(QObject* adsbVehicleManagerSettings      READ adsbVehicleManagerSettings     CONSTANT)
+    Q_PROPERTY(QObject* ntripSettings                   READ ntripSettings                  CONSTANT)
+
 #if !defined(NO_ARDUPILOT_DIALECT)
     Q_PROPERTY(QObject* apmMavlinkStreamRateSettings    READ apmMavlinkStreamRateSettings   CONSTANT)
 #endif
@@ -69,6 +73,8 @@ public:
     OfflineMapsSettings*            offlineMapsSettings         (void) { return _offlineMapsSettings; }
     FirmwareUpgradeSettings*        firmwareUpgradeSettings     (void) { return _firmwareUpgradeSettings; }
     ADSBVehicleManagerSettings*     adsbVehicleManagerSettings  (void) { return _adsbVehicleManagerSettings; }
+    NTRIPSettings*                  ntripSettings               (void) { return _ntripSettings; }
+
 #if !defined(NO_ARDUPILOT_DIALECT)
     APMMavlinkStreamRateSettings*   apmMavlinkStreamRateSettings(void) { return _apmMavlinkStreamRateSettings; }
 #endif
@@ -86,6 +92,8 @@ private:
     OfflineMapsSettings*            _offlineMapsSettings;
     FirmwareUpgradeSettings*        _firmwareUpgradeSettings;
     ADSBVehicleManagerSettings*     _adsbVehicleManagerSettings;
+    NTRIPSettings*                  _ntripSettings;
+
 #if !defined(NO_ARDUPILOT_DIALECT)
     APMMavlinkStreamRateSettings*   _apmMavlinkStreamRateSettings;
 #endif
