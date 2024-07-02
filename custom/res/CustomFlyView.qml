@@ -167,6 +167,8 @@ Item {
         id: videoControl
     }
 
+    property var hasVideo: QGroundControl.videoManager.hasVideo ? true : false
+
     QGCPipOverlay {
         id:                     _pipOverlay
         anchors.top:            parent.top
@@ -178,13 +180,13 @@ Item {
 
         anchors.margins:        _toolsMargin
         item1IsFullSettingsKey: "MainFlyWindowIsMap"
-        item1:                  mapControl
-        item2:                  QGroundControl.videoManager.hasVideo ? videoControl : null
+        item1:                  hasVideo ? videoControl : mapControl
+        item2:                  hasVideo ? mapControl : null
         fullZOrder:             _fullItemZorder
         pipZOrder:              _pipItemZorder
 
-        show:                   !QGroundControl.videoManager.fullScreen &&
-                                    (videoControl.pipState.state === videoControl.pipState.pipState || mapControl.pipState.state === mapControl.pipState.pipState)
+        // show:                   !QGroundControl.videoManager.fullScreen &&
+        //                             (videoControl.pipState.state === videoControl.pipState.pipState || mapControl.pipState.state === mapControl.pipState.pipState)
     }
 
 
