@@ -25,6 +25,7 @@ QtObject {
     property real   rotationYaw225Value:    _distanceSensors ? _distanceSensors.rotationYaw225.value : NaN
     property real   rotationYaw270Value:    _distanceSensors ? _distanceSensors.rotationYaw270.value : NaN
     property real   rotationYaw315Value:    _distanceSensors ? _distanceSensors.rotationYaw315.value : NaN
+    property real   rotationPitch270Value:  _distanceSensors ? _distanceSensors.rotationPitch270.value : NaN
     property real   maxDistance:            _distanceSensors ? _distanceSensors.maxDistance.value : NaN
 
     property string rotationNoneValueString:    _distanceSensors ? _distanceSensors.rotationNone.valueString : _noValueStr
@@ -35,9 +36,7 @@ QtObject {
     property string rotationYaw225ValueString:  _distanceSensors ? _distanceSensors.rotationYaw225.valueString : _noValueStr
     property string rotationYaw270ValueString:  _distanceSensors ? _distanceSensors.rotationYaw270.valueString : _noValueStr
     property string rotationYaw315ValueString:  _distanceSensors ? _distanceSensors.rotationYaw315.valueString : _noValueStr
-
     property string rotationPitch270ValueString:  _distanceSensors ? _distanceSensors.rotationPitch270.valueString : _noValueStr
-    property real rotationPitch270Value:  _distanceSensors ? _distanceSensors.rotationPitch270.value : NaN
 
     property var    rgRotationValues:           [ rotationNoneValue, rotationYaw45Value, rotationYaw90Value, rotationYaw135Value, rotationYaw180Value, rotationYaw225Value, rotationYaw270Value, rotationYaw315Value ]
     property var    rgRotationValueStrings:     [ rotationNoneValueString, rotationYaw45ValueString, rotationYaw90ValueString, rotationYaw135ValueString, rotationYaw180ValueString, rotationYaw225ValueString, rotationYaw270ValueString, rotationYaw315ValueString ]
@@ -53,4 +52,5 @@ QtObject {
     onRotationYaw225ValueChanged:   rotationValueChanged()
     onRotationYaw270ValueChanged:   rotationValueChanged()
     onRotationYaw315ValueChanged:   rotationValueChanged()
+    onRotationPitch270ValueChanged: rotationValueChanged()
 }

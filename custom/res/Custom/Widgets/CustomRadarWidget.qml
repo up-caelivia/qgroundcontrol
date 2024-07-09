@@ -37,14 +37,14 @@ Item {
     property real _shortDash:           size * 0.25
     property real _fontSize:            ScreenTools.defaultFontPointSize * 0.75
 
-    property real distance:             proximityValues.rotationPitch270Value //proximityValues.rotationNoneValue
+    property real distance:             proximityValues.rotationPitch270Value
     property real maxDistance:          50  //proximityValues.maxDistance
     //property real labelHeight:          50  // Height for the "Front radar" label
 
 
     ProximityRadarValues {
         id:                     proximityValues
-        vehicle:                root.vehicle
+        vehicle:                _activeVehicle
     }
 
     Rectangle {
