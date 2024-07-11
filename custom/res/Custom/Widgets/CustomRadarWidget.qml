@@ -37,7 +37,7 @@ Item {
     property real _shortDash:           size * 0.25
     property real _fontSize:            ScreenTools.defaultFontPointSize * 0.75
 
-    property real distance:             proximityValues.rotationPitch270Value
+    property real distance:              proximityValues.rotationPitch270Value
     property real maxDistance:          50  //proximityValues.maxDistance
     //property real labelHeight:          50  // Height for the "Front radar" label
 
@@ -82,16 +82,21 @@ Item {
         Rectangle {
             id: scale
             color: "transparent"
+            height: size * 0.85
+
+
             width: size
-            height: size
+            //height: size
             anchors.centerIn: parent
 
             Item {
                 anchors.fill: parent
+                // height: size * 0.9
 
-                Column {
-                    anchors.centerIn: parent
-                    spacing: _reticleSpacing
+
+                //Column {
+                  //  anchors.centerIn: parent
+                    // spacing: (parent.height - 11 * _reticleHeight) / 10
 
                     Repeater {
                         model: maxDistance / 5 + 1
@@ -99,6 +104,7 @@ Item {
                             property int _pitch: maxDistance - modelData * 5
                             anchors.horizontalCenter: parent.horizontalCenter
                             anchors.horizontalCenterOffset: +(_longDash / 2 * 1.2)
+                            y: parent.height - (parent.height * ((_pitch) / maxDistance)) - height / 2
 
                             width: (_pitch % 10) === 0 ? _longDash : _shortDash
                             height: _reticleHeight
@@ -118,7 +124,7 @@ Item {
                             }
                         }
                     }
-                }
+                //}
 
                 Rectangle {
                     id: distanceBar
@@ -127,7 +133,7 @@ Item {
                     color: get_color()
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.horizontalCenterOffset: +(_longDash / 2 * 1.2)
-                    y: parent.height * (1 - distance / maxDistance) - height / 2
+                    y: parent.height - (parent.height * ((distance) / maxDistance)) - height / 2
                     visible: distance > 0 && distance < maxDistance
 
                     Rectangle {
