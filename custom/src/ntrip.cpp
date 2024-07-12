@@ -269,9 +269,11 @@ void NTRIPTCPLink::_sendNMEA() {
         double alt = 20; //gcsPosition.altitude();
     #else
 
-        QGeoCoordinate gcsPosition = _toolbox->multiVehicleManager()->activeVehicle()->coordinate();            //qgcPositionManager()->gcsPosition();
+        Vehicle* _activeVehicle = _toolbox->multiVehicleManager()->activeVehicle();
+        QGeoCoordinate gcsPosition =_activeVehicle->coordinate();            //qgcPositionManager()->gcsPosition();
 
-        if(!gcsPosition.isValid()) {
+        if(!gcsPosition.isValid() || _activeVehicle->gpsFactGroup()->getFact("count")->rawValue().value<int>() < 6
+            || _activeVehicle->gpsFactGroup()->getFact("lock")->rawValue().value<int>() < 3 ) {
             return;
         }
         double lat = gcsPosition.latitude();
