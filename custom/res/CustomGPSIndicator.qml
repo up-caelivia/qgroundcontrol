@@ -16,6 +16,9 @@ import QGroundControl.MultiVehicleManager   1.0
 import QGroundControl.ScreenTools           1.0
 import QGroundControl.Palette               1.0
 
+import Constants  1.0
+
+
 //-------------------------------------------------------------------------
 //-- GPS Indicator
 Item {
@@ -107,13 +110,25 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         anchors.left:           gpsIcon.right
         // anchors.leftMargin:
-        leftPadding: 10
+        leftPadding: ScreenTools.defaultFontPixelHeight
+        spacing: ScreenTools.defaultFontPixelHeight * 0.1
 
         QGCLabel {
-            //anchors.horizontalCenter:   hdopValue.horizontalCenter
+            anchors.horizontalCenter:   gpsValuesColumn.horizontalCenter
             visible:                    _activeVehicle
             color:                      qgcPal.buttonText
             text:                       _activeVehicle ? _activeVehicle.gps.count.valueString : ""
+        }
+
+        Rectangle {
+            id: statusButton
+            anchors.horizontalCenter:   gpsValuesColumn.horizontalCenter
+            width: 8
+            height: 8
+            radius: 4
+            visible: Constants.ntripEnabled
+            color: Constants.ntripReceiving ? "green" : "red"
+
         }
 
     }

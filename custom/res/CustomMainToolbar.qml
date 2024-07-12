@@ -54,6 +54,7 @@ Rectangle {
         visible:        qgcPal.globalTheme === QGCPalette.Light
     }
 
+
     RowLayout {
         id:                     viewButtonRow
         anchors.bottomMargin:   1
@@ -61,7 +62,6 @@ Rectangle {
         anchors.bottom:         parent.bottom
         spacing:                ScreenTools.defaultFontPixelWidth / 2
 
-        //left logo
         QGCToolBarButton {
             id:                     currentButton
             Layout.preferredHeight: viewButtonRow.height
@@ -70,37 +70,11 @@ Rectangle {
             onClicked:              mainWindow.showToolSelectDialog()
         }
 
-        QGCButton {
-
-            id:                 connectButton
-            text:               qsTr("Connect")
-            visible:            !_activeVehicle && 0
-            enabled:            getEnable() //count > 1  && (obj == undefined || obj.link != null)// the first one is at 14550
-
-            property var count: model.count
-            property var model: QGroundControl.linkManager.linkConfigurations
-
-            function getEnable() {
-
-                for (var i = 0; i < count; i++)
-                    if (model.get(i).localPort == 14551 && !model.get(i).link) {
-                        return true
-                    }
-
-                return false
-            }
-
-
-            onClicked:
-            {                
-                for (var i = 0; i < count; i++)
-                    if (model.get(i).localPort == 14551 && !model.get(i).link) {
-                        QGroundControl.linkManager.createConnectedLink(model.get(i))
-                        console.log("Try to connect")
-                        break
-                    }
-            }
-        }
+        // MainStatusIndicator {
+        //     Layout.preferredHeight: viewButtonRow.height
+        //     visible:                currentToolbar === flyViewToolbar
+        //     anchors.right: parent.right
+        // }
 
         QGCButton {
             id:                 disconnectButton
@@ -110,22 +84,6 @@ Rectangle {
         }
     }
 
-
-
-    // manual and the other on the right
-    MainStatusIndicator {
-
-        id: mainIndicator
-        x: parent.width - width - ScreenTools.defaultFontPixelWidth * 2
-        anchors.verticalCenter: parent.verticalCenter
-        visible:                currentToolbar === flyViewToolbar
-        //color: _mainStatusBGColor
-        // function getX(){
-        //     return brand_image.visible ? parent.width - width - brand_image.width - 40 : parent.width - width - 10
-        // }
-    }
-
-
     // buttons scrollable list
     QGCFlickable {
         id:                     toolsFlickable
@@ -134,7 +92,7 @@ Rectangle {
         anchors.bottomMargin:   1
         anchors.top:            parent.top
         anchors.bottom:         parent.bottom
-        anchors.right:          mainIndicator.left
+        anchors.right:          parent.right
         contentWidth:           indicatorLoader.x + indicatorLoader.width
         flickableDirection:     Flickable.HorizontalFlick
 
@@ -148,16 +106,15 @@ Rectangle {
                                     (currentToolbar == planViewToolbar ? "qrc:/qml/PlanToolBarIndicators.qml" : "")
         }
 
-        FlightTimeWidget {
-            id: tf
-            anchors.left:       indicatorLoader.right
-            anchors.top:        parent.top
-            anchors.bottom:     parent.bottom
-            // anchors.leftMargin: 10
-            anchors.margins: ScreenTools.defaultFontPixelHeight * 0.66
-            visible:            _activeVehicle && currentToolbar === flyViewToolbar
-        }
     }
+
+    MainStatusIndicator {
+        id: mainIndicator
+        x: parent.width - width - ScreenTools.defaultFontPixelWidth * 2
+        anchors.verticalCenter: parent.verticalCenter
+        visible:                currentToolbar === flyViewToolbar
+    }
+
 
     // Small parameter download progress bar
     Rectangle {

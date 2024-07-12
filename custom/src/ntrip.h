@@ -16,6 +16,7 @@
 
 #include "Drivers/src/rtcm.h"
 #include "RTCM/RTCMMavlink.h"
+#include "constants.h"
 
 class NTRIPSettings;
 
@@ -54,6 +55,7 @@ private:
     void _hardwareConnect(void);
     void _parse(const QByteArray &buffer);
     void startTimer(void);
+    Constants* constants = Constants::getInstance();
 
     QTcpSocket*     _socket =   nullptr;
 

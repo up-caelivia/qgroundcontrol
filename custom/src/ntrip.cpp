@@ -29,7 +29,7 @@ void NTRIP::setToolbox(QGCToolbox* toolbox)
     NTRIPSettings* settings = qgcApp()->toolbox()->settingsManager()->ntripSettings();
     if (settings->ntripServerConnectEnabled()->rawValue().toBool()) {
         qCDebug(NTRIPLog) << settings->ntripEnableVRS()->rawValue().toBool();
-        _rtcmMavlink = new RTCMMavlink(*toolbox);
+        _rtcmMavlink = new RTCMMavlink(*toolbox);        
 
         _tcpLink = new NTRIPTCPLink(settings->ntripServerHostAddress()->rawValue().toString(),
                                     settings->ntripServerPort()->rawValue().toInt(),
@@ -72,6 +72,9 @@ NTRIPTCPLink::NTRIPTCPLink(const QString& hostAddress,
             _whitelist.insert(msg_int);
         }
     }
+
+    constants->setNtripEnabled(true);
+
 
    // qDebug() << "AAAAAAA: " << _whitelist;
 
@@ -161,6 +164,7 @@ void NTRIPTCPLink::_hardwareConnect()
     if (!_socket->waitForConnected(2000)) {
         qCDebug(NTRIPLog) << "NTRIP Socket failed to connect";
 
+        constants->setNtripReceiving(false);
         qDebug() << "Socket failed to connect";
 
         //emit error(_socket->errorString());
@@ -198,6 +202,8 @@ void NTRIPTCPLink::_parse(const QByteArray &buffer)
             _state = NTRIPState::accumulating_rtcm_packet;
         }
         if(_rtcm_parsing->addByte(byte)) {
+
+            constants->setNtripReceiving(true);
 
             _state = NTRIPState::waiting_for_rtcm_header;
             QByteArray message((char*)_rtcm_parsing->message(), static_cast<int>(_rtcm_parsing->messageLength()));

@@ -11,6 +11,7 @@ import QtQuick 2.12
 
 import QGroundControl               1.0
 import QGroundControl.ScreenTools   1.0
+import Custom.Widgets 1.0
 
 //-------------------------------------------------------------------------
 //-- Toolbar Indicators
@@ -68,5 +69,15 @@ Row {
             source:             modelData
             visible:            item.showIndicator
         }
+    }
+
+    FlightTimeWidget {
+        id: tf
+        //anchors.right:       mainIndicator.left
+        anchors.top:        parent.top
+        anchors.bottom:     parent.bottom
+        // anchors.leftMargin: 10
+        //anchors.margins: ScreenTools.defaultFontPixelHeight * 0.66
+        visible:            _activeVehicle
     }
 }

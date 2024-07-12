@@ -11,7 +11,6 @@ class Constants : public QObject {
 
     Q_OBJECT
 
-
     Q_PROPERTY(bool developer READ developer CONSTANT)
     Q_PROPERTY(QVector<QString> factNames READ factNames CONSTANT)
     Q_PROPERTY(QVector<QString> factDescription READ factDescription CONSTANT)
@@ -22,6 +21,10 @@ class Constants : public QObject {
     Q_PROPERTY(int maxAltitudeWarning READ maxAltitudeWarning CONSTANT)
     Q_PROPERTY(double altitudeFactor READ altitudeFactor CONSTANT)
     Q_PROPERTY(int lastMaxHeight READ lastMaxHeight WRITE setLastMaxHeight NOTIFY lastMaxHeightChanged)
+
+    Q_PROPERTY(bool ntripEnabled READ ntripEnabled WRITE setNtripEnabled NOTIFY ntripEnabledChanged)
+    Q_PROPERTY(bool ntripReceiving READ ntripReceiving WRITE setNtripReceiving NOTIFY ntripReceivingChanged)
+
     Q_PROPERTY(QVector<QString> factSpeedNames READ factSpeedNames CONSTANT)
     Q_PROPERTY(QVector<int> lowSpeed READ lowSpeed CONSTANT)
     Q_PROPERTY(QVector<int> normalSpeed READ normalSpeed CONSTANT)
@@ -58,17 +61,41 @@ public:
     //QVector<int> highSpeed() const { return {1000, 250, 500, 60}; }   // CNES
     QVector<int> highSpeed() const { return {1000, 150, 250, 60}; }
 
+    bool ntripEnabled() const { return ntripEnableV; }
+    bool ntripReceiving() const { return ntripReceivedV; }
+
+    void setNtripEnabled(bool enable) {
+        if (ntripEnableV != enable) {
+            ntripEnableV = enable;
+            emit ntripEnabledChanged();
+        }
+    }
+
+    void setNtripReceiving(bool received) {
+        if (ntripReceivedV != received) {
+            ntripReceivedV = received;
+            emit ntripReceivingChanged();
+        }
+    }
+
 
     QVector<QString> settingToShow() const { return {"Motors", "Safety"}; }
     int compassNumber() const { return 1; }
 
     static QObject* constants_singleton_provider(QQmlEngine* engine, QJSEngine* scriptEngine);
+    static Constants* getInstance();
+
 
 signals:
     void lastMaxHeightChanged();
+    void ntripEnabledChanged();
+    void ntripReceivingChanged();
+
 
 private:
     int m_lastMaxHeight;
+    bool ntripEnableV = false;
+    bool ntripReceivedV = false;
 };
 
 

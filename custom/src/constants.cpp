@@ -4,6 +4,12 @@ QObject* Constants::constants_singleton_provider(QQmlEngine* engine, QJSEngine* 
     Q_UNUSED(engine)
     Q_UNUSED(scriptEngine)
 
+    return getInstance();
+}
+
+Constants* Constants::getInstance()
+{
+
     static Constants* constants = nullptr;
 
     if (constants == nullptr)
