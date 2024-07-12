@@ -123,9 +123,9 @@ Item {
         Rectangle {
             id: statusButton
             anchors.horizontalCenter:   gpsValuesColumn.horizontalCenter
-            width: 8
-            height: 8
-            radius: 4
+            width: ScreenTools.defaultFontPixelWidth
+            height: ScreenTools.defaultFontPixelWidth
+            radius: ScreenTools.defaultFontPixelWidth / 2
             visible: Constants.ntripEnabled
             color: Constants.ntripReceiving ? "green" : "red"
 

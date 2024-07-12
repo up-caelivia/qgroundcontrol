@@ -39,7 +39,7 @@ Rectangle {
 
     property real   _labelWidth:                ScreenTools.defaultFontPixelWidth * 20
     property real   _comboFieldWidth:           ScreenTools.defaultFontPixelWidth * 30
-    property real   _valueFieldWidth:           ScreenTools.defaultFontPixelWidth * 10
+    property real   _valueFieldWidth:           ScreenTools.defaultFontPixelWidth * 10 * 2
     property string _mapProvider:               QGroundControl.settingsManager.flightMapSettings.mapProvider.value
     property string _mapType:                   QGroundControl.settingsManager.flightMapSettings.mapType.value
     property Fact   _followTarget:              QGroundControl.settingsManager.appSettings.followTarget
@@ -1068,7 +1068,7 @@ Rectangle {
                     }
                     Rectangle {
                         Layout.preferredHeight: ntripGrid.y + ntripGrid.height + _margins
-                        Layout.preferredWidth:  ntripGrid.width + (_margins * 2)
+                        Layout.preferredWidth:  ntripGrid.width*2 + (_margins * 2)
                         color:                  qgcPal.windowShade
                         visible:                ntripSectionLabel.visible
                         Layout.fillWidth:       true

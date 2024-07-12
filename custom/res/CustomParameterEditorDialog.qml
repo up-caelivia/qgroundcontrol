@@ -44,9 +44,9 @@ QGCPopupDialog {
     property bool   _allowDefaultReset:         fact.defaultValueAvailable && (QGroundControl.corePlugin.showAdvancedUI || !_editingParameter)
     property bool   _showCombo:                 fact.enumStrings.length !== 0 && fact.bitmaskStrings.length === 0 && !validate
 
-    property int selectedIndex
-    property double max: Constants.factMax[selectedIndex]
-    property double min: Constants.factMin[selectedIndex]
+    property int selectedIndex: -1
+    property double max: selectedIndex == -1 ? 0 : Constants.factMax[selectedIndex]
+    property double min: selectedIndex == -1 ? 0 : Constants.factMin[selectedIndex]
     property bool developer: Constants.developer
     property bool factor: ( fact.units == "cm" || fact.units == "cm/s" ) ? true : false
 
@@ -58,8 +58,8 @@ QGCPopupDialog {
 
     onAccepted: {
 
-        var errStringCustom = developer ? "" : customControl()
-        //console.log(errStringCustom)
+        var errStringCustom = developer || selectedIndex == -1 ? "" : customControl()
+        //console.log(selectedIndex)
 
         if (validationError.text.includes("press another time on the save button") && oldValue == valueField.text) {}   // ok save
         else {
