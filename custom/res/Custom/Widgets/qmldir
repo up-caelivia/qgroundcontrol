@@ -8,5 +8,6 @@ CustomSpeedSelector     1.0     CustomSpeedSelector.qml
 CustomRadarWidget     1.0     CustomRadarWidget.qml
 Safety     1.0     Safety.qml
 SafetyFull     1.0     SafetyFull.qml
+CustomNTRIP     1.0     CustomNTRIP.qml
 
 

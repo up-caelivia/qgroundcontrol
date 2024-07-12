@@ -47,6 +47,7 @@
         <file alias="Custom/Widgets/SafetyFull.qml">res/Custom/Widgets/SafetyFull.qml</file>
         <file alias="Custom/Widgets/CustomRadarWidget.qml">res/Custom/Widgets/CustomRadarWidget.qml</file>
         <file alias="Custom/Widgets/qmldir">res/Custom/Widgets/qmldir</file>
+        <file alias="CustomNTRIP.qml">res/Custom/Widgets/CustomNTRIP.qml</file>
     </qresource>
     <qresource prefix="/Custom/Constants">
         <file alias="Custom/Constants/Constants.qml">res/Custom/Constants/Constants.qml</file>

@@ -47,6 +47,8 @@ public:
             delete pCommLinks;
         if(pOfflineMaps)
             delete pOfflineMaps;
+        if(pNtrip)
+            delete pNtrip;
 #if defined(QGC_GST_TAISYNC_ENABLED)
         if(pTaisync)
             delete pTaisync;
@@ -76,6 +78,8 @@ public:
     QmlComponentInfo* pGeneral                  = nullptr;
     QmlComponentInfo* pCommLinks                = nullptr;
     QmlComponentInfo* pOfflineMaps              = nullptr;
+    QmlComponentInfo* pNtrip                    = nullptr;
+
 #if defined(QGC_GST_TAISYNC_ENABLED)
     QmlComponentInfo* pTaisync                  = nullptr;
 #endif
@@ -139,6 +143,13 @@ QVariantList &QGCCorePlugin::settingsPages()
                                                 QUrl::fromUserInput("qrc:/qml/OfflineMap.qml"),
                                                 QUrl::fromUserInput("qrc:/res/waves.svg"));
         _p->settingsList.append(QVariant::fromValue(reinterpret_cast<QmlComponentInfo*>(_p->pOfflineMaps)));
+
+        _p->pNtrip = new QmlComponentInfo(tr("NTRIP"),
+                                            QUrl::fromUserInput("qrc:/Custom/Widgets/CustomNTRIP.qml"),
+                                            QUrl::fromUserInput("qrc:/res/gear-white.svg"));
+        _p->settingsList.append(QVariant::fromValue(reinterpret_cast<QmlComponentInfo*>(_p->pNtrip)));
+
+
 #if defined(QGC_GST_TAISYNC_ENABLED)
         _p->pTaisync = new QmlComponentInfo(tr("Taisync"),
                                             QUrl::fromUserInput("qrc:/qml/TaisyncSettings.qml"),
