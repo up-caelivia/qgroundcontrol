@@ -22,8 +22,6 @@
 #define MSG_TYPE_1006 1006
 #define MSG_TYPE_1005 1005
 
-static LatLongAlt decode_type1005_1006(const QByteArray &data);
-
 
 NTRIP::NTRIP(QGCApplication* app, QGCToolbox* toolbox)
     : QGCTool(app, toolbox)

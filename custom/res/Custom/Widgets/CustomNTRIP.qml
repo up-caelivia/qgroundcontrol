@@ -185,7 +185,7 @@ Rectangle {
                     QGCLabel {
                         id:         ntripSectionLabel2
                         text:       qsTr("NTRIP / RTCM Informations")
-                        visible:    QGroundControl.settingsManager.ntripSettings.visible
+                        visible:            Constants.ntripReceiving
                     }
 
                     Rectangle {
