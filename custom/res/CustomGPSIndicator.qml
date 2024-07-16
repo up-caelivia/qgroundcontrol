@@ -9,6 +9,9 @@
 
 import QtQuick          2.11
 import QtQuick.Layouts  1.11
+import QtQuick.Controls 2.4
+import QtQuick.Dialogs  1.3
+import QtQuick.Window   2.11
 
 import QGroundControl                       1.0
 import QGroundControl.Controls              1.0
@@ -127,7 +130,39 @@ Item {
             height: ScreenTools.defaultFontPixelWidth
             radius: ScreenTools.defaultFontPixelWidth / 2
             visible: Constants.ntripEnabled
-            color: Constants.ntripReceiving ? "green" : "red"
+            color: get_color()
+
+            function get_color() {
+
+                if(Constants.authError){
+                    mainWindow.showMessageDialog("NTRIP",
+                        qsTr("Credentials Error."),
+                        StandardButton.Ok,
+                        function() { return; })
+                    return "orange"
+                }
+
+                if(Constants.mountError){
+                    mainWindow.showMessageDialog("NTRIP",
+                        qsTr("Mount Point Error."),
+                        StandardButton.Ok,
+                        function() { return; })
+                    return "orange"
+                }
+
+                // if(!Constants.ntripReceiving){
+                //     mainWindow.showMessageDialog("NTRIP",
+                //         qsTr("Check Internet Connection or Server's IP/Port."),
+                //         StandardButton.Ok,
+                //         function() { return; })
+                //     return "orange"
+                // }
+
+                return Constants.ntripReceiving ? "green" : "red"
+
+
+
+            }
 
         }
 

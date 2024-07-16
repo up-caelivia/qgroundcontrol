@@ -15,6 +15,14 @@
 #include "PositionManager.h"
 #include "NTRIPSettings.h"
 #include <QDebug>
+#include <cstring>
+#include <cstdio>
+
+#define RTCM3_PREAMBLE 0xD3
+#define MSG_TYPE_1006 1006
+#define MSG_TYPE_1005 1005
+
+static LatLongAlt decode_type1005_1006(const QByteArray &data);
 
 
 NTRIP::NTRIP(QGCApplication* app, QGCToolbox* toolbox)
@@ -222,6 +230,11 @@ void NTRIPTCPLink::_parse(const QByteArray &buffer)
                 emit RTCMDataUpdate(message);
                 qCDebug(NTRIPLog) << "Sending " << id << "of size " << message.length();
                 //qDebug() << "AAAAAAA: " << message;
+                constants->setnumM(0);
+
+                if(id == 1005 || id == 1006)
+                    decode_type1005_1006(message);
+
 
             } else {
                 qCDebug(NTRIPLog) << "Ignoring " << id;
@@ -244,12 +257,25 @@ void NTRIPTCPLink::_readBytes(void)
 
     if(_state == NTRIPState::waiting_for_http_response) {
         QString line = _socket->readLine();
-        if (line.contains("200")){
+        if (line.contains("ICY 200")){
             _state = NTRIPState::waiting_for_rtcm_header;
+            qDebug() << "AAAA: " << line;
+
+            constants->setauthError(false);
+            constants->setmountError(false);
+
             startTimer();
         } else {
             qCWarning(NTRIPLog) << "Server responded with " << line;
             qgcApp()->showAppMessage("Unable to start NTRIP");
+            qDebug() << "AAAA: " << line;
+
+            if(line.contains("401"))
+                constants->setauthError(true);
+
+            if(line.contains("SOURCETABLE 200") || line.contains("Server: "))
+                constants->setmountError(true);
+
             return;
 
             // TODO: Handle failure. Reconnect?
@@ -349,3 +375,124 @@ QString NTRIPTCPLink::_getCheckSum(QString line) {
 
     return QString("%1").arg(checksum, 0, 16);
 }
+
+
+
+// --------------------------------------------------------------
+
+
+static uint32_t getbitu(const QByteArray &buff, int pos, int len) {
+    uint32_t bits = 0;
+    for (int i = pos; i < pos + len; i++) {
+        if (i / 8 >= buff.size()) {
+            qWarning() << "Buffer overrun in getbitu";
+            return 0;
+        }
+        bits = (bits << 1) | ((buff[i / 8] >> (7 - i % 8)) & 1u);
+    }
+    return bits;
+}
+
+static int32_t getbits(const QByteArray &buff, int pos, int len) {
+    int32_t bits = getbitu(buff, pos, len);
+    if (len <= 0 || len >= 32 || !(bits & (1u << (len - 1)))) {
+        return bits;
+    }
+    return bits | (~0u << len); // Extend sign
+}
+
+static int64_t getbits_38(const QByteArray &buff, int pos) {
+    return (int64_t)getbits(buff, pos, 32) * 64 + getbitu(buff, pos + 32, 6);
+}
+
+static LatLongAlt convertECEFToLatLonAlt(double X, double Y, double Z) {
+    LatLongAlt result = {0, 0, 0, 0, 0, 0, true};
+    const double a = 6378137.0; // WGS-84 semi-major axis
+    const double f = 1.0 / 298.257223563; // WGS-84 flattening
+    const double b = a * (1 - f); // semi-minor axis
+    const double e2 = f * (2 - f); // first eccentricity squared
+    const double ep2 = (a * a - b * b) / (b * b); // second eccentricity squared
+
+    double p = sqrt(X * X + Y * Y);
+    double theta = atan2(Z * a, p * b);
+
+    result.longitude = atan2(Y, X);
+    result.latitude = atan2(Z + ep2 * b * pow(sin(theta), 3), p - e2 * a * pow(cos(theta), 3));
+
+    double N = a / sqrt(1 - e2 * pow(sin(result.latitude), 2));
+    result.altitude = p / cos(result.latitude) - N;
+
+    // Convert to degrees
+    result.latitude *= 180.0 / M_PI;
+    result.longitude *= 180.0 / M_PI;
+
+    return result;
+}
+
+LatLongAlt NTRIPTCPLink::decode_type1005_1006(const QByteArray &data) {
+    LatLongAlt result = {0, 0, 0, 0, 0, 0, false};
+    if (data.size() < 6 || static_cast<uint8_t>(data[0]) != RTCM3_PREAMBLE) {
+        qWarning() << "Invalid RTCM3 message";
+        return result;
+    }
+
+    int i = 24 + 12;
+    int staid;
+    double rr[3], anth = 0;
+
+    uint16_t length = ((static_cast<uint8_t>(data[1]) & 0x03) << 8) | static_cast<uint8_t>(data[2]);
+    if (data.size() < length + 6) {
+        qWarning() << "Message too short";
+        return result;
+    }
+
+    result.messageType = getbitu(data, 24, 12);
+    if (result.messageType != MSG_TYPE_1005 && result.messageType != MSG_TYPE_1006) {
+        qWarning() << "Not a Type 1005 or 1006 message";
+        return result;
+    }
+
+    staid = getbitu(data, i, 12);
+    i += 12;
+    i += 6 + 4;
+    rr[0] = getbits_38(data, i);
+    i += 38 + 2;
+    rr[1] = getbits_38(data, i);
+    i += 38 + 2;
+    rr[2] = getbits_38(data, i);
+    i += 38;
+
+    if (result.messageType == MSG_TYPE_1006) {
+        anth = getbitu(data, i, 16);
+    }
+
+    result.referenceStationId = staid;
+
+    // Convert ECEF to Lat/Lon/Alt
+    LatLongAlt converted = convertECEFToLatLonAlt(rr[0] * 0.0001, rr[1] * 0.0001, rr[2] * 0.0001);
+    result.latitude = converted.latitude;
+    result.longitude = converted.longitude;
+    result.altitude = converted.altitude;
+
+    // Antenna height (only for message type 1006)
+    result.antennaHeight = (result.messageType == MSG_TYPE_1006) ? anth * 0.0001 : 0;
+
+    qDebug() << "Message Type:" << result.messageType;
+    qDebug() << "Reference Station ID:" << result.referenceStationId;
+    qDebug() << "Latitude:" << result.latitude;
+    qDebug() << "Longitude:" << result.longitude;
+    qDebug() << "Altitude:" << result.altitude;
+    if (result.messageType == MSG_TYPE_1006) {
+        qDebug() << "Antenna Height:" << result.antennaHeight;
+    }
+
+    result.isValid = true;
+
+    constants->setNtripInfoLon(result.longitude);
+    constants->setNtripInfoLat(result.latitude);
+    constants->setNtripInfoAlt(result.altitude);
+
+
+    return result;
+}
+

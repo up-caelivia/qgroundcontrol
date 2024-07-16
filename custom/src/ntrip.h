@@ -18,6 +18,18 @@
 #include "RTCM/RTCMMavlink.h"
 #include "constants.h"
 
+struct LatLongAlt {
+    double latitude;
+    double longitude;
+    double altitude;
+    double antennaHeight;
+    uint16_t referenceStationId;
+    uint16_t messageType;
+    bool isValid;
+};
+
+
+
 class NTRIPSettings;
 
 class NTRIPTCPLink : public QThread
@@ -56,6 +68,8 @@ private:
     void _parse(const QByteArray &buffer);
     void startTimer(void);
     Constants* constants = Constants::getInstance();
+    LatLongAlt decode_type1005_1006(const QByteArray &data);
+
 
     QTcpSocket*     _socket =   nullptr;
 

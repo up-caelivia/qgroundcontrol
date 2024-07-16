@@ -24,6 +24,8 @@ import QGroundControl.Palette               1.0
 import QGroundControl.Controllers           1.0
 import QGroundControl.SettingsManager       1.0
 
+import Constants 1.0
+
 Rectangle {
     id:                 _root
     color:              qgcPal.window
@@ -83,7 +85,7 @@ Rectangle {
                     Item { width: 1; height: _margins; visible: ntripSectionLabel.visible }
                     QGCLabel {
                         id:         ntripSectionLabel
-                        text:       qsTr("NTRIP / RTCM")
+                        text:       qsTr("NTRIP / RTCM Settings")
                         visible:    QGroundControl.settingsManager.ntripSettings.visible
                     }
                     Rectangle {
@@ -176,6 +178,80 @@ Rectangle {
                                 visible:                ntripGrid.ntripSettings.ntripWhitelist.visible
                                 Layout.preferredWidth:  _valueFieldWidth
                             }
+                        }
+                    }
+
+                    Item { width: 1; height: _margins; visible: ntripSectionLabel.visible }
+                    QGCLabel {
+                        id:         ntripSectionLabel2
+                        text:       qsTr("NTRIP / RTCM Informations")
+                        visible:    QGroundControl.settingsManager.ntripSettings.visible
+                    }
+
+                    Rectangle {
+                        Layout.preferredHeight: ntripGrid2.y + ntripGrid2.height + _margins
+                        Layout.preferredWidth:  ntripGrid2.width*2 + (_margins * 2)
+                        color:                  qgcPal.windowShade
+                        visible:                Constants.ntripReceiving
+                        Layout.fillWidth:       true
+
+                        GridLayout {
+                            id:                         ntripGrid2
+                            anchors.topMargin:          _margins
+                            anchors.top:                parent.top
+                            Layout.fillWidth:           true
+                            anchors.horizontalCenter:   parent.horizontalCenter
+                            columns:                    2
+                            columnSpacing: _margins * 3
+
+
+                            property var  ntripSettings:    QGroundControl.settingsManager.ntripSettings
+
+                            QGCLabel {
+                                text:               "Base Latitude"
+                                visible:            Constants.ntripReceiving
+                            }
+
+                            QGCLabel{
+                                text:               Constants.ntripInfoLat.toFixed(5)
+                                visible:            Constants.ntripReceiving
+                                Layout.preferredWidth:  _valueFieldWidth
+                            }
+
+                            QGCLabel {
+                                text:               "Base Longitude"
+                                visible:            Constants.ntripReceiving
+                            }
+
+                            QGCLabel{
+                                text:               Constants.ntripInfoLon.toFixed(5)
+                                visible:            Constants.ntripReceiving
+                                Layout.preferredWidth:  _valueFieldWidth
+                            }
+
+                            QGCLabel {
+                                text:               "Base Altitude"
+                                visible:            Constants.ntripReceiving
+                            }
+
+                            QGCLabel{
+                                text:               Constants.ntripInfoAlt.toFixed(5)
+                                visible:            Constants.ntripReceiving
+                                Layout.preferredWidth:  _valueFieldWidth
+                            }
+
+                            QGCLabel {
+                                text:               "RTCM3 Messagges Received"
+                                visible:            Constants.ntripReceiving
+                            }
+
+                            QGCLabel{
+                                text:               Constants.numM
+                                visible:            Constants.ntripReceiving
+                                Layout.preferredWidth:  _valueFieldWidth
+                            }
+
+
                         }
                     }
 

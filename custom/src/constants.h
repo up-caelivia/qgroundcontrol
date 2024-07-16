@@ -24,6 +24,14 @@ class Constants : public QObject {
 
     Q_PROPERTY(bool ntripEnabled READ ntripEnabled WRITE setNtripEnabled NOTIFY ntripEnabledChanged)
     Q_PROPERTY(bool ntripReceiving READ ntripReceiving WRITE setNtripReceiving NOTIFY ntripReceivingChanged)
+    Q_PROPERTY(bool authError READ authError WRITE setauthError NOTIFY authErrorChanged)
+    Q_PROPERTY(bool mountError READ mountError WRITE setmountError NOTIFY mountErrorChanged)
+
+    Q_PROPERTY(double ntripInfoLat READ ntripInfoLat WRITE setNtripInfoLat NOTIFY ntripInfoLatChanged)
+    Q_PROPERTY(double ntripInfoLon READ ntripInfoLon WRITE setNtripInfoLon NOTIFY ntripInfoLonChanged)
+    Q_PROPERTY(double ntripInfoAlt READ ntripInfoAlt WRITE setNtripInfoAlt NOTIFY ntripInfoAltChanged)
+    Q_PROPERTY(int numM READ numM WRITE setnumM NOTIFY numMChanged)
+
 
     Q_PROPERTY(QVector<QString> factSpeedNames READ factSpeedNames CONSTANT)
     Q_PROPERTY(QVector<int> lowSpeed READ lowSpeed CONSTANT)
@@ -61,8 +69,17 @@ public:
     //QVector<int> highSpeed() const { return {1000, 250, 500, 60}; }   // CNES
     QVector<int> highSpeed() const { return {1000, 150, 250, 60}; }
 
+    //Non superare i 19 m/s per certificazione
+
     bool ntripEnabled() const { return ntripEnableV; }
+    bool authError() const { return authErrV; }
     bool ntripReceiving() const { return ntripReceivedV; }
+    bool mountError() const { return mountErrorV; }
+
+    double ntripInfoLat() const {return latitude;}
+    double ntripInfoLon() const {return longitude;}
+    double ntripInfoAlt() const {return altitude;}
+    int numM() const {return numMV;}
 
     void setNtripEnabled(bool enable) {
         if (ntripEnableV != enable) {
@@ -78,6 +95,47 @@ public:
         }
     }
 
+    void setauthError(bool received) {
+        if (authErrV != received) {
+            authErrV = received;
+            emit authErrorChanged();
+        }
+    }
+
+    void setmountError(bool received) {
+        if (mountErrorV != received) {
+            mountErrorV = received;
+            emit mountErrorChanged();
+        }
+    }
+
+    void setNtripInfoLat(double lat) {
+        if (lat != latitude) {
+            latitude = lat;
+            emit ntripInfoLatChanged();
+        }
+    }
+
+    void setNtripInfoLon(double lon) {
+        if (lon != longitude) {
+            longitude = lon;
+            emit ntripInfoLonChanged();
+        }
+    }
+
+    void setNtripInfoAlt(double alt) {
+        if (alt != altitude) {
+            altitude = alt;
+            emit ntripInfoAltChanged();
+        }
+    }
+
+    void setnumM(int placeholder) {
+        numMV++;
+        emit numMChanged();
+
+    }
+
 
     QVector<QString> settingToShow() const { return {"Motors", "Safety"}; }
     int compassNumber() const { return 1; }
@@ -90,12 +148,27 @@ signals:
     void lastMaxHeightChanged();
     void ntripEnabledChanged();
     void ntripReceivingChanged();
+    void authErrorChanged();
+    void mountErrorChanged();
+    void ntripInfoLatChanged();
+    void ntripInfoLonChanged();
+    void ntripInfoAltChanged();
+    void numMChanged();
 
 
 private:
     int m_lastMaxHeight;
     bool ntripEnableV = false;
+    bool authErrV = false;
     bool ntripReceivedV = false;
+    bool mountErrorV = false;
+
+    double latitude = 0;
+    double longitude = 0;
+    double altitude = 0;
+    int numMV = 0;
+
+
 };
 
 
