@@ -251,6 +251,29 @@ Rectangle {
                                 Layout.preferredWidth:  _valueFieldWidth
                             }
 
+                            QGCLabel {
+                                text:               "GPS Satellite Received"
+                                visible:            Constants.ntripReceiving
+                            }
+
+                            QGCLabel{
+                                text:               Constants.numGPS
+                                visible:            Constants.ntripReceiving
+                                Layout.preferredWidth:  _valueFieldWidth
+                            }
+
+                            QGCLabel {
+                                text:               "GLONASS Satellite Received"
+                                visible:            Constants.ntripReceiving
+                            }
+
+                            QGCLabel{
+                                text:               Constants.numGLO
+                                visible:            Constants.ntripReceiving
+                                Layout.preferredWidth:  _valueFieldWidth
+                            }
+
+
 
                         }
                     }

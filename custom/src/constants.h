@@ -31,6 +31,8 @@ class Constants : public QObject {
     Q_PROPERTY(double ntripInfoLon READ ntripInfoLon WRITE setNtripInfoLon NOTIFY ntripInfoLonChanged)
     Q_PROPERTY(double ntripInfoAlt READ ntripInfoAlt WRITE setNtripInfoAlt NOTIFY ntripInfoAltChanged)
     Q_PROPERTY(int numM READ numM WRITE setnumM NOTIFY numMChanged)
+    Q_PROPERTY(int numGPS READ numGPS WRITE setnumGPS NOTIFY numGPSChanged)
+    Q_PROPERTY(int numGLO READ numGLO WRITE setnumGLO NOTIFY numGLOChanged)
 
 
     Q_PROPERTY(QVector<QString> factSpeedNames READ factSpeedNames CONSTANT)
@@ -80,6 +82,9 @@ public:
     double ntripInfoLon() const {return longitude;}
     double ntripInfoAlt() const {return altitude;}
     int numM() const {return numMV;}
+    int numGPS() const {return numGPSV;}
+    int numGLO() const {return numGLOV;}
+
 
     void setNtripEnabled(bool enable) {
         if (ntripEnableV != enable) {
@@ -136,6 +141,21 @@ public:
 
     }
 
+    void setnumGPS(int num) {
+        if (num != numGPSV) {
+            numGPSV = num;
+            emit numGPSChanged();
+        }
+    }
+
+    void setnumGLO(int num) {
+        if (num != numGLOV) {
+            numGLOV = num;
+            emit numGLOChanged();
+        }
+    }
+
+
 
     QVector<QString> settingToShow() const { return {"Motors", "Safety"}; }
     int compassNumber() const { return 1; }
@@ -154,6 +174,8 @@ signals:
     void ntripInfoLonChanged();
     void ntripInfoAltChanged();
     void numMChanged();
+    void numGPSChanged();
+    void numGLOChanged();
 
 
 private:
@@ -167,6 +189,8 @@ private:
     double longitude = 0;
     double altitude = 0;
     int numMV = 0;
+    int numGPSV = 0;
+    int numGLOV = 0;
 
 
 };

@@ -12,16 +12,20 @@
 #include "QGCToolbox.h"
 #include "QGCApplication.h"
 #include "SettingsManager.h"
-#include "PositionManager.h"
 #include "NTRIPSettings.h"
 #include <QDebug>
-#include <cstring>
-#include <cstdio>
+#include <QByteArray>
+#include <QDataStream>
+#include <QDebug>
+
 
 #define RTCM3_PREAMBLE 0xD3
 #define MSG_TYPE_1006 1006
 #define MSG_TYPE_1005 1005
 
+int parse_num_satellites(const QByteArray &message, int message_type);
+void printRelevantBytes(const QByteArray &buff, int startBit, int numBits);
+void printRelevantBits(const QByteArray &buff, int startBit, int numBits);
 
 NTRIP::NTRIP(QGCApplication* app, QGCToolbox* toolbox)
     : QGCTool(app, toolbox)
@@ -220,19 +224,25 @@ void NTRIPTCPLink::_parse(const QByteArray &buffer)
             //uint16_t id = _rtcm_parsing->messageId();
 
             uint16_t id = ((uint8_t)message[3] << 4) | ((uint8_t)message[4] >> 4);
-
             //qDebug() << "AAAA:" << id;
-
 
             if(_whitelist.empty() || _whitelist.contains(id)) {
                 emit RTCMDataUpdate(message);
                 qCDebug(NTRIPLog) << "Sending " << id << "of size " << message.length();
-                //qDebug() << "AAAAAAA: " << message;
                 constants->setnumM(0);
 
                 if(id == 1005 || id == 1006)
                     decode_type1005_1006(message);
 
+                int sat = -1;
+                if(id == 1004 || id == 1012 || id == 1094 || id == 1124)
+                    sat = parse_num_satellites(message, id);
+
+                if(id == 1004 && sat != -1)
+                    constants->setnumGPS(sat);
+
+                if(id == 1012 && sat != -1)
+                    constants->setnumGLO(sat);
 
             } else {
                 qCDebug(NTRIPLog) << "Ignoring " << id;
@@ -257,16 +267,14 @@ void NTRIPTCPLink::_readBytes(void)
         QString line = _socket->readLine();
         if (line.contains("ICY 200")){
             _state = NTRIPState::waiting_for_rtcm_header;
-            qDebug() << "AAAA: " << line;
 
             constants->setauthError(false);
             constants->setmountError(false);
-
             startTimer();
+
         } else {
             qCWarning(NTRIPLog) << "Server responded with " << line;
             qgcApp()->showAppMessage("Unable to start NTRIP");
-            qDebug() << "AAAA: " << line;
 
             if(line.contains("401"))
                 constants->setauthError(true);
@@ -288,8 +296,8 @@ void NTRIPTCPLink::_readBytes(void)
 void NTRIPTCPLink::_sendNMEA() {
 
     #ifdef QT_DEBUG  // coordinate of ISMEC by google maps
-        double lat = 45.4064; //gcsPosition.latitude();
-        double lng = 11.8768; //gcsPosition.longitude();
+        double lat = 45.277432; //gcsPosition.latitude();
+        double lng = 11.679657; //gcsPosition.longitude();
         double alt = 20; //gcsPosition.altitude();
     #else
 
@@ -308,7 +316,6 @@ void NTRIPTCPLink::_sendNMEA() {
 
 
     qCDebug(NTRIPLog) << "lat : " << lat << " lon : " << lng << " alt : " << alt;
-
     QString time = QDateTime::currentDateTimeUtc().toString("hhmmss.zzz");
 
     if(lat != 0 || lng != 0) {
@@ -475,14 +482,14 @@ LatLongAlt NTRIPTCPLink::decode_type1005_1006(const QByteArray &data) {
     // Antenna height (only for message type 1006)
     result.antennaHeight = (result.messageType == MSG_TYPE_1006) ? anth * 0.0001 : 0;
 
-    qDebug() << "Message Type:" << result.messageType;
-    qDebug() << "Reference Station ID:" << result.referenceStationId;
-    qDebug() << "Latitude:" << result.latitude;
-    qDebug() << "Longitude:" << result.longitude;
-    qDebug() << "Altitude:" << result.altitude;
-    if (result.messageType == MSG_TYPE_1006) {
-        qDebug() << "Antenna Height:" << result.antennaHeight;
-    }
+    // qDebug() << "Message Type:" << result.messageType;
+    // qDebug() << "Reference Station ID:" << result.referenceStationId;
+    // qDebug() << "Latitude:" << result.latitude;
+    // qDebug() << "Longitude:" << result.longitude;
+    // qDebug() << "Altitude:" << result.altitude;
+    // if (result.messageType == MSG_TYPE_1006) {
+    //     qDebug() << "Antenna Height:" << result.antennaHeight;
+    // }
 
     result.isValid = true;
 
@@ -494,3 +501,57 @@ LatLongAlt NTRIPTCPLink::decode_type1005_1006(const QByteArray &data) {
     return result;
 }
 
+// ---------------------------------------------------
+
+
+static int decode_head1001(QByteArray rtcm)
+{
+
+    int i=24;
+    int nsat = 0;
+     i+=12;
+
+    if (i+52<=rtcm.size()*8) {
+        i+=12;
+        i+=30;
+        i+= 1;
+        nsat =getbitu(rtcm,i, 5);
+    }
+    else {
+        return -1;
+    }
+
+    return nsat;
+}
+
+
+static int decode_head1009(QByteArray rtcm)
+{
+    int i=24;
+    int nsat = 0;
+    i+=12;
+
+    if (i+49<=rtcm.size()*8) {
+        i+=12;
+        i+=27; /* sec in a day */
+        i+= 1;
+        nsat =getbitu(rtcm,i, 5);
+    }
+    else {
+        return -1;
+    }
+
+    return nsat;
+}
+
+
+int parse_num_satellites(const QByteArray &message, int message_type)
+{
+    int nsat;
+
+    if (message_type == 1004 && (nsat=decode_head1001(message))<0) return -1;
+    if (message_type == 1012 && (nsat=decode_head1009(message))<0) return -1;
+
+    // qDebug() << nsat << " " << message_type;
+    return nsat;
+}
