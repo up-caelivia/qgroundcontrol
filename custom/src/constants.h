@@ -6,6 +6,9 @@
 #include <QQmlEngine>
 #include <QJSEngine>
 #include <QVector>
+#include <QTimer>
+#include <QDateTime>
+
 
 class Constants : public QObject {
 
@@ -49,6 +52,15 @@ public:
         connect(m_timer, &QTimer::timeout, this, &Constants::checkNtripStatus);
         m_timer->start(2000); // Check every 2 seconds
 
+    }
+
+    // Destructor
+    ~Constants() {
+        if (m_timer) {
+            m_timer->stop();
+            delete m_timer;
+            m_timer = nullptr;
+        }
     }
 
     bool developer() const { return false; }

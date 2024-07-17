@@ -284,11 +284,11 @@ void NTRIPTCPLink::_readBytes(void)
 
 void NTRIPTCPLink::_sendNMEA() {
 
-    // #ifdef QT_DEBUG  // coordinate of ISMEC by google maps
-    //     double lat = 45.277432; //gcsPosition.latitude();
-    //     double lng = 11.679657; //gcsPosition.longitude();
-    //     double alt = 20; //gcsPosition.altitude();
-    // #else
+    #ifdef QT_DEBUG  // coordinate of ISMEC by google maps
+        double lat = 45.277432; //gcsPosition.latitude();
+        double lng = 11.679657; //gcsPosition.longitude();
+        double alt = 20; //gcsPosition.altitude();
+    #else
 
         Vehicle* _activeVehicle = _toolbox->multiVehicleManager()->activeVehicle();
         QGeoCoordinate gcsPosition =_activeVehicle->coordinate();            //qgcPositionManager()->gcsPosition();
@@ -301,7 +301,7 @@ void NTRIPTCPLink::_sendNMEA() {
         double lng = gcsPosition.longitude();
         double alt = gcsPosition.altitude();
 
-    // #endif
+    #endif
 
 
     qCDebug(NTRIPLog) << "lat : " << lat << " lon : " << lng << " alt : " << alt;
