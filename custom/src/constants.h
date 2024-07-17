@@ -43,7 +43,13 @@ class Constants : public QObject {
     Q_PROPERTY(int compassNumber READ compassNumber CONSTANT)
 
 public:
-    explicit Constants(QObject* parent = nullptr) : QObject(parent) {}
+    explicit Constants(QObject* parent = nullptr) : QObject(parent) {
+
+        m_timer = new QTimer(this);
+        connect(m_timer, &QTimer::timeout, this, &Constants::checkNtripStatus);
+        m_timer->start(2000); // Check every 2 seconds
+
+    }
 
     bool developer() const { return false; }
     QVector<QString> factNames() const { return {"LOIT_SPEED", "WPNAV_SPEED", "WPNAV_SPEED_DN", "WPNAV_SPEED_UP", "RTL_CLIMB_MIN", "WP_YAW_BEHAVIOR","FENCE_ALT_MAX"}; }
@@ -94,6 +100,14 @@ public:
     }
 
     void setNtripReceiving(bool received) {
+
+        if (received == true) {
+            m_messageCount++;
+            m_lastMessageTime = QDateTime::currentMSecsSinceEpoch();
+        }
+
+        // if(received == true && m_messageCount < 3) return;
+
         if (ntripReceivedV != received) {
             ntripReceivedV = received;
             emit ntripReceivingChanged();
@@ -177,6 +191,21 @@ signals:
     void numGPSChanged();
     void numGLOChanged();
 
+private slots:
+
+    void checkNtripStatus() {
+        qint64 currentTime = QDateTime::currentMSecsSinceEpoch();
+        qint64 timeSinceLastMessage = currentTime - m_lastMessageTime;
+
+        if (timeSinceLastMessage >= 2000 && m_messageCount < 3) {
+            ntripReceivedV = false;
+            emit ntripReceivingChanged();
+        }
+
+        // Reset the message count for the next 2-second interval
+        m_messageCount = 0;
+    }
+
 
 private:
     int m_lastMaxHeight;
@@ -191,6 +220,10 @@ private:
     int numMV = 0;
     int numGPSV = 0;
     int numGLOV = 0;
+
+    QTimer *m_timer;
+    qint64 m_lastMessageTime = 0;
+    int m_messageCount = 0;
 
 
 };

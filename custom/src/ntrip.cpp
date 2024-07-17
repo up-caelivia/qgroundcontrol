@@ -13,19 +13,14 @@
 #include "QGCApplication.h"
 #include "SettingsManager.h"
 #include "NTRIPSettings.h"
-#include <QDebug>
 #include <QByteArray>
-#include <QDataStream>
-#include <QDebug>
 
 
 #define RTCM3_PREAMBLE 0xD3
 #define MSG_TYPE_1006 1006
 #define MSG_TYPE_1005 1005
 
-int parse_num_satellites(const QByteArray &message, int message_type);
-void printRelevantBytes(const QByteArray &buff, int startBit, int numBits);
-void printRelevantBits(const QByteArray &buff, int startBit, int numBits);
+static int parse_num_satellites(const QByteArray &message, int message_type);
 
 NTRIP::NTRIP(QGCApplication* app, QGCToolbox* toolbox)
     : QGCTool(app, toolbox)
@@ -203,8 +198,7 @@ void NTRIPTCPLink::_hardwareConnect()
 void NTRIPTCPLink::_parse(const QByteArray &buffer)
 {
 
-    //qDebug() << "AAAAAA: " << buffer;
-
+    // qDebug() << "AAAAAA: " << buffer;
     for(const uint8_t byte : buffer) {
         if(_state == NTRIPState::waiting_for_rtcm_header) {
             if(byte != RTCM3_PREAMBLE)
@@ -217,14 +211,8 @@ void NTRIPTCPLink::_parse(const QByteArray &buffer)
 
             _state = NTRIPState::waiting_for_rtcm_header;
             QByteArray message((char*)_rtcm_parsing->message(), static_cast<int>(_rtcm_parsing->messageLength()));
-
-            // emit RTCMDataUpdate(message);
-            // _rtcm_parsing->reset();
-            //TODO: Restore the following when upstreamed in Driver repo
-            //uint16_t id = _rtcm_parsing->messageId();
-
             uint16_t id = ((uint8_t)message[3] << 4) | ((uint8_t)message[4] >> 4);
-            //qDebug() << "AAAA:" << id;
+            // qDebug() << "AAAA:" << id;
 
             if(_whitelist.empty() || _whitelist.contains(id)) {
                 emit RTCMDataUpdate(message);
@@ -265,6 +253,7 @@ void NTRIPTCPLink::_readBytes(void)
 
     if(_state == NTRIPState::waiting_for_http_response) {
         QString line = _socket->readLine();
+
         if (line.contains("ICY 200")){
             _state = NTRIPState::waiting_for_rtcm_header;
 
@@ -274,7 +263,7 @@ void NTRIPTCPLink::_readBytes(void)
 
         } else {
             qCWarning(NTRIPLog) << "Server responded with " << line;
-            qgcApp()->showAppMessage("Unable to start NTRIP");
+            // qgcApp()->showAppMessage("Unable to start NTRIP");
 
             if(line.contains("401"))
                 constants->setauthError(true);
@@ -295,11 +284,11 @@ void NTRIPTCPLink::_readBytes(void)
 
 void NTRIPTCPLink::_sendNMEA() {
 
-    #ifdef QT_DEBUG  // coordinate of ISMEC by google maps
-        double lat = 45.277432; //gcsPosition.latitude();
-        double lng = 11.679657; //gcsPosition.longitude();
-        double alt = 20; //gcsPosition.altitude();
-    #else
+    // #ifdef QT_DEBUG  // coordinate of ISMEC by google maps
+    //     double lat = 45.277432; //gcsPosition.latitude();
+    //     double lng = 11.679657; //gcsPosition.longitude();
+    //     double alt = 20; //gcsPosition.altitude();
+    // #else
 
         Vehicle* _activeVehicle = _toolbox->multiVehicleManager()->activeVehicle();
         QGeoCoordinate gcsPosition =_activeVehicle->coordinate();            //qgcPositionManager()->gcsPosition();
@@ -312,7 +301,7 @@ void NTRIPTCPLink::_sendNMEA() {
         double lng = gcsPosition.longitude();
         double alt = gcsPosition.altitude();
 
-    #endif
+    // #endif
 
 
     qCDebug(NTRIPLog) << "lat : " << lat << " lon : " << lng << " alt : " << alt;
@@ -545,9 +534,9 @@ static int decode_head1009(QByteArray rtcm)
 }
 
 
-int parse_num_satellites(const QByteArray &message, int message_type)
+static int parse_num_satellites(const QByteArray &message, int message_type)
 {
-    int nsat;
+    int nsat = -1;
 
     if (message_type == 1004 && (nsat=decode_head1001(message))<0) return -1;
     if (message_type == 1012 && (nsat=decode_head1009(message))<0) return -1;
