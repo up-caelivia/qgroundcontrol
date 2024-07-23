@@ -285,7 +285,7 @@ bool CustomPlugin::adjustSettingMetaData(const QString& settingsGroup, FactMetaD
         }
     } else if (settingsGroup == AppSettings::settingsGroup) {
         if (metaData.name() == AppSettings::androidSaveToSDCardName) {
-            metaData.setRawDefaultValue(true);
+            // metaData.setRawDefaultValue(true);
         }
     }
 
