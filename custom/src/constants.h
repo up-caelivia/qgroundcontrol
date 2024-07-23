@@ -184,7 +184,7 @@ public:
 
 
     QVector<QString> settingToShow() const { return {"Motors", "Safety"}; }
-    int compassNumber() const { return 1; }
+    int compassNumber() const { return 3; }
 
     static QObject* constants_singleton_provider(QQmlEngine* engine, QJSEngine* scriptEngine);
     static Constants* getInstance();

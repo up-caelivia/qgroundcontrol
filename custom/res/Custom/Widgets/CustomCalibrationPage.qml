@@ -154,7 +154,7 @@ SetupPage {
                 id:                         controller
                 statusLog:                  statusTextArea
                 progressBar:                progressBar
-                //nextButton:                 nextButton
+                // nextButton:                 nextButton
                 cancelButton:               cancelButton
                 orientationCalAreaHelpText: orientationCalAreaHelpText
 
@@ -342,7 +342,7 @@ SetupPage {
 
                 Column {
                     spacing: Math.round(ScreenTools.defaultFontPixelHeight / 2)
-                    visible: sensorParams.rgCompassAvailable[index]
+                    visible: sensorParams.rgCompassAvailable[index] && Constants.developer
 
                     QGCLabel {
                         text: compassLabel(index)
@@ -363,7 +363,7 @@ SetupPage {
                                 id:         useCompassCheckBox
                                 text:       qsTr("Use Compass")
                                 fact:       sensorParams.rgCompassUseFact[index]
-                                visible:    sensorParams.rgCompassUseParamAvailable[index] && !sensorParams.rgCompassPrimary[index]  && Constants.developer
+                                visible:    sensorParams.rgCompassUseParamAvailable[index] && !sensorParams.rgCompassPrimary[index] && Constants.developer
                             }
 
                             QGCComboBox {
@@ -488,7 +488,6 @@ SetupPage {
                         Column {
 
                             visible: _orientationDialogCalType == _calTypeAccel && Constants.developer
-
                             spacing: ScreenTools.defaultFontPixelHeight
 
                             QGCLabel {
