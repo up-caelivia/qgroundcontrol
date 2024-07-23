@@ -31,7 +31,7 @@ public:
     Q_PROPERTY(QQuickItem* statusLog                        MEMBER _statusLog)
     Q_PROPERTY(QQuickItem* progressBar                      MEMBER _progressBar)
     
-    // Q_PROPERTY(QQuickItem* nextButton                       MEMBER _nextButton)
+    Q_PROPERTY(QQuickItem* nextButton                       MEMBER _nextButton)
     Q_PROPERTY(QQuickItem* cancelButton                     MEMBER _cancelButton)
     Q_PROPERTY(QQuickItem* orientationCalAreaHelpText       MEMBER _orientationCalAreaHelpText)
 
