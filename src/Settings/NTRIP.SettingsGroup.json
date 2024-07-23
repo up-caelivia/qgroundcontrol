@@ -8,14 +8,14 @@
     "shortDesc":     "Connect to NTRIP server",
     "longDesc":      "Connect to NTRIP server using specified address/port",
     "type":                 "bool",
-    "default":         false,
+    "default":         true,
     "qgcRebootRequired":    true
 },
 {
     "name":                 "ntripServerHostAddress",
     "shortDesc":     "Host address",
     "type":                 "string",
-    "default":         "",
+    "default":         "147.162.229.53",
     "qgcRebootRequired":    true
 },
 {
@@ -29,14 +29,14 @@
     "name":                 "ntripUsername",
     "shortDesc":     "Username",
     "type":                 "string",
-    "default":         "",
+    "default":         "baggio",
     "qgcRebootRequired":    true
 },
 {
     "name":                 "ntripPassword",
     "shortDesc":     "Password",
     "type":                 "string",
-    "default":         "",
+    "default":         "baggio23",
     "qgcRebootRequired":    true
 },
 {
@@ -44,7 +44,7 @@
     "shortDesc":     "Mount Point",
     "longDesc":      "NTRIP Mount Point. Leave blank for RTCM over TCP",
     "type":                 "string",
-    "default":         "",
+    "default":         "MAX3",
     "qgcRebootRequired":    true
 },
 {

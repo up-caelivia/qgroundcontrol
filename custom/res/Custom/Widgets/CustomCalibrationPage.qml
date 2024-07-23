@@ -342,7 +342,7 @@ SetupPage {
 
                 Column {
                     spacing: Math.round(ScreenTools.defaultFontPixelHeight / 2)
-                    visible: sensorParams.rgCompassAvailable[index] && Constants.developer
+                    visible: sensorParams.rgCompassAvailable[index]
 
                     QGCLabel {
                         text: compassLabel(index)
@@ -363,12 +363,12 @@ SetupPage {
                                 id:         useCompassCheckBox
                                 text:       qsTr("Use Compass")
                                 fact:       sensorParams.rgCompassUseFact[index]
-                                visible:    sensorParams.rgCompassUseParamAvailable[index] && !sensorParams.rgCompassPrimary[index]
+                                visible:    sensorParams.rgCompassUseParamAvailable[index] && !sensorParams.rgCompassPrimary[index]  && Constants.developer
                             }
 
                             QGCComboBox {
                                 model:      [ qsTr("Priority 1"), qsTr("Priority 2"), qsTr("Priority 3"), qsTr("Not Set") ]
-                                visible:    _singleCompassSettingsComponentShowPriority && sensorParams.compassPrioFactsAvailable && useCompassCheckBox.visible && useCompassCheckBox.checked
+                                visible:    _singleCompassSettingsComponentShowPriority && sensorParams.compassPrioFactsAvailable && useCompassCheckBox.visible && useCompassCheckBox.checked  && Constants.developer
 
                                 property int _compassIndex: index
 

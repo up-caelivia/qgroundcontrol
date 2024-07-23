@@ -158,9 +158,7 @@ Item {
                 //     return "orange"
                 // }
 
-                return Constants.ntripReceiving ? "green" : "red"
-
-
+                return Constants.ntripReceiving ? Qt.rgba(0, 255, 0, 1.0)  : "red"
 
             }
 
