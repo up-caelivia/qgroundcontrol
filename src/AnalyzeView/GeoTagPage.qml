@@ -75,7 +75,7 @@ AnalyzePage {
                     title:          qsTr("Select log file")
                     folder:         shortcuts.home
                     nameFilters:    [qsTr("ULog file (*.ulg)"), qsTr("PX4 log file (*.px4log)"), qsTr("All Files (*)")]
-                    defaultSuffix:  "ulg"
+                    // defaultSuffix:  "ulg"
                     selectExisting: true
                     onAccepted: {
                         geoController.logFile = openLogFile.fileUrl
