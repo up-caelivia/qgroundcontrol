@@ -36,8 +36,8 @@ message(Custom QGC Version: $${CUSTOM_QGC_VERSION})
 DEFINES += CUSTOMHEADER=\"\\\"CustomPlugin.h\\\"\"
 DEFINES += CUSTOMCLASS=CustomPlugin
 
-TARGET   = QGroundControlUP
-DEFINES += QGC_APPLICATION_NAME='"\\\"QGroundControl UP version \\\""'
+TARGET   = QGroundControlABLUO
+DEFINES += QGC_APPLICATION_NAME='"\\\"QGroundControl ABLUO version \\\""'
 
 DEFINES += QGC_ORG_NAME=\"\\\"qgroundcontrol.org\\\"\"
 DEFINES += QGC_ORG_DOMAIN=\"\\\"org.qgroundcontrol\\\"\"
@@ -47,8 +47,8 @@ DEFINES += \
     QGC_HERELINK_AIRUNIT_VIDEO
 
 
-QGC_APP_NAME        = "QGroundControlUP"
-QGC_BINARY_NAME     = "QGroundControlUP"
+QGC_APP_NAME        = "QGroundControlABLUO"
+QGC_BINARY_NAME     = "QGroundControlABLUO"
 QGC_ORG_NAME        = "Custom"
 QGC_ORG_DOMAIN      = "org.custom"
 QGC_ANDROID_PACKAGE = "org.custom.qgroundcontrol"

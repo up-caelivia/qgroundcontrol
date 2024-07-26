@@ -61,7 +61,7 @@ Button {
                 anchors.left:           image.right
                 anchors.verticalCenter: parent.verticalCenter
                 verticalAlignment:      TextEdit.AlignVCenter
-                color:                  showHighlight ? qgcPal.buttonHighlightText : qgcPal.buttonText
+                color:                  showHighlight ? qgcPal.buttonHighlightText : qgcPal.text
                 text:                   control.text
             }
         }

@@ -57,12 +57,12 @@ Item {
 
 
         QGCLabel {
-            color:                      qgcPal.buttonText
+            color:                      qgcPal.text
             text: "Flight Time: "
         }
 
         QGCLabel {
-            color:                      qgcPal.buttonText
+            color:                      qgcPal.text
             text: "Time Remaining: "
         }
 
@@ -79,7 +79,7 @@ Item {
 
 
         QGCLabel {
-            color:                      qgcPal.buttonText
+            color:                     qgcPal.text
             text:  _activeVehicle ?  _activeVehicle.getFact("flightTime").valueString : "--/--"
         }
 
@@ -135,7 +135,7 @@ Item {
                     }
 
                 if(num == 0)
-                    return qgcPal.buttonText
+                    return qgcPal.text
 
                 if (red == num)
                     return qgcPal.colorRed
@@ -143,7 +143,7 @@ Item {
                 if(orange == num || (orange + red == num))
                     return qgcPal.colorOrange
 
-                return qgcPal.buttonText
+                return qgcPal.text
 
             }
 
