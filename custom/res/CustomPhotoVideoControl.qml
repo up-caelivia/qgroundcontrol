@@ -25,6 +25,8 @@ import QGroundControl.FactControls      1.0
 
 Rectangle {
     height:     mainLayout.height + (_margins * 2)
+    width:     height
+
     color:      Qt.rgba(qgcPal.window.r, qgcPal.window.g, qgcPal.window.b, 0.5)
     radius:     _margins
     visible:    (_mavlinkCamera || _videoStreamAvailable || _simpleCameraAvailable) && multiVehiclePanelSelector.showSingleVehiclePanel
@@ -156,8 +158,8 @@ Rectangle {
 
     QGCColoredImage {
         anchors.margins:    _margins
-        anchors.top:        parent.top
-        anchors.right:      parent.right
+        anchors.bottom:        parent.bottom
+        anchors.left:      parent.left
         source:             "/res/gear-black.svg"
         mipmap:             true
         height:             ScreenTools.defaultFontPixelHeight

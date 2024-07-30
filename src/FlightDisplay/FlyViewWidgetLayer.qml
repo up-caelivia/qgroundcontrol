@@ -133,7 +133,7 @@ Item {
         id:                     photoVideoControl
         anchors.margins:        _toolsMargin
         anchors.right:          parent.right
-        width:                  _rightPanelWidth
+        // width:                  _rightPanelWidth
 
         property real rightEdgeCenterInset: visible ? parent.width - x : 0
 

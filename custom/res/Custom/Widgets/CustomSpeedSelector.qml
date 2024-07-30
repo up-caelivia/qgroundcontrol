@@ -28,6 +28,8 @@ import Constants  1.0
 
 Rectangle {
     height:     mainLayout.height + (_margins * 2)
+    width:     height
+
     color:      Qt.rgba(qgcPal.window.r, qgcPal.window.g, qgcPal.window.b, 0.5)
     radius:     _margins
 
