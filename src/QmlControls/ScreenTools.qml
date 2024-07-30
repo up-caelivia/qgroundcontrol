@@ -137,7 +137,7 @@ Item {
 
     /// \private
     function _setBasePointSize(pointSize) {
-        pointSize = pointSize / 1.0   // 1.2 H12 Pro,   1.1 H16,    1.0 HereLink
+        pointSize = pointSize / 1.2   // 1.2 H12 Pro,   1.1 H16,    1.0 HereLink
         _textMeasure.font.pointSize = pointSize
         defaultFontPointSize    = pointSize
         defaultFontPixelHeight  = Math.round(_textMeasure.fontHeight/2.0)*2
