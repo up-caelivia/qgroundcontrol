@@ -92,8 +92,8 @@ private:
     QTimer*          _vrsSendTimer;
     QTimer*          _requestTimer;
 
-    static const int _reqSendRateMSecs = 10000;
-    static const int _vrsSendRateMSecs = 3000;
+    static const int _reqSendRateMSecs = 12000;
+    static const int _vrsSendRateMSecs = 5000;
 
     RTCMParsing *_rtcm_parsing{nullptr};
     NTRIPState _state;

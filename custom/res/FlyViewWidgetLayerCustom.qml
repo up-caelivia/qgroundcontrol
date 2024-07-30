@@ -245,7 +245,7 @@ Item {
         anchors.margins:  _toolsMargin
         anchors.topMargin:    _toolsMargin
         anchors.left:          parent.left
-        width:                  _rightPanelWidth * 0.8
+        // width:                  _rightPanelWidth * 0.8
         anchors.bottom:            parent.bottom
 
         property real rightEdgeCenterInset: visible ? parent.width - x : 0
@@ -256,7 +256,6 @@ Item {
         anchors.margins:  _toolsMargin
         anchors.topMargin:    _toolsMargin
         anchors.right:          parent.right
-        width:                  _rightPanelWidth * 0.8
         anchors.bottom:            parent.bottom
         _controller: _controller
         visible: selector
