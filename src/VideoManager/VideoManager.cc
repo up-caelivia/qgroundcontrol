@@ -82,9 +82,6 @@ VideoManager::~VideoManager()
         }
 #endif
     }
-
-    delete _videoStreamControl;
-
 }
 
 //-----------------------------------------------------------------------------
@@ -107,10 +104,6 @@ VideoManager::setToolbox(QGCToolbox *toolbox)
    connect(_videoSettings->lowLatencyMode(),&Fact::rawValueChanged, this, &VideoManager::_lowLatencyModeChanged);
    MultiVehicleManager *pVehicleMgr = qgcApp()->toolbox()->multiVehicleManager();
    connect(pVehicleMgr, &MultiVehicleManager::activeVehicleChanged, this, &VideoManager::_setActiveVehicle);
-
-   // Create video stream control, for Herelink specific functions, and link it to _restartAllVideos, to restart when HDMI source changes
-   _videoStreamControl = new VideoStreamControl();
-   connect(_videoStreamControl, &VideoStreamControl::videoNeedsReset, this, &VideoManager::_restartAllVideos);
 
 #if defined(QGC_GST_STREAMING)
     GStreamer::blacklist(static_cast<VideoSettings::VideoDecoderOptions>(_videoSettings->forceVideoDecoder()->rawValue().toInt()));

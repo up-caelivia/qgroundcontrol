@@ -42,10 +42,6 @@ DEFINES += QGC_APPLICATION_NAME='"\\\"QGroundControl UP version \\\""'
 DEFINES += QGC_ORG_NAME=\"\\\"qgroundcontrol.org\\\"\"
 DEFINES += QGC_ORG_DOMAIN=\"\\\"org.qgroundcontrol\\\"\"
 
-# Enable Herelink AirUnit video config
-DEFINES += \
-    QGC_HERELINK_AIRUNIT_VIDEO
-
 
 QGC_APP_NAME        = "QGroundControlUP"
 QGC_BINARY_NAME     = "QGroundControlUP"
@@ -69,17 +65,11 @@ SOURCES += \
     $$PWD/src/constants.cpp \
     $$PWD/src/ntrip.cpp
 
-SOURCES += \
-    $$PWD/src/VideoStreamControl.cc \
-
 HEADERS += \
     $$PWD/src/CustomPlugin.h \
     $$PWD/src/NTRIPSettings.h \
     $$PWD/src/constants.h \
     $$PWD/src/ntrip.h
-
-HEADERS += \
-    $$PWD/src/VideoStreamControl.h \
 
 INCLUDEPATH += \
     $$PWD/src \
