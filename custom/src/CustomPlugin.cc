@@ -67,7 +67,7 @@ bool CustomPlugin::overrideSettingsGroupVisibility(QString name)
 
 
     //qDebug() << "Setting name: " << name;
-    if (name == BrandImageSettings::name || name == AutoConnectSettings::name || name == UnitsSettings::name || name == ADSBVehicleManagerSettings::name || name == RTKSettings::name || name == PlanViewSettings::name) {
+    if (name == BrandImageSettings::name || name == AutoConnectSettings::name || name == ADSBVehicleManagerSettings::name || name == RTKSettings::name || name == PlanViewSettings::name) {
         return false;
     }
 
