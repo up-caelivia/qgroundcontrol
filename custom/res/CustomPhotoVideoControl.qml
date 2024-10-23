@@ -334,41 +334,22 @@ Rectangle {
     Component {
         id: settingsDialogComponent
 
-        QGCPopupDialog {
+        QGCSidebarDialog {
             title:      qsTr("Settings")
-            buttons:    StandardButton.Close
+            // buttons:    StandardButton.Close
 
+            contentItem: Component {
             ColumnLayout {
                 spacing: _margins
 
-                // GridLayout {
-                //     Layout.margins: ScreenTools.defaultFontPixelWidth
-                //     columns:        3
-
-                //     QGCLabel {
-                //         text:               qsTr("video source used: HDMI ") + (_videoStreamSettings.cameraId.rawValue + 1)
-                //         Layout.columnSpan:  3
-                //     }
-                //     QGCLabel {
-                //         text:               qsTr("Select: ")
-                //     }
-                //     QGCButton {
-                //         text:               qsTr("HDMI 1")
-                //         enabled:            !QGroundControl.videoManager.videoStreamControl.settingInProgress
-                //         onClicked:          _videoStreamSettings.cameraId.rawValue = 0
-                //     }
-                //     QGCButton {
-                //         text:               qsTr("HDMI 2")
-                //         enabled:            !QGroundControl.videoManager.videoStreamControl.settingInProgress
-                //         onClicked:          _videoStreamSettings.cameraId.rawValue = 1
-                //     }
-                // }
 
                 GridLayout {
                     id:     gridLayout
                     flow:   GridLayout.TopToBottom
                     rows:   dynamicRows + (_mavlinkCamera ? _mavlinkCamera.activeSettings.length : 0)
+                    height: parent.height
 
+                    // Layout.margins: _margins
                     property int dynamicRows: 10
 
                     // First column
@@ -395,6 +376,7 @@ Rectangle {
                         visible:            _mavlinkCameraHasThermalVideoStream && _mavlinkCamera.thermalMode === QGCCameraControl.THERMAL_BLEND
                         onVisibleChanged:   gridLayout.dynamicRows += visible ? 1 : -1
                     }
+
 
                     // Mavlink Camera Protocol active settings
                     Repeater {
@@ -608,6 +590,7 @@ Rectangle {
                             }
                         }
                     }
+                }
                 }
             }
         }
