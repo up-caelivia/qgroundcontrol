@@ -9,7 +9,7 @@ import QGroundControl.ScreenTools   1.0
 
 Item {
     id: root
-    width: Math.min(parent.width * 0.5, 500)
+    width: parent.width * 0.4
     height: parent.height
     x: visible ? 0 : -width
     visible: false
@@ -70,13 +70,15 @@ Item {
                 clip: true
                 Layout.margins: _contentMargin
 
-
                 Loader {
                     id: contentLoader
                     width: parent.width
                 }
+
             }
         }
+
+
     }
 
     QGCPalette { id: _pal; colorGroupEnabled: root.enabled }

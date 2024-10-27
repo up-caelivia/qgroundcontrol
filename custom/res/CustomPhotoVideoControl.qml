@@ -366,6 +366,7 @@ Rectangle {
                     }
 
                     QGCLabel {
+                        id: size_reference
                         text:               qsTr("Thermal View Mode")
                         visible:            _mavlinkCameraHasThermalVideoStream
                         onVisibleChanged:   gridLayout.dynamicRows += visible ? 1 : -1
@@ -378,12 +379,44 @@ Rectangle {
                     }
 
 
+
+                    // QGCLabel {
+                    //     text: get_text("DIo cabas ndsao asdokosd dsaijda")
+                    //     width: ScreenTools.defaultFontPixelHeight * 6 // Aumentato per il test
+                    //     wrapMode: Text.WordWrap
+                    //     clip: false // Rimosso clipping
+
+                    //     function get_text(text) {
+                    //         if (text.indexOf("NUC") !== -1) // Controlla se "abba" è presente
+                    //             return "NUC Correction";
+
+                    //         return text;
+                    //     }
+                    // }
+
+
+
+
+
                     // Mavlink Camera Protocol active settings
                     Repeater {
                         model: _mavlinkCamera ? _mavlinkCamera.activeSettings : []
 
                         QGCLabel {
-                            text: _mavlinkCamera.getFact(modelData).shortDescription
+                            text: get_text(_mavlinkCamera.getFact(modelData).shortDescription)
+                            width: ScreenTools.defaultFontPixelHeight * 10 // Aumentato per il test
+                            wrapMode: Text.WordWrap
+                            clip: false // Rimosso clipping
+
+                            function get_text(text) {
+                                if (text.indexOf("NUC") !== -1) // Controlla se "abba" è presente
+                                    return "NUC Correction";
+
+                                if (text.indexOf("camera simultaneously") !== -1) // Controlla se "abba" è presente
+                                    return "Zoom EO/IR toghether";
+
+                                return text;
+                            }
                         }
                     }
 
