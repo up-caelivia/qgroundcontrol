@@ -395,9 +395,6 @@ Rectangle {
                     // }
 
 
-
-
-
                     // Mavlink Camera Protocol active settings
                     Repeater {
                         model: _mavlinkCamera ? _mavlinkCamera.activeSettings : []
@@ -409,11 +406,17 @@ Rectangle {
                             clip: false // Rimosso clipping
 
                             function get_text(text) {
-                                if (text.indexOf("NUC") !== -1) // Controlla se "abba" è presente
+                                if (text.indexOf("NUC") !== -1)
                                     return "NUC Correction";
 
-                                if (text.indexOf("camera simultaneously") !== -1) // Controlla se "abba" è presente
-                                    return "Zoom EO/IR toghether";
+                                if (text.indexOf("camera simultaneously") !== -1)
+                                    return "Zoom EO/IR together";
+
+                                if (text.indexOf("Upper limit") !== -1)
+                                    return "Upper limit temp. alarm";
+
+                                if (text.indexOf("Lower limit") !== -1)
+                                    return "Lower limit temp. alarm";
 
                                 return text;
                             }
@@ -458,7 +461,7 @@ Rectangle {
 
                     // Second column
                     QGCComboBox {
-                        Layout.fillWidth:   true
+                        // Layout.fillWidth:   true
                         sizeToContents:     true
                         model:              _mavlinkCameraManager ? _mavlinkCameraManager.cameraLabels : []
                         currentIndex:       _mavlinkCameraManagerCurCameraIndex
@@ -467,7 +470,7 @@ Rectangle {
                     }
 
                     QGCComboBox {
-                        Layout.fillWidth:   true
+                        // Layout.fillWidth:   true
                         sizeToContents:     true
                         model:              _mavlinkCamera ? _mavlinkCamera.streamLabels : []
                         currentIndex:       _mavlinCameraCurStreamIndex
@@ -476,7 +479,7 @@ Rectangle {
                     }
 
                     QGCComboBox {
-                        Layout.fillWidth:   true
+                        // Layout.fillWidth:   true
                         sizeToContents:     true
                         model:              [ qsTr("Off"), qsTr("Blend"), qsTr("Full"), qsTr("Picture In Picture") ]
                         currentIndex:       _mavlinkCamera ? _mavlinkCamera.thermalMode : -1
@@ -485,7 +488,7 @@ Rectangle {
                     }
 
                     QGCSlider {
-                        Layout.fillWidth:           true
+                        // Layout.fillWidth:           true
                         maximumValue:               100
                         minimumValue:               0
                         value:                      _mavlinkCamera ? _mavlinkCamera.thermalOpacity : 0
@@ -509,19 +512,19 @@ Rectangle {
                             property bool   _isEdit:    !_isBool && !_isSlider && _fact.enumStrings.length < 1
 
                             FactComboBox {
-                                Layout.fillWidth:   true
+                                // Layout.fillWidth:   true
                                 sizeToContents:     true
                                 fact:               parent._fact
                                 indexModel:         false
                                 visible:            parent._isCombo
                             }
                             FactTextField {
-                                Layout.fillWidth:   true
+                                // Layout.fillWidth:   true
                                 fact:               parent._fact
                                 visible:            parent._isEdit
                             }
                             QGCSlider {
-                                Layout.fillWidth:           true
+                                // Layout.fillWidth:           true
                                 maximumValue:               parent._fact.max
                                 minimumValue:               parent._fact.min
                                 stepSize:                   parent._fact.increment
@@ -550,7 +553,7 @@ Rectangle {
                     }
 
                     QGCComboBox {
-                        Layout.fillWidth:   true
+                        // Layout.fillWidth:   true
                         sizeToContents:     true
                         model:              [ qsTr("Single"), qsTr("Time Lapse") ]
                         currentIndex:       _mavlinkCamera ? _mavlinkCamera.photoMode : 0
@@ -559,7 +562,7 @@ Rectangle {
                     }
 
                     QGCSlider {
-                        Layout.fillWidth:           true
+                        // Layout.fillWidth:           true
                         maximumValue:               60
                         minimumValue:               1
                         stepSize:                   1
@@ -581,7 +584,7 @@ Rectangle {
                     }
 
                     FactComboBox {
-                        Layout.fillWidth:   true
+                        // Layout.fillWidth:   true
                         sizeToContents:     true
                         fact:               _videoStreamSettings.videoFit
                         indexModel:         false
@@ -589,7 +592,7 @@ Rectangle {
                     }
 
                     QGCButton {
-                        Layout.fillWidth:   true
+                        // Layout.fillWidth:   true
                         text:               qsTr("Reset")
                         visible:            _mavlinkCamera
                         onClicked:          resetPrompt.open()
@@ -607,7 +610,7 @@ Rectangle {
                     }
 
                     QGCButton {
-                        Layout.fillWidth:   true
+                        // Layout.fillWidth:   true
                         text:               qsTr("Format")
                         visible:            _mavlinkCameraStorageSupported
                         onClicked:          formatPrompt.open()

@@ -80,14 +80,32 @@ T.ComboBox {
         TextMetrics {
             id:             popupItemMetrics
             font:           control.font
-            text:           _text
+            text:           getText(_text)
+
+            function getText(text) {
+
+                if (text.indexOf("Radiometric sequence") !== -1)
+                    return "Radiometric (*.seq)";
+
+                return text;
+            }
+
         }
 
         contentItem: Text {
-            text:                   _text
+            text:                   getText(_text)
             font:                   control.font
             color:                  control.currentIndex === index ? _qgcPal.buttonHighlightText : _qgcPal.buttonText
             verticalAlignment:      Text.AlignVCenter
+
+            function getText(text) {
+
+                if (text.indexOf("Radiometric sequence") !== -1)
+                    return "Radiometric (*.seq)";
+
+                return text;
+            }
+
         }
 
         background: Rectangle {
@@ -116,9 +134,18 @@ T.ComboBox {
             id:                         text
             anchors.verticalCenter:     parent.verticalCenter
             anchors.horizontalCenter:   centeredLabel ? parent.horizontalCenter : undefined
-            text:                       control.alternateText === "" ? control.currentText : control.alternateText
+            text:                       control.alternateText === "" ? getText(control.currentText) : getText(control.alternateText)
             font:                       control.font
             color:                      _qgcPal.text
+
+            function getText(text) {
+
+                if (text.indexOf("Radiometric sequence") !== -1)
+                    return "Radiometric (*.seq)";
+
+                return text;
+            }
+
         }
     }
 
