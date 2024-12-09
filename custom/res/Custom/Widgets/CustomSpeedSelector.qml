@@ -32,6 +32,8 @@ Rectangle {
 
     color:      Qt.rgba(qgcPal.window.r, qgcPal.window.g, qgcPal.window.b, 0.5)
     radius:     _margins
+    anchors.bottomMargin:       ScreenTools.defaultFontPixelWidth * 0.75 * 7
+
 
     property real   _margins:                                   ScreenTools.defaultFontPixelHeight / 2
     property var    _activeVehicle:                             QGroundControl.multiVehicleManager.activeVehicle
