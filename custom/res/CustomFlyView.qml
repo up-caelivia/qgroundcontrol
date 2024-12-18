@@ -163,9 +163,40 @@ Item {
         mapName:                "FlightDisplayView"
     }
 
+    Rectangle{
+
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        width: videoControl.pipState.state === videoControl.pipState.fullState ? ScreenTools.defaultFontPixelHeight * 5 : 0
+
+        color: "black"
+    }
+
+
+    Rectangle{
+
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        height: videoControl.pipState.state === videoControl.pipState.fullState ? ScreenTools.defaultFontPixelHeight * 7 : 0
+
+        color: "black"
+    }
+
+
     FlyViewVideo {
         id: videoControl
+
+        function calculateBottomMargin() {
+            // console.log(pipState.state)
+            return pipState.state === pipState.fullState ? ScreenTools.defaultFontPixelHeight * 7 : 0
+        }
+
+        anchors.bottomMargin: calculateBottomMargin()
+        anchors.leftMargin:   pipState.state === pipState.fullState ? ScreenTools.defaultFontPixelHeight * 5 : 0
     }
+
 
     property var hasVideo: QGroundControl.videoManager.hasVideo ? true : false
 
@@ -176,7 +207,6 @@ Item {
 
         // anchors.bottom:            parent.bottom
         // anchors.left:          parent.left
-
 
         anchors.margins:        _toolsMargin
         item1IsFullSettingsKey: "MainFlyWindowIsMap"
