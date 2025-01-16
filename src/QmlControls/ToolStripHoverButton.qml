@@ -37,8 +37,8 @@ Button {
     property real imageScale:        forceImageScale11 && (text == "") ? 0.8 : 0.6
     property real contentMargins:    innerText.height * 0.1
 
-    property color _currentContentColor:  (checked || pressed) ? qgcPal.buttonHighlightText : qgcPal.buttonText
-    property color _currentContentColorSecondary:  (checked || pressed) ? qgcPal.buttonText : qgcPal.buttonHighlight
+    property color _currentContentColor:  (checked || pressed) ? qgcPal.buttonHighlightText : (control.enabled ? "#efefef" : "#4d4d4d")
+    property color _currentContentColorSecondary:  (checked || pressed) ? "#9d9d9d" : qgcPal.buttonHighlight
 
     signal dropped(int index)
 
@@ -95,7 +95,7 @@ Button {
                 sourceSize.width:           width
                 anchors.horizontalCenter:   parent.horizontalCenter
                 visible:                    source != "" && !modelData.fullColorIcon
-                
+
                 QGCColoredImage {
                     id:                         innerImageSecondColor
                     source:                     modelData.alternateIconSource
@@ -128,7 +128,7 @@ Button {
         id:             buttonBkRect
         color:          (control.checked || control.pressed) ?
                             qgcPal.buttonHighlight :
-                            (control.hovered ? qgcPal.toolStripHoverColor : qgcPal.toolbarBackground)
+                            (control.hovered ? "#3d3d3d" : qgcPal.toolbarBackground)
         anchors.fill:   parent
     }
 }
