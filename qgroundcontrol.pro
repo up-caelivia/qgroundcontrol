@@ -399,6 +399,7 @@ INCLUDEPATH += \
     src/Joystick \
     src/PlanView \
     src/MissionManager \
+    src/NTRIP \
     src/PositionManager \
     src/QmlControls \
     src/QtLocationPlugin \
@@ -588,6 +589,8 @@ HEADERS += \
     src/Compression/QGCZlib.h \
     src/FirmwarePlugin/PX4/px4_custom_mode.h \
     src/FollowMe/FollowMe.h \
+    src/GPS/Drivers/src/rtcm.h \
+    src/GPS/RTCM/RTCMMavlink.h \
     src/Joystick/Joystick.h \
     src/Joystick/JoystickManager.h \
     src/Joystick/JoystickMavCommand.h \
@@ -637,6 +640,7 @@ HEADERS += \
     src/MissionManager/TransectStyleComplexItem.h \
     src/MissionManager/VisualMissionItem.h \
     src/MissionManager/VTOLLandingComplexItem.h \
+    src/NTRIP/NTRIP.h \
     src/PositionManager/PositionManager.h \
     src/PositionManager/SimulatedPosition.h \
     src/Geo/QGCGeo.h \
@@ -686,6 +690,7 @@ HEADERS += \
     src/Settings/FirmwareUpgradeSettings.h \
     src/Settings/FlightMapSettings.h \
     src/Settings/FlyViewSettings.h \
+    src/Settings/NTRIPSettings.h \
     src/Settings/OfflineMapsSettings.h \
     src/Settings/PlanViewSettings.h \
     src/Settings/RTKSettings.h \
@@ -853,6 +858,8 @@ SOURCES += \
     src/Compression/QGCLZMA.cc \
     src/Compression/QGCZlib.cc \
     src/FollowMe/FollowMe.cc \
+    src/GPS/Drivers/src/rtcm.cpp \
+    src/GPS/RTCM/RTCMMavlink.cc \
     src/Joystick/Joystick.cc \
     src/Joystick/JoystickManager.cc \
     src/Joystick/JoystickMavCommand.cc \
@@ -901,6 +908,7 @@ SOURCES += \
     src/MissionManager/TransectStyleComplexItem.cc \
     src/MissionManager/VisualMissionItem.cc \
     src/MissionManager/VTOLLandingComplexItem.cc \
+    src/NTRIP/NTRIP.cc \
     src/PositionManager/PositionManager.cpp \
     src/PositionManager/SimulatedPosition.cc \
     src/Geo/QGCGeo.cc \
@@ -947,6 +955,7 @@ SOURCES += \
     src/Settings/RemoteIDSettings.cc \
     src/Settings/FirmwareUpgradeSettings.cc \
     src/Settings/FlightMapSettings.cc \
+    src/Settings/NTRIPSettings.cc \
     src/Settings/FlyViewSettings.cc \
     src/Settings/OfflineMapsSettings.cc \
     src/Settings/PlanViewSettings.cc \
@@ -1071,6 +1080,8 @@ SOURCES += \
     src/Joystick/JoystickSDL.cc \
     src/RunGuard.cc \
 }
+
+SOURCES += src/GPS/NmeaMessage.cc
 
 #
 # Firmware Plugin Support
