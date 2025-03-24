@@ -62,15 +62,13 @@ QML_IMPORT_PATH += \
 # Our own, custom sources
 SOURCES += \
     $$PWD/src/CustomPlugin.cc \
-    $$PWD/src/NTRIPSettings.cpp \
-    $$PWD/src/constants.cpp \
-    $$PWD/src/ntrip.cpp
+    $$PWD/src/ntrip.cpp \
+    $$PWD/src/constants.cpp 
 
 HEADERS += \
     $$PWD/src/CustomPlugin.h \
-    $$PWD/src/NTRIPSettings.h \
-    $$PWD/src/constants.h \
-    $$PWD/src/ntrip.h
+    $$PWD/src/ntrip.h \
+    $$PWD/src/constants.h 
 
 INCLUDEPATH += \
     $$PWD/src \
