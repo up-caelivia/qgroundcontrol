@@ -170,8 +170,8 @@ void NTRIPTCPLink::_parse(const QByteArray &buffer) {
   qCDebug(NTRIPLog) << "Buffer: " << QString(buffer);
   for (const uint8_t byte : buffer) {
     if (_state == NTRIPState::waiting_for_rtcm_header) {
-      if (byte != RTCM3_PREAMBLE && byte != RTCM2_PREAMBLE) {
-        qCDebug(NTRIPLog) << "NOT RTCM 2/3 preamble, ignoring byte " << byte;
+      if (byte != RTCM3_PREAMBLE) {
+        qCDebug(NTRIPLog) << "NOT RTCM 3 preamble, ignoring byte " << byte;
         continue;
       }
       _state = NTRIPState::accumulating_rtcm_packet;
@@ -182,20 +182,8 @@ void NTRIPTCPLink::_parse(const QByteArray &buffer) {
       QByteArray message((char *)_rtcm_parsing->message(),
                          static_cast<int>(_rtcm_parsing->messageLength()));
       uint16_t id = _rtcm_parsing->messageId();
-      uint8_t version = _rtcm_parsing->rtcmVersion();
-      qCDebug(NTRIPLog) << "RTCM version " << version;
       qCDebug(NTRIPLog) << "RTCM message ID " << id;
       qCDebug(NTRIPLog) << "RTCM message size " << message.size();
-
-      if (version == 2) {
-        qCWarning(NTRIPLog) << "RTCM 2 not supported";
-        emit error("Server sent RTCM 2 message. Not supported!");
-        continue;
-      } else if (version != 3) {
-        qCWarning(NTRIPLog) << "Unknown RTCM version " << version;
-        emit error("Server sent unknown RTCM version");
-        continue;
-      }
 
       if (_whitelist.empty() || _whitelist.contains(id)) {
         qCDebug(NTRIPLog) << "Sending message ID [" << id << "] of size "
