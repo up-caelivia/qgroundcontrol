@@ -57,6 +57,7 @@ public:
     void                    paletteOverride                 (QString colorName, QGCPalette::PaletteColorInfo_t& colorInfo) final;
     bool        adjustSettingMetaData                  (const QString& settingsGroup, FactMetaData& metaData) override;
     QQmlApplicationEngine*  createQmlApplicationEngine      (QObject* parent) final;
+    void registerQmlTypes();
 
     private:
     CustomOptions*  _options = nullptr;

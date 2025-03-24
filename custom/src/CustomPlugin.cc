@@ -23,10 +23,19 @@
 #include "QGCToolbox.h"
 #include "MultiVehicleManager.h"
 #include "constants.h"
+#include "CustomAnnouncer.h"
 // #include "JoystickManager.h"
 // #include "HorizontalFactValueGrid.h"
 // #include "InstrumentValueData.h"
 #include <list>
+
+void CustomPlugin::registerQmlTypes()
+{
+    qmlRegisterSingletonType<CustomAnnouncer>("QGroundControl.Custom", 1, 0, "CustomAnnouncer",
+        [](QQmlEngine*, QJSEngine*) -> QObject* {
+            return new CustomAnnouncer();
+        });
+}
 
 
 CustomFlyViewOptions::CustomFlyViewOptions(CustomOptions* options, QObject* parent)

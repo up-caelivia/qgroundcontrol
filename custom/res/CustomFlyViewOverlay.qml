@@ -21,6 +21,7 @@ import QGroundControl.FactSystem    1.0
 import QGroundControl.FlightMap     1.0
 import QGroundControl.FlightDisplay 1.0
 import Custom.Widgets 1.0
+import QGroundControl.Custom 1.0
 
 Item {
     property var parentToolInsets                       // These insets tell you what screen real estate is available for positioning the controls in your overlay
@@ -64,7 +65,7 @@ Item {
                 if(!above120) {
                     showCriticalVehicleMessage("WARNING : Above 120m")
                     console.log("INFO: Vehicle above 120m");
-                    _activeVehicle.announceAltitude();
+                    CustomAnnouncer.announceAltitude();
                 }
 
                 above120 = true
