@@ -21,7 +21,6 @@ import QGroundControl.FactSystem    1.0
 import QGroundControl.FlightMap     1.0
 import QGroundControl.FlightDisplay 1.0
 import Custom.Widgets 1.0
-import QGroundControl.Custom 1.0
 
 Item {
     property var parentToolInsets                       // These insets tell you what screen real estate is available for positioning the controls in your overlay

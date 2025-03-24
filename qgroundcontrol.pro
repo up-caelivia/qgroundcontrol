@@ -810,10 +810,6 @@ HEADERS += \
     src/comm/SerialLink.h \
 }
 
-HEADERS += \
-    src/GPS/Drivers/src/rtcm.h \
-    src/GPS/RTCM/RTCMMavlink.h \
-
 
 !MobileBuild {
 HEADERS += \
@@ -1063,11 +1059,6 @@ contains (DEFINES, QGC_ENABLE_PAIRING) {
         src/PairingManager/QtNFC.cc
     }
 }
-
-SOURCES += \
-    src/GPS/RTCM/RTCMMavlink.cc \
-    src/GPS/Drivers/src/rtcm.cpp \
-
 
 !MobileBuild {
 SOURCES += \

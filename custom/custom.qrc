@@ -57,7 +57,7 @@
         <file alias="CustomCalibrationPage.qml">res/Custom/Widgets/CustomCalibrationPage.qml</file>
         <file alias="CustomSetupView.qml">res/Custom/Widgets/CustomSetupView.qml</file>
         <file alias="QGroundControl/FlightMap/FlightMap.qml">res/CustomFlightMap.qml</file>
-        <file alias="GeneralSettings.qml">res/CustomGeneralSettings.qml</file>
+        <file alias="QGroundControl/ui/preferences/GeneralSettings.qml">res/CustomGeneralSettings.qml</file>
         <file alias="QGroundControl/FlightDisplay/FlyViewCustomLayer.qml">res/CustomFlyViewOverlay.qml</file>
         <file alias="QGroundControl/FlightDisplay/FlyViewWidgetLayer.qml">res/FlyViewWidgetLayerCustom.qml</file>
         <file alias="QGroundControl/Controls/MainToolBar.qml">res/CustomMainToolbar.qml</file>
@@ -72,12 +72,16 @@
         <file alias="QGroundControl/Controls/FlightModeMenuIndicator.qml">res/CustomFlightModeMenuIndicator.qml</file>
         <file alias="QGroundControl/Controls/ParameterEditor.qml">res/CustomParameterEditor.qml</file>
         <file alias="QGroundControl/Controls/QGCPipOverlay.qml">res/CustomQGCPipOverlay.qml</file>
+        <file alias="QGroundControl/Controls/QGCSidebarDialog.qml">res/QGCSidebarDialog.qml</file> 
         <file alias="QGroundControl/FlightDisplay/FlyView.qml">res/CustomFlyView.qml</file>
         <file alias="MainRootWindow.qml">res/CustomMainRootWindow.qml</file>
-        <file alias="QGroundControl/FlightMap/PhotoVideoControl.qml">res/CustomPhotoVideoControl.qml</file>
+        <file alias="QGroundControl/FlightMap/PhotoVideoControl.qml">res/CustomPhotoVideoControl.qml</file>       
     </qresource>
     <qresource prefix="/toolbar">
         <file alias="GPSIndicator.qml">res/CustomGPSIndicator.qml</file>
         <file alias="BatteryIndicator.qml">res/CustomBatteryIndicator.qml</file>
+    </qresource>
+    <qresource prefix="/json">
+        <file alias="NTRIP.SettingsGroup.json">src/NTRIP.SettingsGroup.json</file>
     </qresource>
 </RCC>
