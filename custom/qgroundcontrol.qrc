@@ -44,7 +44,6 @@
 		<file alias="FlightDisplayViewDummy.qml">../src/FlightDisplay/FlightDisplayViewDummy.qml</file>
 		<file alias="FlightDisplayViewUVC.qml">../src/FlightDisplay/FlightDisplayViewUVC.qml</file>
 		<file alias="FWLandingPatternEditor.qml">../src/PlanView/FWLandingPatternEditor.qml</file>
-		<file alias="GeneralSettings.qml">res/CustomGeneralSettings.qml</file>
 		<file alias="GeoTagPage.qml">../src/AnalyzeView/GeoTagPage.qml</file>
 		<file alias="HelpSettings.qml">../src/ui/preferences/HelpSettings.qml</file>
 		<file alias="JoystickConfig.qml">../src/VehicleSetup/JoystickConfig.qml</file>
@@ -193,12 +192,10 @@
 		<file alias="QGroundControl/FlightDisplay/FlightDisplayViewVideo.qml">../src/FlightDisplay/FlightDisplayViewVideo.qml</file>
 		<file alias="QGroundControl/FlightDisplay/FlightDisplayViewWidgets.qml">../src/FlightDisplay/FlightDisplayViewWidgets.qml</file>
 		<file alias="QGroundControl/FlightDisplay/FlyViewInstrumentPanel.qml">../src/FlightDisplay/FlyViewInstrumentPanel.qml</file>
-		<file alias="QGroundControl/FlightDisplay/FlyViewMap.qml">../src/FlightDisplay/FlyViewMap.qml</file>
 		<file alias="QGroundControl/FlightDisplay/FlyViewMissionCompleteDialog.qml">../src/FlightDisplay/FlyViewMissionCompleteDialog.qml</file>
 		<file alias="QGroundControl/FlightDisplay/FlyViewPreFlightChecklistPopup.qml">../src/FlightDisplay/FlyViewPreFlightChecklistPopup.qml</file>
 		<file alias="QGroundControl/FlightDisplay/FlyViewToolStrip.qml">../src/FlightDisplay/FlyViewToolStrip.qml</file>
 		<file alias="QGroundControl/FlightDisplay/FlyViewToolStripActionList.qml">../src/FlightDisplay/FlyViewToolStripActionList.qml</file>
-		<file alias="QGroundControl/FlightDisplay/FlyViewVideo.qml">../src/FlightDisplay/FlyViewVideo.qml</file>
 		<file alias="QGroundControl/FlightDisplay/GuidedActionActionList.qml">../src/FlightDisplay/GuidedActionActionList.qml</file>
 		<file alias="QGroundControl/FlightDisplay/GuidedActionConfirm.qml">../src/FlightDisplay/GuidedActionConfirm.qml</file>
 		<file alias="QGroundControl/FlightDisplay/GuidedActionsController.qml">../src/FlightDisplay/GuidedActionsController.qml</file>
@@ -218,7 +215,6 @@
 		<file alias="QGroundControl/FlightDisplay/PreFlightSensorsHealthCheck.qml">../src/FlightDisplay/PreFlightSensorsHealthCheck.qml</file>
 		<file alias="QGroundControl/FlightDisplay/PreFlightSoundCheck.qml">../src/FlightDisplay/PreFlightSoundCheck.qml</file>
 		<file alias="QGroundControl/FlightDisplay/PreFlightCheckListShowAction.qml">../src/FlightDisplay/PreFlightCheckListShowAction.qml</file>
-		<file alias="QGroundControl/FlightDisplay/ProximityRadarValues.qml">../src/FlightDisplay/ProximityRadarValues.qml</file>
 		<file alias="QGroundControl/FlightDisplay/ProximityRadarVideoView.qml">../src/FlightDisplay/ProximityRadarVideoView.qml</file>
 		<file alias="QGroundControl/FlightDisplay/TerrainProgress.qml">../src/FlightDisplay/TerrainProgress.qml</file>
 		<file alias="QGroundControl/FlightDisplay/TelemetryValuesBar.qml">../src/FlightDisplay/TelemetryValuesBar.qml</file>

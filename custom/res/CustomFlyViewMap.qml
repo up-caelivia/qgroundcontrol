@@ -288,15 +288,15 @@ FlightMap {
         }
     }
     // Add distance sensor view
-    MapItemView{
-        model: QGroundControl.multiVehicleManager.vehicles
-        delegate: ProximityRadarMapView {
-            vehicle:        object
-            coordinate:     object.coordinate
-            map:            _root
-            z:              QGroundControl.zOrderVehicles
-        }
-    }
+    // MapItemView{
+    //     model: QGroundControl.multiVehicleManager.vehicles
+    //     delegate: ProximityRadarMapView {
+    //         vehicle:        object
+    //         coordinate:     object.coordinate
+    //         map:            _root
+    //         z:              QGroundControl.zOrderVehicles
+    //     }
+    // }
     // Add ADSB vehicles to the map
     MapItemView {
         model: QGroundControl.adsbVehicleManager.adsbVehicles

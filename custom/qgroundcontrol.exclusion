@@ -37,12 +37,15 @@
 <file alias="QGroundControl/FlightMap/PhotoVideoControl.qml">src/FlightMap/Widgets/PhotoVideoControl.qml</file>
 
 
-        <file alias="QGroundControl/FlightMap/FlightMap.qml">src/FlightMap/FlightMap.qml</file>
+<file alias="QGroundControl/FlightMap/FlightMap.qml">src/FlightMap/FlightMap.qml</file>
 
-        <file alias="GeneralSettings.qml">src/ui/preferences/GeneralSettings.qml</file>
+<file alias="GeneralSettings.qml">src/ui/preferences/GeneralSettings.qml</file>
 
+<file alias="QGroundControl/FlightDisplay/ProximityRadarValues.qml">src/FlightDisplay/ProximityRadarValues.qml</file>
 
+<file alias="QGroundControl/FlightDisplay/FlyViewVideo.qml">src/FlightDisplay/FlyViewVideo.qml</file>
 
+<file alias="QGroundControl/FlightDisplay/FlyViewMap.qml">src/FlightDisplay/FlyViewMap.qml</file>
 
 
 

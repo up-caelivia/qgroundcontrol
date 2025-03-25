@@ -234,10 +234,10 @@ Item {
         }
     }
 
-    ProximityRadarVideoView{
-        anchors.fill:   parent
-        vehicle:        QGroundControl.multiVehicleManager.activeVehicle
-    }
+    // ProximityRadarVideoView{
+    //     anchors.fill:   parent
+    //     vehicle:        QGroundControl.multiVehicleManager.activeVehicle
+    // }
 
     ObstacleDistanceOverlayVideo {
         id: obstacleDistance
