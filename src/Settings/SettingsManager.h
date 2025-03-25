@@ -31,7 +31,6 @@
 #include <QVariantList>
 #include "RemoteIDSettings.h"
 
-
 /// Provides access to all app settings
 class SettingsManager : public QGCTool
 {

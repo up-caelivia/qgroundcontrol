@@ -78,9 +78,8 @@ void QGroundControlQmlGlobal::setToolbox(QGCToolbox* toolbox)
     _settingsManager        = toolbox->settingsManager();
     _gpsRtkFactGroup        = qgcApp()->gpsRtkFactGroup();
     _adsbVehicleManager     = toolbox->adsbVehicleManager();
-    _globalPalette          = new QGCPalette(this);
     _ntrip                  = toolbox->ntrip();
-
+    _globalPalette          = new QGCPalette(this);
 #if defined(QGC_ENABLE_PAIRING)
     _pairingManager         = toolbox->pairingManager();
 #endif

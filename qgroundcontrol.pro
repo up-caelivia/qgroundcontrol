@@ -810,7 +810,6 @@ HEADERS += \
     src/comm/SerialLink.h \
 }
 
-
 !MobileBuild {
 HEADERS += \
     src/GPS/Drivers/src/gps_helper.h \
