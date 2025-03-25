@@ -1123,11 +1123,6 @@ Rectangle {
                         }
                     }
 
-
-
-
-
-
                     Item { width: 1; height: _margins; visible: brandImageSectionLabel.visible }
                     QGCLabel {
                         id:         brandImageSectionLabel
