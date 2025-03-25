@@ -74,6 +74,9 @@ gcc_64:
 android_armv7:
 	$(call cmake-build,$@,$(SRC_DIR))
 
+android_armv8:
+	$(call cmake-build,$@,$(SRC_DIR))
+
 android_x86:
 	$(call cmake-build,$@,$(SRC_DIR))
 
@@ -85,7 +88,7 @@ xcode:
 
 linux: gcc_64
 
-android: android_armv7
+android: android_armv8
 
 mac: clang_64
 

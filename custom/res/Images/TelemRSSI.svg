@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 72 72">
+  <defs>
+    <style>
+      .cls-1, .cls-2, .cls-3, .cls-4 {
+        fill: none;
+      }
+
+      .cls-1, .cls-3, .cls-4 {
+        stroke: #fff;
+        stroke-miterlimit: 10;
+      }
+
+      .cls-1, .cls-4 {
+        stroke-width: 3px;
+      }
+
+      .cls-2, .cls-5 {
+        stroke-width: 0px;
+      }
+
+      .cls-6 {
+        clip-path: url(#clippath-1);
+      }
+
+      .cls-7 {
+        clip-path: url(#clippath);
+      }
+
+      .cls-5 {
+        fill: #fff;
+      }
+
+      .cls-3 {
+        stroke-width: 2px;
+      }
+
+      .cls-4 {
+        stroke-linecap: round;
+      }
+    </style>
+    <clipPath id="clippath">
+      <rect class="cls-2" x="4.7" y="15.7" width="25.1" height="54.8"/>
+    </clipPath>
+    <clipPath id="clippath-1">
+      <rect class="cls-2" x="29.8" y="15.7" width="25.9" height="54.8"/>
+    </clipPath>
+  </defs>
+  <g id="_Ripetizione_specchio_" data-name=" Ripetizione specchio ">
+    <g class="cls-7">
+      <g>
+        <polyline class="cls-2" points="29.8 15.7 29.8 42.3 29.8 70.4"/>
+        <line class="cls-4" x1="29.8" y1="42.3" x2="15.3" y2="57.4"/>
+        <line class="cls-4" x1="15.3" y1="27.3" x2="29.8" y2="42.3"/>
+        <circle class="cls-4" cx="15.3" cy="27.3" r="9.4"/>
+        <circle class="cls-1" cx="15.3" cy="57.4" r="9.4"/>
+        <circle class="cls-5" cx="15.3" cy="27.3" r="2.6"/>
+        <circle class="cls-5" cx="15.3" cy="57.4" r="2.6"/>
+      </g>
+    </g>
+  </g>
+  <g id="_Ripetizione_specchio_-2" data-name=" Ripetizione specchio -2">
+    <g class="cls-6">
+      <g>
+        <polyline class="cls-2" points="29.8 15.7 29.8 42.3 29.8 70.4"/>
+        <line class="cls-4" x1="29.8" y1="42.3" x2="44.3" y2="57.4"/>
+        <line class="cls-4" x1="44.3" y1="27.3" x2="29.8" y2="42.3"/>
+        <circle class="cls-4" cx="44.3" cy="27.3" r="9.4"/>
+        <circle class="cls-1" cx="44.3" cy="57.4" r="9.4"/>
+        <circle class="cls-5" cx="44.3" cy="27.3" r="2.6"/>
+        <circle class="cls-5" cx="44.3" cy="57.4" r="2.6"/>
+      </g>
+    </g>
+  </g>
+  <g>
+    <path class="cls-3" d="M51.5,14.6l1.1.4c2.2.9,3.9,2.7,4.6,4.9l.4,1.2"/>
+    <path class="cls-3" d="M53.2,8.1l1.9.8c3.8,1.6,6.8,4.7,8,8.7l.7,2.1"/>
+    <path class="cls-3" d="M54.9,1.7l2.7,1.1c5.5,2.2,9.7,6.8,11.5,12.5l.9,3"/>
+  </g>
+</svg>
