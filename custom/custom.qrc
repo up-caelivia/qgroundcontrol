@@ -79,6 +79,8 @@
         <file alias="QGroundControl/FlightDisplay/FlyViewMap.qml">res/CustomFlyViewMap.qml</file>
         <file alias="QGroundControl/FlightDisplay/ProximityRadarValues.qml">res/CustomProximityRadarValues.qml</file>   
         <file alias="QGroundControl/FlightDisplay/FlyViewVideo.qml">res/CustomFlyViewVideo.qml</file> 
+		<file alias="QGroundControl/Controls/QGCComboBox.qml">res/CustomQGCComboBox.qml</file>
+		<file alias="MainToolBarIndicators.qml">res/CustomMainToolBarIndicators.qml</file>
     </qresource>
     <qresource prefix="/toolbar">
         <file alias="GPSIndicator.qml">res/CustomGPSIndicator.qml</file>

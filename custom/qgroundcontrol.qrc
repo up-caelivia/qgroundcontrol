@@ -7,7 +7,6 @@
 		<file alias="GPSRTKIndicator.qml">../src/ui/toolbar/GPSRTKIndicator.qml</file>
 		<file alias="JoystickIndicator.qml">../src/ui/toolbar/JoystickIndicator.qml</file>
 		<file alias="LinkIndicator.qml">../src/ui/toolbar/LinkIndicator.qml</file>
-		<file alias="MainToolBarIndicators.qml">../src/ui/toolbar/MainToolBarIndicators.qml</file>
 		<file alias="MessageIndicator.qml">../src/ui/toolbar/MessageIndicator.qml</file>
 		<file alias="ModeIndicator.qml">../src/ui/toolbar/ModeIndicator.qml</file>
 		<file alias="MultiVehicleSelector.qml">../src/ui/toolbar/MultiVehicleSelector.qml</file>
@@ -125,7 +124,6 @@
 		<file alias="QGroundControl/Controls/QGCCheckBox.qml">../src/QmlControls/QGCCheckBox.qml</file>
 		<file alias="QGroundControl/Controls/QGCColoredImage.qml">../src/QmlControls/QGCColoredImage.qml</file>
 		<file alias="QGroundControl/Controls/QGCControlDebug.qml">../src/QmlControls/QGCControlDebug.qml</file>
-		<file alias="QGroundControl/Controls/QGCComboBox.qml">../src/QmlControls/QGCComboBox.qml</file>
 		<file alias="QGroundControl/Controls/QGCFileDialog.qml">../src/QmlControls/QGCFileDialog.qml</file>
 		<file alias="QGroundControl/Controls/QGCFlickable.qml">../src/QmlControls/QGCFlickable.qml</file>
 		<file alias="QGroundControl/Controls/QGCFlickableHorizontalIndicator.qml">../src/QmlControls/QGCFlickableHorizontalIndicator.qml</file>
