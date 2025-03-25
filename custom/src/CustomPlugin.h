@@ -14,6 +14,7 @@
 #include "QGCCorePlugin.h"
 #include "QGCOptions.h"
 #include <QObject>
+#include "QmlComponentInfo.h"
 
 class CustomOptions;
 class CustomPlugin;
@@ -56,9 +57,12 @@ public:
     bool                    overrideSettingsGroupVisibility (QString name) final;
     void                    paletteOverride                 (QString colorName, QGCPalette::PaletteColorInfo_t& colorInfo) final;
     bool        adjustSettingMetaData                  (const QString& settingsGroup, FactMetaData& metaData) override;
-    QQmlApplicationEngine*  createQmlApplicationEngine      (QObject* parent) final;
+    QQmlApplicationEngine*  createQmlApplicationEngine      (QObject* parent) override;
     void registerQmlTypes();
+    QVariantList&           settingsPages() override;
 
     private:
     CustomOptions*  _options = nullptr;
+    QmlComponentInfo* _ntripSettings = nullptr;
+    QVariantList      _customSettingsList;
 };

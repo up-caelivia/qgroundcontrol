@@ -294,6 +294,41 @@ bool CustomPlugin::adjustSettingMetaData(const QString& settingsGroup, FactMetaD
     return true; // Show all settings in ui
 }
 
+QVariantList& CustomPlugin::settingsPages()
+{
+    if (_customSettingsList.isEmpty()) {
+        // Get default pages from QGCCorePlugin
+        QVariantList baseSettings = QGCCorePlugin::settingsPages();
+        _customSettingsList = baseSettings;
+
+        //add NTRIP page
+        _ntripSettings = new QmlComponentInfo(
+            tr("NTRIP"),
+            QUrl::fromUserInput("qrc:/Custom/Widgets/CustomNTRIP.qml"),
+            QUrl::fromUserInput("qrc:/res/gear-white.svg")
+        );
+
+        // Find "Comm Links" position and insert NTRIP page after it
+        int insertIndex = -1;
+        for (int i = 0; i < _customSettingsList.count(); ++i) {
+            QmlComponentInfo* info = _customSettingsList[i].value<QmlComponentInfo*>();
+            if (info && info->title() == tr("Comm Links")) {
+                insertIndex = i + 1;
+                break;
+            }
+        }
+
+        // Insert NTRIP page
+        if (insertIndex >= 0 && insertIndex <= _customSettingsList.count()) {
+            _customSettingsList.insert(insertIndex, QVariant::fromValue(_ntripSettings));
+        } else {
+            _customSettingsList.append(QVariant::fromValue(_ntripSettings));
+        }
+    }
+
+    return _customSettingsList;
+}
+
 
 
 
