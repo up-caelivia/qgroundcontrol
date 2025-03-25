@@ -100,8 +100,7 @@ void APMSensorsComponentController::_startLogCalibration(void)
     
     emit setAllCalButtonsEnabled(false);
     if (_calTypeInProgress == CalTypeAccel || _calTypeInProgress == CalTypeCompassMot) {
-        if(_nextButton != nullptr)
-         _nextButton->setEnabled(true);
+        _nextButton->setEnabled(true);
     }
     _cancelButton->setEnabled(_calTypeInProgress == CalTypeOnboardCompass);
 
@@ -112,8 +111,7 @@ void APMSensorsComponentController::_startVisualCalibration(void)
 {
     emit setAllCalButtonsEnabled(false);
     _cancelButton->setEnabled(true);
-    if(_nextButton != nullptr)
-      _nextButton->setEnabled(false);
+    _nextButton->setEnabled(false);
 
     _resetInternalState();
     
@@ -156,8 +154,7 @@ void APMSensorsComponentController::_stopCalibration(APMSensorsComponentControll
     disconnect(_vehicle, &Vehicle::textMessageReceived, this, &APMSensorsComponentController::_handleUASTextMessage);
     
     emit setAllCalButtonsEnabled(true);
-    if(_nextButton != nullptr)
-        _nextButton->setEnabled(false);
+    _nextButton->setEnabled(false);
     _cancelButton->setEnabled(false);
 
     if (_calTypeInProgress == CalTypeOnboardCompass) {
@@ -620,9 +617,7 @@ void APMSensorsComponentController::_handleCommandLong(mavlink_message_t& messag
             if (!_orientationCalDownSideInProgress) {
                 updateImages = true;
                 _orientationCalDownSideInProgress = true;
-
-                if(_nextButton != nullptr)
-                    _nextButton->setEnabled(true);
+                _nextButton->setEnabled(true);
             }
             break;
         case ACCELCAL_VEHICLE_POS_LEFT:

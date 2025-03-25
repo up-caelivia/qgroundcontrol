@@ -81,6 +81,7 @@
         <file alias="GPSIndicator.qml">res/CustomGPSIndicator.qml</file>
         <file alias="BatteryIndicator.qml">res/CustomBatteryIndicator.qml</file>
         <file alias="APMSafetyComponent.qml">res/CustomAPMSafetyComponent.qml</file>
+        <file alias="APMSensorsComponent.qml">res/CustomAPMSensorsComponent.qml</file>
     </qresource>
     <qresource prefix="/json">
         <file alias="NTRIP.SettingsGroup.json">src/NTRIP.SettingsGroup.json</file>
