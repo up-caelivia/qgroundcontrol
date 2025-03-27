@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 72 72">
+  <defs>
+    <style>
+      .cls-1, .cls-2, .cls-3 {
+        fill: none;
+      }
+
+      .cls-1, .cls-3 {
+        stroke: #fff;
+        stroke-miterlimit: 10;
+        stroke-width: 3px;
+      }
+
+      .cls-2, .cls-4 {
+        stroke-width: 0px;
+      }
+
+      .cls-5 {
+        clip-path: url(#clippath-1);
+      }
+
+      .cls-6 {
+        clip-path: url(#clippath);
+      }
+
+      .cls-4 {
+        fill: #fff;
+      }
+
+      .cls-3 {
+        stroke-linecap: round;
+      }
+    </style>
+    <clipPath id="clippath">
+      <rect class="cls-2" x="5.5" y="4" width="30.5" height="66.5"/>
+    </clipPath>
+    <clipPath id="clippath-1">
+      <rect class="cls-2" x="36" y="4" width="30.5" height="66.5"/>
+    </clipPath>
+  </defs>
+  <g id="_Ripetizione_specchio_" data-name=" Ripetizione specchio ">
+    <g class="cls-6">
+      <g>
+        <polyline class="cls-2" points="36 4 36 36.3 36 70.4"/>
+        <line class="cls-3" x1="36" y1="36.3" x2="18.4" y2="54.6"/>
+        <line class="cls-3" x1="18.4" y1="18" x2="36" y2="36.3"/>
+        <circle class="cls-3" cx="18.4" cy="18" r="11.4"/>
+        <circle class="cls-1" cx="18.4" cy="54.6" r="11.4"/>
+        <circle class="cls-4" cx="18.4" cy="18" r="3.1"/>
+        <circle class="cls-4" cx="18.4" cy="54.6" r="3.1"/>
+      </g>
+    </g>
+  </g>
+  <g id="_Ripetizione_specchio_-2" data-name=" Ripetizione specchio -2">
+    <g class="cls-5">
+      <g>
+        <polyline class="cls-2" points="36 4 36 36.3 36 70.4"/>
+        <line class="cls-3" x1="36" y1="36.3" x2="53.6" y2="54.6"/>
+        <line class="cls-3" x1="53.6" y1="18" x2="36" y2="36.3"/>
+        <circle class="cls-3" cx="53.6" cy="18" r="11.4"/>
+        <circle class="cls-1" cx="53.6" cy="54.6" r="11.4"/>
+        <circle class="cls-4" cx="53.6" cy="18" r="3.1"/>
+        <circle class="cls-4" cx="53.6" cy="54.6" r="3.1"/>
+      </g>
+    </g>
+  </g>
+</svg>

@@ -70,7 +70,14 @@ public:
     void setFailureMode(FailureMode_t failureMode) { _failureMode = failureMode; }
 
     // Overrides from LinkConfiguration
-    LinkType    type            (void) override                                         { return LinkConfiguration::TypeMock; }
+    LinkType    type            (void) override                                         {
+    #ifdef QT_DEBUG
+            return LinkConfiguration::TypeMock;
+    #endif
+
+        return LinkConfiguration::TypeTcp;  // giusto per non far tirare errore in release android
+
+    }
     void        copyFrom        (LinkConfiguration* source) override;
     void        loadSettings    (QSettings& settings, const QString& root) override;
     void        saveSettings    (QSettings& settings, const QString& root) override;
