@@ -15,6 +15,7 @@
 #include "QGCOptions.h"
 #include <QObject>
 #include "QmlComponentInfo.h"
+#include "CustomToolbox.h"
 
 class CustomOptions;
 class CustomPlugin;
@@ -60,9 +61,11 @@ public:
     QQmlApplicationEngine*  createQmlApplicationEngine      (QObject* parent) override;
     void registerQmlTypes();
     QVariantList&           settingsPages() override;
+    void setToolbox(QGCToolbox* toolbox);
 
     private:
     CustomOptions*  _options = nullptr;
     QmlComponentInfo* _ntripSettings = nullptr;
     QVariantList      _customSettingsList;
+    CustomToolbox* _customToolbox = nullptr;
 };

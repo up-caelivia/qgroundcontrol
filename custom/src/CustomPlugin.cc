@@ -24,6 +24,7 @@
 #include "MultiVehicleManager.h"
 #include "constants.h"
 #include "CustomAnnouncer.h"
+#include "CustomToolbox.h"
 // #include "JoystickManager.h"
 // #include "HorizontalFactValueGrid.h"
 // #include "InstrumentValueData.h"
@@ -62,6 +63,13 @@ CustomPlugin::CustomPlugin(QGCApplication *app, QGCToolbox* toolbox)
     #endif
 }
 
+void CustomPlugin::setToolbox(QGCToolbox* toolbox)
+{
+    QGCCorePlugin::setToolbox(toolbox);
+    qDebug() << "[CustomPlugin] setToolbox() called";
+
+    _customToolbox = new CustomToolbox(qgcApp());
+}
 
 
 bool CustomPlugin::overrideSettingsGroupVisibility(QString name)
@@ -308,11 +316,11 @@ QVariantList& CustomPlugin::settingsPages()
             QUrl::fromUserInput("qrc:/res/gear-white.svg")
         );
 
-        // Find "Comm Links" position and insert NTRIP page after it
+        // Find "Offline Maps" position and insert NTRIP page after it
         int insertIndex = -1;
         for (int i = 0; i < _customSettingsList.count(); ++i) {
             QmlComponentInfo* info = _customSettingsList[i].value<QmlComponentInfo*>();
-            if (info && info->title() == tr("Comm Links")) {
+            if (info && info->title() == tr("Offline Maps")) {
                 insertIndex = i + 1;
                 break;
             }

@@ -98,7 +98,7 @@ public slots:
 
 private slots:
 
-private:
+public:
     NTRIPTCPLink*                    _tcpLink = nullptr;
     RTCMMavlink*                     _rtcmMavlink = nullptr;
 };

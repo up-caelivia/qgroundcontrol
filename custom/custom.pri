@@ -36,6 +36,7 @@ message(Custom QGC Version: $${CUSTOM_QGC_VERSION})
 
 DEFINES += CUSTOMHEADER=\"\\\"CustomPlugin.h\\\"\"
 DEFINES += CUSTOMCLASS=CustomPlugin
+DEFINES += CUSTOMCORE_PLUGIN=CustomPlugin
 
 TARGET   = QGroundControlUP
 DEFINES += QGC_APPLICATION_NAME='"\\\"QGroundControl UP version \\\""'
@@ -62,10 +63,14 @@ QML_IMPORT_PATH += \
 # Our own, custom sources
 SOURCES += \
     $$PWD/src/CustomPlugin.cc \
+    $$PWD/src/CustomToolbox.cpp \
+    $$PWD/src/ParseNTRIP.cpp \
     $$PWD/src/constants.cpp 
 
 HEADERS += \
     $$PWD/src/CustomPlugin.h \
+    $$PWD/src/CustomToolbox.h \
+    $$PWD/src/ParseNTRIP.h \
     $$PWD/src/constants.h 
 
 INCLUDEPATH += \
