@@ -80,13 +80,13 @@
         <file alias="QGroundControl/FlightDisplay/ProximityRadarValues.qml">res/CustomProximityRadarValues.qml</file>   
         <file alias="QGroundControl/FlightDisplay/FlyViewVideo.qml">res/CustomFlyViewVideo.qml</file> 
 		<file alias="QGroundControl/Controls/QGCComboBox.qml">res/CustomQGCComboBox.qml</file>
-		<file alias="MainToolBarIndicators.qml">res/CustomMainToolBarIndicators.qml</file>
     </qresource>
     <qresource prefix="/toolbar">
         <file alias="GPSIndicator.qml">res/CustomGPSIndicator.qml</file>
         <file alias="BatteryIndicator.qml">res/CustomBatteryIndicator.qml</file>
         <file alias="APMSafetyComponent.qml">res/CustomAPMSafetyComponent.qml</file>
         <file alias="APMSensorsComponent.qml">res/CustomAPMSensorsComponent.qml</file>
+		<file alias="MainToolBarIndicators.qml">res/CustomMainToolBarIndicators.qml</file>
     </qresource>
     <qresource prefix="/json">
         <file alias="NTRIP.SettingsGroup.json">src/NTRIP.SettingsGroup.json</file>
