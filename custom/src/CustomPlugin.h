@@ -66,6 +66,7 @@ public:
     private:
     CustomOptions*  _options = nullptr;
     QmlComponentInfo* _ntripSettings = nullptr;
+    QmlComponentInfo* _aboutSettings = nullptr;
     QVariantList      _customSettingsList;
     CustomToolbox* _customToolbox = nullptr;
 };
