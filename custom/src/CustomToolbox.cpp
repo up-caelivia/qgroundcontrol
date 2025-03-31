@@ -28,6 +28,8 @@ CustomToolbox::CustomToolbox(QGCApplication* app)
 
         if (ntrip->_tcpLink) {
 
+            disconnect(ntrip->_tcpLink, SIGNAL(error(QString)), nullptr, nullptr);
+
             connect(ntrip->_tcpLink, &NTRIPTCPLink::error, this, [this](const QString &info) {
                 if (info.contains("bad mountpoint")) 
                     _parseNTRIP->setmountError(true);

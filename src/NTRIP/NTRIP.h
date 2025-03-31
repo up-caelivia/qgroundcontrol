@@ -16,6 +16,7 @@
 
 #include "Drivers/src/rtcm.h"
 #include "RTCM/RTCMMavlink.h"
+#include "NTRIP.h"
 
 Q_DECLARE_LOGGING_CATEGORY(NTRIPLog)
 
