@@ -14,7 +14,7 @@ class Constants : public QObject {
 
     Q_OBJECT
 
-    Q_PROPERTY(bool developer READ developer CONSTANT)
+    Q_PROPERTY(bool developer READ developer WRITE setDeveloper NOTIFY developerChanged)
     Q_PROPERTY(QVector<QString> factNames READ factNames CONSTANT)
     Q_PROPERTY(QVector<QString> factDescription READ factDescription CONSTANT)
     Q_PROPERTY(QVector<QString> factGoodNames READ factGoodNames CONSTANT)
@@ -63,7 +63,7 @@ public:
         }
     }
 
-    bool developer() const { return false; }
+    bool developer() const { return m_developer; }
     QVector<QString> factNames() const { return {"LOIT_SPEED", "WPNAV_SPEED", "WPNAV_SPEED_DN", "WPNAV_SPEED_UP", "RTL_CLIMB_MIN", "WP_YAW_BEHAVIOR","FENCE_ALT_MAX"}; }
     QVector<QString> factDescription() const { return {"Maximum speed reached by drone in loiter mode. Warning: in altitude hold mode speed is not limited", "Maximum horizontal speed reached by drone during automatic mission", "Maximum descending speed reached by drone during automatic mission", "Maximum ascending speed reached by drone during automatic mission", "The altitude selected must be higher than all surrounding obstacles","",""}; }
     QVector<QString> factGoodNames() const { return {"Maximum loiter speed", "Maximum auto speed", "Automatic mode speed down", "Automatic mode speed up", "Altitude for Return To Launch mode", "Automatic mode yaw behaviour","Maximum altitude"}; }
@@ -75,6 +75,11 @@ public:
     double altitudeFactor() const { return 1.0; }
 
     int lastMaxHeight() const { return m_lastMaxHeight; }
+
+    void setDeveloper(bool value){
+        m_developer = value;
+        emit developerChanged();
+    }
 
     void setLastMaxHeight(int height) {
         if (m_lastMaxHeight != height) {
@@ -202,6 +207,7 @@ signals:
     void numMChanged();
     void numGPSChanged();
     void numGLOChanged();
+    void developerChanged();
 
 private slots:
 
@@ -220,6 +226,7 @@ private slots:
 
 
 private:
+    bool m_developer = false;
     int m_lastMaxHeight;
     bool ntripEnableV = false;
     bool authErrV = false;
