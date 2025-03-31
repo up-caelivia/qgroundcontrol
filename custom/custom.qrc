@@ -48,7 +48,7 @@
         <file alias="Custom/Widgets/CustomRadarWidget.qml">res/Custom/Widgets/CustomRadarWidget.qml</file>
         <file alias="Custom/Widgets/qmldir">res/Custom/Widgets/qmldir</file>
         <file alias="CustomNTRIP.qml">res/Custom/Widgets/CustomNTRIP.qml</file>
-        <file alias="CustomAbout.qml">res/Custom/Widgets/CustomAbout.qml</file>
+        <!--<file alias="CustomAbout.qml">res/Custom/Widgets/CustomAbout.qml</file> -->
     </qresource>
     <qresource prefix="/Custom/Constants">
         <file alias="Custom/Constants/Constants.qml">res/Custom/Constants/Constants.qml</file>
@@ -69,7 +69,7 @@
         <file alias="QGroundControl/FlightMap/MapLineArrow.qml">res/CustomMapLineArraw.qml</file>
         <file alias="QGroundControl/Controls/QGCMapPolygonVisuals.qml">res/CustomMapPolygonVisuals.qml</file>
         <file alias="QGroundControl/Controls/MainStatusIndicator.qml">res/CustomMainStatusIndicator.qml</file>
-        <file alias="QGroundControl/Controls/ParameterEditorDialog.qml">res/CustomParameterEditorDialog.qml</file>
+        <file alias="QGroundControl/Controls/ParameterEditorDialog.qml">src/QmlControls/ParameterEditorDialogUp.qml</file>
         <file alias="QGroundControl/Controls/FlightModeMenuIndicator.qml">res/CustomFlightModeMenuIndicator.qml</file>
         <file alias="QGroundControl/Controls/QGCPipOverlay.qml">res/CustomQGCPipOverlay.qml</file>
         <file alias="QGroundControl/Controls/QGCSidebarDialog.qml">res/QGCSidebarDialog.qml</file> 
