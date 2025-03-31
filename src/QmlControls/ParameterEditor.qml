@@ -20,18 +20,33 @@ import QGroundControl.Controllers   1.0
 import QGroundControl.FactSystem    1.0
 import QGroundControl.FactControls  1.0
 
+import Constants 1.0
+
+
 Item {
     id:         _root
 
     property Fact   _editorDialogFact: Fact { }
+    property int _indexSelected: 0
+
     property int    _rowHeight:         ScreenTools.defaultFontPixelHeight * 2
     property int    _rowWidth:          10 // Dynamic adjusted at runtime
-    property bool   _searchFilter:      searchText.text.trim() != "" || controller.showModifiedOnly  ///< true: showing results of search
     property var    _searchResults      ///< List of parameter names from search results
     property var    _activeVehicle:     QGroundControl.multiVehicleManager.activeVehicle
     property bool   _showRCToParam:     _activeVehicle.px4Firmware
     property var    _appSettings:       QGroundControl.settingsManager.appSettings
     property var    _controller:        controller
+
+    property bool   _searchFilter:      searchText.text.trim() != "" || controller.showModifiedOnly  ///< true: showing results of search
+    property list<Fact> factList
+
+    property var factNames: Constants.factNames
+    property var factDescription: Constants.factDescription
+    property var factGoodNames: Constants.factGoodNames
+    property var factMin: Constants.factMin
+    property var factMax: Constants.factMax
+    property var factEditable: Constants.factEditable
+    property bool developer: Constants.developer
 
     ParameterEditorController {
         id: controller
@@ -46,6 +61,7 @@ Item {
         anchors.left:   parent.left
         anchors.right:  parent.right
         spacing:        ScreenTools.defaultFontPixelWidth
+        visible: developer
 
         Timer {
             id:         clearTimer
@@ -91,10 +107,13 @@ Item {
     } // Row - Header
 
     QGCButton {
-        anchors.top:    header.top
-        anchors.bottom: header.bottom
+        id: tools
+        // anchors.top:    header.top
+        // anchors.bottom: header.bottom
         anchors.right:  parent.right
+        anchors.rightMargin: ScreenTools.defaultFontPixelWidth
         text:           qsTr("Tools")
+       // visible:        !_searchFilter
         onClicked:      toolsMenu.popup()
     }
 
@@ -162,7 +181,7 @@ Item {
         pixelAligned:       true
         contentHeight:      groupedViewCategoryColumn.height
         flickableDirection: Flickable.VerticalFlick
-        visible:            !_searchFilter
+        visible:            (!_searchFilter) && (developer)
 
         ColumnLayout {
             id:             groupedViewCategoryColumn
@@ -215,58 +234,135 @@ Item {
         }
     }
 
+    // -----------------------------------------------------------------------------------------------------------------------------
+
+    function getModel() {
+
+        for (var i = 0; i < factNames.length; ++i) {
+
+            var name = factNames[i]
+            controller.searchText = name
+
+            for( var j = 0; j < controller.parameters.rowCount(); j++ ) {
+
+                var fact = controller.parameters.get(j)
+
+                if ( fact.name == name)  {
+                    factList.push(fact)
+
+                    if(fact.name == "FENCE_ALT_MAX")
+                        Constants.lastMaxHeight = parseFloat(fact.value)
+                    break
+                }
+            }
+
+        }
+    }
+
+
+    Component.onCompleted: {
+        if (!developer)
+          getModel() // Trigger the initial population of factList
+      }
+
+    function getText(modelFact)   {
+            if(modelFact.enumStrings.length === 0) {
+
+                //if(developer)
+                //    return modelFact.valueString + " " + modelFact.units
+
+                if (modelFact.name == "FENCE_ALT_MAX"){
+                    Constants.lastMaxHeight = parseFloat( modelFact.valueString)
+                    return (Constants.lastMaxHeight).toFixed(0) + " " + "m"
+                    //  return (parseFloat(modelFact.valueString) / Constants.altitudeFactor).toFixed(0) + " " + "m"
+                }
+
+                if (modelFact.units == "cm/s")
+                    return (modelFact.rawValue / 100).toFixed(modelFact.decimalPlaces+2) + " " + "m/s"
+
+                if (modelFact.units == "cm")
+                    return (modelFact.rawValue / 100).toFixed(modelFact.decimalPlaces+2) + " " + "m"
+
+                return modelFact.valueString + " " + modelFact.units
+
+            }
+
+            if(modelFact.bitmaskStrings.length != 0) {
+                return modelFact.selectedBitmaskStrings.join(',')
+            }
+
+            return modelFact.enumStringValue
+    }
+
     /// Parameter list
     QGCListView {
         id:                 editorListView
         anchors.leftMargin: ScreenTools.defaultFontPixelWidth
-        anchors.left:       _searchFilter ? parent.left : groupScroll.right
+        anchors.left:       developer ? groupScroll.right  : parent.left
         anchors.right:      parent.right
-        anchors.top:        header.bottom
+        anchors.top:        tools.bottom
         anchors.bottom:     parent.bottom
         orientation:        ListView.Vertical
-        model:              controller.parameters
+        model:              developer ? controller.parameters : factList
         cacheBuffer:        height > 0 ? height * 2 : 0
         clip:               true
 
         delegate: Rectangle {
-            height: _rowHeight
+            id: itemDelegate
+            height: developer ? _rowHeight : Math.max(descriptionId.height, nameLabel.height) + ScreenTools.defaultFontPixelHeight //_rowHeight
             width:  _rowWidth
             color:  Qt.rgba(0,0,0,0)
+            anchors.horizontalCenter: developer ? undefined : parent.horizontalCenter
 
             Row {
                 id:     factRow
                 spacing: Math.ceil(ScreenTools.defaultFontPixelWidth * 0.5)
                 anchors.verticalCenter: parent.verticalCenter
 
-                property Fact modelFact: object
+                property Fact modelFact: developer ? object : factList[index]
 
                 QGCLabel {
                     id:     nameLabel
                     width:  ScreenTools.defaultFontPixelWidth  * 20
-                    text:   factRow.modelFact.name
+                    text:   developer ? factRow.modelFact.name : factGoodNames[index]
                     clip:   true
+                    opacity: developer ? 1 : factEditable[index] ? 1 : 0.5
+                    wrapMode: developer ? Text.NoWrap : Text.Wrap
                 }
 
                 QGCLabel {
                     id:     valueLabel
                     width:  ScreenTools.defaultFontPixelWidth  * 20
-                    color:  factRow.modelFact.defaultValueAvailable ? (factRow.modelFact.valueEqualsDefault ? qgcPal.text : qgcPal.warningText) : qgcPal.text
-                    text:   {
-                        if(factRow.modelFact.enumStrings.length === 0) {
-                            return factRow.modelFact.valueString + " " + factRow.modelFact.units
-                        }
-
-                        if(factRow.modelFact.bitmaskStrings.length != 0) {
-                            return factRow.modelFact.selectedBitmaskStrings.join(',')
-                        }
-
-                        return factRow.modelFact.enumStringValue
-                    }
+                    color:  getColor()
+                    text:  getText(factRow.modelFact)
+                    wrapMode: developer ? Text.NoWrap : Text.Wrap
+                    horizontalAlignment: developer ? undefined : Text.AlignHCenter
                     clip:   true
+                    opacity: developer ? 1 : factEditable[index] ? 1 : 0.5
+
+                    function getColor() {
+
+                        if (factGoodNames[index] == "Maximum altitude" && Constants.lastMaxHeight > Constants.maxAltitudeWarning)
+                            return qgcPal.warningText
+                        return qgcPal.text
+
+                    }
+
                 }
 
                 QGCLabel {
-                    text:   factRow.modelFact.shortDescription
+                    id: descriptionId
+                    text: getDesc()
+                    width: ScreenTools.defaultFontPixelWidth  * 30
+                    wrapMode: developer ? Text.NoWrap : Text.Wrap
+                    opacity: developer ? 1 : factEditable[index] ? 1 : 0.5
+
+
+                    function getDesc() {
+                        if(developer || factDescription[index] == "")
+                            return factRow.modelFact.shortDescription
+                        return factDescription[index]
+                    }
                 }
 
                 Component.onCompleted: {
@@ -288,8 +384,11 @@ Item {
             MouseArea {
                 anchors.fill:       parent
                 acceptedButtons:    Qt.LeftButton
+                enabled: developer ? true : factEditable[index]
+
                 onClicked: {
                     _editorDialogFact = factRow.modelFact
+                    _indexSelected = index
                     editorDialogComponent.createObject(mainWindow).open()
                 }
             }
@@ -320,6 +419,10 @@ Item {
         ParameterEditorDialog {
             fact:           _editorDialogFact
             showRCToParam:  _showRCToParam
+            //selectedIndex: _indexSelected
+            // developer: developer
+            // max: factMax[_indexSelected]
+            // min: factMin[_indexSelected]
         }
     }
 
