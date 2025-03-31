@@ -91,6 +91,6 @@
 		<file alias="MainToolBarIndicators.qml">res/CustomMainToolBarIndicators.qml</file>
     </qresource>
     <qresource prefix="/json">
-        <file alias="NTRIP.SettingsGroup.json">src/NTRIP.SettingsGroup.json</file>
+        <file alias="NTRIP.SettingsGroup.json">src/Settings/NTRIP.SettingsGroup.json</file>
     </qresource>
 </RCC>

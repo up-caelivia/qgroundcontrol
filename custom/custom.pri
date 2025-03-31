@@ -75,26 +75,3 @@ HEADERS += \
 
 INCLUDEPATH += \
     $$PWD/src \
-
-#-------------------------------------------------------------------------------------
-# Custom Firmware/AutoPilot Plugin
-
-# INCLUDEPATH += \
-#     $$PWD/src/FirmwarePlugin \
-#     $$PWD/src/AutoPilotPlugin
-
-# HEADERS+= \
-#     $$PWD/src/AutoPilotPlugin/CustomAutoPilotPlugin.h \
-#     $$PWD/src/FirmwarePlugin/CustomFirmwarePlugin.h \
-#     $$PWD/src/FirmwarePlugin/CustomFirmwarePluginFactory.h \
-
-# SOURCES += \
-#     $$PWD/src/AutoPilotPlugin/CustomAutoPilotPlugin.cc \
-#     $$PWD/src/FirmwarePlugin/CustomFirmwarePlugin.cc \
-#     $$PWD/src/FirmwarePlugin/CustomFirmwarePluginFactory.cc \
-
-
-# DISTFILES += \
-#     $$PWD/res/CustomGPSIndicator.qml \
-#     $$PWD/res/CustomMainToolbar.qml
-
