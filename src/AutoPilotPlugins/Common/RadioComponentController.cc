@@ -218,8 +218,8 @@ void RadioComponentController::_setupCurrentState(void)
 
     _rcCalSaveCurrentValues();
 
-    _nextButton->setEnabled(state->nextFn != nullptr);
-    _skipButton->setEnabled(state->skipFn != nullptr);
+    if(_nextButton)   _nextButton->setEnabled(state->nextFn != nullptr);
+    if(_skipButton)   _skipButton->setEnabled(state->skipFn != nullptr);
 }
 
 /// Connected to Vehicle::rcChannelsChanged signal
@@ -340,7 +340,7 @@ void RadioComponentController::_inputCenterWaitBegin(enum rcCalFunctions functio
 
     // FIXME: Doesn't wait for center
 
-    _nextButton->setEnabled(true);
+    if(_nextButton)   _nextButton->setEnabled(true);
 }
 
 bool RadioComponentController::_stickSettleComplete(int value)
@@ -799,8 +799,8 @@ void RadioComponentController::_startCalibration(void)
     // Let the mav known we are starting calibration. This should turn off motors and so forth.
     _vehicle->startCalibration(Vehicle::CalibrationRadio);
 
-    _nextButton->setProperty("text", tr("Next"));
-    _cancelButton->setEnabled(true);
+    if(_nextButton)   _nextButton->setProperty("text", tr("Next"));
+    if(_cancelButton)   _cancelButton->setEnabled(true);
 
     _currentStep = 0;
     _setupCurrentState();
