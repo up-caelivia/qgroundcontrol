@@ -332,6 +332,16 @@ QVariantList& CustomPlugin::settingsPages()
         } else {
             _customSettingsList.append(QVariant::fromValue(_ntripSettings));
         }
+
+        //add About page
+        _aboutSettings = new QmlComponentInfo(
+            tr("About"),
+            QUrl::fromUserInput("qrc:/Custom/Widgets/CustomAbout.qml"),
+            QUrl::fromUserInput("qrc:/res/gear-white.svg")
+        );
+
+        // Insert About page
+        _customSettingsList.append(QVariant::fromValue(_aboutSettings));
     }
 
     return _customSettingsList;
