@@ -50,6 +50,15 @@ QGCPopupDialog {
             default: return 1.0
         }
     }
+    
+    function decimalShiftFromConversion(unit) {
+        var factor = conversionFactor(unit)
+        return Math.max(0, Math.round(Math.log10(factor)))
+    }
+
+    function totalDisplayDecimals(unit) {
+        return fact.decimalPlaces + decimalShiftFromConversion(unit)
+    }
 
     function needsConversion() {
         return conversionFactor(fact.units) !== 1.0
@@ -73,10 +82,11 @@ QGCPopupDialog {
     function toDisplayValue(val) {
         var num = parseFloat(val)
         if (isNaN(num)) return ""
-        return (num / conversionFactor(fact.units)).toFixed(2)
+        return (num / conversionFactor(fact.units)).toFixed(totalDisplayDecimals(fact.units))
     }
 
     function toInternalValue(val) {
+        if (fact.typeIsString) return val
         return parseFloat(val) * conversionFactor(fact.units)
     }
 
@@ -109,10 +119,16 @@ QGCPopupDialog {
             fact.enumIndex = factCombo.currentIndex
             valueChanged()
         } else {
-            var rawError = fact.validate(inputForValidation(), forceSave.checked)
+            var inputVal = valueField.text
+            var rawError = fact.validate(fact.typeIsString ? inputVal : inputForValidation(), forceSave.checked)
             var errorString = convertErrorString(rawError)
+
             if (errorString === "") {
-                fact.value = toInternalValue(parseFloat(valueField.text))
+                if (fact.typeIsString) {
+                    fact.value = inputVal
+                } else {
+                    fact.value = toInternalValue(parseFloat(inputVal))
+                }
                 fact.valueChanged(fact.value)
                 valueChanged()
             } else {
@@ -170,7 +186,7 @@ QGCPopupDialog {
             QGCTextField {
                 id:                 valueField
                 width:              _editFieldWidth
-                text:               validate ? validateValue : toDisplayValue(fact.rawValue)
+                text:               validate ? validateValue : (fact.typeIsString ? fact.rawValue : toDisplayValue(fact.rawValue))
                 unitsLabel:         convertedUnit()
                 showUnits:          fact.units !== ""
                 focus:              setFocus && visible

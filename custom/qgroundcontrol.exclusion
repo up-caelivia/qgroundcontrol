@@ -46,6 +46,8 @@
 
 <file alias="MainToolBarIndicators.qml">src/ui/toolbar/MainToolBarIndicators.qml</file>
 
+<file alias="QGroundControl/FactControls/FactTextField.qml">src/FactSystem/FactControls/FactTextField.qml</file>
+
 
 
 
