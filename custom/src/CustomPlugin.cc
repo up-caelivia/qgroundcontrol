@@ -336,7 +336,7 @@ QVariantList& CustomPlugin::settingsPages()
         //add About page
         _aboutSettings = new QmlComponentInfo(
             tr("About"),
-            QUrl::fromUserInput("qrc:/Custom/Widgets/CustomAbout.qml"),
+            QUrl::fromUserInput("qrc:/Custom/Widgets/AboutUP.qml"),
             QUrl::fromUserInput("qrc:/res/gear-white.svg")
         );
 
