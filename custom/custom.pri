@@ -39,7 +39,7 @@ DEFINES += CUSTOMCLASS=CustomPlugin
 DEFINES += CUSTOMCORE_PLUGIN=CustomPlugin
 
 TARGET   = QGroundControlUP
-DEFINES += QGC_APPLICATION_NAME='"\\\"QGroundControl UP version \\\""'
+DEFINES += QGC_APPLICATION_NAME='"\\\"QGroundControlUP\\\""'
 
 DEFINES += QGC_ORG_NAME=\"\\\"qgroundcontrol.org\\\"\"
 DEFINES += QGC_ORG_DOMAIN=\"\\\"org.qgroundcontrol\\\"\"
