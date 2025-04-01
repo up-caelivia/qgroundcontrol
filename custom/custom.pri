@@ -65,13 +65,15 @@ SOURCES += \
     $$PWD/src/CustomPlugin.cc \
     $$PWD/src/CustomToolbox.cpp \
     $$PWD/src/ParseNTRIP.cpp \
-    $$PWD/src/constants.cpp 
+    $$PWD/src/constants.cpp \
+    $$PWD/src/CustomAnnouncer.cpp
 
 HEADERS += \
     $$PWD/src/CustomPlugin.h \
     $$PWD/src/CustomToolbox.h \
     $$PWD/src/ParseNTRIP.h \
-    $$PWD/src/constants.h 
+    $$PWD/src/constants.h \
+    $$PWD/src/CustomAnnouncer.h
 
 INCLUDEPATH += \
     $$PWD/src \

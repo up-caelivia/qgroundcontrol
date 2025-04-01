@@ -61,7 +61,7 @@ public:
     QQmlApplicationEngine*  createQmlApplicationEngine      (QObject* parent) override;
     void registerQmlTypes();
     QVariantList&           settingsPages() override;
-    void setToolbox(QGCToolbox* toolbox);
+    void setToolbox(QGCToolbox* toolbox) override;
 
     private:
     CustomOptions*  _options = nullptr;
