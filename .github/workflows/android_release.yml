@@ -1,5 +1,5 @@
-# The 32 and 64 bit version of these actions should be kept in sync
-name: Android 32/64-bit Release
+# The 64 bit version of these actions should be kept in sync
+name: Android 64-bit Release
 
 on:
   push:
@@ -34,9 +34,6 @@ jobs:
     strategy:
       matrix:
        include:
-         - architecture: 32bits
-           eabi: armeabi-v7a
-           ARTIFACT: QGroundControl32.apk
          - architecture: 64bits
            eabi: arm64-v8a
            ARTIFACT: QGroundControl64.apk
@@ -47,10 +44,38 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Install Python headers
+        run: sudo apt-get update && sudo apt-get install -y python3-dev build-essential rsync \
+              libfuse2 libgstreamer-plugins-base1.0-dev libgstreamer1.0-0 libgstreamer1.0-dev \
+              openjdk-11-jdk openjdk-11-jdk-headless openjdk-11-jre-headless locales
+              
+
       - name: Get all tags for correct version determination
         working-directory:  ${{ github.workspace }}
         run: |
           git fetch --all --tags -f --depth 1
+
+      - name: Install Android SDK platforms
+        env:
+          JAVA_HOME: /usr/lib/jvm/java-11-openjdk-amd64
+          ANDROID_SDK_ROOT: /opt/android/sdk
+          ANDROID_HOME: /opt/android/sdk
+        run: |
+          set -x
+          export PATH=/usr/lib/jvm/java-11-openjdk-amd64/bin:$PATH
+          export LANG=en_US.UTF-8
+          export LC_ALL=en_US.UTF-8
+      
+          mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools
+          curl -Lo /tmp/cmdline-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-7302050_latest.zip
+          unzip -q /tmp/cmdline-tools.zip -d ${ANDROID_SDK_ROOT}/cmdline-tools
+          mv ${ANDROID_SDK_ROOT}/cmdline-tools/cmdline-tools ${ANDROID_SDK_ROOT}/cmdline-tools/latest
+      
+          export PATH=${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:$PATH
+      
+          yes | sdkmanager --sdk_root=${ANDROID_SDK_ROOT} --licenses || true
+          sdkmanager --sdk_root=${ANDROID_SDK_ROOT} "platforms;android-29" "build-tools;29.0.2" "platform-tools"
+        
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
@@ -60,22 +85,14 @@ jobs:
           target:       android
           dir:          ${{ runner.temp }}
           modules:      qtcharts
-          setup-python: true
+          setup-python: ${{ !env.ACT }}
 
       - name: Install Android NDK
         uses: nttld/setup-ndk@v1
         id: setup-ndk
         with:
-          ndk-version: r21e
+          ndk-version: r21d
           add-to-path: false
-
-      - name: Remove Android SDKs to force usage of android-33 only
-        run: |
-            ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-33-ext5"
-            ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-33-ext4"
-            ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-34"
-            ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-34-ext8"
-            ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-34-ext10"
 
       - name: Install ccache
         run:  sudo apt-get install ccache
@@ -103,12 +120,12 @@ jobs:
       - name: Create build directory
         run:  mkdir ${{ runner.temp }}/shadow_build_dir
 
-      - name:               Install gstreamer
-        working-directory:  ${{ github.workspace }}
-        run: |
-            wget --quiet https://gstreamer.freedesktop.org/data/pkg/android/1.18.5/gstreamer-1.0-android-universal-1.18.5.tar.xz
-            mkdir gstreamer-1.0-android-universal-1.18.5
-            tar xf gstreamer-1.0-android-universal-1.18.5.tar.xz -C gstreamer-1.0-android-universal-1.18.5
+      #- name:               Install gstreamer
+      #  working-directory:  ${{ github.workspace }}
+      #  run: |
+      #      wget --quiet https://gstreamer.freedesktop.org/data/pkg/android/1.18.5/gstreamer-1.0-android-universal-1.18.5.tar.xz
+      #      mkdir gstreamer-1.0-android-universal-1.18.5
+      #      tar xf gstreamer-1.0-android-universal-1.18.5.tar.xz -C gstreamer-1.0-android-universal-1.18.5
 
       - name: Update android manifest
         if: github.ref_name != 'Stable'
@@ -135,19 +152,3 @@ jobs:
         with:
           name: ${{ matrix.ARTIFACT }}
           path: ${{ runner.temp }}/shadow_build_dir/package/${{ matrix.ARTIFACT }}
-
-      - name: Upload build to S3 Bucket
-        if:                 github.event_name == 'push'
-        working-directory:  ${{ runner.temp }}/shadow_build_dir/package
-        run: |
-              aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-              aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-              aws s3 cp ${{ matrix.ARTIFACT }} s3://qgroundcontrol/builds/${{ github.ref_name }}/${{ matrix.ARTIFACT }} --region us-west-2 --acl public-read
-
-      - name: Upload tagged stable build to S3 latest Bucket
-        if:                 github.event_name == 'push' && github.ref_type == 'tag'
-        working-directory:  ${{ runner.temp }}/shadow_build_dir/package
-        run: |
-              aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-              aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-              aws s3 cp ${{ matrix.ARTIFACT }} s3://qgroundcontrol/latest/${{ matrix.ARTIFACT }} --region us-west-2 --acl public-read

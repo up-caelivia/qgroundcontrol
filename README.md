@@ -39,7 +39,7 @@ Run the command on wsl:
 docker build --file ./deploy/docker/Dockerfile-build-android -t qgc-android-docker ./deploy/docker
 ```
 
-# Run Docker Iamges to create builds:
+# Run Docker Images to create builds:
 Run the command on wsl (dot included) from repository folder (qgroundcontrol):
 
 ## Linux 
@@ -49,13 +49,32 @@ docker run -it -v ${PWD}:/project/source -v ${PWD}/build:/project/build qgc-linu
 ```
 
 ## Android 
-replace ??????? with the kwystore password
+replace ??????? with the keystore password
 
 ```bash
 mkdir -p build-docker 
 docker run -it \
   --mount type=bind,source="${PWD}",target=/home/user/qgroundcontrol \
   -e FAST=false \
-  -e ANDROID_KEYSTORE_PASSWORD=?????? \
+  -e ANDROID_KEYSTORE_PASSWORD=up-caelivia
   qgc-android-docker
+```
+
+# Use github action
+To be Added
+
+## install required packages
+
+# Run github action locally to create builds:
+Run the command on wsl (dot included) from repository folder (qgroundcontrol):
+
+### Linux 
+
+```bash
+ACT=true act -j build -W .github/workflows/linux_release.yml
+```
+### Android 
+
+```bash
+ACT=true act -s ANDROID_KEYSTORE_PASSWORD=?????? -P ubuntu-20.04=catthehacker/ubuntu:act-20.04 -j build -W .github/workflows/android_release.yml
 ```
