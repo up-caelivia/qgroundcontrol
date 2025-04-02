@@ -58,6 +58,9 @@ QGC_ANDROID_PACKAGE = "org.custom.qgroundcontrol"
 QGC_APP_DESCRIPTION = "Custom QGroundControl"
 QGC_APP_COPYRIGHT   = "Copyright (C) 2020 QGroundControl Development Team. All rights reserved."
 
+exclude($$PWD/../QGCPostLinkInstaller.pri)
+include($$PWD/QGCPostLinkInstaller.pri)
+
 # Our own, custom resources
 RESOURCES += \
     $$PWD/custom.qrc
