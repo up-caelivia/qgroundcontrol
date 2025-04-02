@@ -45,9 +45,9 @@ jobs:
           submodules: recursive
 
       - name: Install Python headers
-        run: sudo apt-get update && sudo apt-get install -y python3-dev build-essential rsync \
-              libfuse2 libgstreamer-plugins-base1.0-dev libgstreamer1.0-0 libgstreamer1.0-dev \
-              openjdk-11-jdk openjdk-11-jdk-headless openjdk-11-jre-headless locales
+        run: |
+          sudo apt-get update && sudo apt-get install -y python3-dev build-essential rsync libfuse2 libgstreamer-plugins-base1.0-dev libgstreamer1.0-0 libgstreamer1.0-dev openjdk-11-jdk openjdk-11-jdk-headless openjdk-11-jre-headless locales
+
               
 
       - name: Get all tags for correct version determination
