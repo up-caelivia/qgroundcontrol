@@ -75,6 +75,18 @@ jobs:
       
           yes | sdkmanager --sdk_root=${ANDROID_SDK_ROOT} --licenses || true
           sdkmanager --sdk_root=${ANDROID_SDK_ROOT} "platforms;android-29" "build-tools;29.0.2" "platform-tools"
+
+      - name: Check installed Android SDKs (before)
+        run: |
+          ls ${ANDROID_SDK_ROOT}/platforms
+        
+      - name: Remove unwanted Android SDKs
+        run: |
+          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-33-ext5"
+          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-33-ext4"
+          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-34"
+          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-34-ext8"
+          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-34-ext10"
         
 
       - name: Install Qt
