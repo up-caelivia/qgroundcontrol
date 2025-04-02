@@ -11,16 +11,21 @@ GIT_HASH = $$system(git rev-parse --short HEAD)
 # Count number of commits since the latest tag
 COMMITS_FROM_TAG = $$system(git rev-list $${GIT_TAG}..HEAD --count)
 
-# Check if current commit is exactly the tag commit
-isOnTag = $$system(git rev-parse $${GIT_TAG}) == $$system(git rev-parse HEAD)
+# Check if the working directory has uncommitted changes
+isDirty = $$system(git diff-index --quiet HEAD -- || echo "dirty")
 
 # Compose version string
-!isEmpty(isOnTag) {
+equals(COMMITS_FROM_TAG, 0) {
     # We're on the tag itself — version is the tag name
     CUSTOM_QGC_VERSION = $${GIT_TAG}
 } else {
     # Not on the tag — include commit count and hash
     CUSTOM_QGC_VERSION = $${GIT_TAG}-$${COMMITS_FROM_TAG}-$${GIT_HASH}
+}
+
+# Append "-dirty" if there are uncommitted changes
+!isEmpty(isDirty) {
+    CUSTOM_QGC_VERSION = $${CUSTOM_QGC_VERSION}-dirty
 }
 
 ANDROID_MIN_SDK_VERSION = 21
@@ -58,8 +63,6 @@ QGC_ANDROID_PACKAGE = "org.custom.qgroundcontrol"
 QGC_APP_DESCRIPTION = "Custom QGroundControl"
 QGC_APP_COPYRIGHT   = "Copyright (C) 2020 QGroundControl Development Team. All rights reserved."
 
-exclude($$PWD/../QGCPostLinkInstaller.pri)
-include($$PWD/QGCPostLinkInstaller.pri)
 
 # Our own, custom resources
 RESOURCES += \
