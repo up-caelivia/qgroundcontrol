@@ -1,23 +1,28 @@
 message("Adding Custom Plugin")
 
 #-- Version control
-#   Major and minor versions are defined here (manually)
-
-CUSTOM_QGC_VER_MAJOR = 0
-CUSTOM_QGC_VER_MINOR = 0
-CUSTOM_QGC_VER_FIRST_BUILD = 0
-
 # Build number is automatic
-# Uses the current branch. This way it works on any branch including build-server's PR branches
-# CUSTOM_QGC_VER_BUILD = $$system(git --git-dir ../.git rev-list $$GIT_BRANCH --first-parent --count)
-# win32 {
-#     CUSTOM_QGC_VER_BUILD = $$system("set /a $$CUSTOM_QGC_VER_BUILD - $$CUSTOM_QGC_VER_FIRST_BUILD")
-# } else {
-#     CUSTOM_QGC_VER_BUILD = $$system("echo $(($$CUSTOM_QGC_VER_BUILD - $$CUSTOM_QGC_VER_FIRST_BUILD))")
-# }
+# Get the latest tag matching the pattern v*-UP
+GIT_TAG = $$system(git describe --tags --abbrev=0 --match "v*-UP")
 
-CUSTOM_QGC_VER_BUILD = 2
-CUSTOM_QGC_VERSION = $${CUSTOM_QGC_VER_MAJOR}.$${CUSTOM_QGC_VER_MINOR}.$${CUSTOM_QGC_VER_BUILD}
+# Get short commit hash
+GIT_HASH = $$system(git rev-parse --short HEAD)
+
+# Count number of commits since the latest tag
+COMMITS_FROM_TAG = $$system(git rev-list $${GIT_TAG}..HEAD --count)
+
+# Check if current commit is exactly the tag commit
+isOnTag = $$system(git rev-parse $${GIT_TAG}) == $$system(git rev-parse HEAD)
+
+# Compose version string
+!isEmpty(isOnTag) {
+    # We're on the tag itself — version is the tag name
+    CUSTOM_QGC_VERSION = $${GIT_TAG}
+} else {
+    # Not on the tag — include commit count and hash
+    CUSTOM_QGC_VERSION = $${GIT_TAG}-$${COMMITS_FROM_TAG}-$${GIT_HASH}
+}
+
 ANDROID_MIN_SDK_VERSION = 21
 
 DEFINES -= APP_VERSION_STR=\"\\\"$$APP_VERSION_STR\\\"\"
