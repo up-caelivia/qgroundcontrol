@@ -96,7 +96,7 @@ jobs:
         working-directory: ${{ runner.temp }}\shadow_build_dir
         run:  |
               qmake -r ${{ env.SOURCE_DIR }}\qgroundcontrol.pro CONFIG+=installer CONFIG+=${{ env. BUILD_TYPE }}
-              ${{ runner.temp }}\jom\jom
+              ${{ runner.temp }}\jom\jom -j 16
 
       - name: Save installer artifact
         uses: actions/upload-artifact@master

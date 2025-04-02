@@ -95,7 +95,7 @@ jobs:
         working-directory: ${{ runner.temp }}/shadow_build_dir
         run:  |
               qmake -r ${SOURCE_DIR}/qgroundcontrol.pro CONFIG+=installer CONFIG+=${BUILD_TYPE}
-              make -j2
+              make -j16
 
       - name: ccache post-run
         run:  ccache -s
