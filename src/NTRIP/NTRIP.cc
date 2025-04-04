@@ -16,7 +16,7 @@
 #include "QGCToolbox.h"
 #include "SettingsManager.h"
 
-QGC_LOGGING_CATEGORY(NTRIPLog, "NTRIP")
+QGC_LOGGING_CATEGORY(NTRIPLog, "NTRIPLog")
 
 NTRIP::NTRIP(QGCApplication *app, QGCToolbox *toolbox)
     : QGCTool(app, toolbox) {}

@@ -1420,8 +1420,13 @@ CONFIG+=lrelease embed_translations
 
 contains (CONFIG, QGC_DISABLE_BUILD_SETUP) {
     message("Disable standard build setup")
-} else {
-    include(QGCPostLinkCommon.pri)
+} else {    
+    exists(custom/QGCPostLinkCommon.pri) {
+        message("Included custom QGCPostLinkCommon.pri")
+        include(custom/QGCPostLinkCommon.pri)
+    }else {
+        include(QGCPostLinkCommon.pri)
+    }
 }
 
 #
@@ -1430,8 +1435,13 @@ contains (CONFIG, QGC_DISABLE_BUILD_SETUP) {
 
 contains (CONFIG, QGC_DISABLE_INSTALLER_SETUP) {
     message("Disable standard installer setup")
-} else {
-    include(QGCPostLinkInstaller.pri)
+} else {    
+    exists(custom/QGCPostLinkInstaller.pri) {
+        message("Included custom QGCPostLinkInstaller.pri")
+        include(custom/QGCPostLinkInstaller.pri)
+    }else {
+        include(QGCPostLinkInstaller.pri)
+    }
 }
 
 DISTFILES += \

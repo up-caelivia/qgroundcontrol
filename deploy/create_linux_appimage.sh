@@ -10,12 +10,12 @@ fi
 
 QGC_SRC=$(readlink -f $1)
 
-QGC_CUSTOM_APP_NAME="${QGC_CUSTOM_APP_NAME:-QGroundControl}"
+QGC_CUSTOM_APP_NAME="${QGC_CUSTOM_APP_NAME:-QGroundControlUP}"
 QGC_CUSTOM_GENERIC_NAME="${QGC_CUSTOM_GENERIC_NAME:-Ground Control Station}"
-QGC_CUSTOM_BINARY_NAME="${QGC_CUSTOM_BINARY_NAME:-QGroundControl}"
+QGC_CUSTOM_BINARY_NAME="${QGC_CUSTOM_BINARY_NAME:-QGroundControlUP}"
 QGC_CUSTOM_LINUX_START_SH="${QGC_CUSTOM_LINUX_START_SH:-${QGC_SRC}/deploy/qgroundcontrol-start.sh}"
-QGC_CUSTOM_APP_ICON="${QGC_CUSTOM_APP_ICON:-${QGC_SRC}/resources/icons/qgroundcontrol.png}"
-QGC_CUSTOM_APP_ICON_NAME="${QGC_CUSTOM_APP_ICON_NAME:-QGroundControl}"
+QGC_CUSTOM_APP_ICON="${QGC_CUSTOM_APP_ICON:-${QGC_SRC}/custom/resources/icons/qgroundcontrol.png}"
+QGC_CUSTOM_APP_ICON_NAME="${QGC_CUSTOM_APP_ICON_NAME:-QGroundControlUP}"
 
 if [ ! -f ${QGC_SRC}/qgroundcontrol.pro ]; then
   echo "please specify path to ${QGC_CUSTOM_APP_NAME} source as the 1st argument"
@@ -50,8 +50,9 @@ find ../ -name *.deb -exec dpkg -x {} . \;
 
 # copy libdirectfb-1.2.so.9
 cd ${TMPDIR}
-wget -c --quiet http://ftp.us.debian.org/debian/pool/main/d/directfb/libdirectfb-1.2-9_1.2.10.0-5.1_amd64.deb
+wget -c --quiet http://launchpadlibrarian.net/188140233/libdirectfb-1.2-9_1.2.10.0-5.1_amd64.deb
 mkdir libdirectfb
+mkdir -p ${APPDIR}/usr/lib/x86_64-linux-gnu
 dpkg -x libdirectfb-1.2-9_1.2.10.0-5.1_amd64.deb libdirectfb
 cp -L libdirectfb/usr/lib/x86_64-linux-gnu/libdirectfb-1.2.so.9 ${APPDIR}/usr/lib/x86_64-linux-gnu/
 cp -L libdirectfb/usr/lib/x86_64-linux-gnu/libfusion-1.2.so.9 ${APPDIR}/usr/lib/x86_64-linux-gnu/
@@ -65,7 +66,7 @@ cp ${QGC_CUSTOM_LINUX_START_SH} ${APPDIR}/AppRun
 # copy icon
 cp ${QGC_CUSTOM_APP_ICON} ${APPDIR}/
 
-cat > ./QGroundControl.desktop <<\EOF
+cat > ./QGroundControlUP.desktop <<\EOF
 [Desktop Entry]
 Type=Application
 Name=${QGC_CUSTOM_APP_NAME}
@@ -86,7 +87,14 @@ cd ${TMPDIR}
 wget -c --quiet "https://github.com/AppImage/AppImageKit/releases/download/12/appimagetool-x86_64.AppImage"
 chmod a+x ./appimagetool-x86_64.AppImage
 
-./appimagetool-x86_64.AppImage ./$APP.AppDir/ ${TMPDIR}/$APP".AppImage"
+# Fallback for act/local builds
+if [ "$ACT" = "true" ]; then
+  echo "💡 Running appimagetool in extracted mode to avoid FUSE"
+  ./appimagetool-x86_64.AppImage --appimage-extract
+  ./squashfs-root/AppRun --no-appstream ./$APP.AppDir/ ${TMPDIR}/$APP".AppImage"
+else
+  ./appimagetool-x86_64.AppImage ./$APP.AppDir/ ${TMPDIR}/$APP".AppImage"
+fi
 
 mkdir -p ${OUTPUT_DIR}
 cp ${TMPDIR}/$APP".AppImage" ${OUTPUT_DIR}/$APP".AppImage"

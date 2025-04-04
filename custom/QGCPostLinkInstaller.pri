@@ -51,7 +51,7 @@ installer {
     }
     AndroidBuild {
         _ANDROID_KEYSTORE_PASSWORD = $$(ANDROID_KEYSTORE_PASSWORD)
-        QMAKE_POST_LINK += && mkdir -p package
+        QMAKE_POST_LINK = mkdir -p package
         isEmpty(_ANDROID_KEYSTORE_PASSWORD) {
             message(Keystore password not available - not signing package)
             # This is for builds in forks and PR where the Android keystore password is not available

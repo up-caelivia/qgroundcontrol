@@ -1,0 +1,162 @@
+# Docker container to build Qt 5.12 for Android armv7 projects with OpenSSL
+# Image: a12e/docker-qt:5.12-android_armv7
+
+FROM ubuntu:20.04
+
+ARG NDK_VERSION=r21d
+ARG NDK_VERSION_NUM=21.3.6528147
+ARG OPENSSL_VERSION=1.0.2r
+ARG QT_VERSION=5.15.2
+ARG SDK_BUILD_TOOLS=29.0.2
+ARG SDK_PACKAGES="tools platform-tools"
+ARG SDK_PLATFORM=android-29
+
+ENV \
+    ANDROID_HOME=/opt/android-sdk \
+    ANDROID_NDK_ARCH=arch-arm64 \
+    ANDROID_NDK_EABI=llvm \
+    ANDROID_NDK_HOST=linux-x86_64 \
+    ANDROID_NDK_TOOLCHAIN_PREFIX=aarch64-linux-android \
+    CLANG_TARGET=aarch64-linux-android \
+    DEBIAN_FRONTEND=noninteractive \
+    QMAKESPEC=android-clang \
+    QT_PATH=/opt/qt \
+    QT_PLATFORM=android
+
+ENV \
+    ANDROID_SDK_ROOT=${ANDROID_HOME} \
+    ANDROID_NDK_PLATFORM=${SDK_PLATFORM} \
+    ANDROID_NDK_ROOT=${ANDROID_HOME}/ndk/${NDK_VERSION_NUM} \
+    ANDROID_NDK_TOOLS_PREFIX=${ANDROID_NDK_TOOLCHAIN_PREFIX}
+
+# Percorsi aggiornati per LLVM
+ENV \
+    ANDROID_NDK_TOOLCHAIN=${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/${ANDROID_NDK_HOST} \
+    ANDROID_DEV=${ANDROID_NDK_ROOT}/platforms/${ANDROID_NDK_PLATFORM}/${ANDROID_NDK_ARCH}/usr \
+    PATH=${QT_PATH}/${QT_VERSION}/${QT_PLATFORM}/bin:${ANDROID_NDK_TOOLCHAIN}/bin:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools:${PATH}
+
+# Install updates & requirements:
+RUN dpkg --add-architecture i386 && apt update && apt full-upgrade -y && apt install -y --no-install-recommends \
+        ant \
+        apt \
+		apt-utils \
+		binutils \
+		build-essential \
+		ca-certificates \
+		ccache \
+		checkinstall \
+        clang \
+		cmake \
+		curl \
+		espeak \
+		fuse \
+		g++ \
+		gcc \
+		git \
+		gosu \
+		kmod \
+        libsm6 \
+        libice6 \
+        libxext6 \
+        libxrender1 \
+        libfontconfig1 \
+        libdbus-1-3 \
+        libx11-xcb1 \
+        libc6:i386 \
+        libncurses5:i386 \
+        libstdc++6:i386 \
+        libz1:i386 \
+		libespeak-dev \
+		libfontconfig1 \
+		libfuse2 \
+        libgl1-mesa-dev \
+		libgstreamer-plugins-base1.0-dev \
+		libgstreamer1.0-0 \
+		libgstreamer1.0-dev \
+		libsdl2-dev \
+		libssl-dev \
+		libudev-dev \
+		locales \
+		make \
+		ninja-build \
+        openjdk-11-jdk \
+        openjdk-11-jdk-headless \
+        openjdk-11-jre-headless \
+		openssh-client \
+		openssl \
+		patchelf \
+        patch \
+		pkg-config \
+        python3 \
+        python3-dev \
+        python3-pip \
+        python3-setuptools \
+		rsync \
+		speech-dispatcher \
+        sudo \
+        unzip \
+		wget \
+		xvfb \
+        xz-utils \
+		zlib1g-dev \
+	&& apt-get -y autoremove \
+	&& apt-get clean autoclean \
+	&& rm -rf /var/lib/apt/lists/{apt,dpkg,cache,log} /tmp/* /var/tmp/*
+    
+# Install aqtinstall for downloading Qt
+RUN pip install aqtinstall==1.2.5
+
+# Install Qt SDK with QtCharts module for Linux and Android
+RUN mkdir -p /tmp/qt && \
+    python3 -m aqt install ${QT_VERSION} linux android -m qtcharts -O "${QT_PATH}" && \
+    find "${QT_PATH}" -mindepth 1 -maxdepth 1 ! -name "${QT_VERSION}" -exec echo 'Cleaning Qt SDK: {}' \; -exec rm -r '{}' \; && \
+    rm -rf /tmp/qt /root/.cache
+
+# Imposta i compilatori LLVM
+ENV \
+    CC=${ANDROID_NDK_TOOLCHAIN}/bin/clang \
+    CXX=${ANDROID_NDK_TOOLCHAIN}/bin/clang++ \
+    AS=${ANDROID_NDK_TOOLCHAIN}/bin/llvm-as \
+    AR=${ANDROID_NDK_TOOLCHAIN}/bin/llvm-ar \
+    LD=${ANDROID_NDK_TOOLCHAIN}/bin/ld.lld \
+    STRIP=${ANDROID_NDK_TOOLCHAIN}/bin/llvm-strip 
+    
+# Create SDK directory
+RUN mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools
+# Download and install the Android command-line tools
+RUN curl -Lo /tmp/cmdline-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-7302050_latest.zip \
+ && unzip -q /tmp/cmdline-tools.zip -d ${ANDROID_SDK_ROOT}/cmdline-tools \
+ && rm -fv /tmp/cmdline-tools.zip \
+ && mv ${ANDROID_SDK_ROOT}/cmdline-tools/cmdline-tools ${ANDROID_SDK_ROOT}/cmdline-tools/latest
+# Set PATH for SDK tools
+ENV PATH="${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_SDK_ROOT}/platform-tools:${ANDROID_SDK_ROOT}/build-tools/${SDK_BUILD_TOOLS}:${PATH}"
+# Accept all licenses and update sdkmanager
+RUN yes | sdkmanager --licenses && sdkmanager --update
+# Install required SDK packages
+RUN sdkmanager --verbose \
+    "platforms;${SDK_PLATFORM}" \
+    "build-tools;${SDK_BUILD_TOOLS}" \
+    ${SDK_PACKAGES} \
+    "ndk;${NDK_VERSION_NUM}"
+# Remove unnecessary components
+RUN rm -rf ${ANDROID_SDK_ROOT}/emulator || true
+
+
+# Reconfigure locale
+RUN locale-gen en_US.UTF-8 && dpkg-reconfigure locales \
+# Add group & user, and make the SDK directory writable
+    && groupadd -r user \
+    && useradd --create-home --gid user user \
+    && echo 'user ALL=NOPASSWD: ALL' > /etc/sudoers.d/user \
+    && chown -R user:user $ANDROID_HOME
+
+COPY build-qgc-android.sh /home/user/
+RUN chmod +x /home/user/build-qgc-android.sh
+ 
+USER user
+WORKDIR /home/user
+ENV HOME=/home/user
+RUN  mkdir -p /opt/android-sdk/ndk-${NDK_VERSION}/ && ln -s /opt/android-sdk/ndk/${NDK_VERSION_NUM}/ /opt/android-sdk/ndk-${NDK_VERSION}
+ARG CLEAN="false"
+ARG FAST="false"
+CMD ["/home/user/build-qgc-android.sh"]

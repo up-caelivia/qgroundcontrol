@@ -32,7 +32,7 @@
 
 void CustomPlugin::registerQmlTypes()
 {
-    qmlRegisterSingletonType<CustomAnnouncer>("QGroundControl.Custom", 1, 0, "CustomAnnouncer",
+    qmlRegisterSingletonType<CustomAnnouncer>("CustomAnnouncer", 1, 0, "CustomAnnouncer",
         [](QQmlEngine*, QJSEngine*) -> QObject* {
             return new CustomAnnouncer();
         });
@@ -67,6 +67,11 @@ void CustomPlugin::setToolbox(QGCToolbox* toolbox)
 {
     QGCCorePlugin::setToolbox(toolbox);
     qDebug() << "[CustomPlugin] setToolbox() called";
+
+    qmlRegisterSingletonType<CustomAnnouncer>("CustomAnnouncer", 1, 0, "CustomAnnouncer",
+        [](QQmlEngine*, QJSEngine*) -> QObject* {
+            return new CustomAnnouncer();
+        });
 
     _customToolbox = new CustomToolbox(qgcApp());
 }

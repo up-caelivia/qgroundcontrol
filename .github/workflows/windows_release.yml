@@ -24,7 +24,7 @@ defaults:
 env:
   SOURCE_DIR:   ${{ github.workspace }}
   QT_VERSION:   5.15.2
-  ARTIFACT:     QGroundControl-installer.exe
+  ARTIFACT:     QGroundControlUP-installer.exe
   BUILD_TYPE:   ${{ fromJSON('["DailyBuild", "StableBuild"]')[ github.ref_type == 'tag' || contains(github.ref, 'Stable_' ) ] }}
 
 jobs:
@@ -84,6 +84,9 @@ jobs:
       - name: Create build directory
         run:  mkdir ${{ runner.temp }}\shadow_build_dir
 
+      - name: Copy icon to build dir
+        run: copy ${{ env.SOURCE_DIR }}\deploy\windows\WindowsQGC.ico ${{ runner.temp }}\shadow_build_dir\
+
       - name: Set up Visual Studio shell
         uses: egor-tensin/vs-shell@v2
         with:
@@ -93,7 +96,7 @@ jobs:
         working-directory: ${{ runner.temp }}\shadow_build_dir
         run:  |
               qmake -r ${{ env.SOURCE_DIR }}\qgroundcontrol.pro CONFIG+=installer CONFIG+=${{ env. BUILD_TYPE }}
-              ${{ runner.temp }}\jom\jom -j2
+              ${{ runner.temp }}\jom\jom -j 16
 
       - name: Save installer artifact
         uses: actions/upload-artifact@master
@@ -104,22 +107,6 @@ jobs:
       - name: Save PDB artifact
         uses: actions/upload-artifact@master
         with:
-          name: qgroundcontrol.pdb
-          path: ${{ runner.temp }}\shadow_build_dir\staging\qgroundcontrol.pdb
-
-      - name: Upload build to S3 Bucket
-        if:                 github.event_name == 'push'
-        working-directory:  ${{ runner.temp }}\shadow_build_dir\staging
-        run: |
-              aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-              aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-              aws s3 cp ${{ env.ARTIFACT }} s3://qgroundcontrol/builds/${{ github.ref_name }}/${{ env.ARTIFACT }} --region us-west-2 --acl public-read
-
-      - name: Upload tagged stable build to S3 latest Bucket
-        if:                 github.event_name == 'push' && github.ref_type == 'tag'
-        working-directory:  ${{ runner.temp }}\shadow_build_dir\staging
-        run: |
-              aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-              aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-              aws s3 cp ${{ env.ARTIFACT }} s3://qgroundcontrol/latest/${{ env.ARTIFACT }} --region us-west-2 --acl public-read
+          name: qgroundcontrolUP.pdb
+          path: ${{ runner.temp }}\shadow_build_dir\staging\qgroundcontrolUP.pdb
 
