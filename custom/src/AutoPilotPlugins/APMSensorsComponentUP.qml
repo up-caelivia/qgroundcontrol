@@ -429,6 +429,7 @@ SetupPage {
                             controller.calibrateAccel(_doSimpleAccelCal)
                         } else if (_orientationDialogCalType == _calTypeCompass) {
                             if (!northCalibrationCheckBox.checked) {
+                                statusTextArea.text = qsTr("Calibration running, move the drone until the calibration is completed.\nPress Cancel button to stop the calibration.")
                                 controller.calibrateCompass()
                             } else {
                                 var lat = parseFloat(northCalLat.text)

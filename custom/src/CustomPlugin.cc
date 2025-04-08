@@ -309,6 +309,8 @@ bool CustomPlugin::adjustSettingMetaData(const QString& settingsGroup, FactMetaD
 
 QVariantList& CustomPlugin::settingsPages()
 {
+    Constants constant;
+
     if (_customSettingsList.isEmpty()) {
         // Get default pages from QGCCorePlugin
         QVariantList baseSettings = QGCCorePlugin::settingsPages();
@@ -347,8 +349,34 @@ QVariantList& CustomPlugin::settingsPages()
 
         // Insert About page
         _customSettingsList.append(QVariant::fromValue(_aboutSettings));
-    }
+    } 
+    
+    Constants* constants = Constants::getInstance();
+    if (!constants->developer()) {
+        qDebug() << "finding Comm Links page";
+        for (int i = 0; i < _customSettingsList.count(); ++i) {
+            QmlComponentInfo* info = _customSettingsList[i].value<QmlComponentInfo*>();
+            if (info && info->title() == tr("Comm Links")) {
+                _customSettingsList.removeAt(i);
+                break;
+            }
+        }
+    } else {
+        for (int i = 0; i < _customSettingsList.count(); ++i) {
+            QmlComponentInfo* _commLinksSettings = _customSettingsList[i].value<QmlComponentInfo*>();
+            if (_commLinksSettings && _commLinksSettings->title() == tr("Comm Links")) {
+                return _customSettingsList;
+            }
+        }
 
+        // Add the "Comm Links" page if developer mode is active
+        QmlComponentInfo* _commLinksSettings = new QmlComponentInfo(tr("Comm Links"),
+            QUrl::fromUserInput("qrc:/qml/LinkSettings.qml"),
+            QUrl::fromUserInput("qrc:/res/waves.svg")
+        );
+        // Insert Comm Links page
+        _customSettingsList.insert(1, QVariant::fromValue(_commLinksSettings));   
+    }
     return _customSettingsList;
 }
 

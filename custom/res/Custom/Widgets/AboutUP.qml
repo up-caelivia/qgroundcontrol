@@ -67,7 +67,8 @@ Rectangle {
                 fillMode: Image.PreserveAspectFit
                 Layout.columnSpan: 2
                 //Layout.alignment: Qt.AlignHLeft
-                Layout.preferredHeight: 100
+                Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 8
+                Layout.preferredWidth: parent.width
 
                 MouseArea {
                     anchors.fill: parent
@@ -80,9 +81,7 @@ Rectangle {
                         if (clickCount >= 6) {
                             clickTimer.stop()
                             clickCount = 0
-                            console.log("Comando iniizato!")
                             Constants.developer = !Constants.developer 
-                            console.log("Comando eseguito!")
                         }
                     }
                 }

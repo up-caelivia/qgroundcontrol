@@ -50,7 +50,7 @@ SetupPage {
             readonly property string accelHelp:     qsTr("For Accelerometer calibration you will need to place your vehicle on all six sides on a perfectly level surface and hold it still in each orientation for a few seconds.")
             readonly property string levelHelp:     qsTr("To level the horizon you need to place the vehicle in its level flight position and press OK.")
 
-            readonly property string statusTextAreaDefaultText: qsTr("Start the compass calibration by clicking the corrisponding button to the left.")
+            readonly property string statusTextAreaDefaultText: qsTr("Start the compass calibration by clicking the Compass button on the left side.")
 
             // Used to pass help text to the preCalibrationDialog dialog
             property string preCalibrationDialogHelp
@@ -429,6 +429,7 @@ SetupPage {
                             controller.calibrateAccel(_doSimpleAccelCal)
                         } else if (_orientationDialogCalType == _calTypeCompass) {
                             if (!northCalibrationCheckBox.checked) {
+                                statusTextArea.text = qsTr("Calibration running, move the drone until the calibration is completed.\nPress Cancel button to stop the calibration.")
                                 controller.calibrateCompass()
                             } else {
                                 var lat = parseFloat(northCalLat.text)
