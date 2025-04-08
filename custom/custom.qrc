@@ -86,8 +86,6 @@
     <qresource prefix="/toolbar">
         <file alias="GPSIndicator.qml">src/ui/toolbar/GPSIndicatorUP.qml</file>
         <file alias="BatteryIndicator.qml">src/ui/toolbar/BatteryIndicatorUP.qml</file>
-        <file alias="APMSafetyComponent.qml">src/AutoPilotPlugins/APMSafetyComponentUP.qml</file>
-        <file alias="APMSensorsComponent.qml">src/AutoPilotPlugins/APMSensorsComponentUP.qml</file>
 		<file alias="MainToolBarIndicators.qml">src/ui/MainToolBarIndicatorsUP.qml</file>
     </qresource>
     <qresource prefix="/json">

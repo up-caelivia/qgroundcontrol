@@ -1138,8 +1138,14 @@ ArdupilotEnabled {
 
 # ArduPilot FirmwarePlugin
 
-APMFirmwarePlugin {
-    RESOURCES *= src/FirmwarePlugin/APM/APMResources.qrc
+APMFirmwarePlugin {    
+    exists($$PWD/custom/src/FirmwarePlugin/APM/APMResources.qrc) {
+        message("Using custom APMResources.qrc")
+        RESOURCES += $$PWD/custom/src/FirmwarePlugin/APM/APMResources.qrc
+    } else {
+        RESOURCES += $$PWD/src/FirmwarePlugin/APM/APMResources.qrc
+    }
+
 
     INCLUDEPATH += \
         src/AutoPilotPlugins/APM \
