@@ -53,11 +53,7 @@ replace ??????? with the keystore password
 
 ```bash
 mkdir -p build-docker 
-docker run -it \
-  --mount type=bind,source="${PWD}",target=/home/user/qgroundcontrol \
-  -e FAST=false \
-  -e ANDROID_KEYSTORE_PASSWORD=up-caelivia
-  qgc-android-docker
+docker run -it  --mount type=bind,source="${PWD}",target=/home/user/qgroundcontrol  -e FAST=false  -e ANDROID_KEYSTORE_PASSWORD=?????? qgc-android-docker
 ```
 
 # Use github action
