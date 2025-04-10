@@ -72,5 +72,5 @@ ACT=true act -j build -W .github/workflows/linux_release.yml
 ### Android 
 
 ```bash
-ACT=true act -s ANDROID_KEYSTORE_PASSWORD=?????? -P ubuntu-20.04=catthehacker/ubuntu:act-20.04 -j build -W .github/workflows/android_release.yml
+ACT=true act -s ANDROID_KEYSTORE_PASSWORD=?????? -P ubuntu-22.04=catthehacker/ubuntu:act-22.04 -j build -W .github/workflows/android_release.yml
 ```
