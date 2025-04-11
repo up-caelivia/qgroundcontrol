@@ -573,6 +573,8 @@ VideoManager::isGStreamer()
             videoSource == VideoSettings::videoSourceYuneecMantisG ||
             videoSource == VideoSettings::videoSourceHerelinkAirUnit ||
             videoSource == VideoSettings::videoSourceHerelinkHotspot ||
+            videoSource == VideoSettings::videoSourceSkydroidH12 ||
+            videoSource == VideoSettings::videoSourceSkydroidH16 ||
             autoStreamConfigured();
 #else
     return false;
@@ -753,6 +755,10 @@ VideoManager::_updateSettings(unsigned id)
         settingsChanged |= _updateVideoUri(0, QStringLiteral("rtsp://192.168.0.10:8554/H264Video"));
     else if (source == VideoSettings::videoSourceHerelinkHotspot)
         settingsChanged |= _updateVideoUri(0, QStringLiteral("rtsp://192.168.43.1:8554/fpv_stream"));
+    else if (source == VideoSettings::videoSourceSkydroidH12)
+        settingsChanged |= _updateVideoUri(0, QStringLiteral("rtsp://192.168.144.108:554/stream=0"));
+    else if (source == VideoSettings::videoSourceSkydroidH16)
+        settingsChanged |= _updateVideoUri(0, QStringLiteral("rtsp://192.168.0.10:8554/H264Video"));
     else if (source == VideoSettings::videoDisabled || source == VideoSettings::videoSourceNoVideo)
         settingsChanged |= _updateVideoUri(0, "");
     else {
