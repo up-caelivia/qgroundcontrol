@@ -1,6 +1,16 @@
 #!/bin/bash
 cd qgroundcontrol
 
+SOURCE_DIR="/home/user/gstreamer-1.0-android-universal-1.18.6"
+DEST_DIR="/home/user/qgroundcontrol/gstreamer-1.0-android-universal-1.18.6"
+
+if [ -d "$DEST_DIR" ]; then
+    echo "The directory '$DEST_DIR' already exists. Nothing to copy."
+else
+    echo "The directory '$DEST_DIR' does not exist. Copying from '$SOURCE_DIR'."
+    cp -r "$SOURCE_DIR" "$DEST_DIR"
+    echo "Directory copied successfully."
+fi
 
 if [ "$CLEAN" == "true" ]; then
     cd build-docker

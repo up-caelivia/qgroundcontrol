@@ -48,15 +48,6 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y python3-dev build-essential rsync libfuse2 openjdk-11-jdk openjdk-11-jdk-headless openjdk-11-jre-headless locales
 
-
-
-      - name: Install gstreamer
-        working-directory:  ${{ github.workspace }}
-        run: |
-            wget --quiet https://gstreamer.freedesktop.org/data/pkg/android/1.18.6/gstreamer-1.0-android-universal-1.18.6.tar.xz
-            mkdir gstreamer-1.0-android-universal-1.18.6
-            tar xf gstreamer-1.0-android-universal-1.18.6.tar.xz -C gstreamer-1.0-android-universal-1.18.6              
-
       - name: Get all tags for correct version determination
         working-directory:  ${{ github.workspace }}
         run: |
@@ -145,12 +136,12 @@ jobs:
       - name: Create build directory
         run:  mkdir ${{ runner.temp }}/shadow_build_dir
 
-      #- name:               Install gstreamer
-      #  working-directory:  ${{ github.workspace }}
-      #  run: |
-      #      wget --quiet https://gstreamer.freedesktop.org/data/pkg/android/1.18.5/gstreamer-1.0-android-universal-1.18.5.tar.xz
-      #      mkdir gstreamer-1.0-android-universal-1.18.5
-      #      tar xf gstreamer-1.0-android-universal-1.18.5.tar.xz -C gstreamer-1.0-android-universal-1.18.5
+      - name:               Install gstreamer
+        working-directory:  ${{ github.workspace }}
+        run: |
+            wget --quiet https://gstreamer.freedesktop.org/data/pkg/android/1.18.6/gstreamer-1.0-android-universal-1.18.6.tar.xz
+            mkdir gstreamer-1.0-android-universal-1.18.6
+            tar xf gstreamer-1.0-android-universal-1.18.6.tar.xz -C gstreamer-1.0-android-universal-1.18.6
 
       - name: Update android manifest
         if: github.ref_name != 'Stable'
