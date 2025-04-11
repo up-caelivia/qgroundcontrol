@@ -72,7 +72,7 @@
         <file alias="QGroundControl/Controls/ParameterEditorDialog.qml">src/QmlControls/ParameterEditorDialogUP.qml</file>
         <file alias="QGroundControl/Controls/FlightModeMenuIndicator.qml">src/ui/toolbar/FlightModeMenuIndicatorUP.qml</file>
         <file alias="QGroundControl/Controls/QGCPipOverlay.qml">src/QmlControls/QGCPipOverlayUP.qml</file>
-        <file alias="QGroundControl/Controls/QGCSidebarDialog.qml">res/QGCSidebarDialog.qml</file> 
+        <file alias="QGroundControl/Controls/QGCSidebarDialog.qml">res/QGCSidebarDialogUP.qml</file> 
         <file alias="QGroundControl/FlightDisplay/FlyView.qml">src/FlightMap/FlyViewUP.qml</file>
         <file alias="MainRootWindow.qml">src/ui/MainRootWindowUP.qml</file>
         <file alias="QGroundControl/FlightMap/PhotoVideoControl.qml">src/FlightMap/Widgets/PhotoVideoControlUP.qml</file>   

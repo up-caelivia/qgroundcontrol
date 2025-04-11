@@ -1,7 +1,7 @@
 # Docker container to build Qt 5.12 for Android armv7 projects with OpenSSL
 # Image: a12e/docker-qt:5.12-android_armv7
 
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 ARG NDK_VERSION=r21d
 ARG NDK_VERSION_NUM=21.3.6528147
@@ -70,9 +70,6 @@ RUN dpkg --add-architecture i386 && apt update && apt full-upgrade -y && apt ins
 		libfontconfig1 \
 		libfuse2 \
         libgl1-mesa-dev \
-		libgstreamer-plugins-base1.0-dev \
-		libgstreamer1.0-0 \
-		libgstreamer1.0-dev \
 		libsdl2-dev \
 		libssl-dev \
 		libudev-dev \
@@ -150,13 +147,21 @@ RUN locale-gen en_US.UTF-8 && dpkg-reconfigure locales \
     && echo 'user ALL=NOPASSWD: ALL' > /etc/sudoers.d/user \
     && chown -R user:user $ANDROID_HOME
 
-COPY build-qgc-android.sh /home/user/
-RUN chmod +x /home/user/build-qgc-android.sh
  
 USER user
 WORKDIR /home/user
 ENV HOME=/home/user
 RUN  mkdir -p /opt/android-sdk/ndk-${NDK_VERSION}/ && ln -s /opt/android-sdk/ndk/${NDK_VERSION_NUM}/ /opt/android-sdk/ndk-${NDK_VERSION}
+
+RUN wget https://gstreamer.freedesktop.org/data/pkg/android/1.18.6/gstreamer-1.0-android-universal-1.18.6.tar.xz \
+    && mkdir -p /home/user/gstreamer-1.0-android-universal-1.18.6 \
+    && tar xf gstreamer-1.0-android-universal-1.18.6.tar.xz -C /home/user/gstreamer-1.0-android-universal-1.18.6
+
+USER root
+COPY build-qgc-android.sh /home/user/
+RUN chmod +x /home/user/build-qgc-android.sh
+USER user
+
 ARG CLEAN="false"
 ARG FAST="false"
 CMD ["/home/user/build-qgc-android.sh"]

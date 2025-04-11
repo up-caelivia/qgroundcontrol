@@ -86,14 +86,18 @@ SOURCES += \
     $$PWD/src/CustomToolbox.cpp \
     $$PWD/src/ParseNTRIP.cpp \
     $$PWD/src/constants.cpp \
-    $$PWD/src/CustomAnnouncer.cpp
+    $$PWD/src/CustomAnnouncer.cpp \
+    $$PWD/src/VideoStreamControl.cc
 
 HEADERS += \
     $$PWD/src/CustomPlugin.h \
     $$PWD/src/CustomToolbox.h \
     $$PWD/src/ParseNTRIP.h \
     $$PWD/src/constants.h \
-    $$PWD/src/CustomAnnouncer.h
+    $$PWD/src/CustomAnnouncer.h \
+    $$PWD/src/VideoStreamControl.h
 
-INCLUDEPATH += \
-    $$PWD/src \
+INCLUDEPATH += $$PWD/src
+
+# Enable Herelink AirUnit video config
+DEFINES += QGC_HERELINK_AIRUNIT_VIDEO

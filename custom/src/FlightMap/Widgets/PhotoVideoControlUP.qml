@@ -25,7 +25,7 @@ import QGroundControl.FactControls      1.0
 
 Rectangle {
     height:     mainLayout.height + (_margins * 2)
-    width:     height
+    width:     height * 1.2
 
     color:      Qt.rgba(qgcPal.window.r, qgcPal.window.g, qgcPal.window.b, 0.5)
     radius:     _margins
@@ -158,8 +158,8 @@ Rectangle {
 
     QGCColoredImage {
         anchors.margins:    _margins
-        anchors.bottom:        parent.bottom
-        anchors.left:      parent.left
+        anchors.top:        parent.top
+        anchors.right:      parent.right
         source:             "/res/gear-black.svg"
         mipmap:             true
         height:             ScreenTools.defaultFontPixelHeight
@@ -378,21 +378,6 @@ Rectangle {
                         onVisibleChanged:   gridLayout.dynamicRows += visible ? 1 : -1
                     }
 
-
-
-                    // QGCLabel {
-                    //     text: get_text("DIo cabas ndsao asdokosd dsaijda")
-                    //     width: ScreenTools.defaultFontPixelHeight * 6 // Aumentato per il test
-                    //     wrapMode: Text.WordWrap
-                    //     clip: false // Rimosso clipping
-
-                    //     function get_text(text) {
-                    //         if (text.indexOf("NUC") !== -1) // Controlla se "abba" è presente
-                    //             return "NUC Correction";
-
-                    //         return text;
-                    //     }
-                    // }
 
 
                     // Mavlink Camera Protocol active settings
