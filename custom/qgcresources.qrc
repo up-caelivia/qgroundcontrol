@@ -105,4 +105,7 @@
 	<qresource prefix="/opengl">
 		<file>../resources/opengl/buglist.json</file>
 	</qresource>
+    <qresource prefix="/gimbal">
+        <file alias="payload.svg">../resources/gimbal/payload.svg</file>
+    </qresource>
 </RCC>
