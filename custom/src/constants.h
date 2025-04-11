@@ -64,9 +64,9 @@ public:
     }
 
     bool developer() const { return m_developer; }
-    QVector<QString> factNames() const { return {"LOIT_SPEED", "WPNAV_SPEED", "WPNAV_SPEED_DN", "WPNAV_SPEED_UP", "RTL_CLIMB_MIN", "WP_YAW_BEHAVIOR","FENCE_ALT_MAX"}; }
-    QVector<QString> factDescription() const { return {"Maximum speed reached by drone in loiter mode. Warning: in altitude hold mode speed is not limited", "Maximum horizontal speed reached by drone during automatic mission", "Maximum descending speed reached by drone during automatic mission", "Maximum ascending speed reached by drone during automatic mission", "The altitude selected must be higher than all surrounding obstacles","",""}; }
-    QVector<QString> factGoodNames() const { return {"Maximum loiter speed", "Maximum auto speed", "Automatic mode speed down", "Automatic mode speed up", "Altitude for Return To Launch mode", "Automatic mode yaw behaviour","Maximum altitude"}; }
+    QVector<QString> factNames() const { return {"LOIT_SPEED", "WPNAV_SPEED", "WPNAV_SPEED_DN", "WPNAV_SPEED_UP", "WP_YAW_BEHAVIOR"}; }
+    QVector<QString> factDescription() const { return {"Maximum speed reached by drone in loiter mode. Warning: in altitude hold mode speed is not limited", "Maximum horizontal speed reached by drone during automatic mission", "Maximum descending speed reached by drone during automatic mission", "Maximum ascending speed reached by drone during automatic mission",""}; }
+    QVector<QString> factGoodNames() const { return {"Maximum loiter speed", "Maximum horizontal auto speed", "Auto mode speed down", "Auto mode speed up", "Auto mode yaw behaviour"}; }
     QVector<int> factMin() const { return {200, 200, 50, 50, 1000, 0, 10}; }
     QVector<int> factMax() const { return {1500, 1500, 150, 300, 6000, 0, 200}; }
     QVector<bool> factEditable() const { return {false, true, true, true, true, true, true}; }
