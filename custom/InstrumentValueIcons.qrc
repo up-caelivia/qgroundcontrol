@@ -297,5 +297,7 @@
 		<file alias="yin-yang.svg">../resources/InstrumentValueIcons/yin-yang.svg</file>
 		<file alias="zoom-in.svg">../resources/InstrumentValueIcons/zoom-in.svg</file>
 		<file alias="zoom-out.svg">../resources/InstrumentValueIcons/zoom-out.svg</file>
+		<file alias="gimbal-1.svg">../resources/InstrumentValueIcons/gimbal-1.svg</file>
+		<file alias="gimbal-2.svg">../resources/InstrumentValueIcons/gimbal-2.svg</file>
 	</qresource>
 </RCC>
