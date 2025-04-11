@@ -82,6 +82,8 @@ VideoManager::~VideoManager()
         }
 #endif
     }
+
+    delete _videoStreamControl;
 }
 
 //-----------------------------------------------------------------------------
@@ -104,6 +106,10 @@ VideoManager::setToolbox(QGCToolbox *toolbox)
    connect(_videoSettings->lowLatencyMode(),&Fact::rawValueChanged, this, &VideoManager::_lowLatencyModeChanged);
    MultiVehicleManager *pVehicleMgr = qgcApp()->toolbox()->multiVehicleManager();
    connect(pVehicleMgr, &MultiVehicleManager::activeVehicleChanged, this, &VideoManager::_setActiveVehicle);
+
+   // Create video stream control, for Herelink specific functions, and link it to _restartAllVideos, to restart when HDMI source changes
+   _videoStreamControl = new VideoStreamControl();
+   connect(_videoStreamControl, &VideoStreamControl::videoNeedsReset, this, &VideoManager::_restartAllVideos);
 
 #if defined(QGC_GST_STREAMING)
     GStreamer::blacklist(static_cast<VideoSettings::VideoDecoderOptions>(_videoSettings->forceVideoDecoder()->rawValue().toInt()));
@@ -818,9 +824,8 @@ VideoManager::_restartVideo(unsigned id)
 
     if (_videoStarted[id]) {
         _stopReceiver(id);
-    } else {
-        _startReceiver(id);
     }
+    _startReceiver(id);
 #endif
 }
 
@@ -840,8 +845,8 @@ VideoManager::_startReceiver(unsigned id)
     const QString source = _videoSettings->videoSource()->rawValue().toString();
     const unsigned rtsptimeout = _videoSettings->rtspTimeout()->rawValue().toUInt();
     /* The gstreamer rtsp source will switch to tcp if udp is not available after 5 seconds.
-       So we should allow for some negotiation time for rtsp */
-    const unsigned timeout = (source == VideoSettings::videoSourceRTSP ? rtsptimeout : 2 );
+    So we should allow for some negotiation time for rtsp */
+    const unsigned timeout = (source == VideoSettings::videoSourceRTSP ? rtsptimeout : 15 );
 
     if (id > 1) {
         qCDebug(VideoManagerLog) << "Unsupported receiver id" << id;
