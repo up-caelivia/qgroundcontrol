@@ -238,7 +238,7 @@ SetupPage {
 
                     Rectangle {
                         id:     rtlSettings
-                        width:  landSpeedField.x + landSpeedField.width + _margins
+                        width:  rltAltField.x + rltAltField.width + _margins
                         height: icon.y + icon.height + _margins
                         color:  ggcPal.windowShade
 
