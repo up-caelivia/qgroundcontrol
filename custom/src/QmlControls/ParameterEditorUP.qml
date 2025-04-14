@@ -43,8 +43,6 @@ Item {
     property var factNames: Constants.factNames
     property var factDescription: Constants.factDescription
     property var factGoodNames: Constants.factGoodNames
-    property var factMin: Constants.factMin
-    property var factMax: Constants.factMax
     property var factEditable: Constants.factEditable
     property bool developer: Constants.developer
 
@@ -420,9 +418,6 @@ Item {
             fact:           _editorDialogFact
             showRCToParam:  _showRCToParam
             //selectedIndex: _indexSelected
-            // developer: developer
-            // max: factMax[_indexSelected]
-            // min: factMin[_indexSelected]
         }
     }
 

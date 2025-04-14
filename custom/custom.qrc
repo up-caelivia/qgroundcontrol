@@ -82,6 +82,7 @@
 		<file alias="QGroundControl/Controls/QGCComboBox.qml">src/QmlControls/QGCComboBoxUP.qml</file>
 		<file alias="QGroundControl/FactControls/FactTextField.qml">src/FactSystem/FactControls/FactTextFieldUP.qml</file>
         <file alias="QGroundControl/Controls/ParameterEditor.qml">src/QmlControls/ParameterEditorUP.qml</file>
+		<file alias="QGroundControl/FactControls/FactComboBox.qml">src/FactSystem/FactControls/FactComboBoxUP.qml</file>
     </qresource>
     <qresource prefix="/toolbar">
         <file alias="GPSIndicator.qml">src/ui/toolbar/GPSIndicatorUP.qml</file>

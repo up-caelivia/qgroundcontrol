@@ -164,6 +164,7 @@ SetupPage {
 
                 onWaitingForCancelChanged: {
                     if (controller.waitingForCancel) {
+                        barblock.visible = false
                         waitForCancelDialogComponent.createObject(mainWindow).open()
                     }
                 }
@@ -173,6 +174,7 @@ SetupPage {
                     case APMSensorsComponentController.CalTypeAccel:
                     case APMSensorsComponentController.CalTypeOnboardCompass:
                         _singleCompassSettingsComponentShowPriority = true
+                        barblock.visible = false
                         postOnboardCompassCalibrationComponent.createObject(mainWindow).open()
                         break
                     }
@@ -198,6 +200,7 @@ SetupPage {
 
                         onWaitingForCancelChanged: {
                             if (!controller.waitingForCancel) {
+                                barblock.visible = false
                                 close()
                             }
                         }
@@ -430,6 +433,7 @@ SetupPage {
                         } else if (_orientationDialogCalType == _calTypeCompass) {
                             if (!northCalibrationCheckBox.checked) {
                                 statusTextArea.text = qsTr("Calibration running, move the drone until the calibration is completed.\nPress Cancel button to stop the calibration.")
+                                barblock.visible = true
                                 controller.calibrateCompass()
                             } else {
                                 var lat = parseFloat(northCalLat.text)
@@ -721,7 +725,7 @@ SetupPage {
                         width:      _buttonWidth
                         text:       qsTr("Cancel")
                         enabled:    false
-                        onClicked:  controller.cancelCalibration()
+                        onClicked:  {controller.cancelCalibration(); barblock.visible = false}
                     }
                 }
             } // QGCFlickable - buttons
@@ -734,10 +738,31 @@ SetupPage {
                 anchors.left:       buttonFlickable.right
                 anchors.right:      parent.right
 
-                ProgressBar {
-                    id:             progressBar
+                Item {
+                    id: barblock
                     anchors.left:   parent.left
                     anchors.right:  parent.right
+                    height:         parent.height * 0.15
+                    visible:        false
+
+                    ProgressBar {
+                        id: progressBar
+                        anchors.fill: parent
+                        value: controller.progressValue // es: da 0.0 a 1.0
+                    }
+
+                    QGCLabel {
+                        anchors.margins:        _defaultTextWidth * 2
+                        anchors.fill:           parent
+                        verticalAlignment:      Text.AlignVCenter
+                        horizontalAlignment:    Text.AlignHCenter
+                        wrapMode:               Text.WordWrap
+                        font.pointSize:         ScreenTools.largeFontPointSize * 3
+                        text:                   Math.round(progressBar.value * 100) + "%"
+                        color: "green"
+                        visible: progressBar.visible
+                        font.bold: true
+                    }
                 }
 
                 Item { height: ScreenTools.defaultFontPixelHeight; width: 10 } // spacer

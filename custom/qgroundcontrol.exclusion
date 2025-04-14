@@ -58,6 +58,8 @@
 
 <file alias="NTRIP.SettingsGroup.json">src/Settings/NTRIP.SettingsGroup.json</file>
 
+<file alias="QGroundControl/FactControls/FactComboBox.qml">../src/FactSystem/FactControls/FactComboBox.qml</file>
+
 
 
 
