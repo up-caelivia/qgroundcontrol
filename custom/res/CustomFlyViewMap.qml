@@ -23,6 +23,8 @@ import QGroundControl.Palette       1.0
 import QGroundControl.ScreenTools   1.0
 import QGroundControl.Vehicle       1.0
 
+import GeoAwareness 1.0
+
 FlightMap {
     id:                         _root
     allowGCSLocationCenter:     true
@@ -85,6 +87,33 @@ FlightMap {
     }
     onCenterChanged: {
         QGroundControl.flightMapPosition = center
+    }
+
+    KmlPolygonLoader {
+        id: kmlLoader
+        onPolygonsChanged: {
+            console.log("Loaded", polygons.length, "polygons from KML")
+        }
+
+        Component.onCompleted: {
+            kmlLoader.loadFromFile("/home/adf/doc.kml")
+        }
+    }
+    
+    MapItemView {
+        model: kmlLoader.polygons
+
+        delegate: MapPolygon {
+            path: modelData.coordinates
+            color: "lightblue"
+            border.color: "blue"
+            border.width: 2
+            opacity: 1
+
+            Component.onCompleted: {
+                console.log("Polygon drawn with", modelData.coordinates.length, "points")
+            }
+        }
     }
 
     // We track whether the user has panned or not to correctly handle automatic map positioning

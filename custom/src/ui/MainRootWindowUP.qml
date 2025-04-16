@@ -20,8 +20,6 @@ import QGroundControl.ScreenTools   1.0
 import QGroundControl.FlightDisplay 1.0
 import QGroundControl.FlightMap     1.0
 
-import GeoAwareness 1.0
-
 /// @brief Native QML top level window
 /// All properties defined here are visible to all QML pages.
 ApplicationWindow {
@@ -41,33 +39,6 @@ ApplicationWindow {
 
         // Start the sequence of first run prompt(s)
         firstRunPromptManager.nextPrompt()
-    }
-
-    Item {
-        id: kmlroot
-        width: parent.width
-        height: parent.height
-
-        KmlPolygonLoader {
-            id: kmlLoader
-            Component.onCompleted: {
-                kmlLoader.loadFromFile("/home/adf/doc.kml")
-            }
-        }
-
-        ListView {
-            anchors.fill: parent
-            model: kmlLoader.polygons
-
-            delegate: Column {
-                Text {
-                    text: modelData.name + " | Alt: " + modelData.allowedAltitude + " m | Points: " + modelData.coordinates.length
-                }
-                Component.onCompleted: {
-                    console.log(modelData.name, " | Alt: ", modelData.allowedAltitude, " m | Points: ", modelData.coordinates.length);
-                }
-            }
-        }
     }
 
     QtObject {

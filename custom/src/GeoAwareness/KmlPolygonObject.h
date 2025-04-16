@@ -2,7 +2,7 @@
 
 #include <QObject>
 #include <QGeoCoordinate>
-#include <QVariantList>
+#include <QVariant>
 
 class KmlPolygonObject : public QObject {
     Q_OBJECT
@@ -11,13 +11,10 @@ class KmlPolygonObject : public QObject {
     Q_PROPERTY(QVariantList coordinates READ coordinates CONSTANT)
 
 public:
-    explicit KmlPolygonObject(const QString& name,
-                              int allowedAltitude,
-                              const QList<QGeoCoordinate>& coordinates,
-                              QObject* parent = nullptr);
+    KmlPolygonObject(const QString& name, int allowedAltitude, const QList<QGeoCoordinate>& coords, QObject* parent = nullptr);
 
-    QString name() const;
-    int allowedAltitude() const;
+    QString name() const { return _name; }
+    int allowedAltitude() const { return _allowedAltitude; }
     QVariantList coordinates() const;
 
 private:

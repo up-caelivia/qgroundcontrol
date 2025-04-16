@@ -1,6 +1,11 @@
 #include "KmlPolygonLoader.h"
 #include "KmlPolygonObject.h"
 
+#include "QGCApplication.h"
+#include "QGCToolbox.h"
+#include "GeoFenceController.h"
+#include "QGCMapPolygon.h"
+
 #include <QFile>
 #include <QDomDocument>
 #include <QDebug>
