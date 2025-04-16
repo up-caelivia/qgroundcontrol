@@ -87,7 +87,9 @@ SOURCES += \
     $$PWD/src/ParseNTRIP.cpp \
     $$PWD/src/constants.cpp \
     $$PWD/src/CustomAnnouncer.cpp \
-    $$PWD/src/VideoStreamControl.cc
+    $$PWD/src/VideoStreamControl.cc \
+    $$PWD/src/GeoAwareness/KmlPolygonObject.cpp \
+    $$PWD/src/GeoAwareness/KmlPolygonLoader.cpp
 
 HEADERS += \
     $$PWD/src/CustomPlugin.h \
@@ -95,9 +97,12 @@ HEADERS += \
     $$PWD/src/ParseNTRIP.h \
     $$PWD/src/constants.h \
     $$PWD/src/CustomAnnouncer.h \
-    $$PWD/src/VideoStreamControl.h
+    $$PWD/src/VideoStreamControl.h \
+    $$PWD/src/GeoAwareness/KmlPolygonObject.h \
+    $$PWD/src/GeoAwareness/KmlPolygonLoader.h
 
-INCLUDEPATH += $$PWD/src
+INCLUDEPATH += $$PWD/src \
+               $$PWD/src/GeoAwareness
 
 # Enable Herelink AirUnit video config
 DEFINES += QGC_HERELINK_AIRUNIT_VIDEO
