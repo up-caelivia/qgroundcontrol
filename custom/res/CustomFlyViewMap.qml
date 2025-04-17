@@ -88,7 +88,7 @@ FlightMap {
     onCenterChanged: {
         QGroundControl.flightMapPosition = center
     }
-    
+    /*
     MapItemView {
         model: KmlPolygonLoader.polygons
 
@@ -100,6 +100,7 @@ FlightMap {
             opacity: 1
         }
     }
+    */
 
     // We track whether the user has panned or not to correctly handle automatic map positioning
     Connections {

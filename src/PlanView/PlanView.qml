@@ -83,6 +83,7 @@ Item {
         selectExisting: true
         onAccepted: {
             KmlPolygonLoader.loadFromFile(fileUrl.toString().replace("file://", ""))
+            KmlPolygonLoader.applyToGeoFence(_geoFenceController)
         }
     }
 
@@ -448,11 +449,7 @@ Item {
                     color: "lightblue"
                     border.color: "blue"
                     border.width: 2
-                    opacity: 1
-
-                    Component.onCompleted: {
-                        console.log("Polygon drawn with", modelData.coordinates.length, "points")
-                    }
+                    opacity: 0
                 }
             }
 

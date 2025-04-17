@@ -72,6 +72,40 @@ void KmlPolygonLoader::parsePlacemark(const QDomElement& placemark) {
     _polygonObjects.append(new KmlPolygonObject(name, allowedAltitude, coordinates, this));
 }
 
+void KmlPolygonLoader::applyToGeoFence(QObject* controllerObj) {
+    GeoFenceController* controller = qobject_cast<GeoFenceController*>(controllerObj);
+    if (!controller) {
+        qWarning() << "Invalid GeoFenceController passed to applyToGeoFence";
+        return;
+    }
+
+    if (_polygonObjects.isEmpty()) {
+        qWarning() << "No polygons to apply";
+        return;
+    }
+
+    QmlObjectListModel* polygonList = controller->polygons();
+    if (!polygonList) {
+        qWarning() << "GeoFenceController has no valid polygon list.";
+        return;
+    }
+
+    // Pulisci i poligoni esistenti se vuoi sovrascrivere
+    polygonList->clear();
+
+    // Aggiungi tutti i poligoni KML
+    for (QObject* obj : _polygonObjects) {
+        KmlPolygonObject* polyObj = qobject_cast<KmlPolygonObject*>(obj);
+        if (!polyObj) continue;
+
+        QGCMapPolygon* newPolygon = new QGCMapPolygon(this);
+        newPolygon->setPath(polyObj->coordinates());
+        polygonList->append(newPolygon);
+    }
+
+    qDebug() << "Added" << polygonList->count() << "polygon(s) to GeoFenceController";
+}
+
 QList<QObject*> KmlPolygonLoader::polygons() const {
     return _polygonObjects;
 }
