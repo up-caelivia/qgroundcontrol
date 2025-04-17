@@ -1,0 +1,4 @@
+Module Custom.GeoAwareness
+
+KmlPolygonOverlay 1.0 KmlPolygonOverlay.qml
+singleton KmlPolygonLoaderSingleton 1.0 KmlPolygonLoaderSingleton.qml

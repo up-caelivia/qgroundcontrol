@@ -13,6 +13,11 @@
 KmlPolygonLoader::KmlPolygonLoader(QObject* parent)
     : QObject(parent) {}
 
+KmlPolygonLoader* KmlPolygonLoader::instance() {
+    static KmlPolygonLoader* _instance = new KmlPolygonLoader();
+    return _instance;
+}
+
 bool KmlPolygonLoader::loadFromFile(const QString& filePath) {
     _polygonObjects.clear();
 

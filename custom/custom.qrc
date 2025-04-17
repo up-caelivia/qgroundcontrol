@@ -54,6 +54,11 @@
         <file alias="Custom/Constants/Constants.qml">res/Custom/Constants/Constants.qml</file>
         <file alias="Custom/Constants/qmldir">res/Custom/Constants/qmldir</file>
     </qresource>
+    <qresource prefix="/Custom/GeoAwareness">
+        <file alias="Custom/GeoAwareness/KmlPolygonLoaderSingleton.qml">res/Custom/GeoAwareness/KmlPolygonLoaderSingleton.qml</file>
+        <file alias="Custom/GeoAwareness/qmldir">res/Custom/GeoAwareness/qmldir</file>
+        <file alias="Custom/GeoAwareness/KmlPolygonOverlay.qml">res/Custom/GeoAwareness/KmlPolygonOverlay.qml</file>
+    </qresource>
     <qresource prefix="/qml">
         <file alias="CustomCalibrationPage.qml">res/Custom/Widgets/CustomCalibrationPage.qml</file>
         <file alias="CustomSetupView.qml">res/Custom/Widgets/CustomSetupView.qml</file>

@@ -23,7 +23,7 @@ import QGroundControl.Palette       1.0
 import QGroundControl.ScreenTools   1.0
 import QGroundControl.Vehicle       1.0
 
-import GeoAwareness 1.0
+import QGroundControl.KML 1.0
 
 FlightMap {
     id:                         _root
@@ -88,20 +88,9 @@ FlightMap {
     onCenterChanged: {
         QGroundControl.flightMapPosition = center
     }
-
-    KmlPolygonLoader {
-        id: kmlLoader
-        onPolygonsChanged: {
-            console.log("Loaded", polygons.length, "polygons from KML")
-        }
-
-        Component.onCompleted: {
-            kmlLoader.loadFromFile("/home/adf/doc.kml")
-        }
-    }
     
     MapItemView {
-        model: kmlLoader.polygons
+        model: KmlPolygonLoader.polygons
 
         delegate: MapPolygon {
             path: modelData.coordinates
@@ -109,10 +98,6 @@ FlightMap {
             border.color: "blue"
             border.width: 2
             opacity: 1
-
-            Component.onCompleted: {
-                console.log("Polygon drawn with", modelData.coordinates.length, "points")
-            }
         }
     }
 

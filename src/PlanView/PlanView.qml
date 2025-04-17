@@ -25,6 +25,9 @@ import QGroundControl.Palette           1.0
 import QGroundControl.Controllers       1.0
 import QGroundControl.ShapeFileHelper   1.0
 
+import QGroundControl.KML 1.0
+
+
 Item {
     id: _root
 
@@ -71,6 +74,17 @@ Item {
     property bool _firstFenceLoadComplete:      false
     property bool _firstRallyLoadComplete:      false
     property bool _firstLoadComplete:           false
+
+    
+    FileDialog {
+        id: kmlFileDialog
+        title: qsTr("Select KML File")
+        nameFilters: [ "KML files (*.kml)" ]
+        selectExisting: true
+        onAccepted: {
+            KmlPolygonLoader.loadFromFile(fileUrl.toString().replace("file://", ""))
+        }
+    }
 
     MapFitFunctions {
         id:                         mapFitFunctions  // The name for this id cannot be changed without breaking references outside of this code. Beware!
@@ -425,6 +439,22 @@ Item {
                     opacity:    _editingLayer == _layerMission ? 1 : editorMap._nonInteractiveOpacity
                 }
             }
+    
+            MapItemView {
+                model: KmlPolygonLoader.polygons
+
+                delegate: MapPolygon {
+                    path: modelData.coordinates
+                    color: "lightblue"
+                    border.color: "blue"
+                    border.width: 2
+                    opacity: 1
+
+                    Component.onCompleted: {
+                        console.log("Polygon drawn with", modelData.coordinates.length, "points")
+                    }
+                }
+            }
 
             // UI for splitting the current segment
             MapQuickItem {
@@ -531,6 +561,15 @@ Item {
                         iconSource:             "/qmlimages/MapSync.svg"
                         alternateIconSource:    "/qmlimages/MapSyncChanged.svg"
                         dropPanelComponent:     syncDropPanel
+                    },
+                    ToolStripAction {
+                        text:                   qsTr("NFZ")
+                        enabled:                !_planMasterController.syncInProgress
+                        visible:                true
+                        showAlternateIcon:      _planMasterController.dirty
+                        iconSource:             "/qmlimages/MapSync.svg"
+                        alternateIconSource:    "/qmlimages/MapSyncChanged.svg"
+                        onTriggered:            kmlFileDialog.open()
                     },
                     ToolStripAction {
                         text:       qsTr("Takeoff")

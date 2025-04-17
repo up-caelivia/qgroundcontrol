@@ -12,6 +12,7 @@ class KmlPolygonLoader : public QObject {
     Q_PROPERTY(QList<QObject*> polygons READ polygons NOTIFY polygonsChanged)
 
 public:
+    static KmlPolygonLoader* instance();
     explicit KmlPolygonLoader(QObject* parent = nullptr);
     Q_INVOKABLE bool loadFromFile(const QString& filePath);
     QList<QObject*> polygons() const;
