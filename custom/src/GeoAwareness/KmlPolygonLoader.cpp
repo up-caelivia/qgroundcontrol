@@ -11,6 +11,10 @@
 #include <QDomDocument>
 #include <QDebug>
 
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+
 KmlPolygonLoader::KmlPolygonLoader(QObject* parent)
     : QObject(parent) {}
 
@@ -20,8 +24,6 @@ KmlPolygonLoader* KmlPolygonLoader::instance() {
 }
 
 bool KmlPolygonLoader::loadFromFile(const QString& filePath) {
-    _polygonObjects.clear();
-
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qWarning() << "Cannot open KML file:" << filePath;
@@ -37,6 +39,84 @@ bool KmlPolygonLoader::loadFromFile(const QString& filePath) {
     QDomNodeList placemarks = doc.elementsByTagName("Placemark");
     for (int i = 0; i < placemarks.count(); ++i) {
         parsePlacemark(placemarks.at(i).toElement());
+    }
+
+    emit polygonsChanged();
+    return true;
+}
+
+
+bool KmlPolygonLoader::loadFromJsonFile(const QString& filePath) {
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly)) {
+        qWarning() << "Cannot open JSON file:" << filePath;
+        return false;
+    }
+
+    QByteArray jsonData = file.readAll();
+    QJsonDocument doc = QJsonDocument::fromJson(jsonData);
+
+    if (!doc.isObject()) {
+        qWarning() << "Invalid JSON structure.";
+        return false;
+    }
+
+    const QJsonObject root = doc.object();
+    for (const QString& key : root.keys()) {
+        const QJsonObject featureCollection = root[key].toObject();
+        const QJsonArray features = featureCollection["features"].toArray();
+
+        for (const QJsonValue& f : features) {
+            const QJsonObject feature = f.toObject();
+            const QJsonObject properties = feature["properties"].toObject();
+            const QJsonObject geometry = feature["geometry"].toObject();
+
+            QString name = properties["name"].toString();
+            QString id = feature["id"].toVariant().toString();
+            QString description = properties["additionalInfo"].toString();
+            QColor color = Qt::red; // default or map from category
+            int hmin = static_cast<int>(properties["lowestpoint"].toString().toDouble());
+            int hmax = static_cast<int>(properties["highestpoint"].toString().toDouble());
+
+            int allowedAltitude = static_cast<int>(properties["upperLimit"].toDouble());
+
+            QDateTime activationDate;  // puoi modificarlo se c'è un campo tipo `validFrom`
+            QDateTime deactivationDate; // idem per `validUntil`
+
+            QList<QGeoCoordinate> coordinates;
+
+            const QString type = geometry["type"].toString();
+            if (type == "Polygon") {
+                const QJsonArray rings = geometry["coordinates"].toArray();
+                if (!rings.isEmpty()) {
+                    const QJsonArray coordArray = rings[0].toArray();
+                    for (const QJsonValue& coordVal : coordArray) {
+                        const QJsonArray latlon = coordVal.toArray();
+                        if (latlon.size() >= 2) {
+                            coordinates.append(QGeoCoordinate(latlon[1].toDouble(), latlon[0].toDouble()));
+                        }
+                    }
+                }
+            } else if (type == "MultiPolygon") {
+                const QJsonArray polygons = geometry["coordinates"].toArray();
+                if (!polygons.isEmpty()) {
+                    const QJsonArray firstPolygon = polygons[0].toArray();
+                    if (!firstPolygon.isEmpty()) {
+                        const QJsonArray coordArray = firstPolygon[0].toArray();
+                        for (const QJsonValue& coordVal : coordArray) {
+                            const QJsonArray latlon = coordVal.toArray();
+                            if (latlon.size() >= 2) {
+                                coordinates.append(QGeoCoordinate(latlon[1].toDouble(), latlon[0].toDouble()));
+                            }
+                        }
+                    }
+                }
+            }
+
+            _polygonObjects.append(new KmlPolygonObject(
+                name, allowedAltitude, coordinates, color, hmin, hmax, id, description, activationDate, deactivationDate, this
+            ));
+        }
     }
 
     emit polygonsChanged();
@@ -73,39 +153,6 @@ void KmlPolygonLoader::parsePlacemark(const QDomElement& placemark) {
     _polygonObjects.append(new KmlPolygonObject(name, allowedAltitude, coordinates, this));
 }
 
-void KmlPolygonLoader::applyToGeoFence(QObject* controllerObj) {
-    GeoFenceController* controller = qobject_cast<GeoFenceController*>(controllerObj);
-    if (!controller) {
-        qWarning() << "Invalid GeoFenceController passed to applyToGeoFence";
-        return;
-    }
-
-    if (_polygonObjects.isEmpty()) {
-        qWarning() << "No polygons to apply";
-        return;
-    }
-
-    QmlObjectListModel* polygonList = controller->polygons();
-    if (!polygonList) {
-        qWarning() << "GeoFenceController has no valid polygon list.";
-        return;
-    }
-
-    // Pulisci i poligoni esistenti se vuoi sovrascrivere
-    polygonList->clear();
-
-    for (QObject* obj : _polygonObjects) {
-        KmlPolygonObject* polyObj = qobject_cast<KmlPolygonObject*>(obj);
-        if (!polyObj) continue;
-    
-        GeoAwarenessFencePolygon* newPolygon = new GeoAwarenessFencePolygon(false, this);
-        newPolygon->setIsKml(true);
-        newPolygon->setPath(polyObj->coordinates());
-        polygonList->append(newPolygon);
-    }
-
-    qDebug() << "Added" << polygonList->count() << "polygon(s) to GeoFenceController";
-}
 
 QList<QObject*> KmlPolygonLoader::polygons() const {
     return _polygonObjects;

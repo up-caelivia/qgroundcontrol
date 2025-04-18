@@ -15,6 +15,7 @@ public:
     static KmlPolygonLoader* instance();
     explicit KmlPolygonLoader(QObject* parent = nullptr);
     Q_INVOKABLE bool loadFromFile(const QString& filePath);
+    Q_INVOKABLE bool loadFromJsonFile(const QString& filePath);
     QList<QObject*> polygons() const;
     Q_INVOKABLE void applyToGeoFence(QObject* controller);
     Q_INVOKABLE void clearPolygons();
