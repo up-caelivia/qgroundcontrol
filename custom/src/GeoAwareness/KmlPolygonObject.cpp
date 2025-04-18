@@ -1,4 +1,5 @@
 #include "KmlPolygonObject.h"
+#include <QVariant>
 
 KmlPolygonObject::KmlPolygonObject(const QString& name, int allowedAltitude, const QList<QGeoCoordinate>& coords, QObject* parent)
     : QObject(parent)
@@ -14,4 +15,11 @@ QVariantList KmlPolygonObject::coordinates() const {
         list.append(QVariant::fromValue(c));
     }
     return list;
+}
+
+void KmlPolygonObject::setName(const QString& name) {
+    if (name != _name) {
+        _name = name;
+        emit nameChanged();
+    }
 }

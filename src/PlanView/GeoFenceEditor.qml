@@ -17,6 +17,14 @@ QGCFlickable {
     property var    myGeoFenceController
     property var    flightMap
 
+    function isKmlPolygon(polygon) {
+        try {
+            return polygon && polygon["isKml"] === true
+        } catch(e) {
+            return false
+        }
+    }
+
     readonly property real  _editFieldWidth:    Math.min(width - _margin * 2, ScreenTools.defaultFontPixelWidth * 15)
     readonly property real  _margin:            ScreenTools.defaultFontPixelWidth / 2
     readonly property real  _radius:            ScreenTools.defaultFontPixelWidth / 2
@@ -48,6 +56,7 @@ QGCFlickable {
             color:              qgcPal.windowShadeDark
             radius:             _radius
 
+
             Column {
                 id:                 fenceColumn
                 anchors.margins:    _margin
@@ -71,7 +80,6 @@ QGCFlickable {
                     anchors.right:      parent.right
                     spacing:            _margin
                     visible:            myGeoFenceController.supported
-
                     Repeater {
                         model: myGeoFenceController.params
 
@@ -167,7 +175,15 @@ QGCFlickable {
                         Repeater {
                             model: myGeoFenceController.polygons
 
+                            Component.onCompleted: {
+                                for (var i = 0; i < myGeoFenceController.polygons.count; i++) {
+                                    var poly = myGeoFenceController.polygons.get(i)
+                                    console.log("Polygon", i, "has isKml:", poly["isKml"])
+                                }
+                            }
+
                             QGCCheckBox {
+                                visible:            !isKmlPolygon(object)
                                 checked:            object.inclusion
                                 onClicked:          object.inclusion = checked
                                 Layout.alignment:   Qt.AlignHCenter
@@ -184,6 +200,7 @@ QGCFlickable {
                             model: myGeoFenceController.polygons
 
                             QGCRadioButton {
+                                visible:            !isKmlPolygon(object)
                                 checked:            _interactive
                                 Layout.alignment:   Qt.AlignHCenter
 
@@ -208,6 +225,7 @@ QGCFlickable {
                             model: myGeoFenceController.polygons
 
                             QGCButton {
+                                visible:            !isKmlPolygon(object)
                                 text:               qsTr("Del")
                                 Layout.alignment:   Qt.AlignHCenter
                                 onClicked:          myGeoFenceController.deletePolygon(index)

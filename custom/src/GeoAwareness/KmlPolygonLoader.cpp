@@ -5,6 +5,7 @@
 #include "QGCToolbox.h"
 #include "GeoFenceController.h"
 #include "QGCMapPolygon.h"
+#include "GeoAwarenessFencePolygon.h"
 
 #include <QFile>
 #include <QDomDocument>
@@ -93,12 +94,12 @@ void KmlPolygonLoader::applyToGeoFence(QObject* controllerObj) {
     // Pulisci i poligoni esistenti se vuoi sovrascrivere
     polygonList->clear();
 
-    // Aggiungi tutti i poligoni KML
     for (QObject* obj : _polygonObjects) {
         KmlPolygonObject* polyObj = qobject_cast<KmlPolygonObject*>(obj);
         if (!polyObj) continue;
-
-        QGCMapPolygon* newPolygon = new QGCMapPolygon(this);
+    
+        GeoAwarenessFencePolygon* newPolygon = new GeoAwarenessFencePolygon(false, this);
+        newPolygon->setIsKml(true);
         newPolygon->setPath(polyObj->coordinates());
         polygonList->append(newPolygon);
     }
@@ -108,4 +109,18 @@ void KmlPolygonLoader::applyToGeoFence(QObject* controllerObj) {
 
 QList<QObject*> KmlPolygonLoader::polygons() const {
     return _polygonObjects;
+}
+
+void KmlPolygonLoader::clearPolygons() {
+    qDeleteAll(_polygonObjects);
+    _polygonObjects.clear();
+    emit polygonsChanged();
+}
+
+void KmlPolygonLoader::removePolygon(QObject* polygon) {
+    int index = _polygonObjects.indexOf(polygon);
+    if (index >= 0) {
+        _polygonObjects.removeAt(index);
+        emit polygonsChanged(); // se è una Q_PROPERTY
+    }
 }

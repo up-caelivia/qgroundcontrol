@@ -76,14 +76,18 @@ Item {
     property bool _firstLoadComplete:           false
 
     
-    FileDialog {
-        id: kmlFileDialog
-        title: qsTr("Select KML File")
-        nameFilters: [ "KML files (*.kml)" ]
+
+    QGCFileDialog {
+        id:             kmlFileDialog
+        folder:         QGroundControl.settingsManager.appSettings.missionSavePath
+        title:          qsTr("Select KML File")
         selectExisting: true
-        onAccepted: {
-            KmlPolygonLoader.loadFromFile(fileUrl.toString().replace("file://", ""))
-            KmlPolygonLoader.applyToGeoFence(_geoFenceController)
+        nameFilters:    ShapeFileHelper.fileDialogKMLFilters
+
+        onAcceptedForLoad: {
+            KmlPolygonLoader.loadFromFile(file.toString().replace("file://", ""))
+            //KmlPolygonLoader.applyToGeoFence(_geoFenceController)
+            close()
         }
     }
 
@@ -447,9 +451,10 @@ Item {
                 delegate: MapPolygon {
                     path: modelData.coordinates
                     color: "lightblue"
-                    border.color: "blue"
+                    border.color: "red"
                     border.width: 2
-                    opacity: 0
+                    opacity: 1
+                    z: 100
                 }
             }
 
@@ -560,13 +565,14 @@ Item {
                         dropPanelComponent:     syncDropPanel
                     },
                     ToolStripAction {
-                        text:                   qsTr("NFZ")
+                        text:                   qsTr("UGZ")
                         enabled:                !_planMasterController.syncInProgress
                         visible:                true
                         showAlternateIcon:      _planMasterController.dirty
                         iconSource:             "/qmlimages/MapSync.svg"
                         alternateIconSource:    "/qmlimages/MapSyncChanged.svg"
-                        onTriggered:            kmlFileDialog.open()
+                        //onTriggered:            kmlFileDialog.openForLoad()
+                        dropPanelComponent:     ugzDropPanel
                     },
                     ToolStripAction {
                         text:       qsTr("Takeoff")
@@ -1091,4 +1097,196 @@ Item {
             }
         }
     }
+
+    Component {
+        id: ugzDropPanel
+
+        ColumnLayout {
+            id: panelRoot
+            spacing: _margin
+            property var selectedPolygon: null
+
+            SectionHeader {
+                Layout.fillWidth: true
+                text: qsTr("No-Fly Zones Management")
+                showSpacer: false
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: _margin
+
+                QGCButton {
+                    text: qsTr("Delete All")
+                    onClicked: KmlPolygonLoader.clearPolygons()
+                }
+
+                QGCButton {
+                    text: qsTr("Add from file")
+                    onClicked: kmlFileDialog.openForLoad()
+                }
+
+                QGCButton {
+                    text: qsTr("Replace from file")
+                    onClicked: {
+                        KmlPolygonLoader.clearPolygons()
+                        kmlFileDialog.openForLoad()
+                    }
+                }
+
+                QGCButton {
+                    text: qsTr("Export KML file")
+                    onClicked: {
+                        //KmlPolygonLoader.clearPolygons()
+                        //kmlFileDialog.openForLoad()
+                    }
+                }
+            }
+
+            SectionHeader {
+                Layout.fillWidth: true
+                text: qsTr("Loaded polygons:")
+                showSpacer: false
+            }
+
+            ListView {
+                Layout.fillWidth: true
+                Layout.preferredHeight: Screen.height * 0.20
+                clip: true
+                model: KmlPolygonLoader.polygons                
+                visible: renameDialog.visible === false
+
+                delegate: Item {
+                    width: ListView.view.width
+                    height: ScreenTools.defaultFontPixelHeight * 2
+
+                    Rectangle {
+                        anchors.fill: parent
+                        color: mouseArea.containsMouse ? qgcPal.buttonHighlight : "transparent"
+                        radius: 4
+                    }
+
+                    MouseArea {
+                        id: mouseArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                    }
+
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.margins: _margin
+                        spacing: _margin
+
+                        QGCColoredImage {
+                            source: "qrc:/InstrumentValueIcons/edit-pencil.svg"
+                            width: ScreenTools.defaultFontPixelHeight * 1.2
+                            height: width
+                            color: qgcPal.text
+
+                            QGCMouseArea {
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    panelRoot.selectedPolygon = modelData
+                                }
+                            }
+                        }
+
+                        Rectangle {
+                            width: ScreenTools.defaultFontPixelHeight * 1.2
+                            height: width
+                            color: modelData.color ? modelData.color : "red"
+                            border.color: "black"
+                            radius: 2
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+
+                        QGCLabel {
+                            text: modelData.name
+                            font.bold: true
+                            verticalAlignment: Text.AlignVCenter
+                            Layout.fillWidth: true
+                        }
+
+                        QGCColoredImage {
+                            source: "qrc:/InstrumentValueIcons/close.svg"
+                            width: ScreenTools.defaultFontPixelHeight * 1.2
+                            height: width
+                            color: qgcPal.text
+
+                            QGCMouseArea {
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    KmlPolygonLoader.removePolygon(modelData)
+                                }
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        height: 1
+                        color: qgcPal.text
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                    }
+                }
+            }
+
+            Rectangle {
+                id: renameDialog
+                visible: selectedPolygon !== null
+                width: ScreenTools.defaultFontPixelWidth * 40
+                height: ScreenTools.defaultFontPixelHeight * 8
+                color: qgcPal.window
+                border.color: qgcPal.text
+                radius: 8
+                Layout.fillWidth: true
+                z: 1000
+
+                ColumnLayout {
+                    anchors.fill: parent
+                    anchors.margins: _margin
+                    spacing: _margin
+
+                    QGCLabel {
+                        text: qsTr("Rename Polygon")
+                        font.bold: true
+                        Layout.alignment: Qt.AlignHCenter
+                    }
+
+                    QGCTextField {
+                        id: renameField
+                        Layout.fillWidth: true
+                        text: panelRoot.selectedPolygon ? panelRoot.selectedPolygon.name : ""
+                        Component.onCompleted: selectAll()
+                    }
+
+                    RowLayout {
+                        Layout.alignment: Qt.AlignRight
+                        spacing: _margin
+
+                        QGCButton {
+                            text: qsTr("Cancel")
+                            onClicked: selectedPolygon = null
+                        }
+
+                        QGCButton {
+                            text: qsTr("OK")
+                            enabled: renameField.text.trim().length > 0
+                            onClicked: {
+                                if (selectedPolygon) {
+                                    selectedPolygon.name = renameField.text.trim()
+                                }
+                                selectedPolygon = null
+                            }
+                        }
+                    }
+                }
+            }
+        }
+}
 }
