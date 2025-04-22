@@ -18,9 +18,19 @@ QGCComboBox {
 
     currentIndex: {
         if (!fact) return 0
-        if (indexModel) return fact.value
-        if (allowedValues) return allowedValues.indexOf(fact.value)
-        return fact.enumIndex
+        if (indexModel) {
+            if (allowedValues) {
+                let idx = allowedValues.indexOf(fact.value)
+                return idx >= 0 ? idx : 0
+            }
+            return fact.value
+        } else {
+            if (allowedValues) {
+                let idx = allowedValues.indexOf(fact.value)
+                return idx >= 0 ? idx : 0
+            }
+            return fact.enumIndex
+        }
     }
 
     onModelChanged: {
@@ -30,16 +40,30 @@ QGCComboBox {
         // avoid an event binding loop (the 2. call will for certain not trigger
         // another model change)
         Qt.callLater(function() {
-            currentIndex = fact ? (indexModel ? fact.value : fact.enumIndex) : 0
+            if (!fact) return
+            if (indexModel) {
+                if (allowedValues) {
+                    let idx = allowedValues.indexOf(fact.value)
+                    currentIndex = idx >= 0 ? idx : 0
+                } else {
+                    currentIndex = fact.value
+                }
+            } else {
+                if (allowedValues) {
+                    let idx = allowedValues.indexOf(fact.value)
+                    currentIndex = idx >= 0 ? idx : 0
+                } else {
+                    currentIndex = fact.enumIndex
+                }
+            }
         })
     }
 
     onActivated: {
         if (!fact) return
         if (indexModel) {
-            fact.value = index
+            fact.value = allowedValues ? allowedValues[index] : index
         } else {
-            // ✅ NEW: use allowedValues if defined
             fact.value = allowedValues ? allowedValues[index] : fact.enumValues[index]
         }
     }
