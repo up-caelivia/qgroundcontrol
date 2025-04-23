@@ -304,11 +304,7 @@ bool CustomPlugin::adjustSettingMetaData(const QString& settingsGroup, FactMetaD
         } else if (metaData.name() == VideoSettings::videoSourceName) {
             metaData.setRawDefaultValue(VideoSettings::videoSourceHerelinkAirUnit);
         }
-    } else if (settingsGroup == AppSettings::settingsGroup) {
-        if (metaData.name() == AppSettings::androidSaveToSDCardName) {
-            metaData.setRawDefaultValue(true);
-        }
-    }
+    } 
 
     return true; // Show all settings in ui
 }
