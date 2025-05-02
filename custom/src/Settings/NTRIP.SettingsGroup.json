@@ -29,14 +29,14 @@
     "name":                 "ntripUsername",
     "shortDesc":     "Username",
     "type":                 "string",
-    "default":         "baggio",
+    "default":         "",
     "qgcRebootRequired":    true
 },
 {
     "name":                 "ntripPassword",
     "shortDesc":     "Password",
     "type":                 "string",
-    "default":         "baggio23",
+    "default":         "",
     "qgcRebootRequired":    true
 },
 {
