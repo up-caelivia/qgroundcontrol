@@ -86,7 +86,6 @@ Item {
 
         onAcceptedForLoad: {
             KmlPolygonLoader.loadFromFile(file.toString().replace("file://", ""))
-            //KmlPolygonLoader.applyToGeoFence(_geoFenceController)
             close()
         }
     }

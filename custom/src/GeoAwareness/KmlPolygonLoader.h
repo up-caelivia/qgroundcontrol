@@ -17,7 +17,6 @@ public:
     Q_INVOKABLE bool loadFromFile(const QString& filePath);
     Q_INVOKABLE bool loadFromJsonFile(const QString& filePath);
     QList<QObject*> polygons() const;
-    Q_INVOKABLE void applyToGeoFence(QObject* controller);
     Q_INVOKABLE void clearPolygons();
     Q_INVOKABLE void removePolygon(QObject* polygon);
 

@@ -150,7 +150,19 @@ void KmlPolygonLoader::parsePlacemark(const QDomElement& placemark) {
         }
     }
 
-    _polygonObjects.append(new KmlPolygonObject(name, allowedAltitude, coordinates, this));
+    _polygonObjects.append(new KmlPolygonObject(
+        name,
+        allowedAltitude,
+        coordinates,
+        Qt::red,         // color
+        0,               // hmin
+        100,             // hmax
+        "",              // id
+        "",              // description
+        QDateTime(),     // activationDate
+        QDateTime(),     // deactivationDate
+        this             // parent
+    ));    
 }
 
 
