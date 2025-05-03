@@ -9,7 +9,6 @@
 class KmlPolygonObject : public QObject {
     Q_OBJECT
     Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
-    Q_PROPERTY(int allowedAltitude READ allowedAltitude CONSTANT)
     Q_PROPERTY(QVariantList coordinates READ coordinates NOTIFY coordinatesChanged)
     Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY colorChanged)
     Q_PROPERTY(int hmin READ hmin WRITE setHmin NOTIFY hminChanged)
@@ -21,11 +20,10 @@ class KmlPolygonObject : public QObject {
 
 public:
     KmlPolygonObject(const QString& name,
-                     int allowedAltitude,
                      const QList<QGeoCoordinate>& coords,
                      const QColor& color = Qt::red,
                      int hmin = 0,
-                     int hmax = 100,
+                     int hmax = 9999,
                      const QString& id = "",
                      const QString& description = "",
                      const QDateTime& activationDate = QDateTime(),
@@ -34,8 +32,6 @@ public:
 
     QString name() const { return _name; }
     void setName(const QString& name);
-
-    int allowedAltitude() const { return _allowedAltitude; }
 
     QVariantList coordinates() const;
 
@@ -73,7 +69,6 @@ signals:
 
 private:
     QString _name;
-    int _allowedAltitude;
     QList<QGeoCoordinate> _coordinates;
 
     QColor _color;

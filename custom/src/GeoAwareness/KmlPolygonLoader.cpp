@@ -78,8 +78,6 @@ bool KmlPolygonLoader::loadFromJsonFile(const QString& filePath) {
             int hmin = static_cast<int>(properties["lowestpoint"].toString().toDouble());
             int hmax = static_cast<int>(properties["highestpoint"].toString().toDouble());
 
-            int allowedAltitude = static_cast<int>(properties["upperLimit"].toDouble());
-
             QDateTime activationDate;  // puoi modificarlo se c'è un campo tipo `validFrom`
             QDateTime deactivationDate; // idem per `validUntil`
 
@@ -114,7 +112,7 @@ bool KmlPolygonLoader::loadFromJsonFile(const QString& filePath) {
             }
 
             _polygonObjects.append(new KmlPolygonObject(
-                name, allowedAltitude, coordinates, color, hmin, hmax, id, description, activationDate, deactivationDate, this
+                name, coordinates, color, hmin, hmax, id, description, activationDate, deactivationDate, this
             ));
         }
     }
@@ -127,7 +125,8 @@ void KmlPolygonLoader::parsePlacemark(const QDomElement& placemark) {
     QString name = placemark.firstChildElement("name").text().trimmed();
     QString id, description;
     QDateTime activationDate, deactivationDate;
-    int allowedAltitude = -1;
+    int hmin = 0;
+    int hmax = 9999;
     QList<QGeoCoordinate> coordinates;
     QList<QList<QGeoCoordinate>> holes;
 
@@ -141,10 +140,11 @@ void KmlPolygonLoader::parsePlacemark(const QDomElement& placemark) {
             QString value = dataElem.text().trimmed();
 
             if (key == "ID") id = value;
-            else if (key == "Description") description = value;
-            else if (key == "ActivationDate") activationDate = QDateTime::fromString(value, Qt::ISODate);
-            else if (key == "DeactivationDate") deactivationDate = QDateTime::fromString(value, Qt::ISODate);
-            else if (key == "AllowedAltitude") allowedAltitude = value.toInt();
+            else if (key == "Message_en") description = value;
+            else if (key == "StartDate") activationDate = QDateTime::fromString(value, Qt::ISODate);
+            else if (key == "EndDate") deactivationDate = QDateTime::fromString(value, Qt::ISODate);
+            else if (key == "LowerLimit") hmin = value.toInt();
+            else if (key == "UpperLimit") hmax = value.toInt();
             else if (key == "Name_en") name = value.trimmed();
         }
     }
@@ -187,11 +187,10 @@ void KmlPolygonLoader::parsePlacemark(const QDomElement& placemark) {
     // Create and store the polygon object
     _polygonObjects.append(new KmlPolygonObject(
         name,
-        allowedAltitude,
         coordinates,
         Qt::red,         // color
-        0,               // hmin
-        100,             // hmax
+        hmin,               // hmin
+        hmax,             // hmax
         id,
         description,
         activationDate,

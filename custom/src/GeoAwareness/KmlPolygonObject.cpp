@@ -2,7 +2,6 @@
 #include <QVariant>
 
 KmlPolygonObject::KmlPolygonObject(const QString& name,
-                                   int allowedAltitude,
                                    const QList<QGeoCoordinate>& coords,
                                    const QColor& color,
                                    int hmin,
@@ -14,7 +13,6 @@ KmlPolygonObject::KmlPolygonObject(const QString& name,
                                    QObject* parent)
     : QObject(parent)
     , _name(name)
-    , _allowedAltitude(allowedAltitude)
     , _coordinates(coords)
     , _color(color)
     , _hmin(hmin)
