@@ -24,6 +24,7 @@ import QGroundControl.ScreenTools   1.0
 import QGroundControl.Vehicle       1.0
 
 import QGroundControl.KML 1.0
+import Custom.GeoAwareness 1.0
 
 FlightMap {
     id:                         _root
@@ -88,19 +89,11 @@ FlightMap {
     onCenterChanged: {
         QGroundControl.flightMapPosition = center
     }
-    /*
-    MapItemView {
-        model: KmlPolygonLoader.polygons
-
-        delegate: MapPolygon {
-            path: modelData.coordinates
-            color: "lightblue"
-            border.color: "blue"
-            border.width: 2
-            opacity: 1
-        }
-    }
-    */
+    
+    
+    KmlPolygonOverlay {
+        polygonModel: KmlPolygonLoader.polygons
+    }   
 
     // We track whether the user has panned or not to correctly handle automatic map positioning
     Connections {

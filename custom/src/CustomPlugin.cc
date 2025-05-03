@@ -249,6 +249,7 @@ QQmlApplicationEngine* CustomPlugin::createQmlApplicationEngine(QObject* parent)
     QQmlApplicationEngine* qmlEngine = QGCCorePlugin::createQmlApplicationEngine(parent);
     qmlEngine->addImportPath("qrc:/Custom/Widgets");
     qmlEngine->addImportPath("qrc:/Custom/Constants");
+    qmlEngine->addImportPath("qrc:/Custom/GeoAwareness");
 
     qmlRegisterSingletonType<Constants>("Constants", 1, 0, "Constants", Constants::constants_singleton_provider);
 

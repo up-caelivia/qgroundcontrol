@@ -124,17 +124,34 @@ bool KmlPolygonLoader::loadFromJsonFile(const QString& filePath) {
 }
 
 void KmlPolygonLoader::parsePlacemark(const QDomElement& placemark) {
-    QString name = placemark.attribute("id");
+    QString name = placemark.firstChildElement("name").text().trimmed();
+    QString id, description;
+    QDateTime activationDate, deactivationDate;
     int allowedAltitude = -1;
     QList<QGeoCoordinate> coordinates;
+    QList<QList<QGeoCoordinate>> holes;
+
+    // Parse <ExtendedData>
+    QDomElement extData = placemark.firstChildElement("ExtendedData");
+    if (!extData.isNull()) {
+        QDomNodeList simpleDataList = extData.elementsByTagName("SimpleData");
+        for (int i = 0; i < simpleDataList.count(); ++i) {
+            QDomElement dataElem = simpleDataList.at(i).toElement();
+            QString key = dataElem.attribute("name");
+            QString value = dataElem.text().trimmed();
+
+            if (key == "ID") id = value;
+            else if (key == "Description") description = value;
+            else if (key == "ActivationDate") activationDate = QDateTime::fromString(value, Qt::ISODate);
+            else if (key == "DeactivationDate") deactivationDate = QDateTime::fromString(value, Qt::ISODate);
+            else if (key == "AllowedAltitude") allowedAltitude = value.toInt();
+            else if (key == "Name_en") name = value.trimmed();
+        }
+    }
 
     QDomElement polygon = placemark.firstChildElement("Polygon");
     if (!polygon.isNull()) {
-        QDomElement extrudeElement = polygon.firstChildElement("extrude");
-        if (!extrudeElement.isNull()) {
-            allowedAltitude = extrudeElement.text().toInt();
-        }
-
+        // Outer boundary
         QDomElement outerBoundary = polygon.firstChildElement("outerBoundaryIs");
         QDomElement linearRing = outerBoundary.firstChildElement("LinearRing");
         QDomElement coordElement = linearRing.firstChildElement("coordinates");
@@ -148,8 +165,26 @@ void KmlPolygonLoader::parsePlacemark(const QDomElement& placemark) {
                 coordinates.append(QGeoCoordinate(latlon[1].toDouble(), latlon[0].toDouble()));
             }
         }
+
+        // Inner boundaries (holes)
+        QDomNodeList innerBoundaries = polygon.elementsByTagName("innerBoundaryIs");
+        for (int i = 0; i < innerBoundaries.count(); ++i) {
+            QDomElement ring = innerBoundaries.at(i).firstChildElement("LinearRing");
+            QDomElement coordsElem = ring.firstChildElement("coordinates");
+            QStringList holeCoords = coordsElem.text().trimmed().split(' ', Qt::SkipEmptyParts);
+
+            QList<QGeoCoordinate> hole;
+            for (const QString& pair : holeCoords) {
+                QStringList latlon = pair.split(',', Qt::SkipEmptyParts);
+                if (latlon.size() >= 2) {
+                    hole.append(QGeoCoordinate(latlon[1].toDouble(), latlon[0].toDouble()));
+                }
+            }
+            holes.append(hole);
+        }
     }
 
+    // Create and store the polygon object
     _polygonObjects.append(new KmlPolygonObject(
         name,
         allowedAltitude,
@@ -157,13 +192,15 @@ void KmlPolygonLoader::parsePlacemark(const QDomElement& placemark) {
         Qt::red,         // color
         0,               // hmin
         100,             // hmax
-        "",              // id
-        "",              // description
-        QDateTime(),     // activationDate
-        QDateTime(),     // deactivationDate
-        this             // parent
-    ));    
+        id,
+        description,
+        activationDate,
+        deactivationDate,
+        this
+        // Add holes as needed in your KmlPolygonObject class
+    ));
 }
+
 
 
 QList<QObject*> KmlPolygonLoader::polygons() const {

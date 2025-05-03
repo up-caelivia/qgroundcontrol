@@ -26,6 +26,7 @@ import QGroundControl.Controllers       1.0
 import QGroundControl.ShapeFileHelper   1.0
 
 import QGroundControl.KML 1.0
+import Custom.GeoAwareness 1.0
 
 
 Item {
@@ -444,18 +445,9 @@ Item {
                 }
             }
     
-            MapItemView {
-                model: KmlPolygonLoader.polygons
-
-                delegate: MapPolygon {
-                    path: modelData.coordinates
-                    color: "lightblue"
-                    border.color: "red"
-                    border.width: 2
-                    opacity: 1
-                    z: 100
-                }
-            }
+            KmlPolygonOverlay {
+                polygonModel: KmlPolygonLoader.polygons
+            }               
 
             // UI for splitting the current segment
             MapQuickItem {
