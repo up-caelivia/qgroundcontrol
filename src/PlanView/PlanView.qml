@@ -27,6 +27,7 @@ import QGroundControl.ShapeFileHelper   1.0
 
 import QGroundControl.KML 1.0
 import Custom.GeoAwareness 1.0
+import Custom.Widgets 1.0
 
 
 Item {
@@ -38,7 +39,7 @@ Item {
     readonly property real  _margin:                    ScreenTools.defaultFontPixelHeight * 0.5
     readonly property real  _toolsMargin:               ScreenTools.defaultFontPixelWidth * 0.75
     readonly property real  _radius:                    ScreenTools.defaultFontPixelWidth  * 0.5
-    readonly property real  _rightPanelWidth:           Math.min(parent.width / 3, ScreenTools.defaultFontPixelWidth * 30)
+    readonly property real  _rightPanelWidth:           Math.min(parent.width / 3, ScreenTools.defaultFontPixelWidth * 50)
     readonly property var   _defaultVehicleCoordinate:  QtPositioning.coordinate(37.803784, -122.462276)
     readonly property bool  _waypointsOnlyMode:         QGroundControl.corePlugin.options.missionWaypointsOnly
 
@@ -56,11 +57,12 @@ Item {
     property var    _planViewSettings:                  QGroundControl.settingsManager.planViewSettings
     property bool   _promptForPlanUsageShowing:         false
 
-    readonly property var       _layers:                [_layerMission, _layerGeoFence, _layerRallyPoints]
+    readonly property var       _layers:                [_layerMission, _layerGeoFence, _layerRallyPoints, _layerAwareness]
 
     readonly property int       _layerMission:              1
     readonly property int       _layerGeoFence:             2
     readonly property int       _layerRallyPoints:          3
+    readonly property int       _layerAwareness:            4
     readonly property string    _armedVehicleUploadPrompt:  qsTr("Vehicle is currently armed. Do you want to upload the mission to the vehicle?")
 
     function mapCenter() {
@@ -314,6 +316,29 @@ Item {
             }
         }
     }
+
+    function fitPolygonToMap(coords) {
+        if (!coords || coords.length === 0)
+            return
+
+        var minLat = coords[0].latitude
+        var maxLat = coords[0].latitude
+        var minLon = coords[0].longitude
+        var maxLon = coords[0].longitude
+
+        for (var i = 1; i < coords.length; i++) {
+            minLat = Math.min(minLat, coords[i].latitude)
+            maxLat = Math.max(maxLat, coords[i].latitude)
+            minLon = Math.min(minLon, coords[i].longitude)
+            maxLon = Math.max(maxLon, coords[i].longitude)
+        }
+
+        var centerLat = (minLat + maxLat) / 2
+        var centerLon = (minLon + maxLon) / 2
+
+        editorMap.center = QtPositioning.coordinate(centerLat, centerLon)
+    }
+
 
     QGCFileDialog {
         id:             fileDialog
@@ -675,16 +700,33 @@ Item {
                     width:      parent.width
                     visible:    QGroundControl.corePlugin.options.enablePlanViewSelector
                     Component.onCompleted: currentIndex = 0
+
+                    property real totalImplicitWidth: missionBtn.implicitWidth + fenceBtn.implicitWidth + rallyBtn.implicitWidth + awarenessBtn.implicitWidth
+                    property real availableExtra: width - totalImplicitWidth
+                    property real extraPerTab: Math.max(0, (width - totalImplicitWidth) / 4)                    
+
                     QGCTabButton {
+                        id: missionBtn
                         text:       qsTr("Mission")
+                        width: implicitWidth + layerTabBar.extraWidthPerTab
                     }
                     QGCTabButton {
+                        id: fenceBtn
                         text:       qsTr("Fence")
                         enabled:    _geoFenceController.supported
+                        width: implicitWidth + layerTabBar.extraWidthPerTab
                     }
                     QGCTabButton {
+                        id: rallyBtn
                         text:       qsTr("Rally")
                         enabled:    _rallyPointController.supported
+                        width: implicitWidth + layerTabBar.extraWidthPerTab
+                    }
+                    QGCTabButton {
+                        id: awarenessBtn
+                        text:       qsTr("Awareness")
+                        enabled:    true
+                        width: implicitWidth + layerTabBar.extraWidthPerTab
                     }
                 }
             }
@@ -760,6 +802,26 @@ Item {
                 visible:                _editingLayer == _layerRallyPoints && _rallyPointController.points.count
                 rallyPoint:             _rallyPointController.currentRallyPoint
                 controller:             _rallyPointController
+            }
+
+            // Awareness Info Tab
+            AwarenessInfoHeader {
+                id:                     awarenessInfoHeader
+                anchors.top:            rightControls.bottom
+                anchors.topMargin:      ScreenTools.defaultFontPixelHeight * 0.25
+                anchors.left:           parent.left
+                anchors.right:          parent.right
+                visible:                _editingLayer == _layerAwareness
+            }
+            // GeoFence Editor
+            AwarenessInfoViewer {
+                anchors.top:            rightControls.bottom
+                anchors.topMargin:      ScreenTools.defaultFontPixelHeight * 0.25
+                anchors.bottom:         parent.bottom
+                anchors.left:           parent.left
+                anchors.right:          parent.right
+                polygonGeoAwareness:    KmlPolygonLoader.selectedPolygon
+                visible:                _editingLayer == _layerAwareness && KmlPolygonLoader.selectedPolygon
             }
         }
 
@@ -1161,6 +1223,22 @@ Item {
                         id: mouseArea
                         anchors.fill: parent
                         hoverEnabled: true
+
+                        property var lastClickTime: 0
+                        property var doubleClickThreshold: 250 // ms
+
+                        onClicked: {
+                            var currentTime = Date.now()
+                            if (currentTime - lastClickTime < doubleClickThreshold) {
+                                //console.log("Double click on", modelData.name)
+                                fitPolygonToMap(modelData.coordinates)
+                                //editorMap.center = QtPositioning.coordinate(modelData.coordinates[0].latitude, modelData.coordinates[0].longitude)
+                            } else {
+                                //console.log("single click on", modelData.name)
+                                KmlPolygonLoader.selectPolygon(modelData) // o altra azione
+                            }
+                            lastClickTime = currentTime
+                        }
                     }
 
                     RowLayout {

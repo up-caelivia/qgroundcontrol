@@ -1,5 +1,6 @@
 import QtQuick 2.15
 import QtLocation 5.15
+import QGroundControl.KML 1.0
 
 MapItemView {
     id: polygonOverlay
@@ -21,13 +22,7 @@ MapItemView {
             anchors.fill: parent
             hoverEnabled: true
             onClicked: {
-                console.log("Name ", modelData.name)
-                console.log("Polygon drawn with", modelData.coordinates.length, "points")
-                console.log("Description ", modelData.description)
-                console.log("hmin ", modelData.hmin)
-                console.log("hmax ", modelData.hmax)
-                console.log("activationDate ", modelData.activationDate)
-                console.log("deactivationDate ", modelData.deactivationDate)
+                KmlPolygonLoader.selectPolygon(modelData)
             }
         }
     }

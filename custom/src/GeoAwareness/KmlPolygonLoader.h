@@ -10,6 +10,7 @@ class KmlPolygonObject;
 class KmlPolygonLoader : public QObject {
     Q_OBJECT
     Q_PROPERTY(QList<QObject*> polygons READ polygons NOTIFY polygonsChanged)
+    Q_PROPERTY(QObject* selectedPolygon READ selectedPolygon NOTIFY selectedPolygonChanged)
 
 public:
     static KmlPolygonLoader* instance();
@@ -19,11 +20,15 @@ public:
     QList<QObject*> polygons() const;
     Q_INVOKABLE void clearPolygons();
     Q_INVOKABLE void removePolygon(QObject* polygon);
+    Q_INVOKABLE void selectPolygon(QObject* polygon);
+    QObject* selectedPolygon() const;
 
 signals:
     void polygonsChanged();
+    void selectedPolygonChanged();
 
 private:
     QList<QObject*> _polygonObjects;
+    QObject* _selectedPolygon = nullptr;
     void parsePlacemark(const QDomElement& placemark);
 };

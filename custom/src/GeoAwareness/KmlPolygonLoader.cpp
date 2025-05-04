@@ -123,7 +123,7 @@ bool KmlPolygonLoader::loadFromJsonFile(const QString& filePath) {
 
 void KmlPolygonLoader::parsePlacemark(const QDomElement& placemark) {
     QString name = placemark.firstChildElement("name").text().trimmed();
-    QString id, description;
+    QString id, description, message="-", restriction, reason="-", service="-", authority="-", email, contact="-";
     QDateTime activationDate, deactivationDate;
     int hmin = 0;
     int hmax = 9999;
@@ -139,14 +139,21 @@ void KmlPolygonLoader::parsePlacemark(const QDomElement& placemark) {
             QString key = dataElem.attribute("name");
             QString value = dataElem.text().trimmed();
 
-            if (key == "ID") id = value;
-            else if (key == "Message_en") description = value;
+            if (key == "Identifier") id = value;
+            else if (key == "Message_en") message = value;
+            else if (key == "Reason") reason = value;
+            else if (key == "Restri_en") restriction = value;
+            else if (key == "Contact") contact = value;
+            else if (key == "Email")  email = value;
+            else if (key == "Service_en") service = value;
+            else if (key == "Authori_en") authority = value;
             else if (key == "StartDate") activationDate = QDateTime::fromString(value, Qt::ISODate);
             else if (key == "EndDate") deactivationDate = QDateTime::fromString(value, Qt::ISODate);
             else if (key == "LowerLimit") hmin = value.toInt();
             else if (key == "UpperLimit") hmax = value.toInt();
             else if (key == "Name_en") name = value.trimmed();
         }
+        description = message + "\n" + restriction + "\n\nREASON:\n" + reason + "\n\nSERVICE:\n" + service + "\n\nAUTHORITY:\n" + authority + "\n\nCONTACT:\n" + contact + "\n" + email;
     }
 
     QDomElement polygon = placemark.firstChildElement("Polygon");
@@ -209,13 +216,31 @@ QList<QObject*> KmlPolygonLoader::polygons() const {
 void KmlPolygonLoader::clearPolygons() {
     qDeleteAll(_polygonObjects);
     _polygonObjects.clear();
+    _selectedPolygon = nullptr;
     emit polygonsChanged();
+    emit selectedPolygonChanged(); 
 }
 
 void KmlPolygonLoader::removePolygon(QObject* polygon) {
     int index = _polygonObjects.indexOf(polygon);
     if (index >= 0) {
         _polygonObjects.removeAt(index);
-        emit polygonsChanged(); // se è una Q_PROPERTY
+        emit polygonsChanged(); 
+        if (_selectedPolygon == polygon) {
+            _selectedPolygon = nullptr;
+            emit selectedPolygonChanged(); 
+        }
     }
+}
+
+void KmlPolygonLoader::selectPolygon(QObject* polygon) {
+    if (_selectedPolygon != polygon) {
+        _selectedPolygon = polygon;
+        //qDebug() << "Polygon selected: " << polygon->name;
+        emit selectedPolygonChanged(); 
+    }
+}
+
+QObject* KmlPolygonLoader::selectedPolygon() const {
+    return _selectedPolygon;
 }

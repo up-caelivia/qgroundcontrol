@@ -48,7 +48,9 @@
         <file alias="Custom/Widgets/CustomRadarWidget.qml">res/Custom/Widgets/CustomRadarWidget.qml</file>
         <file alias="Custom/Widgets/qmldir">res/Custom/Widgets/qmldir</file>
         <file alias="CustomNTRIP.qml">res/Custom/Widgets/CustomNTRIP.qml</file>
-        <file alias="AboutUP.qml">res/Custom/Widgets/AboutUP.qml</file>
+        <file alias="AboutUP.qml">res/Custom/Widgets/AboutUP.qml</file> 
+		<file alias="Custom/Widgets/AwarenessInfoHeader.qml">res/Custom/Widgets/AwarenessInfoHeader.qml</file>
+		<file alias="Custom/Widgets/AwarenessInfoViewer.qml">res/Custom/Widgets/AwarenessInfoViewer.qml</file>
     </qresource>
     <qresource prefix="/Custom/Constants">
         <file alias="Custom/Constants/Constants.qml">res/Custom/Constants/Constants.qml</file>
@@ -87,7 +89,7 @@
 		<file alias="QGroundControl/Controls/QGCComboBox.qml">src/QmlControls/QGCComboBoxUP.qml</file>
 		<file alias="QGroundControl/FactControls/FactTextField.qml">src/FactSystem/FactControls/FactTextFieldUP.qml</file>
         <file alias="QGroundControl/Controls/ParameterEditor.qml">src/QmlControls/ParameterEditorUP.qml</file>
-		<file alias="QGroundControl/FactControls/FactComboBox.qml">src/FactSystem/FactControls/FactComboBoxUP.qml</file>
+		<file alias="QGroundControl/FactControls/FactComboBox.qml">src/FactSystem/FactControls/FactComboBoxUP.qml</file>     
     </qresource>
     <qresource prefix="/toolbar">
         <file alias="GPSIndicator.qml">src/ui/toolbar/GPSIndicatorUP.qml</file>
