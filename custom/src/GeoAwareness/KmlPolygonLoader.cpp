@@ -127,6 +127,7 @@ void KmlPolygonLoader::parsePlacemark(const QDomElement& placemark) {
     QDateTime activationDate, deactivationDate;
     int hmin = 0;
     int hmax = 9999;
+    QColor color = Qt::red;
     QList<QGeoCoordinate> coordinates;
     QList<QList<QGeoCoordinate>> holes;
 
@@ -191,13 +192,21 @@ void KmlPolygonLoader::parsePlacemark(const QDomElement& placemark) {
         }
     }
 
+    if (hmin >=120) {
+        color = Qt::green;
+    } else if (hmin >=120) {
+        color = QColor("orange");
+    } else {
+        color = Qt::red;
+    }
+
     // Create and store the polygon object
     _polygonObjects.append(new KmlPolygonObject(
         name,
         coordinates,
-        Qt::red,         // color
-        hmin,               // hmin
-        hmax,             // hmax
+        color,  
+        hmin,
+        hmax,
         id,
         description,
         activationDate,

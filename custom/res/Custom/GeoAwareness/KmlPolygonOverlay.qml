@@ -7,15 +7,16 @@ MapItemView {
 
     // Il modello da usare (può essere esterno o di default)
     property var polygonModel: []
+    property var showBorder: true
 
     model: polygonModel
 
     delegate: MapPolygon {
         path: modelData.coordinates
-        color: "lightblue"
-        border.color: "red"
+        color: modelData.color
+        border.color: showBorder ? modelData.color : modelData.transparent
         border.width: 2
-        opacity: 1
+        opacity: 0.4
         z: 100
 
         MouseArea {
