@@ -7,6 +7,11 @@
 #include "QGCMapPolygon.h"
 #include "GeoAwarenessFencePolygon.h"
 
+#include "Vehicle.h"
+#include "MultiVehicleManager.h"
+
+#include "AudioOutput.h"
+
 #include <QFile>
 #include <QDomDocument>
 #include <QDebug>
@@ -460,4 +465,31 @@ void KmlPolygonLoader::selectPolygon(QObject* polygon) {
 
 QObject* KmlPolygonLoader::selectedPolygon() const {
     return _selectedPolygon;
+}
+
+bool KmlPolygonLoader::checkDronePosition(){
+    Vehicle* vehicle = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle();
+    if (!vehicle || !vehicle->coordinate().isValid()) {
+        return false;
+    }
+
+    QGeoCoordinate dronePos = vehicle->coordinate();
+
+    for (QObject* obj : _polygonObjects) {
+        auto* polygon = qobject_cast<KmlPolygonObject*>(obj);
+        if (polygon && polygon->contains(dronePos)) {
+            if (dronePos.altitude() > polygon->hmin()) {                
+                if (_selectedPolygon != polygon) {
+                    _selectedPolygon = polygon;
+                    QString msg = QString( "drone violated the geo-awareness zone");
+                    qDebug() << msg;
+                    qgcApp()->toolbox()->audioOutput()->say(msg);
+                    return true;
+                }
+                return false;
+            }
+        }
+    }
+    _selectedPolygon = nullptr;
+    return false;
 }

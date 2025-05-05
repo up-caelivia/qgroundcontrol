@@ -1,5 +1,6 @@
 #include "KmlPolygonObject.h"
 #include <QVariant>
+#include <QPolygonF>
 
 KmlPolygonObject::KmlPolygonObject(const QString& name,
                                    const QList<QGeoCoordinate>& coords,
@@ -86,4 +87,13 @@ void KmlPolygonObject::setDeactivationDate(const QDateTime& date) {
         _deactivationDate = date;
         emit deactivationDateChanged();
     }
+}
+
+bool KmlPolygonObject::contains(const QGeoCoordinate& coordinate) const {
+    QPolygonF polygon;
+    for (const auto& coord : _coordinates) {
+        polygon << QPointF(coord.longitude(), coord.latitude());
+    }
+    QPointF point(coordinate.longitude(), coordinate.latitude());
+    return polygon.containsPoint(point, Qt::OddEvenFill);
 }

@@ -56,6 +56,8 @@ public:
     QDateTime deactivationDate() const { return _deactivationDate; }
     void setDeactivationDate(const QDateTime& date);
 
+    bool contains(const QGeoCoordinate& coordinate) const;
+
 signals:
     void nameChanged();
     void coordinatesChanged();

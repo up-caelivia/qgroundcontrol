@@ -21,6 +21,7 @@ public:
     Q_INVOKABLE void removePolygon(QObject* polygon);
     Q_INVOKABLE void selectPolygon(QObject* polygon);
     QObject* selectedPolygon() const;
+    Q_INVOKABLE bool checkDronePosition();
 
 signals:
     void polygonsChanged();
