@@ -83,9 +83,9 @@ Item {
     QGCFileDialog {
         id:             kmlFileDialog
         folder:         QGroundControl.settingsManager.appSettings.missionSavePath
-        title:          qsTr("Select KML File")
+        title:          qsTr("Select KML/JSON File")
         selectExisting: true
-        nameFilters:    ShapeFileHelper.fileDialogKMLFilters
+        nameFilters:    [ "KML/JSON Files (*.kml *.json)" ]
 
         onAcceptedForLoad: {
             KmlPolygonLoader.loadFromFile(file.toString().replace("file://", ""))

@@ -16,7 +16,6 @@ public:
     static KmlPolygonLoader* instance();
     explicit KmlPolygonLoader(QObject* parent = nullptr);
     Q_INVOKABLE bool loadFromFile(const QString& filePath);
-    Q_INVOKABLE bool loadFromJsonFile(const QString& filePath);
     QList<QObject*> polygons() const;
     Q_INVOKABLE void clearPolygons();
     Q_INVOKABLE void removePolygon(QObject* polygon);
@@ -30,5 +29,8 @@ signals:
 private:
     QList<QObject*> _polygonObjects;
     QObject* _selectedPolygon = nullptr;
-    void parsePlacemark(const QDomElement& placemark);
+    void parseSwissCyprusKml(const QDomDocument& doc);
+    bool loadFromKmlFile(const QString& filePath);
+    bool loadFromJsonFile(const QString& filePath);
+    void parseItalyJson(const QJsonObject& root);
 };
