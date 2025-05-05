@@ -14,9 +14,9 @@ MapItemView {
     delegate: MapPolygon {
         path: modelData.coordinates
         color: modelData.color
-        border.color: showBorder ? modelData.color : modelData.transparent
-        border.width: 2
-        opacity: 0.4
+        border.color: modelData.color
+        border.width: showBorder ? 2 : 0
+        opacity: showBorder ? 0.4 : 0.2
         z: 100
 
         MouseArea {

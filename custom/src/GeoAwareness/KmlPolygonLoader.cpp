@@ -28,8 +28,11 @@ bool KmlPolygonLoader::loadFromFile(const QString& filePath) {
         return loadFromKmlFile(filePath);
     } else if (filePath.endsWith(".json", Qt::CaseInsensitive)) {
         return loadFromJsonFile(filePath);
+    } else if (filePath.endsWith(".geojson", Qt::CaseInsensitive)) {
+        return loadFromJsonFile(filePath);
     } else {
         qWarning() << "Unsupported file format:" << filePath;
+        qgcApp()->showAppMessage(QString("Unsupported file format: %1").arg(filePath));
         return false;
     }
 }
@@ -38,12 +41,14 @@ bool KmlPolygonLoader::loadFromKmlFile(const QString& filePath) {
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qWarning() << "Cannot open KML file:" << filePath;
+        qgcApp()->showAppMessage(QString("Cannot open KML file: %1").arg(filePath));
         return false;
     }
 
     QDomDocument doc;
     if (!doc.setContent(&file)) {
         qWarning() << "Failed to parse KML.";
+        qgcApp()->showAppMessage(QString("Failed to parse KML"));
         return false;
     }
     parseSwissCyprusKml(doc);
@@ -56,26 +61,47 @@ bool KmlPolygonLoader::loadFromJsonFile(const QString& filePath) {
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly)) {
         qWarning() << "Cannot open JSON file:" << filePath;
+        qgcApp()->showAppMessage(QString("Cannot open JSON file: %1").arg(filePath));
         return false;
     }
 
     QByteArray jsonData = file.readAll();
     QJsonDocument doc = QJsonDocument::fromJson(jsonData);
 
-    if (!doc.isObject()) {
+    if (doc.isObject()) {
+        const QJsonObject root = doc.object();
+
+        QString title = root.value("title").toString("");
+        if (title.contains("ITA ZoneVersion") || title.contains("Finnish UASZoneVersion")) {
+            parseItalyFinnishGermanJson(root);
+        } else if (root.contains("0")) {
+            parseBelgiumJson(root);
+        } else {
+            qWarning() << "Unknow JSON file.";
+            qgcApp()->showAppMessage(QString("Unknow JSON file."));
+        }
+    } else if (doc.isArray()) {
+        QJsonArray arr = doc.array();
+        if (!arr.isEmpty()) {
+            QJsonObject first = arr.first().toObject();
+            QString country = first.value("country").toString();
+            if (country == "DEU") {
+                QJsonObject wrapper;
+                wrapper.insert("features", arr);
+                parseItalyFinnishGermanJson(wrapper);
+            } else {
+                qWarning() << "Unsupported country:" << country;
+                qgcApp()->showAppMessage(QString("Unsupported country: %1").arg(country));
+            }
+        } else {
+            qWarning() << "Unknow JSON file.";
+            qgcApp()->showAppMessage(QString("Unknow JSON file."));
+        }
+    } else {        
         qWarning() << "Invalid JSON structure.";
+        qgcApp()->showAppMessage(QString("Invalid JSON structure."));
         return false;
     }
-
-    const QJsonObject root = doc.object();
-
-    QString title = root.value("title").toString("");
-    if (title.contains("ITA ZoneVersion") || title.contains("Finnish UASZoneVersion")) {
-        parseItalyFinnishJson(root);
-    } else if (root.contains("0")) {
-        parseBelgiumJson(root);
-    } else
-        qWarning() << "Unknow JSON file.";
 
     emit polygonsChanged();
     return true;
@@ -170,6 +196,12 @@ void KmlPolygonLoader::parseSwissCyprusKml(const QDomDocument& doc) {
             color = Qt::red;
         }
 
+        if (!activationDate.isNull() && !deactivationDate.isNull()) {
+            if (activationDate > QDateTime::currentDateTime() || deactivationDate < QDateTime::currentDateTime()) {
+                color = QColor("blue");
+            } 
+        }
+
         // Create and store the polygon object
         _polygonObjects.append(new KmlPolygonObject(
             name,
@@ -187,7 +219,7 @@ void KmlPolygonLoader::parseSwissCyprusKml(const QDomDocument& doc) {
     }
 }
 
-void KmlPolygonLoader::parseItalyFinnishJson(const QJsonObject& root) {
+void KmlPolygonLoader::parseItalyFinnishGermanJson(const QJsonObject& root) {
     QJsonArray features = root["features"].toArray();
     for (const QJsonValue& val : features) {
         QJsonObject feature = val.toObject();
@@ -260,6 +292,13 @@ void KmlPolygonLoader::parseItalyFinnishJson(const QJsonObject& root) {
         } else {
             color = Qt::red;
         }
+
+        if (!activationDate.isNull() && !deactivationDate.isNull()) {
+            if (activationDate > QDateTime::currentDateTime() || deactivationDate < QDateTime::currentDateTime()) {
+                color = QColor("blue");
+            } 
+        }
+
         QString description = message + "\n" + restriction + "\n\nREASON:\n" + reason + "\n\nSERVICE:\n" + service + "\n\nAUTHORITY:\n" + authority + "\n\nCONTACT:\n" + contact + "\n" + email;
 
         // Create and store the polygon object
@@ -360,6 +399,13 @@ void KmlPolygonLoader::parseBelgiumJson(const QJsonObject& root) {
         } else {
             color = Qt::red;
         }
+        
+        if (!activationDate.isNull() && !deactivationDate.isNull()) {
+            if (activationDate > QDateTime::currentDateTime() || deactivationDate < QDateTime::currentDateTime()) {
+                color = QColor("blue");
+            } 
+        }
+
         QString description = message + "\n\nREASON:\n" + reason + "\n\nCONTACT:\n" + email;
 
         // Create and store the polygon object

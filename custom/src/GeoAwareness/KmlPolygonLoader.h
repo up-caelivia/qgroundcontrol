@@ -32,8 +32,8 @@ private:
 
     bool loadFromKmlFile(const QString& filePath);
     void parseSwissCyprusKml(const QDomDocument& doc);
-    
+
     bool loadFromJsonFile(const QString& filePath);
-    void parseItalyFinnishJson(const QJsonObject& root);
+    void parseItalyFinnishGermanJson(const QJsonObject& root);
     void parseBelgiumJson(const QJsonObject& root);
 };

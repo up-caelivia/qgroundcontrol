@@ -93,6 +93,7 @@ FlightMap {
     
     KmlPolygonOverlay {
         polygonModel: KmlPolygonLoader.polygons
+        showBorder: false
     }   
 
     // We track whether the user has panned or not to correctly handle automatic map positioning

@@ -85,7 +85,7 @@ Item {
         folder:         QGroundControl.settingsManager.appSettings.missionSavePath
         title:          qsTr("Select KML/JSON File")
         selectExisting: true
-        nameFilters:    [ "KML/JSON Files (*.kml *.json)" ]
+        nameFilters:    [ "KML/JSON Files (*.kml *.json *.geojson)" ]
 
         onAcceptedForLoad: {
             KmlPolygonLoader.loadFromFile(file.toString().replace("file://", ""))
