@@ -1,0 +1,161 @@
+# The 64 bit version of these actions should be kept in sync
+name: Android 64-bit Release
+
+on:
+  push:
+    tags:
+      - 'v*-UP'
+    paths-ignore:
+      - 'docs/**'
+      - '.github/workflows/**'
+      
+defaults:
+  run:
+    shell: bash
+
+env:
+  SOURCE_DIR:   ${{ github.workspace }}
+  QT_VERSION:   5.15.2
+  BUILD_TYPE:   ${{ fromJSON('["DailyBuild", "StableBuild"]')[ github.ref_type == 'tag' || contains(github.ref, 'Stable_' ) ] }}
+
+jobs:
+  build:
+    runs-on:  ubuntu-22.04
+
+    strategy:
+      matrix:
+       include:
+         - architecture: 64bits
+           eabi: arm64-v8a
+           ARTIFACT: QGroundControlUP64.apk
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install Python headers
+        run: |
+          sudo apt-get update && sudo apt-get install -y python3-dev build-essential rsync libfuse2 openjdk-11-jdk openjdk-11-jdk-headless openjdk-11-jre-headless locales
+
+      - name: Get all tags for correct version determination
+        working-directory:  ${{ github.workspace }}
+        run: |
+          git fetch --all --tags -f --depth 1
+
+      - name: Install Android SDK platforms
+        env:
+          JAVA_HOME: /usr/lib/jvm/java-11-openjdk-amd64
+          ANDROID_SDK_ROOT: /opt/android/sdk
+          ANDROID_HOME: /opt/android/sdk
+        run: |
+          set -x
+          export PATH=/usr/lib/jvm/java-11-openjdk-amd64/bin:$PATH
+          export LANG=en_US.UTF-8
+          export LC_ALL=en_US.UTF-8
+      
+          mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools
+          curl -Lo /tmp/cmdline-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-7302050_latest.zip
+          unzip -q /tmp/cmdline-tools.zip -d ${ANDROID_SDK_ROOT}/cmdline-tools
+          mv ${ANDROID_SDK_ROOT}/cmdline-tools/cmdline-tools ${ANDROID_SDK_ROOT}/cmdline-tools/latest
+      
+          export PATH=${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:$PATH
+      
+          yes | sdkmanager --sdk_root=${ANDROID_SDK_ROOT} --licenses || true
+          sdkmanager --sdk_root=${ANDROID_SDK_ROOT} "platforms;android-29" "build-tools;29.0.2" "platform-tools"
+
+      - name: Check installed Android SDKs (before)
+        run: |
+          ls ${ANDROID_SDK_ROOT}/platforms
+        
+      - name: Remove unwanted Android SDKs
+        run: |
+          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-33-ext4"
+          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-33-ext5"
+          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-34"
+          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-34-ext8"
+          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-34-ext10"
+          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-34-ext11"
+          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-34-ext12"
+          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-35"
+          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-35-ext14"
+          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-35-ext15"
+          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-36"
+        
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version:      ${{ env.QT_VERSION }}
+          host:         linux
+          target:       android
+          dir:          ${{ runner.temp }}
+          modules:      qtcharts
+          setup-python: ${{ !env.ACT }}
+
+      - name: Install Android NDK
+        uses: nttld/setup-ndk@v1
+        id: setup-ndk
+        with:
+          ndk-version: r21d
+          add-to-path: false
+
+      - name: Install ccache
+        run:  sudo apt-get install ccache
+
+      - name: Prepare ccache timestamp
+        id: ccache_cache_timestamp
+        run: echo "name=timestamp::$(date --utc +'%Y-%m-%d-%H\;%M\;%S')" >> $GITHUB_OUTPUT
+
+      - name: ccache cache files
+        uses: actions/cache@v3
+        with:
+          path:         ~/.ccache
+          key:          ${{ runner.os }}-ccache-${{steps.ccache_cache_timestamp.outputs.timestamp}}
+          restore-keys: ${{ runner.os }}-ccache-
+
+      - name: Setup ccache
+        run: |
+            mkdir -p ~/.ccache
+            echo "base_dir = ${GITHUB_WORKSPACE}" > ~/.ccache/ccache.conf
+            echo "compression = true" >> ~/.ccache/ccache.conf
+            echo "compression_level = 5" >> ~/.ccache/ccache.conf
+            ccache -s
+            ccache -z
+
+      - name: Create build directory
+        run:  mkdir ${{ runner.temp }}/shadow_build_dir
+
+      - name:               Install gstreamer
+        working-directory:  ${{ github.workspace }}
+        run: |
+            wget --quiet https://gstreamer.freedesktop.org/data/pkg/android/1.18.6/gstreamer-1.0-android-universal-1.18.6.tar.xz
+            mkdir gstreamer-1.0-android-universal-1.18.6
+            tar xf gstreamer-1.0-android-universal-1.18.6.tar.xz -C gstreamer-1.0-android-universal-1.18.6
+
+      - name: Update android manifest
+        if: github.ref_name != 'Stable'
+        run: |
+            ${SOURCE_DIR}/tools/update_android_manifest_package.sh ${{ github.ref_name }}
+
+      - name: Build
+        working-directory: ${{ runner.temp }}/shadow_build_dir
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+          ANDROID_NDK_LATEST_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+          ANDROID_NDK: ${{ steps.setup-ndk.outputs.ndk-path }}
+        run:  |
+            qmake -r ${SOURCE_DIR}/qgroundcontrol.pro -spec android-clang CONFIG+=${BUILD_TYPE} CONFIG+=installer ANDROID_ABIS="${{ matrix.eabi }}"
+            make -j16
+
+      - name: ccache post-run
+        run:  ccache -s
+
+      - name: Save artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: ${{ matrix.ARTIFACT }}
+          path: ${{ runner.temp }}/shadow_build_dir/package/${{ matrix.ARTIFACT }}

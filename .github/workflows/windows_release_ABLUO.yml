@@ -2,18 +2,8 @@ name: Windows Release
 
 on:
   push:
-    branches:
-      - 'master'
-      - 'Stable*'
     tags:
-      - 'v*'
-    paths-ignore:
-      - 'docs/**'
-  pull_request:
-    branches:
-    - '*'
-    paths-ignore:
-      - 'docs/**'
+      - 'v*-ABLUO'
 
 defaults:
   run:
@@ -22,7 +12,7 @@ defaults:
 env:
   SOURCE_DIR:   ${{ github.workspace }}
   QT_VERSION:   5.15.2
-  ARTIFACT:     QGroundControlUP-installer.exe
+  ARTIFACT:     QGroundControlABLUO-installer.exe
   BUILD_TYPE:   ${{ fromJSON('["DailyBuild", "StableBuild"]')[ github.ref_type == 'tag' || contains(github.ref, 'Stable_' ) ] }}
 
 jobs:
@@ -105,6 +95,6 @@ jobs:
       - name: Save PDB artifact
         uses: actions/upload-artifact@master
         with:
-          name: qgroundcontrolUP.pdb
-          path: ${{ runner.temp }}\shadow_build_dir\staging\qgroundcontrolUP.pdb
+          name: qgroundcontrolABLUO.pdb
+          path: ${{ runner.temp }}\shadow_build_dir\staging\qgroundcontrolABLUO.pdb
 
