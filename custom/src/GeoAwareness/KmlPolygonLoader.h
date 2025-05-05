@@ -29,8 +29,11 @@ signals:
 private:
     QList<QObject*> _polygonObjects;
     QObject* _selectedPolygon = nullptr;
-    void parseSwissCyprusKml(const QDomDocument& doc);
+
     bool loadFromKmlFile(const QString& filePath);
+    void parseSwissCyprusKml(const QDomDocument& doc);
+    
     bool loadFromJsonFile(const QString& filePath);
-    void parseItalyJson(const QJsonObject& root);
+    void parseItalyFinnishJson(const QJsonObject& root);
+    void parseBelgiumJson(const QJsonObject& root);
 };
