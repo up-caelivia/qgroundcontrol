@@ -1,16 +1,9 @@
-name: Linux Debug and Test
+name: Linux Release
 
 on:
   push:
-    branches:
-    - 'master'
-    paths-ignore:
-      - 'docs/**'
-  pull_request:
-    branches:
-    - '*'
-    paths-ignore:
-      - 'docs/**'
+    tags:
+      - 'v*-UP'
 
 defaults:
   run:
@@ -19,6 +12,7 @@ defaults:
 env:
   SOURCE_DIR:   ${{ github.workspace }}
   QT_VERSION:   5.15.2
+  ARTIFACT:     QGroundControlUP.AppImage
   BUILD_TYPE:   ${{ fromJSON('["DailyBuild", "StableBuild"]')[ github.ref_type == 'tag' || contains(github.ref, 'Stable_' ) ] }}
 
 jobs:
@@ -31,6 +25,14 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Install Python headers
+        run: sudo apt-get update && sudo apt-get install -y python3-dev build-essential rsync libfuse2
+
+      - name: Get all tags for correct version determination
+        working-directory:  ${{ github.workspace }}
+        run: |
+          git fetch --all --tags -f --depth 1
+
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
         with:
@@ -39,13 +41,11 @@ jobs:
           target:       desktop
           dir:          ${{ runner.temp }}
           modules:      qtcharts
-          setup-python: true
+          setup-python: ${{ !env.ACT }}
+
 
       - name: Install QGC source dependencies
         run:  sudo apt-get install -y libsdl2-dev
-
-      - name: Install source dependencies required to run unit tests in workflow container
-        run:  sudo apt-get install -y libxkbcommon-x11-0
 
       - name: Install gstreamer
         working-directory:  ${{ github.workspace }}
@@ -86,19 +86,18 @@ jobs:
       - name: Build
         working-directory: ${{ runner.temp }}/shadow_build_dir
         run:  |
-              qmake -r ${SOURCE_DIR}/qgroundcontrol.pro CONFIG+=debug CONFIG+=${BUILD_TYPE}
-              make -j2
+              qmake -r ${SOURCE_DIR}/qgroundcontrol.pro CONFIG+=installer CONFIG+=${BUILD_TYPE}
+              make -j16
 
       - name: ccache post-run
         run:  ccache -s
 
-      - name: Setup for unit tests
-        working-directory: ${{ runner.temp }}/shadow_build_dir  
-        run:  |
-              mkdir -p ~/.config/QtProject/
-              cp ${SOURCE_DIR}/test/qtlogging.ini ~/.config/QtProject/
-              export QT_FATAL_WARNINGS=1
+      - name: Create AppImage
+        working-directory:  ${{ runner.temp }}/shadow_build_dir
+        run:                ${SOURCE_DIR}/custom/deploy/create_linux_appimage_UP.sh ${SOURCE_DIR} ./staging ./package;
 
-      - name: Run unit tests
-        working-directory:  ${{ runner.temp }}/shadow_build_dir  
-        run:                xvfb-run -a ./staging/qgroundcontrol-start.sh --unittest
+      - name: Save artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: ${{ env.ARTIFACT }}
+          path: ${{ runner.temp }}/shadow_build_dir/package/${{ env.ARTIFACT }}

@@ -3,17 +3,8 @@ name: Android 64-bit Release
 
 on:
   push:
-    branches:
-      - 'master'
-      - 'Stable*'
     tags:
-      - 'v*'
-    paths-ignore:
-      - 'docs/**'
-      - '.github/workflows/**'
-  pull_request:
-    branches:
-    - '*'
+      - 'v*-UP'
     paths-ignore:
       - 'docs/**'
       - '.github/workflows/**'

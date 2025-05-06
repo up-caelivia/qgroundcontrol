@@ -10,21 +10,13 @@ fi
 
 QGC_SRC=$(readlink -f $1)
 
-if [ -e "../custom/create_ABLUO" ]; then
-  QGC_CUSTOM_APP_NAME="${QGC_CUSTOM_APP_NAME:-QGroundControlABLUO}"
-  QGC_CUSTOM_GENERIC_NAME="${QGC_CUSTOM_GENERIC_NAME:-Ground Control Station}"
-  QGC_CUSTOM_BINARY_NAME="${QGC_CUSTOM_BINARY_NAME:-QGroundControlABLUO}"
-  QGC_CUSTOM_LINUX_START_SH="${QGC_CUSTOM_LINUX_START_SH:-${QGC_SRC}/deploy/qgroundcontrol-start.sh}"
-  QGC_CUSTOM_APP_ICON="${QGC_CUSTOM_APP_ICON:-${QGC_SRC}/custom/resources/icons/qgroundcontrol.png}"
-  QGC_CUSTOM_APP_ICON_NAME="${QGC_CUSTOM_APP_ICON_NAME:-QGroundControlABLUO}"
-else
-  QGC_CUSTOM_APP_NAME="${QGC_CUSTOM_APP_NAME:-QGroundControlUP}"
-  QGC_CUSTOM_GENERIC_NAME="${QGC_CUSTOM_GENERIC_NAME:-Ground Control Station}"
-  QGC_CUSTOM_BINARY_NAME="${QGC_CUSTOM_BINARY_NAME:-QGroundControlUP}"
-  QGC_CUSTOM_LINUX_START_SH="${QGC_CUSTOM_LINUX_START_SH:-${QGC_SRC}/deploy/qgroundcontrol-start.sh}"
-  QGC_CUSTOM_APP_ICON="${QGC_CUSTOM_APP_ICON:-${QGC_SRC}/custom/resources/icons/qgroundcontrol.png}"
-  QGC_CUSTOM_APP_ICON_NAME="${QGC_CUSTOM_APP_ICON_NAME:-QGroundControlUP}"
-fi
+QGC_CUSTOM_APP_NAME="${QGC_CUSTOM_APP_NAME:-QGroundControlABLUO}"
+QGC_CUSTOM_GENERIC_NAME="${QGC_CUSTOM_GENERIC_NAME:-Ground Control Station}"
+QGC_CUSTOM_BINARY_NAME="${QGC_CUSTOM_BINARY_NAME:-QGroundControlABLUO}"
+QGC_CUSTOM_LINUX_START_SH="${QGC_CUSTOM_LINUX_START_SH:-${QGC_SRC}/deploy/qgroundcontrol-start.sh}"
+QGC_CUSTOM_APP_ICON="${QGC_CUSTOM_APP_ICON:-${QGC_SRC}/custom/resources/icons/qgroundcontrol.png}"
+QGC_CUSTOM_APP_ICON_NAME="${QGC_CUSTOM_APP_ICON_NAME:-QGroundControlABLUO}"
+
 
 if [ ! -f ${QGC_SRC}/qgroundcontrol.pro ]; then
   echo "please specify path to ${QGC_CUSTOM_APP_NAME} source as the 1st argument"
@@ -75,10 +67,7 @@ cp ${QGC_CUSTOM_LINUX_START_SH} ${APPDIR}/AppRun
 # copy icon
 cp ${QGC_CUSTOM_APP_ICON} ${APPDIR}/
 
-if [ -e "${PWD}/../custom/create_ABLUO" ]; then
-  echo "Creating AppImage for ABLUO"
-  
-  cat > ./QGroundControlABLUO.desktop <<\EOF
+cat > ./QGroundControlABLUO.desktop <<\EOF
 [Desktop Entry]
 Type=Application
 Name=${QGC_CUSTOM_APP_NAME}
@@ -90,23 +79,6 @@ Terminal=false
 Categories=Utility;
 Keywords=computer;
 EOF
-
-else
-  
-  cat > ./QGroundControlUP.desktop <<\EOF
-[Desktop Entry]
-Type=Application
-Name=${QGC_CUSTOM_APP_NAME}
-GenericName=${QGC_CUSTOM_GENERIC_NAME}
-Comment=UAS ground control station
-Icon=${QGC_CUSTOM_APP_ICON_NAME}
-Exec=AppRun
-Terminal=false
-Categories=Utility;
-Keywords=computer;
-EOF
-  echo "Creating AppImage for UP"
-fi
 
 VERSION=$(strings ${APPDIR}/${QGC_CUSTOM_BINARY_NAME} | grep '^v[0-9*]\.[0-9*].[0-9*]' | head -n 1)
 echo ${QGC_CUSTOM_APP_NAME} Version: ${VERSION}

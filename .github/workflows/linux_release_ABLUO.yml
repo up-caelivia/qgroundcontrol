@@ -2,20 +2,8 @@ name: Linux Release
 
 on:
   push:
-    branches:
-      - 'master'
-      - 'Stable*'
     tags:
-      - 'v*'
-    paths-ignore:
-      - 'docs/**'
-      - '.github/workflows/**'
-  pull_request:
-    branches:
-    - '*'
-    paths-ignore:
-      - 'docs/**'
-      - '.github/workflows/**'
+      - 'v*-ABLUO'
 
 defaults:
   run:
@@ -24,7 +12,7 @@ defaults:
 env:
   SOURCE_DIR:   ${{ github.workspace }}
   QT_VERSION:   5.15.2
-  ARTIFACT:     QGroundControlUP.AppImage
+  ARTIFACT:     QGroundControlABLUO.AppImage
   BUILD_TYPE:   ${{ fromJSON('["DailyBuild", "StableBuild"]')[ github.ref_type == 'tag' || contains(github.ref, 'Stable_' ) ] }}
 
 jobs:
@@ -98,6 +86,7 @@ jobs:
       - name: Build
         working-directory: ${{ runner.temp }}/shadow_build_dir
         run:  |
+              touch ${SOURCE_DIR}/custom/create_ABLUO
               qmake -r ${SOURCE_DIR}/qgroundcontrol.pro CONFIG+=installer CONFIG+=${BUILD_TYPE}
               make -j16
 
@@ -106,7 +95,7 @@ jobs:
 
       - name: Create AppImage
         working-directory:  ${{ runner.temp }}/shadow_build_dir
-        run:                ${SOURCE_DIR}/deploy/create_linux_appimage.sh ${SOURCE_DIR} ./staging ./package;
+        run:                ${SOURCE_DIR}/custom/deploy/create_linux_appimage_ABLUO.sh ${SOURCE_DIR} ./staging ./package;
 
       - name: Save artifact
         uses: actions/upload-artifact@master

@@ -2,18 +2,8 @@ name: Windows Release
 
 on:
   push:
-    branches:
-      - 'master'
-      - 'Stable*'
     tags:
-      - 'v*'
-    paths-ignore:
-      - 'docs/**'
-  pull_request:
-    branches:
-    - '*'
-    paths-ignore:
-      - 'docs/**'
+      - 'v*-UP'
 
 defaults:
   run:
