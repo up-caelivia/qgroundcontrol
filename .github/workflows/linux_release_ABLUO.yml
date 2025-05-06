@@ -95,7 +95,7 @@ jobs:
 
       - name: Create AppImage
         working-directory:  ${{ runner.temp }}/shadow_build_dir
-        run:                ${SOURCE_DIR}/deploy/create_linux_appimage.sh ${SOURCE_DIR} ./staging ./package;
+        run:                ${SOURCE_DIR}/custom/deploy/create_linux_appimage_ABLUO.sh ${SOURCE_DIR} ./staging ./package;
 
       - name: Save artifact
         uses: actions/upload-artifact@master
