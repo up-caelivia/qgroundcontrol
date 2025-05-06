@@ -118,6 +118,12 @@ QGC_APP_COPYRIGHT   = "Copyright (C) 2020 QGroundControl Development Team. All r
 RESOURCES += \
     $$PWD/custom.qrc
 
+exists($$PWD/create_ABLUO)  {
+    RESOURCES += $$PWD/abluo.qrc
+} else {
+    RESOURCES += $$PWD/up.qrc
+}
+
 QML_IMPORT_PATH += \
    $$PWD/res
 

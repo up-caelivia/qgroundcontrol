@@ -91,6 +91,3 @@ Qt*-linux*.tar.*
 node_modules/
 docs/.vitepress/cache/
 docs/.vitepress/dist/
-/custom/create_ABLUO
-/custom/android/AndroidManifest.xml
-res
