@@ -67,10 +67,10 @@ Run the command on wsl (dot included) from repository folder (qgroundcontrol):
 ### Linux 
 
 ```bash
-ACT=true act -j build -W .github/workflows/linux_release.yml
+ACT=true act -j build -W .github/workflows/linux_release_UP.yml
 ```
 ### Android 
 
 ```bash
-ACT=true act -s ANDROID_KEYSTORE_PASSWORD=?????? -P ubuntu-22.04=catthehacker/ubuntu:act-22.04 -j build -W .github/workflows/android_release.yml
+ACT=true act -s ANDROID_KEYSTORE_PASSWORD=?????? -P ubuntu-22.04=catthehacker/ubuntu:act-22.04 -j build -W .github/workflows/android_release_UP.yml
 ```

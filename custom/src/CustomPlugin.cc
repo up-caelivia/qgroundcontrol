@@ -57,7 +57,7 @@ CustomPlugin::CustomPlugin(QGCApplication *app, QGCToolbox* toolbox)
     : QGCCorePlugin(app, toolbox)
 {
     _options = new CustomOptions(this, this);
-    QCoreApplication::setApplicationName(QStringLiteral("QGroundControlUP"));  // set the folder on document to save the options
+    QCoreApplication::setApplicationName(QStringLiteral(QGC_APPLICATION_NAME));  // set the folder on document to save the options
 
     #ifdef Q_OS_WIN
         QApplication::setWindowIcon(QIcon(":/res/resources/icons/qgroundcontrol.ico"));
@@ -90,7 +90,11 @@ bool CustomPlugin::overrideSettingsGroupVisibility(QString name)
 
 
     //qDebug() << "Setting name: " << name;
+#ifndef ABLUO_APP
     if (name == BrandImageSettings::name || name == AutoConnectSettings::name || name == ADSBVehicleManagerSettings::name || name == RTKSettings::name || name == PlanViewSettings::name) {
+#else
+    if (name == BrandImageSettings::name || name == AutoConnectSettings::name || name == UnitsSettings::name || name == ADSBVehicleManagerSettings::name || name == RTKSettings::name || name == PlanViewSettings::name) {
+#endif
         return false;
     }
 
@@ -130,15 +134,29 @@ void CustomPlugin::paletteOverride(QString colorName, QGCPalette::PaletteColorIn
   //   DECLARE_QGC_COLOR(statusPendingText,    "#9d9d9d", "#000000", "#707070", "#ffffff")
   //   DECLARE_QGC_COLOR(toolbarBackground,    "#ffffff", "#ffffff", "#222222", "#222222")
 
-
-
-
+#ifdef ABLUO_APP
+    QColor color1 = QColor("#004F9F");
+    QColor color2 = QColor("#76BEEA");
+    QColor color3 = QColor("#76BEEA");
+    QColor color4 = QColor("#004F9F");
+    if (colorName == QStringLiteral("buttonText")) {
+        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupEnabled]   = QColor("#2d2d2d");
+        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupDisabled]  = QColor("#7d7d7d");
+        colorInfo[QGCPalette::Light][QGCPalette::ColorGroupEnabled]  = QColor("#A6A6A6");
+        colorInfo[QGCPalette::Light][QGCPalette::ColorGroupDisabled] = QColor("#ffffff");
+    } else
+#else
+    QColor color1 = QColor("#E73444");
+    QColor color2 = QColor("#73969D");
+    QColor color3 = QColor("#61848C");
+    QColor color4 = QColor("#E73444");
+#endif
 
     if (colorName == QStringLiteral("buttonHighlight")) {
-        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupEnabled]   = QColor("#E73444");
-        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupDisabled]  = QColor("#E73444");
-        colorInfo[QGCPalette::Light][QGCPalette::ColorGroupEnabled]  = QColor("#E73444");
-        colorInfo[QGCPalette::Light][QGCPalette::ColorGroupDisabled] = QColor("#E73444");
+        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupEnabled]   = color1;
+        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupDisabled]  = color1;
+        colorInfo[QGCPalette::Light][QGCPalette::ColorGroupEnabled]  = color1;
+        colorInfo[QGCPalette::Light][QGCPalette::ColorGroupDisabled] = color1;
     }
     else if (colorName == QStringLiteral("buttonHighlightText")) {
         colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupEnabled]   = QColor("#ffffff");
@@ -147,51 +165,38 @@ void CustomPlugin::paletteOverride(QString colorName, QGCPalette::PaletteColorIn
         colorInfo[QGCPalette::Light][QGCPalette::ColorGroupDisabled] = QColor("#2c2c2c");
     }
     else if (colorName == QStringLiteral("primaryButton")) {
-        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupEnabled]   = QColor("#E73444");
-        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupDisabled]  = QColor("#E73444");
-        colorInfo[QGCPalette::Light][QGCPalette::ColorGroupEnabled]  = QColor("#E73444");
-        colorInfo[QGCPalette::Light][QGCPalette::ColorGroupDisabled] = QColor("#E73444");
+        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupEnabled]   = color1;
+        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupDisabled]  = color1;
+        colorInfo[QGCPalette::Light][QGCPalette::ColorGroupEnabled]  = color1;
+        colorInfo[QGCPalette::Light][QGCPalette::ColorGroupDisabled] = color1;
     }
     else if (colorName == QStringLiteral("mapButtonHighlight")) {
-        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupEnabled]   = QColor("#E73444");
-        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupDisabled]  = QColor("#E73444");
-        colorInfo[QGCPalette::Light][QGCPalette::ColorGroupEnabled]  = QColor("#E73444");
-        colorInfo[QGCPalette::Light][QGCPalette::ColorGroupDisabled] = QColor("#E73444");
+        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupEnabled]   = color1;
+        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupDisabled]  = color1;
+        colorInfo[QGCPalette::Light][QGCPalette::ColorGroupEnabled]  = color1;
+        colorInfo[QGCPalette::Light][QGCPalette::ColorGroupDisabled] = color1;
     }
 
     else if (colorName == QStringLiteral("toolStripHoverColor")) {
-        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupEnabled]   = QColor("#73969D");
-        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupDisabled]  = QColor("#73969D");
-        colorInfo[QGCPalette::Light][QGCPalette::ColorGroupEnabled]  = QColor("#73969D");
-        colorInfo[QGCPalette::Light][QGCPalette::ColorGroupDisabled] = QColor("#73969D");
+        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupEnabled]   = color2;
+        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupDisabled]  = color2;
+        colorInfo[QGCPalette::Light][QGCPalette::ColorGroupEnabled]  = color2;
+        colorInfo[QGCPalette::Light][QGCPalette::ColorGroupDisabled] = color2;
     }
 
     else if (colorName == QStringLiteral("missionItemEditor")) {
-        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupEnabled]   = QColor("#73969D");
-        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupDisabled]  = QColor("#73969D");
-        colorInfo[QGCPalette::Light][QGCPalette::ColorGroupEnabled]  = QColor("#73969D");
-        colorInfo[QGCPalette::Light][QGCPalette::ColorGroupDisabled] = QColor("#73969D");
+        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupEnabled]   = color2;
+        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupDisabled]  = color2;
+        colorInfo[QGCPalette::Light][QGCPalette::ColorGroupEnabled]  = color2;
+        colorInfo[QGCPalette::Light][QGCPalette::ColorGroupDisabled] = color2;
     }
 
     else if (colorName == QStringLiteral("button")) {
-        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupEnabled]   = QColor("#61848C");
-        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupDisabled]  = QColor("#61848C");
+        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupEnabled]   = color3;
+        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupDisabled]  = color3;
         colorInfo[QGCPalette::Light][QGCPalette::ColorGroupEnabled]  = QColor("#ffffff");
         colorInfo[QGCPalette::Light][QGCPalette::ColorGroupDisabled] = QColor("#ffffff");
     }
-
-    // else if (colorName == QStringLiteral("mapIndicator")) {
-    //     colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupEnabled]   = QColor("#9dda4f");
-    //     colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupDisabled]  = QColor("#585858");
-    //     colorInfo[QGCPalette::Light][QGCPalette::ColorGroupEnabled]  = QColor("#be781c");
-    //     colorInfo[QGCPalette::Light][QGCPalette::ColorGroupDisabled] = QColor("#585858");
-    // }
-    // else if (colorName == QStringLiteral("mapIndicatorChild")) {
-    //     colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupEnabled]   = QColor("#527942");
-    //     colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupDisabled]  = QColor("#585858");
-    //     colorInfo[QGCPalette::Light][QGCPalette::ColorGroupEnabled]  = QColor("#766043");
-    //     colorInfo[QGCPalette::Light][QGCPalette::ColorGroupDisabled] = QColor("#585858");
-    // }
     else if (colorName == QStringLiteral("colorGreen")) {
         colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupEnabled]   = QColor("#27bf89");
         colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupDisabled]  = QColor("#0ca678");
@@ -217,23 +222,17 @@ void CustomPlugin::paletteOverride(QString colorName, QGCPalette::PaletteColorIn
         colorInfo[QGCPalette::Light][QGCPalette::ColorGroupDisabled] = QColor("#808080");
     }
     else if (colorName == QStringLiteral("hoverColor")) {
-        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupEnabled]   = QColor("#E73444");
-        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupDisabled]  = QColor("#E73444");
-        colorInfo[QGCPalette::Light][QGCPalette::ColorGroupEnabled]  = QColor("#E73444");
-        colorInfo[QGCPalette::Light][QGCPalette::ColorGroupDisabled] = QColor("#E73444");
+        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupEnabled]   = color4;
+        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupDisabled]  = color4;
+        colorInfo[QGCPalette::Light][QGCPalette::ColorGroupEnabled]  = color4;
+        colorInfo[QGCPalette::Light][QGCPalette::ColorGroupDisabled] = color4;
     }
     else if (colorName == QStringLiteral("brandingPurple")) {
-        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupEnabled]   = QColor("#E73444");
-        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupDisabled]  = QColor("#E73444");
-        colorInfo[QGCPalette::Light][QGCPalette::ColorGroupEnabled]  = QColor("#E73444");
-        colorInfo[QGCPalette::Light][QGCPalette::ColorGroupDisabled] = QColor("#E73444");
+        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupEnabled]   = color4;
+        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupDisabled]  = color4;
+        colorInfo[QGCPalette::Light][QGCPalette::ColorGroupEnabled]  = color4;
+        colorInfo[QGCPalette::Light][QGCPalette::ColorGroupDisabled] = color4;
     }
-    // else if (colorName == QStringLiteral("brandingBlue")) {   // NOT USED
-    //     colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupEnabled]   = QColor("#E73444");
-    //     colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupDisabled]  = QColor("#E73444");
-    //     colorInfo[QGCPalette::Light][QGCPalette::ColorGroupEnabled]  = QColor("#E73444");
-    //     colorInfo[QGCPalette::Light][QGCPalette::ColorGroupDisabled] = QColor("#E73444");
-    // }
 }
 
 static QObject* kmlPolygonLoader_singletontype_provider(QQmlEngine* engine, QJSEngine* scriptEngine)
@@ -316,11 +315,7 @@ bool CustomPlugin::adjustSettingMetaData(const QString& settingsGroup, FactMetaD
         } else if (metaData.name() == VideoSettings::videoSourceName) {
             metaData.setRawDefaultValue(VideoSettings::videoSourceHerelinkAirUnit);
         }
-    } else if (settingsGroup == AppSettings::settingsGroup) {
-        if (metaData.name() == AppSettings::androidSaveToSDCardName) {
-            metaData.setRawDefaultValue(true);
-        }
-    }
+    } 
 
     return true; // Show all settings in ui
 }

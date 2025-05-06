@@ -43,6 +43,8 @@ class Constants : public QObject {
     Q_PROPERTY(QVector<QString> settingToShow READ settingToShow CONSTANT)
     Q_PROPERTY(int compassNumber READ compassNumber CONSTANT)
 
+    Q_PROPERTY(bool isABLUOApp READ isABLUOApp CONSTANT)
+
 public:
     explicit Constants(QObject* parent = nullptr) : QObject(parent) {
 
@@ -119,6 +121,7 @@ public:
     int numGPS() const {return numGPSV;}
     int numGLO() const {return numGLOV;}
 
+    bool isABLUOApp() const { return _isABLUOApp; }
 
     void setNtripEnabled(bool enable) {
         if (ntripEnableV != enable) {
@@ -254,7 +257,11 @@ private:
     QTimer *m_timer;
     qint64 m_lastMessageTime = 0;
     int m_messageCount = 0;
-
+#ifdef ABLUO_APP
+    bool _isABLUOApp = true;
+#else
+    bool _isABLUOApp = false;
+#endif
 
 };
 

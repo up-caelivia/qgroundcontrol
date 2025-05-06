@@ -50,7 +50,7 @@ SetupPage {
             readonly property string accelHelp:     qsTr("For Accelerometer calibration you will need to place your vehicle on all six sides on a perfectly level surface and hold it still in each orientation for a few seconds.")
             readonly property string levelHelp:     qsTr("To level the horizon you need to place the vehicle in its level flight position and press OK.")
 
-            readonly property string statusTextAreaDefaultText: qsTr("Start the individual calibration steps by clicking one of the buttons to the left.")
+            readonly property string statusTextAreaDefaultText: qsTr("Start the compass calibration by clicking the Compass button on the left side.")
 
             // Used to pass help text to the preCalibrationDialog dialog
             property string preCalibrationDialogHelp
@@ -154,7 +154,7 @@ SetupPage {
                 id:                         controller
                 statusLog:                  statusTextArea
                 progressBar:                progressBar
-                nextButton:                 nextButton
+                // nextButton:                 nextButton
                 cancelButton:               cancelButton
                 orientationCalAreaHelpText: orientationCalAreaHelpText
 
@@ -200,6 +200,7 @@ SetupPage {
 
                         onWaitingForCancelChanged: {
                             if (!controller.waitingForCancel) {
+                                barblock.visible = false
                                 close()
                             }
                         }
@@ -283,7 +284,7 @@ SetupPage {
                         spacing:    ScreenTools.defaultFontPixelHeight
 
                         Repeater {
-                            model:      3
+                            model:      Constants.compassNumber
                             delegate:   singleCompassOnboardResultsComponent
                         }
 
@@ -344,13 +345,14 @@ SetupPage {
 
                 Column {
                     spacing: Math.round(ScreenTools.defaultFontPixelHeight / 2)
-                    visible: sensorParams.rgCompassAvailable[index] && Constants.developer
+                    visible: sensorParams.rgCompassAvailable[index]
 
                     QGCLabel {
                         text: compassLabel(index)
                     }
                     APMSensorIdDecoder {
                         fact: sensorParams.rgCompassId[index]
+                        visible: Constants.developer
                     }
 
                     Column {
@@ -365,12 +367,12 @@ SetupPage {
                                 id:         useCompassCheckBox
                                 text:       qsTr("Use Compass")
                                 fact:       sensorParams.rgCompassUseFact[index]
-                                visible:    sensorParams.rgCompassUseParamAvailable[index] && !sensorParams.rgCompassPrimary[index]
+                                visible:    sensorParams.rgCompassUseParamAvailable[index] && !sensorParams.rgCompassPrimary[index] && Constants.developer
                             }
 
                             QGCComboBox {
                                 model:      [ qsTr("Priority 1"), qsTr("Priority 2"), qsTr("Priority 3"), qsTr("Not Set") ]
-                                visible:    _singleCompassSettingsComponentShowPriority && sensorParams.compassPrioFactsAvailable && useCompassCheckBox.visible && useCompassCheckBox.checked
+                                visible:    _singleCompassSettingsComponentShowPriority && sensorParams.compassPrioFactsAvailable && useCompassCheckBox.visible && useCompassCheckBox.checked  && Constants.developer
 
                                 property int _compassIndex: index
 
@@ -492,7 +494,6 @@ SetupPage {
                         Column {
 
                             visible: _orientationDialogCalType == _calTypeAccel && Constants.developer
-
                             spacing: ScreenTools.defaultFontPixelHeight
 
                             QGCLabel {
@@ -691,17 +692,6 @@ SetupPage {
 
                     IndicatorButton {
                         width:          _buttonWidth
-                        text:           qsTr("Accelerometer")
-                        indicatorGreen: !accelCalNeeded
-
-                        onClicked: function () {
-                            showOrientationsDialog(_calTypeAccel);
-                            showSimpleAccelCalOption();
-                        }
-                    }
-
-                    IndicatorButton {
-                        width:          _buttonWidth
                         text:           qsTr("Compass")
                         indicatorGreen: !compassCalNeeded
 
@@ -714,59 +704,6 @@ SetupPage {
                         }
                     }
 
-                    QGCButton {
-                        width:  _buttonWidth
-                        text:   _levelHorizonText
-
-                        readonly property string _levelHorizonText: qsTr("Level Horizon")
-
-                        onClicked: {
-                            if (controller.accelSetupNeeded) {
-                                mainWindow.showMessageDialog(_levelHorizonText, qsTr("Accelerometer must be calibrated prior to Level Horizon."))
-                            } else {
-                                mainWindow.showMessageDialog(_levelHorizonText,
-                                                             qsTr("To level the horizon you need to place the vehicle in its level flight position and press Ok."),
-                                                             StandardButton.Cancel | StandardButton.Ok,
-                                                             function() { controller.levelHorizon() })
-                            }
-                        }
-                    }
-
-                    QGCButton {
-                        width:      _buttonWidth
-                        text:       qsTr("Gyro")
-                        visible:    globals.activeVehicle && (globals.activeVehicle.multiRotor | globals.activeVehicle.rover | globals.activeVehicle.sub)
-                        onClicked:  mainWindow.showMessageDialog(qsTr("Calibrate Gyro"),
-                                                                 qsTr("For Gyroscope calibration you will need to place your vehicle on a surface and leave it still.\n\nClick Ok to start calibration."),
-                                                                 StandardButton.Cancel | StandardButton.Ok,
-                                                                 function() { controller.calibrateGyro() })
-                    }
-
-                    QGCButton {
-                        width:      _buttonWidth
-                        text:       _calibratePressureText
-                        onClicked:  mainWindow.showMessageDialog(_calibratePressureText,
-                                                                 qsTr("Pressure calibration will set the %1 to zero at the current pressure reading. %2").arg(_altText).arg(_helpTextFW),
-                                                                 StandardButton.Cancel | StandardButton.Ok,
-                                                                 function() { controller.calibratePressure() })
-
-                        readonly property string _altText:                  globals.activeVehicle.sub ? qsTr("depth") : qsTr("altitude")
-                        readonly property string _helpTextFW:               globals.activeVehicle.fixedWing ? qsTr("To calibrate the airspeed sensor shield it from the wind. Do not touch the sensor or obstruct any holes during the calibration.") : ""
-                        readonly property string _calibratePressureText:    globals.activeVehicle.fixedWing ? qsTr("Baro/Airspeed") : qsTr("Pressure")
-                    }
-
-                    QGCButton {
-                        width:      _buttonWidth
-                        text:       qsTr("CompassMot")
-                        visible:    globals.activeVehicle ? globals.activeVehicle.supportsMotorInterference : false
-                        onClicked:  compassMotDialogComponent.createObject(mainWindow).open()
-                    }
-
-                    QGCButton {
-                        width:      _buttonWidth
-                        text:       qsTr("Sensor Settings")
-                        onClicked:  showOrientationsDialog(_calTypeSet)
-                    }
                 } // Column - Cal Buttons
 
                 Column {
@@ -776,21 +713,20 @@ SetupPage {
                     anchors.left:       buttonColumn.left
                     spacing:            buttonColumn.spacing
 
-                    QGCButton {
-                        id:         nextButton
-                        width:      _buttonWidth
-                        text:       qsTr("Next")
-                        enabled:    false
-                        onClicked:  controller.nextClicked()                        
-                        visible:    false
-                    }
+                    // QGCButton {
+                    //     id:         nextButton
+                    //     width:      _buttonWidth
+                    //     text:       qsTr("Next")
+                    //     enabled:    false
+                    //     onClicked:  controller.nextClicked()
+                    // }
 
                     QGCButton {
                         id:         cancelButton
                         width:      _buttonWidth
                         text:       qsTr("Cancel")
                         enabled:    false
-                        onClicked:  controller.cancelCalibration()
+                        onClicked:  {controller.cancelCalibration(); barblock.visible = false}
                     }
                 }
             } // QGCFlickable - buttons
@@ -804,38 +740,9 @@ SetupPage {
                 anchors.right:      parent.right
 
                 Item {
-                    id: barblock
-                    anchors.left:   parent.left
-                    anchors.right:  parent.right
-                    height:         parent.height * 0.15
-                    visible:        false
-
-                    ProgressBar {
-                        id: progressBar
-                        anchors.fill: parent
-                        value: controller.progressValue // es: da 0.0 a 1.0
-                    }
-
-                    QGCLabel {
-                        anchors.margins:        _defaultTextWidth * 2
-                        anchors.fill:           parent
-                        verticalAlignment:      Text.AlignVCenter
-                        horizontalAlignment:    Text.AlignHCenter
-                        wrapMode:               Text.WordWrap
-                        font.pointSize:         ScreenTools.largeFontPointSize * 3
-                        text:                   Math.round(progressBar.value * 100) + "%"
-                        color: "green"
-                        visible: progressBar.visible
-                        font.bold: true
-                    }
-                }
-
-                Item { height: ScreenTools.defaultFontPixelHeight; width: 10 } // spacer
-
-                Item {
                     id:     centerPanel
                     width:  parent.width
-                    height: parent.height - y
+                    height: parent.height*0.8 - y
 
                     TextArea {
                         id:             statusTextArea
@@ -934,6 +841,68 @@ SetupPage {
                         }
                     }
                 } // Item - Cal display area
+
+                Item { height: ScreenTools.defaultFontPixelHeight; width: 10 } // spacer
+
+                Item {
+                    id: barblock
+                    anchors.left:   parent.left
+                    anchors.right:  parent.right
+                    height:         parent.height * 0.15
+                    visible:        false
+
+                    Item {
+                        id: progressWrapper
+                        anchors.fill: parent
+                        clip: true
+
+                        ProgressBar {
+                            id: progressBar
+                            anchors.centerIn: parent
+                            value: controller.progressValue
+                        }
+                    }
+
+                    Item {
+                        id: progressBarBlocks
+                        anchors.fill:   parent
+                        visible:        true
+
+                        Rectangle {
+                            id: progressBackground
+                            anchors.fill: parent
+                            color: "#dddddd"
+
+                            Rectangle {
+                                id: progressFill
+                                width: progressBackground.width * progressBar.value
+                                height: progressBackground.height
+                                color: "blue"
+
+                                Behavior on width {
+                                    NumberAnimation {
+                                        duration: 200
+                                        easing.type: Easing.InOutQuad
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    QGCLabel {
+                        anchors.margins:        _defaultTextWidth * 2
+                        anchors.fill:           parent
+                        verticalAlignment:      Text.AlignVCenter
+                        horizontalAlignment:    Text.AlignHCenter
+                        wrapMode:               Text.WordWrap
+                        font.pointSize:         ScreenTools.largeFontPointSize * 3
+                        text:                   Math.round(progressBar.value * 100) + "%"
+                        color: "green"
+                        visible: progressBar.visible
+                        font.bold: true
+                    }
+                }
+
             } // Column - cal display
         } // Row
     } // Component - sensorsPageComponent

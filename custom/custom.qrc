@@ -4,7 +4,6 @@
         <file alias="distance.svg">res/Images/distance.svg</file>
         <file alias="horizontal_speed.svg">res/Images/horizontal_speed.svg</file>
         <file alias="vertical_speed.svg">res/Images/vertical_speed.svg</file>
-        <file alias="CustomAppIcon.png">res/Images/CustomAppIcon.png</file>
         <file alias="waypoint.svg">res/Images/waypoint.svg</file>
         <file alias="slow.svg">res/Images/ButtonsLettering1.svg</file>
         <file alias="h.svg">res/Images/ButtonsLettering3.svg</file>
@@ -12,11 +11,6 @@
         <file alias="alert.svg">res/Images/alert.svg</file>
         <file alias="MovimentoY.svg">res/Images/MovimentoY.svg</file>
         <file alias="MovimentoZ.svg">res/Images/MovimentoZ.svg</file>
-    </qresource>
-    <qresource prefix="/res">
-        <file alias="QGCLogoFull">res/Images/QGCLogoFull.svg</file>
-        <file alias="QGCLogoWhite">res/Images/QGCLogoWhite.svg</file>
-        <file alias="resources/icons/qgroundcontrol.ico">res/Images/QGCLogoFull.ico</file>
     </qresource>
     <qresource prefix="/qmlimages">
         <file alias="vehicleArrowOpaque.svg">res/Images/Puntatore1.svg</file>
@@ -62,7 +56,6 @@
         <file alias="Custom/GeoAwareness/KmlPolygonOverlay.qml">res/Custom/GeoAwareness/KmlPolygonOverlay.qml</file>
     </qresource>
     <qresource prefix="/qml">
-        <file alias="CustomCalibrationPage.qml">res/Custom/Widgets/CustomCalibrationPage.qml</file>
         <file alias="CustomSetupView.qml">res/Custom/Widgets/CustomSetupView.qml</file>
         <file alias="QGroundControl/FlightMap/FlightMap.qml">src/FlightMap/FlightMapUP.qml</file>
         <file alias="GeneralSettings.qml">src/ui/preferences/GeneralSettingsUP.qml</file>
@@ -89,7 +82,9 @@
 		<file alias="QGroundControl/Controls/QGCComboBox.qml">src/QmlControls/QGCComboBoxUP.qml</file>
 		<file alias="QGroundControl/FactControls/FactTextField.qml">src/FactSystem/FactControls/FactTextFieldUP.qml</file>
         <file alias="QGroundControl/Controls/ParameterEditor.qml">src/QmlControls/ParameterEditorUP.qml</file>
-		<file alias="QGroundControl/FactControls/FactComboBox.qml">src/FactSystem/FactControls/FactComboBoxUP.qml</file>  
+        <file alias="QGroundControl/FactControls/FactComboBox.qml">src/FactSystem/FactControls/FactComboBoxUP.qml</file>  
+        <file alias="QGroundControl/Controls/ToolStripHoverButton.qml">src/QmlControls/ToolStripHoverButtonUP.qml</file>
+        <file alias="QGroundControl/Controls/SubMenuButton.qml">src/QmlControls/SubMenuButtonUP.qml</file>
         <file alias="PlanView.qml">src/PlanView/PlanViewUP.qml</file>   
     </qresource>
     <qresource prefix="/toolbar">
