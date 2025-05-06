@@ -78,7 +78,7 @@ exists($$PWD/create_ABLUO) {
    
     images_copy_target.target = $$PWD/android/res
     images_copy_target.commands = \
-        $$QMAKE_COPY_DIR $$PWD/android/res_ABLUO $$PWD/android/res
+        $$QMAKE_COPY_DIR \"$$PWD/android/res_ABLUO\" \"$$PWD/android/res\"
     PRE_TARGETDEPS += $$images_copy_target.target
     QMAKE_EXTRA_TARGETS += images_copy_target
 
@@ -99,7 +99,7 @@ exists($$PWD/create_ABLUO) {
    
     images_copy_target.target = $$PWD/android/res
     images_copy_target.commands = \
-        $$QMAKE_COPY_DIR $$PWD/android/res_UP $$PWD/android/res
+        $$QMAKE_COPY_DIR \"$$PWD/android/res_UP\" \"$$PWD/android/res\"
     PRE_TARGETDEPS += $$images_copy_target.target
     QMAKE_EXTRA_TARGETS += images_copy_target
 }
