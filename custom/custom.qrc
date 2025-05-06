@@ -12,9 +12,6 @@
         <file alias="MovimentoY.svg">res/Images/MovimentoY.svg</file>
         <file alias="MovimentoZ.svg">res/Images/MovimentoZ.svg</file>
     </qresource>
-    <qresource prefix="/res">
-        <file alias="resources/icons/qgroundcontrol.ico">res/Images/QGCLogoFull.ico</file>
-    </qresource>
     <qresource prefix="/qmlimages">
         <file alias="vehicleArrowOpaque.svg">res/Images/Puntatore1.svg</file>
         <file alias="vehicleArrowOutline.svg">res/Images/Puntatore1.svg</file>

@@ -5,5 +5,6 @@
     <qresource prefix="/res">
         <file alias="QGCLogoFull">res/Images/QGCLogoFull_ABLUO.svg</file>
         <file alias="QGCLogoWhite">res/Images/QGCLogoWhite_ABLUO.svg</file>
+        <file alias="resources/icons/qgroundcontrol.ico">res/Images/QGCLogoFull_UP.ico</file>
     </qresource>
 </RCC>
