@@ -1,10 +1,10 @@
 <RCC>
     <qresource prefix="/custom/img">
-        <file alias="CustomAppIcon.png">res/Images/CustomAppIcon_ABLUO.png</file>
+        <file alias="CustomAppIcon.png">res/Images/CustomAppIcon_UP.png</file>
     </qresource>
     <qresource prefix="/res">
-        <file alias="QGCLogoFull">res/Images/QGCLogoFull_ABLUO.svg</file>
-        <file alias="QGCLogoWhite">res/Images/QGCLogoWhite_ABLUO.svg</file>
+        <file alias="QGCLogoFull">res/Images/QGCLogoFull_UP.svg</file>
+        <file alias="QGCLogoWhite">res/Images/QGCLogoWhite_UP.svg</file>
         <file alias="resources/icons/qgroundcontrol.ico">res/Images/QGCLogoFull_UP.ico</file>
     </qresource>
 </RCC>
