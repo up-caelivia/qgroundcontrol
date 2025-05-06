@@ -75,7 +75,13 @@ cp ${QGC_CUSTOM_LINUX_START_SH} ${APPDIR}/AppRun
 # copy icon
 cp ${QGC_CUSTOM_APP_ICON} ${APPDIR}/
 
-cat > ./QGroundControlUP.desktop <<\EOF
+if [ -e "../custom/create_ABLUO" ]; then
+  APPNAME = "QGroundControlABLUO"
+else
+  APPNAME = "QGroundControlUP"
+fi
+
+cat > "./${APPNAME}.desktop" <<EOF
 [Desktop Entry]
 Type=Application
 Name=${QGC_CUSTOM_APP_NAME}
