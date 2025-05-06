@@ -76,14 +76,9 @@ cp ${QGC_CUSTOM_LINUX_START_SH} ${APPDIR}/AppRun
 cp ${QGC_CUSTOM_APP_ICON} ${APPDIR}/
 
 if [ -e "${PWD}/../custom/create_ABLUO" ]; then
-  APPNAME = "QGroundControlABLUO"
   echo "Creating AppImage for ABLUO"
-else
-  APPNAME = "QGroundControlUP"
-  echo "Creating AppImage for UP"
-fi
-
-cat > "./${APPNAME}.desktop" <<EOF
+  
+  cat > ./QGroundControlABLUO.desktop <<\EOF
 [Desktop Entry]
 Type=Application
 Name=${QGC_CUSTOM_APP_NAME}
@@ -95,6 +90,23 @@ Terminal=false
 Categories=Utility;
 Keywords=computer;
 EOF
+
+else
+  
+  cat > ./QGroundControlUP.desktop <<\EOF
+[Desktop Entry]
+Type=Application
+Name=${QGC_CUSTOM_APP_NAME}
+GenericName=${QGC_CUSTOM_GENERIC_NAME}
+Comment=UAS ground control station
+Icon=${QGC_CUSTOM_APP_ICON_NAME}
+Exec=AppRun
+Terminal=false
+Categories=Utility;
+Keywords=computer;
+EOF
+  echo "Creating AppImage for UP"
+fi
 
 VERSION=$(strings ${APPDIR}/${QGC_CUSTOM_BINARY_NAME} | grep '^v[0-9*]\.[0-9*].[0-9*]' | head -n 1)
 echo ${QGC_CUSTOM_APP_NAME} Version: ${VERSION}
