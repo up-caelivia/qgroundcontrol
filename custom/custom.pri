@@ -2,8 +2,14 @@ message("Adding Custom Plugin")
 
 #-- Version control
 # Build number is automatic
-# Get the latest tag matching the pattern v*-UP
-GIT_TAG = $$system(git describe --tags --abbrev=0 --match "v*-UP")
+
+exists($$PWD/create_ABLUO) {
+    # Get the latest tag matching the pattern v*-ABLUO
+    GIT_TAG = $$system(git describe --tags --abbrev=0 --match "v*-ABLUO")
+} else {
+    # Get the latest tag matching the pattern v*-UP
+    GIT_TAG = $$system(git describe --tags --abbrev=0 --match "v*-UP")
+}
 
 # Get short commit hash
 GIT_HASH = $$system(git rev-parse --short HEAD)
@@ -57,19 +63,40 @@ DEFINES += CUSTOMHEADER=\"\\\"CustomPlugin.h\\\"\"
 DEFINES += CUSTOMCLASS=CustomPlugin
 DEFINES += CUSTOMCORE_PLUGIN=CustomPlugin
 
-TARGET   = QGroundControlUP
-DEFINES += QGC_APPLICATION_NAME='"\\\"QGroundControlUP\\\""'
+exists($$PWD/create_ABLUO) {
+    TARGET   = QGroundControlABLUO
+    DEFINES += QGC_APPLICATION_NAME='"\\\"QGroundControlABLUO\\\""'
+    QGC_APP_NAME        = "QGroundControlABLUO"
+    QGC_BINARY_NAME     = "QGroundControlABLUO"
+    QGC_APP_DESCRIPTION = "QGroundControl ABLUO"
+   
+    manifest_copy_target.target = $$PWD/android/AndroidManifest.xml
+    manifest_copy_target.commands = \
+        $$QMAKE_COPY $$PWD/android/AndroidManifest_ABLUO.xml $$PWD/android/AndroidManifest.xml
+    PRE_TARGETDEPS += $$manifest_copy_target.target
+    QMAKE_EXTRA_TARGETS += manifest_copy_target
+
+} else {
+    TARGET   = QGroundControlUP
+    DEFINES += QGC_APPLICATION_NAME='"\\\"QGroundControlUP\\\""'
+    QGC_APP_NAME        = "QGroundControlUP"
+    QGC_BINARY_NAME     = "QGroundControlUP"
+    QGC_APP_DESCRIPTION = "QGroundControl UP"
+   
+    manifest_copy_target.target = $$PWD/android/AndroidManifest.xml
+    manifest_copy_target.commands = \
+        $$QMAKE_COPY $$PWD/android/AndroidManifest_UP.xml $$PWD/android/AndroidManifest.xml
+    PRE_TARGETDEPS += $$manifest_copy_target.target
+    QMAKE_EXTRA_TARGETS += manifest_copy_target
+}
 
 DEFINES += QGC_ORG_NAME=\"\\\"qgroundcontrol.org\\\"\"
 DEFINES += QGC_ORG_DOMAIN=\"\\\"org.qgroundcontrol\\\"\"
 
 
-QGC_APP_NAME        = "QGroundControlUP"
-QGC_BINARY_NAME     = "QGroundControlUP"
 QGC_ORG_NAME        = "UP Caeli Via"
 QGC_ORG_DOMAIN      = "www.up-caelivia.it"
 QGC_ANDROID_PACKAGE = "org.custom.qgroundcontrol"
-QGC_APP_DESCRIPTION = "QGroundControl UP"
 QGC_APP_COPYRIGHT   = "Copyright (C) 2020 QGroundControl Development Team. All rights reserved."
 
 

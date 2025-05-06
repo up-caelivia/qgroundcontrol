@@ -10,12 +10,21 @@ fi
 
 QGC_SRC=$(readlink -f $1)
 
-QGC_CUSTOM_APP_NAME="${QGC_CUSTOM_APP_NAME:-QGroundControlUP}"
-QGC_CUSTOM_GENERIC_NAME="${QGC_CUSTOM_GENERIC_NAME:-Ground Control Station}"
-QGC_CUSTOM_BINARY_NAME="${QGC_CUSTOM_BINARY_NAME:-QGroundControlUP}"
-QGC_CUSTOM_LINUX_START_SH="${QGC_CUSTOM_LINUX_START_SH:-${QGC_SRC}/deploy/qgroundcontrol-start.sh}"
-QGC_CUSTOM_APP_ICON="${QGC_CUSTOM_APP_ICON:-${QGC_SRC}/custom/resources/icons/qgroundcontrol.png}"
-QGC_CUSTOM_APP_ICON_NAME="${QGC_CUSTOM_APP_ICON_NAME:-QGroundControlUP}"
+if [ -e "../custom/create_ABLUO" ]; then
+  QGC_CUSTOM_APP_NAME="${QGC_CUSTOM_APP_NAME:-QGroundControlABLUO}"
+  QGC_CUSTOM_GENERIC_NAME="${QGC_CUSTOM_GENERIC_NAME:-Ground Control Station}"
+  QGC_CUSTOM_BINARY_NAME="${QGC_CUSTOM_BINARY_NAME:-QGroundControlABLUO}"
+  QGC_CUSTOM_LINUX_START_SH="${QGC_CUSTOM_LINUX_START_SH:-${QGC_SRC}/deploy/qgroundcontrol-start.sh}"
+  QGC_CUSTOM_APP_ICON="${QGC_CUSTOM_APP_ICON:-${QGC_SRC}/custom/resources/icons/qgroundcontrol.png}"
+  QGC_CUSTOM_APP_ICON_NAME="${QGC_CUSTOM_APP_ICON_NAME:-QGroundControlABLUO}"
+else
+  QGC_CUSTOM_APP_NAME="${QGC_CUSTOM_APP_NAME:-QGroundControlUP}"
+  QGC_CUSTOM_GENERIC_NAME="${QGC_CUSTOM_GENERIC_NAME:-Ground Control Station}"
+  QGC_CUSTOM_BINARY_NAME="${QGC_CUSTOM_BINARY_NAME:-QGroundControlUP}"
+  QGC_CUSTOM_LINUX_START_SH="${QGC_CUSTOM_LINUX_START_SH:-${QGC_SRC}/deploy/qgroundcontrol-start.sh}"
+  QGC_CUSTOM_APP_ICON="${QGC_CUSTOM_APP_ICON:-${QGC_SRC}/custom/resources/icons/qgroundcontrol.png}"
+  QGC_CUSTOM_APP_ICON_NAME="${QGC_CUSTOM_APP_ICON_NAME:-QGroundControlUP}"
+fi
 
 if [ ! -f ${QGC_SRC}/qgroundcontrol.pro ]; then
   echo "please specify path to ${QGC_CUSTOM_APP_NAME} source as the 1st argument"
