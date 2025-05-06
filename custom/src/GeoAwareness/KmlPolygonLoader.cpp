@@ -56,6 +56,21 @@ bool KmlPolygonLoader::loadFromKmlFile(const QString& filePath) {
         qgcApp()->showAppMessage(QString("Failed to parse KML"));
         return false;
     }
+
+    QDomElement root = doc.documentElement();
+    QDomElement documentElem = root.firstChildElement("Document");
+    if (!documentElem.isNull()) {
+        QDomElement nameElem = documentElem.firstChildElement("name");
+        if (!nameElem.isNull()) {
+            QString docName = nameElem.text();
+            if (docName.contains("UP caeli via exported database", Qt::CaseSensitive)) {
+                parseUpCaeliViaKml(doc);
+                emit polygonsChanged();
+                return true;                
+            }
+        }
+    }
+
     parseSwissCyprusKml(doc);
 
     emit polygonsChanged();
@@ -223,6 +238,73 @@ void KmlPolygonLoader::parseSwissCyprusKml(const QDomDocument& doc) {
         ));
     }
 }
+
+void KmlPolygonLoader::parseUpCaeliViaKml(const QDomDocument& doc) {
+    QDomNodeList placemarksList = doc.elementsByTagName("Placemark");
+    for (int i = 0; i < placemarksList.count(); ++i) {
+        QDomElement placemark =placemarksList.at(i).toElement();
+        QString name = placemark.firstChildElement("name").text().trimmed();
+        QString id, description;
+        QDateTime activationDate, deactivationDate;
+        int hmin = 0;
+        int hmax = 9999;
+        QColor color = Qt::red;
+        QList<QGeoCoordinate> coordinates;
+
+        // Parse <ExtendedData>
+        QDomElement extData = placemark.firstChildElement("ExtendedData");
+        if (!extData.isNull()) {
+            QDomNodeList simpleDataList = extData.elementsByTagName("SimpleData");
+            for (int i = 0; i < simpleDataList.count(); ++i) {
+                QDomElement dataElem = simpleDataList.at(i).toElement();
+                QString key = dataElem.attribute("name");
+                QString value = dataElem.text().trimmed();
+
+                if (key == "Identifier") id = value;
+                else if (key == "Message") description = value.replace("&#10;", "\n");
+                else if (key == "StartDate") activationDate = QDateTime::fromString(value, Qt::ISODate);
+                else if (key == "EndDate") deactivationDate = QDateTime::fromString(value, Qt::ISODate);
+                else if (key == "LowerLimit") hmin = value.toInt();
+                else if (key == "UpperLimit") hmax = value.toInt();
+                else if (key == "Name_en") name = value.trimmed();
+                else if (key == "Color") color = QColor(value);
+            }
+        }
+
+        QDomElement polygon = placemark.firstChildElement("Polygon");
+        if (!polygon.isNull()) {
+            // Outer boundary
+            QDomElement outerBoundary = polygon.firstChildElement("outerBoundaryIs");
+            QDomElement linearRing = outerBoundary.firstChildElement("LinearRing");
+            QDomElement coordElement = linearRing.firstChildElement("coordinates");
+
+            QStringList coordPairs = coordElement.text().trimmed().split(' ', Qt::SkipEmptyParts);
+
+            for (const QString& pair : coordPairs) {
+                QStringList latlon = pair.split(',', Qt::SkipEmptyParts);
+
+                if (latlon.size() >= 2) {
+                    coordinates.append(QGeoCoordinate(latlon[1].toDouble(), latlon[0].toDouble()));
+                }
+            }
+        }
+
+        // Create and store the polygon object
+        _polygonObjects.append(new KmlPolygonObject(
+            name,
+            coordinates,
+            color,  
+            hmin,
+            hmax,
+            id,
+            description,
+            activationDate,
+            deactivationDate,
+            this
+        ));
+    }
+}
+
 
 void KmlPolygonLoader::parseItalyFinnishGermanJson(const QJsonObject& root) {
     QJsonArray features = root["features"].toArray();
@@ -482,7 +564,6 @@ bool KmlPolygonLoader::checkDronePosition(){
                 if (_selectedPolygon != polygon) {
                     _selectedPolygon = polygon;
                     QString msg = QString( "drone violated the geo-awareness zone");
-                    qDebug() << msg;
                     qgcApp()->toolbox()->audioOutput()->say(msg);
                     return true;
                 }
@@ -492,4 +573,85 @@ bool KmlPolygonLoader::checkDronePosition(){
     }
     _selectedPolygon = nullptr;
     return false;
+}
+
+bool KmlPolygonLoader::exportToKmlFile(const QString& filePath) {
+    QDomDocument doc;
+    
+    QDomElement kmlElem = doc.createElement("kml");
+    kmlElem.setAttribute("xmlns", "http://www.opengis.net/kml/2.2");
+    doc.appendChild(kmlElem);
+
+    QDomElement docElem = doc.createElement("Document");
+    kmlElem.appendChild(docElem);
+
+    // Titolo del documento
+    QDomElement titleElem = doc.createElement("name");
+    titleElem.appendChild(doc.createTextNode("UP caeli via exported database"));
+    docElem.appendChild(titleElem);
+
+    for (QObject* obj : _polygonObjects) {
+        auto* poly = qobject_cast<KmlPolygonObject*>(obj);
+        if (!poly) continue;
+
+        QDomElement placemark = doc.createElement("Placemark");
+
+        // <name>
+        QDomElement nameElem = doc.createElement("name");
+        nameElem.appendChild(doc.createTextNode(poly->name()));
+        placemark.appendChild(nameElem);
+
+        // <ExtendedData>
+        QDomElement extData = doc.createElement("ExtendedData");
+
+        auto appendSimpleData = [&](const QString& name, const QString& value) {
+            QDomElement simple = doc.createElement("SimpleData");
+            simple.setAttribute("name", name);
+            simple.appendChild(doc.createTextNode(value));
+            extData.appendChild(simple);
+        };
+
+        appendSimpleData("Identifier", poly->id());
+        appendSimpleData("Message", poly->description().replace("\n", "&#10;")); 
+        appendSimpleData("LowerLimit", QString::number(poly->hmin()));
+        appendSimpleData("UpperLimit", QString::number(poly->hmax()));
+        appendSimpleData("StartDate", poly->activationDate().toString(Qt::ISODate));
+        appendSimpleData("EndDate", poly->deactivationDate().toString(Qt::ISODate));
+        appendSimpleData("Color", poly->color().name());    
+        placemark.appendChild(extData);
+
+        // <Polygon>
+        QDomElement polygon = doc.createElement("Polygon");
+
+        QDomElement outerBoundary = doc.createElement("outerBoundaryIs");
+        QDomElement linearRing = doc.createElement("LinearRing");
+        QDomElement coordElem = doc.createElement("coordinates");
+
+        QString coordText;
+        for (const QVariant& var : poly->coordinates()) {
+            QGeoCoordinate coord = var.value<QGeoCoordinate>();
+            coordText += QString::number(coord.longitude(), 'f', 8) + "," +
+                         QString::number(coord.latitude(), 'f', 8) + ",0 ";
+        }
+        coordElem.appendChild(doc.createTextNode(coordText.trimmed()));
+        linearRing.appendChild(coordElem);
+        outerBoundary.appendChild(linearRing);
+        polygon.appendChild(outerBoundary);
+
+        placemark.appendChild(polygon);
+        docElem.appendChild(placemark);
+    }
+
+    QFile file(filePath);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        qWarning() << "Failed to write KML file:" << filePath;
+        return false;
+    }
+
+    QTextStream out(&file);
+    doc.save(out, 4);
+    file.close();
+
+    qDebug() << "Exported polygons to KML:" << filePath;
+    return true;
 }

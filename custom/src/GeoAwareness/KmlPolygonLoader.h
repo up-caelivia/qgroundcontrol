@@ -22,6 +22,7 @@ public:
     Q_INVOKABLE void selectPolygon(QObject* polygon);
     QObject* selectedPolygon() const;
     Q_INVOKABLE bool checkDronePosition();
+    Q_INVOKABLE bool exportToKmlFile(const QString& filePath);
 
 signals:
     void polygonsChanged();
@@ -33,6 +34,7 @@ private:
 
     bool loadFromKmlFile(const QString& filePath);
     void parseSwissCyprusKml(const QDomDocument& doc);
+    void parseUpCaeliViaKml(const QDomDocument& doc);
 
     bool loadFromJsonFile(const QString& filePath);
     void parseItalyFinnishGermanJson(const QJsonObject& root);

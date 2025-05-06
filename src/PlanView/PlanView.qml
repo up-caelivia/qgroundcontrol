@@ -91,6 +91,11 @@ Item {
             KmlPolygonLoader.loadFromFile(file.toString().replace("file://", ""))
             close()
         }
+
+        onAcceptedForSave: {
+            KmlPolygonLoader.exportToKmlFile(file.toString().replace("file://", ""))
+            close()
+        }
     }
 
     MapFitFunctions {
@@ -587,7 +592,6 @@ Item {
                         showAlternateIcon:      _planMasterController.dirty
                         iconSource:             "/qmlimages/MapSync.svg"
                         alternateIconSource:    "/qmlimages/MapSyncChanged.svg"
-                        //onTriggered:            kmlFileDialog.openForLoad()
                         dropPanelComponent:     ugzDropPanel
                     },
                     ToolStripAction {
@@ -1176,13 +1180,22 @@ Item {
 
                 QGCButton {
                     text: qsTr("Add from file")
-                    onClicked: kmlFileDialog.openForLoad()
+                    
+                    onClicked: {
+                        kmlFileDialog.title=qsTr("Select KML/JSON File")
+                        kmlFileDialog.selectExisting = true
+                        kmlFileDialog.nameFilters = [ "KML/JSON Files (*.kml *.json *.geojson)" ]
+                        kmlFileDialog.openForLoad()
+                    }
                 }
 
                 QGCButton {
                     text: qsTr("Replace from file")
                     onClicked: {
                         KmlPolygonLoader.clearPolygons()
+                        kmlFileDialog.title=qsTr("Select KML/JSON File")
+                        kmlFileDialog.selectExisting = true
+                        kmlFileDialog.nameFilters = [ "KML/JSON Files (*.kml *.json *.geojson)" ]
                         kmlFileDialog.openForLoad()
                     }
                 }
@@ -1190,8 +1203,11 @@ Item {
                 QGCButton {
                     text: qsTr("Export KML file")
                     onClicked: {
-                        //KmlPolygonLoader.clearPolygons()
-                        //kmlFileDialog.openForLoad()
+                        //KmlPolygonLoader.clearPolygons()                        
+                        kmlFileDialog.title =          qsTr("Save KML")
+                        kmlFileDialog.selectExisting = false
+                        kmlFileDialog.nameFilters =    ShapeFileHelper.fileDialogKMLFilters
+                        kmlFileDialog.openForSave()
                     }
                 }
             }
