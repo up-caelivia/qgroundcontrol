@@ -82,6 +82,8 @@ exists($$PWD/create_ABLUO) {
     PRE_TARGETDEPS += $$images_copy_target.target
     QMAKE_EXTRA_TARGETS += images_copy_target
 
+    DEFINES += ABLUO_APP
+
 } else {
     TARGET   = QGroundControlUP
     DEFINES += QGC_APPLICATION_NAME='"\\\"QGroundControlUP\\\""'

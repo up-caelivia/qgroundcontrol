@@ -119,7 +119,7 @@ Item {
         QGCLabel {
             anchors.horizontalCenter:   gpsValuesColumn.horizontalCenter
             visible:                    _activeVehicle
-            color:                      qgcPal.buttonText
+            color:                      Constants.isABLUOApp ? qgcPal.text : qgcPal.buttonText
             text:                       _activeVehicle ? _activeVehicle.gps.count.valueString : ""
         }
 
