@@ -86,6 +86,7 @@ jobs:
       - name: Build
         working-directory: ${{ runner.temp }}/shadow_build_dir
         run:  |
+              touch ${SOURCE_DIR}/custom/create_ABLUO
               qmake -r ${SOURCE_DIR}/qgroundcontrol.pro CONFIG+=installer CONFIG+=${BUILD_TYPE}
               make -j16
 

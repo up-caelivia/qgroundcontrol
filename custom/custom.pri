@@ -75,6 +75,12 @@ exists($$PWD/create_ABLUO) {
         $$QMAKE_COPY $$PWD/android/AndroidManifest_ABLUO.xml $$PWD/android/AndroidManifest.xml
     PRE_TARGETDEPS += $$manifest_copy_target.target
     QMAKE_EXTRA_TARGETS += manifest_copy_target
+   
+    images_copy_target.target = $$PWD/android/res
+    images_copy_target.commands = \
+        $$QMAKE_COPY_DIR $$PWD/android/res_ABLUO $$PWD/android/res
+    PRE_TARGETDEPS += $$images_copy_target.target
+    QMAKE_EXTRA_TARGETS += images_copy_target
 
 } else {
     TARGET   = QGroundControlUP
@@ -88,6 +94,12 @@ exists($$PWD/create_ABLUO) {
         $$QMAKE_COPY $$PWD/android/AndroidManifest_UP.xml $$PWD/android/AndroidManifest.xml
     PRE_TARGETDEPS += $$manifest_copy_target.target
     QMAKE_EXTRA_TARGETS += manifest_copy_target
+   
+    images_copy_target.target = $$PWD/android/res
+    images_copy_target.commands = \
+        $$QMAKE_COPY_DIR $$PWD/android/res_UP $$PWD/android/res
+    PRE_TARGETDEPS += $$images_copy_target.target
+    QMAKE_EXTRA_TARGETS += images_copy_target
 }
 
 DEFINES += QGC_ORG_NAME=\"\\\"qgroundcontrol.org\\\"\"
