@@ -8,6 +8,7 @@ MapItemView {
     // Il modello da usare (può essere esterno o di default)
     property var polygonModel: []
     property var showBorder: true
+    property var map
 
     model: polygonModel
 
@@ -22,8 +23,24 @@ MapItemView {
         MouseArea {
             anchors.fill: parent
             hoverEnabled: true
+
+            property var lastClickTime: 0
+            property var doubleClickThreshold: 250 // ms
+
             onClicked: {
-                KmlPolygonLoader.selectPolygon(modelData)
+                var currentTime = Date.now()
+                if (currentTime - lastClickTime < doubleClickThreshold) {
+                    if (map){
+                        var globalPoint = mapToItem(map, Qt.point(mouse.x, mouse.y))
+                        var clickedCoord = map.toCoordinate(globalPoint, false)
+                        console.log(clickedCoord)
+                        var listObj = KmlPolygonLoader.checkPolygonsInPoint(clickedCoord)
+                        root.showPolygonMenuAtMouse(mouse.x, mouse.y, listObj)
+                    }
+                } else {
+                    KmlPolygonLoader.selectPolygon(modelData)
+                }
+                lastClickTime = currentTime
             }
         }
     }

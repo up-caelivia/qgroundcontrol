@@ -18,10 +18,11 @@ public:
     Q_INVOKABLE bool loadFromFile(const QString& filePath);
     QList<QObject*> polygons() const;
     Q_INVOKABLE void clearPolygons();
-    Q_INVOKABLE void removePolygon(QObject* polygon);
+    Q_INVOKABLE void removePolygon(QObject* polygon, bool forceUnselect = false);
     Q_INVOKABLE void selectPolygon(QObject* polygon);
     QObject* selectedPolygon() const;
     Q_INVOKABLE bool checkDronePosition();
+    Q_INVOKABLE QList<QObject*> checkPolygonsInPoint(const QGeoCoordinate& clickCoord);
     Q_INVOKABLE bool exportToKmlFile(const QString& filePath);
 
 signals:

@@ -15,6 +15,7 @@ QGCFlickable {
     clip:           true
 
     property var    polygonGeoAwareness: []
+    property var    kmlPolygonLoader: []
 
     readonly property real  _editFieldWidth:    Math.min(width - _margin * 2, ScreenTools.defaultFontPixelWidth * 15)
     readonly property real  _margin:            ScreenTools.defaultFontPixelWidth / 2
@@ -162,6 +163,22 @@ QGCFlickable {
                         wrapMode:           Text.WordWrap
                         text:               polygonGeoAwareness.description
                         visible:            descriptionSection.checked
+                    }
+
+                    SectionHeader {
+                        id:             actionSection
+                        anchors.left:   parent.left
+                        anchors.right:  parent.right
+                        text:           qsTr( "Actions")
+                    }
+
+                    QGCButton {
+                        Layout.fillWidth: true
+                        text: qsTr("Delete")
+                        visible: true
+                        onClicked: {
+                            kmlPolygonLoader.removePolygon(polygonGeoAwareness, true);
+                        }
                     }
 
                 }

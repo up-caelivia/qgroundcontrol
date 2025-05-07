@@ -477,6 +477,7 @@ Item {
     
             KmlPolygonOverlay {
                 polygonModel: KmlPolygonLoader.polygons
+                map: editorMap
             }               
 
             // UI for splitting the current segment
@@ -825,6 +826,7 @@ Item {
                 anchors.left:           parent.left
                 anchors.right:          parent.right
                 polygonGeoAwareness:    KmlPolygonLoader.selectedPolygon
+                kmlPolygonLoader:       KmlPolygonLoader
                 visible:                _editingLayer == _layerAwareness && KmlPolygonLoader.selectedPolygon
             }
         }
@@ -1202,8 +1204,7 @@ Item {
 
                 QGCButton {
                     text: qsTr("Export KML file")
-                    onClicked: {
-                        //KmlPolygonLoader.clearPolygons()                        
+                    onClicked: {                     
                         kmlFileDialog.title =          qsTr("Save KML")
                         kmlFileDialog.selectExisting = false
                         kmlFileDialog.nameFilters =    ShapeFileHelper.fileDialogKMLFilters
@@ -1246,12 +1247,9 @@ Item {
                         onClicked: {
                             var currentTime = Date.now()
                             if (currentTime - lastClickTime < doubleClickThreshold) {
-                                //console.log("Double click on", modelData.name)
                                 fitPolygonToMap(modelData.coordinates)
-                                //editorMap.center = QtPositioning.coordinate(modelData.coordinates[0].latitude, modelData.coordinates[0].longitude)
                             } else {
-                                //console.log("single click on", modelData.name)
-                                KmlPolygonLoader.selectPolygon(modelData) // o altra azione
+                                KmlPolygonLoader.selectPolygon(modelData) 
                             }
                             lastClickTime = currentTime
                         }
@@ -1373,5 +1371,5 @@ Item {
                 }
             }
         }
-}
+    }
 }
