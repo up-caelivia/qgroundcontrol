@@ -5,7 +5,6 @@
 #include "QGCToolbox.h"
 #include "GeoFenceController.h"
 #include "QGCMapPolygon.h"
-#include "GeoAwarenessFencePolygon.h"
 
 #include "Vehicle.h"
 #include "MultiVehicleManager.h"

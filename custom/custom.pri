@@ -137,7 +137,6 @@ SOURCES += \
     $$PWD/src/CustomAnnouncer.cpp \
     $$PWD/src/VideoStreamControl.cc \
     $$PWD/src/GeoAwareness/KmlPolygonObject.cpp \
-    $$PWD/src/GeoAwareness/GeoAwarenessFencePolygon.cpp \
     $$PWD/src/GeoAwareness/KmlPolygonLoader.cpp
 
 HEADERS += \
@@ -148,7 +147,6 @@ HEADERS += \
     $$PWD/src/CustomAnnouncer.h \
     $$PWD/src/VideoStreamControl.h \
     $$PWD/src/GeoAwareness/KmlPolygonObject.h \
-    $$PWD/src/GeoAwareness/GeoAwarenessFencePolygon.h \
     $$PWD/src/GeoAwareness/KmlPolygonLoader.h
 
 INCLUDEPATH += $$PWD/src \
