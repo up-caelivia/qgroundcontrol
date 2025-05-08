@@ -337,7 +337,7 @@ Item {
                         QGCButton {
                             text: qsTr("Select")
                             onClicked: {
-                                KmlPolygonLoader.selectPolygon(modelData)
+                                KmlPolygonLoader.selectPolygon(modelData, true)
                                 polygonClickMenu.close()
                             }
                         }
@@ -578,6 +578,7 @@ Item {
                 map: editorMap
                 popupMenuComponent: polygonRightClickMenu
                 root: _root 
+                selectedPolygon: KmlPolygonLoader.selectedPolygon
             }               
 
             // UI for splitting the current segment
@@ -927,7 +928,7 @@ Item {
                 anchors.right:          parent.right
                 polygonGeoAwareness:    KmlPolygonLoader.selectedPolygon
                 kmlPolygonLoader:       KmlPolygonLoader
-                visible:                _editingLayer == _layerAwareness && KmlPolygonLoader.selectedPolygon
+                visible:                _editingLayer == _layerAwareness && KmlPolygonLoader.selectedPolygon !== null
                 callback:               _root
             }
         }
@@ -1350,7 +1351,7 @@ Item {
                             if (currentTime - lastClickTime < doubleClickThreshold) {
                                 fitPolygonToMap(modelData.coordinates)
                             } else {
-                                KmlPolygonLoader.selectPolygon(modelData) 
+                                KmlPolygonLoader.selectPolygon(modelData, true) 
                             }
                             lastClickTime = currentTime
                         }

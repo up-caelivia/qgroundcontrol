@@ -19,7 +19,7 @@ public:
     QList<QObject*> polygons() const;
     Q_INVOKABLE void clearPolygons();
     Q_INVOKABLE void removePolygon(QObject* polygon, bool forceUnselect = false);
-    Q_INVOKABLE void selectPolygon(QObject* polygon);
+    Q_INVOKABLE void selectPolygon(QObject* polygon, bool forceSelect = false);
     QObject* selectedPolygon() const;
     Q_INVOKABLE bool checkDronePosition();
     Q_INVOKABLE QList<QObject*> checkPolygonsInPoint(const QGeoCoordinate& clickCoord);
@@ -32,6 +32,7 @@ signals:
 private:
     QList<QObject*> _polygonObjects;
     QObject* _selectedPolygon = nullptr;
+    QObject* _selectedPolygonFence = nullptr;
 
     bool loadFromKmlFile(const QString& filePath);
     void parseSwissCyprusKml(const QDomDocument& doc);

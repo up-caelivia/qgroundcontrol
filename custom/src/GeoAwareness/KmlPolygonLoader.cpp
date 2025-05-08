@@ -536,11 +536,13 @@ void KmlPolygonLoader::removePolygon(QObject* polygon, bool forceUnselect) {
     }
 }
 
-void KmlPolygonLoader::selectPolygon(QObject* polygon) {
-    if (_selectedPolygon != polygon) {
-        _selectedPolygon = polygon;
-        emit selectedPolygonChanged(); 
+void KmlPolygonLoader::selectPolygon(QObject* polygon, bool forceSelect) {
+    if ((_selectedPolygon != polygon) || forceSelect) {
+        _selectedPolygon = polygon;        
+    } else {
+        _selectedPolygon = nullptr;
     }
+    emit selectedPolygonChanged(); 
 }
 
 QObject* KmlPolygonLoader::selectedPolygon() const {
@@ -559,17 +561,16 @@ bool KmlPolygonLoader::checkDronePosition(){
         auto* polygon = qobject_cast<KmlPolygonObject*>(obj);
         if (polygon && polygon->contains(dronePos)) {
             if (dronePos.altitude() > polygon->hmin()) {                
-                if (_selectedPolygon != polygon) {
-                    _selectedPolygon = polygon;
+                if (_selectedPolygonFence != polygon) {
+                    _selectedPolygonFence = polygon;
                     QString msg = QString( "drone violated the geo-awareness zone");
                     qgcApp()->toolbox()->audioOutput()->say(msg);
                     return true;
                 }
-                return false;
             }
         }
     }
-    _selectedPolygon = nullptr;
+    _selectedPolygonFence = nullptr;
     return false;
 }
 

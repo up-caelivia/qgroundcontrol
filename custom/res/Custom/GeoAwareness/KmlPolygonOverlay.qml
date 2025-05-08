@@ -11,6 +11,7 @@ MapItemView {
     property var map
     property Component popupMenuComponent
     property var root
+    property var selectedPolygon: []
 
     model: polygonModel
 
@@ -18,8 +19,8 @@ MapItemView {
         path: modelData.coordinates
         color: modelData.color
         border.color: modelData.color
-        border.width: showBorder ? 2 : 0
-        opacity: showBorder ? 0.4 : 0.2
+        border.width: showBorder ? (selectedPolygon==modelData ? 4: 2) : 0
+        opacity: showBorder ? (selectedPolygon==modelData ? 0.6: 0.4) : 0.2
         z: 100
 
         MouseArea {
