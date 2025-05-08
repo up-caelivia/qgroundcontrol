@@ -69,6 +69,20 @@ exists($$PWD/create_ABLUO) {
     QGC_APP_NAME        = "QGroundControlABLUO"
     QGC_BINARY_NAME     = "QGroundControlABLUO"
     QGC_APP_DESCRIPTION = "QGroundControl ABLUO"
+   
+    manifest_copy_target.target = $$PWD/android/AndroidManifest.xml
+    manifest_copy_target.commands = \
+        $$QMAKE_COPY $$PWD/android/AndroidManifest_ABLUO.xml $$PWD/android/AndroidManifest.xml
+    PRE_TARGETDEPS += $$manifest_copy_target.target
+    QMAKE_EXTRA_TARGETS += manifest_copy_target
+    message(copy AndroidManifest_ABLUO)
+   
+    images_copy_target.target = $$PWD/android/res
+    images_copy_target.commands = \
+        $$QMAKE_COPY_DIR \"$$PWD/android/res_ABLUO\" \"$$PWD/android/res\"
+    PRE_TARGETDEPS += $$images_copy_target.target
+    QMAKE_EXTRA_TARGETS += images_copy_target
+    message(copy res_ABLUO)
 
     DEFINES += ABLUO_APP
 
@@ -78,6 +92,21 @@ exists($$PWD/create_ABLUO) {
     QGC_APP_NAME        = "QGroundControlUP"
     QGC_BINARY_NAME     = "QGroundControlUP"
     QGC_APP_DESCRIPTION = "QGroundControl UP"
+    linux {
+        manifest_copy_target.target = $$PWD/android/AndroidManifest.xml
+        manifest_copy_target.commands = \
+            $$QMAKE_COPY $$PWD/android/AndroidManifest_UP.xml $$PWD/android/AndroidManifest.xml
+        PRE_TARGETDEPS += $$manifest_copy_target.target
+        QMAKE_EXTRA_TARGETS += manifest_copy_target
+        message("copy AndroidManifest_UP")
+   
+        images_copy_target.target = $$PWD/android/res
+        images_copy_target.commands = \
+            $$QMAKE_COPY_DIR $$PWD/android/res_UP $$PWD/android/res
+        PRE_TARGETDEPS += $$images_copy_target.target
+        QMAKE_EXTRA_TARGETS += images_copy_target
+        message("copy res_UP")
+    }
 }
 
 DEFINES += QGC_ORG_NAME=\"\\\"qgroundcontrol.org\\\"\"

@@ -145,6 +145,7 @@ jobs:
           ANDROID_NDK_LATEST_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
           ANDROID_NDK: ${{ steps.setup-ndk.outputs.ndk-path }}
         run:  |
+            mkdir -p ${SOURCE_DIR}/custom/android/res
             cp -rf ${SOURCE_DIR}/custom/android/res_UP/* ${SOURCE_DIR}/custom/android/res
             cp -rf ${SOURCE_DIR}/custom/android/AndroidManifest_UP.xml ${SOURCE_DIR}/custom/android/AndroidManifest.xml
             qmake -r ${SOURCE_DIR}/qgroundcontrol.pro -spec android-clang CONFIG+=${BUILD_TYPE} CONFIG+=installer ANDROID_ABIS="${{ matrix.eabi }}"
