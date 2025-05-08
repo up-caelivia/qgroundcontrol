@@ -286,8 +286,17 @@ Item {
         focus: true
 
         property var polygons: []
+        
+        Timer {
+            id: popupSizeFixTimer
+            interval: 30
+            repeat: false
+            onTriggered: {
+                showAtMouse(polygonClickMenu.x, polygonClickMenu.y, polygonClickMenu.polygons, true)
+            }
+        }
 
-        function showAtMouse(mouseX, mouseY, polygonData) {
+        function showAtMouse(mouseX, mouseY, polygonData, secondStep = false) {
             polygonClickMenu.polygons = polygonData
 
             var newX = mouseX
@@ -306,6 +315,9 @@ Item {
             x = newX
             y = newY
             open()
+            if (!secondStep) {
+                popupSizeFixTimer.start()
+            }
         }
 
         background: Rectangle {
@@ -447,7 +459,7 @@ Item {
 
     function showPolygonMenuAtMouse(mouseX, mouseY, polygonsAtPoint) {
         if (polygonsAtPoint.length > 0) {
-            polygonClickMenu.showAtMouse(mouseX, mouseY, polygonsAtPoint)
+            polygonClickMenu.showAtMouse(mouseX, mouseY, polygonsAtPoint, false)
         }
     }
 
@@ -1332,7 +1344,7 @@ Item {
 
             ListView {
                 Layout.fillWidth: true
-                Layout.preferredHeight: Screen.height * 0.20
+                Layout.preferredHeight: Screen.height * 0.50
                 clip: true
                 model: KmlPolygonLoader.polygons                
                 visible: renameDialog.visible === false

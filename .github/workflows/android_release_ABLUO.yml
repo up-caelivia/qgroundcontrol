@@ -146,7 +146,8 @@ jobs:
           ANDROID_NDK: ${{ steps.setup-ndk.outputs.ndk-path }}
         run:  |
             touch ${SOURCE_DIR}/custom/create_ABLUO
-            touch ${SOURCE_DIR}/custom/create_ABLUO
+            cp -rf ${SOURCE_DIR}/custom/android/res_ABLUO/* ${SOURCE_DIR}/custom/android/res
+            cp -rf ${SOURCE_DIR}/custom/android/AndroidManifest_ABLUO.xml ${SOURCE_DIR}/custom/android/AndroidManifest.xml
             qmake -r ${SOURCE_DIR}/qgroundcontrol.pro -spec android-clang CONFIG+=${BUILD_TYPE} CONFIG+=installer ANDROID_ABIS="${{ matrix.eabi }}"
             make -j16
 

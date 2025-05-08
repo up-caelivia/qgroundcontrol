@@ -26,6 +26,7 @@ MapItemView {
         MouseArea {
             anchors.fill: parent
             hoverEnabled: true
+            acceptedButtons: Qt.LeftButton
 
             property var lastClickTime: 0
             property var doubleClickThreshold: 250 // ms
