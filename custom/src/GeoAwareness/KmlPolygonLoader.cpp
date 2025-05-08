@@ -27,18 +27,68 @@ KmlPolygonLoader* KmlPolygonLoader::instance() {
     return _instance;
 }
 
-bool KmlPolygonLoader::loadFromFile(const QString& filePath) {
+bool KmlPolygonLoader::loadFromFile(const QString& filePath, const QVariantList& polygonCoords) {
+    bool returnValue = false;
     if (filePath.endsWith(".kml", Qt::CaseInsensitive)) {
-        return loadFromKmlFile(filePath);
+        returnValue = loadFromKmlFile(filePath);
     } else if (filePath.endsWith(".json", Qt::CaseInsensitive)) {
-        return loadFromJsonFile(filePath);
+        returnValue = loadFromJsonFile(filePath);
     } else if (filePath.endsWith(".geojson", Qt::CaseInsensitive)) {
-        return loadFromJsonFile(filePath);
+        returnValue = loadFromJsonFile(filePath);
     } else {
         qWarning() << "Unsupported file format:" << filePath;
         qgcApp()->showAppMessage(QString("Unsupported file format: %1").arg(filePath));
-        return false;
     }
+    
+    if (!returnValue || polygonCoords.isEmpty()) {
+        emit polygonsChanged();
+        return returnValue;
+    }
+
+    // Convert QVariantList to QList<QGeoCoordinate>
+    QList<QGeoCoordinate> boundaryPolygon;
+    for (const QVariant& var : polygonCoords) {
+        boundaryPolygon.append(var.value<QGeoCoordinate>());
+    }
+
+    // Keep polygons that have at least one point inside the boundary
+    QList<QObject*> validPolygons;
+    for (QObject* obj : _polygonObjects) {
+        KmlPolygonObject* polygon = qobject_cast<KmlPolygonObject*>(obj);
+        if (!polygon)
+            continue;
+
+        const QVariantList& coordsVarList = polygon->coordinates();
+        bool hasPointInside = false;
+
+        // 1. Check if at least one point of the polygon is inside the reference area
+        for (const QVariant& v : coordsVarList) {
+            QGeoCoordinate pt = v.value<QGeoCoordinate>();
+            if (isPointInPolygon(pt, boundaryPolygon)) {
+                hasPointInside = true;
+                break;
+            }
+        }
+
+        // 2. Or: all reference boundary points are inside this polygon
+        bool containsArea = true;
+        for (const QGeoCoordinate& pt : boundaryPolygon) {
+            if (!polygon->contains(pt)) {
+                containsArea = false;
+                break;
+            }
+        }
+
+        if (hasPointInside || containsArea) {
+            validPolygons.append(polygon);
+        } else {
+            polygon->deleteLater();
+        }
+    }
+
+    _polygonObjects = validPolygons;
+    emit polygonsChanged();
+    return true;
 }
 
 bool KmlPolygonLoader::loadFromKmlFile(const QString& filePath) {
@@ -64,7 +114,6 @@ bool KmlPolygonLoader::loadFromKmlFile(const QString& filePath) {
             QString docName = nameElem.text();
             if (docName.contains("UP caeli via exported database", Qt::CaseSensitive)) {
                 parseUpCaeliViaKml(doc);
-                emit polygonsChanged();
                 return true;                
             }
         }
@@ -72,7 +121,6 @@ bool KmlPolygonLoader::loadFromKmlFile(const QString& filePath) {
 
     parseSwissCyprusKml(doc);
 
-    emit polygonsChanged();
     return true;
 }
 
@@ -122,7 +170,6 @@ bool KmlPolygonLoader::loadFromJsonFile(const QString& filePath) {
         return false;
     }
 
-    emit polygonsChanged();
     return true;
 }
 
@@ -517,9 +564,8 @@ QList<QObject*> KmlPolygonLoader::polygons() const {
 }
 
 void KmlPolygonLoader::clearPolygons() {
-    qDeleteAll(_polygonObjects);
-    _polygonObjects.clear();
     _selectedPolygon = nullptr;
+    _polygonObjects.clear();
     emit polygonsChanged();
     emit selectedPolygonChanged(); 
 }
@@ -663,4 +709,24 @@ QList<QObject*> KmlPolygonLoader::checkPolygonsInPoint(const QGeoCoordinate& cli
         }
     }
     return matchingPolygons;
+}
+
+bool KmlPolygonLoader::isPointInPolygon(const QGeoCoordinate& point, const QList<QGeoCoordinate>& polygon)
+{
+    int intersections = 0;
+    int count = polygon.size();
+    if (count < 3)
+        return false;
+
+    for (int i = 0; i < count; ++i) {
+        const QGeoCoordinate& p1 = polygon[i];
+        const QGeoCoordinate& p2 = polygon[(i + 1) % count];
+
+        if (((p1.latitude() > point.latitude()) != (p2.latitude() > point.latitude())) &&
+            (point.longitude() < (p2.longitude() - p1.longitude()) * (point.latitude() - p1.latitude()) /
+                                    (p2.latitude() - p1.latitude()) + p1.longitude())) {
+            intersections++;
+        }
+    }
+    return (intersections % 2) != 0;
 }

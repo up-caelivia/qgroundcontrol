@@ -89,7 +89,16 @@ Item {
         nameFilters:    [ "KML/JSON Files (*.kml *.json *.geojson)" ]
 
         onAcceptedForLoad: {
-            KmlPolygonLoader.loadFromFile(file.toString().replace("file://", ""))
+            
+            var coords = [
+                editorMap.toCoordinate(Qt.point(0, 0)),
+                editorMap.toCoordinate(Qt.point(editorMap.width, 0)),
+                editorMap.toCoordinate(Qt.point(editorMap.width, editorMap.height)),
+                editorMap.toCoordinate(Qt.point(0, editorMap.height)),
+                editorMap.toCoordinate(Qt.point(0, 0))
+            ]
+
+            KmlPolygonLoader.loadFromFile(file.toString().replace("file://", ""), coords)
             close()
         }
 

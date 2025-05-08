@@ -15,7 +15,7 @@ class KmlPolygonLoader : public QObject {
 public:
     static KmlPolygonLoader* instance();
     explicit KmlPolygonLoader(QObject* parent = nullptr);
-    Q_INVOKABLE bool loadFromFile(const QString& filePath);
+    Q_INVOKABLE bool loadFromFile(const QString& filePath, const QVariantList& extraPolygonCoords);
     QList<QObject*> polygons() const;
     Q_INVOKABLE void clearPolygons();
     Q_INVOKABLE void removePolygon(QObject* polygon, bool forceUnselect = false);
@@ -41,4 +41,6 @@ private:
     bool loadFromJsonFile(const QString& filePath);
     void parseItalyFinnishGermanJson(const QJsonObject& root);
     void parseBelgiumJson(const QJsonObject& root);
+
+    bool isPointInPolygon(const QGeoCoordinate& point, const QList<QGeoCoordinate>& polygon);
 };
