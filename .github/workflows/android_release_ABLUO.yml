@@ -5,9 +5,6 @@ on:
   push:
     tags:
       - 'v*-ABLUO'
-    paths-ignore:
-      - 'docs/**'
-      - '.github/workflows/**'
       
 defaults:
   run:
