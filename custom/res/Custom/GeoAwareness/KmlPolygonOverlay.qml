@@ -9,6 +9,8 @@ MapItemView {
     property var polygonModel: []
     property var showBorder: true
     property var map
+    property Component popupMenuComponent
+    property var root
 
     model: polygonModel
 
@@ -33,9 +35,8 @@ MapItemView {
                     if (map){
                         var globalPoint = mapToItem(map, Qt.point(mouse.x, mouse.y))
                         var clickedCoord = map.toCoordinate(globalPoint, false)
-                        console.log(clickedCoord)
                         var listObj = KmlPolygonLoader.checkPolygonsInPoint(clickedCoord)
-                        root.showPolygonMenuAtMouse(mouse.x, mouse.y, listObj)
+                        root.showPolygonMenuAtMouse(globalPoint.x, globalPoint.y, listObj)
                     }
                 } else {
                     KmlPolygonLoader.selectPolygon(modelData)

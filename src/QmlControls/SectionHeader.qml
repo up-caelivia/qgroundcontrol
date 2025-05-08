@@ -15,6 +15,7 @@ FocusScope {
     property bool           checked:        true
     property bool           showSpacer:     true
     property ExclusiveGroup exclusiveGroup: null
+    property alias          wrapMode:       label.wrapMode
 
     property real   _sectionSpacer: ScreenTools.defaultFontPixelWidth / 2  // spacing between section headings
 

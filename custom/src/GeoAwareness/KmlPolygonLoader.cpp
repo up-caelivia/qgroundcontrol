@@ -528,7 +528,6 @@ void KmlPolygonLoader::removePolygon(QObject* polygon, bool forceUnselect) {
     int index = _polygonObjects.indexOf(polygon);
     if (index >= 0) {
         if ((_selectedPolygon == polygon) || (forceUnselect)) {
-            qDebug() << "Polygon removed: ";
             _selectedPolygon = nullptr;
             emit selectedPolygonChanged(); 
         }
@@ -540,7 +539,6 @@ void KmlPolygonLoader::removePolygon(QObject* polygon, bool forceUnselect) {
 void KmlPolygonLoader::selectPolygon(QObject* polygon) {
     if (_selectedPolygon != polygon) {
         _selectedPolygon = polygon;
-        //qDebug() << "Polygon selected: " << polygon->name;
         emit selectedPolygonChanged(); 
     }
 }
@@ -652,7 +650,6 @@ bool KmlPolygonLoader::exportToKmlFile(const QString& filePath) {
     doc.save(out, 4);
     file.close();
 
-    qDebug() << "Exported polygons to KML:" << filePath;
     return true;
 }
 
@@ -663,11 +660,6 @@ QList<QObject*> KmlPolygonLoader::checkPolygonsInPoint(const QGeoCoordinate& cli
         if (polygon->contains(clickCoord)) {
             matchingPolygons.append(polygon);
         }
-    }
-    qDebug() << "Poliygons in point " << matchingPolygons.count();
-    for (QObject* obj : matchingPolygons) {
-        auto* polygon = qobject_cast<KmlPolygonObject*>(obj);
-        qDebug() << "\t" << polygon->name();
     }
     return matchingPolygons;
 }

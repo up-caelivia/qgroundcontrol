@@ -16,6 +16,7 @@ QGCFlickable {
 
     property var    polygonGeoAwareness: []
     property var    kmlPolygonLoader: []
+    property var    callback: []
 
     readonly property real  _editFieldWidth:    Math.min(width - _margin * 2, ScreenTools.defaultFontPixelWidth * 15)
     readonly property real  _margin:            ScreenTools.defaultFontPixelWidth / 2
@@ -67,6 +68,7 @@ QGCFlickable {
                         anchors.left:   parent.left
                         anchors.right:  parent.right
                         text:           polygonGeoAwareness.name
+                        wrapMode:       Text.Wrap
                     }
 
                     GridLayout {
@@ -107,6 +109,19 @@ QGCFlickable {
                         QGCLabel {
                             text:               polygonGeoAwareness.id
                             visible:            polygonGeoAwareness.id || polygonGeoAwareness.id != ""
+                        }
+
+                        QGCLabel {
+                            text:               qsTr("Color: ")
+                            Layout.fillWidth:   true
+                        }
+                        Rectangle {
+                            width: ScreenTools.defaultFontPixelHeight * 1.2
+                            height: width
+                            color: polygonGeoAwareness.color ? polygonGeoAwareness.color : "red"
+                            border.color: "black"
+                            radius: 2
+                            Layout.alignment: Qt.AlignVCenter
                         }
                     } // GridLayout
 
@@ -172,15 +187,27 @@ QGCFlickable {
                         text:           qsTr( "Actions")
                     }
 
-                    QGCButton {
-                        Layout.fillWidth: true
-                        text: qsTr("Delete")
-                        visible: true
-                        onClicked: {
-                            kmlPolygonLoader.removePolygon(polygonGeoAwareness, true);
+                    RowLayout {
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        spacing: ScreenTools.defaultFontPixelWidth * 0.5
+
+                        QGCButton {
+                            Layout.fillWidth: true
+                            text: qsTr("Delete")
+                            onClicked: {
+                                kmlPolygonLoader.removePolygon(polygonGeoAwareness, true)
+                            }
+                        }
+
+                        QGCButton {
+                            Layout.fillWidth: true
+                            text: qsTr("Focus")
+                            onClicked: {
+                                callback.fitPolygonToMap(polygonGeoAwareness.coordinates)
+                            }
                         }
                     }
-
                 }
             }
         }

@@ -29,6 +29,7 @@ import QGroundControl.KML 1.0
 import Custom.GeoAwareness 1.0
 import Custom.Widgets 1.0
 
+import QtQuick.Controls 2.4 as Controls2
 
 Item {
     id: _root
@@ -269,6 +270,97 @@ Item {
         }
     }
 
+    
+    Controls2.Popup {
+        id: polygonClickMenu
+        modal: true
+        focus: true
+
+        property var polygons: []
+
+        function showAtMouse(mouseX, mouseY, polygonData) {
+            polygonClickMenu.polygons = polygonData
+
+            var newX = mouseX
+            var newY = mouseY
+
+            var menuWidth = polygonClickMenu.implicitWidth
+            var menuHeight = polygonClickMenu.implicitHeight
+
+            if (newX + menuWidth > _root.width) {
+                newX = _root.width - menuWidth
+            }
+            if (newY + menuHeight > _root.height) {
+                newY = _root.height - menuHeight
+            }
+
+            x = newX
+            y = newY
+            open()
+        }
+
+        background: Rectangle {
+            radius: ScreenTools.defaultFontPixelHeight * 0.5
+            color: qgcPal.window
+            border.color: qgcPal.text
+        }
+
+        ColumnLayout {
+            spacing: ScreenTools.defaultFontPixelHeight * 0.1
+            Layout.fillWidth: true
+
+            Rectangle {
+                height: 1
+                color: Qt.rgba(qgcPal.text.r, qgcPal.text.g, qgcPal.text.b, 0.5)
+                Layout.fillWidth: true
+            }
+
+            Repeater {
+                model: polygonClickMenu.polygons
+
+                ColumnLayout {
+                    spacing: ScreenTools.defaultFontPixelHeight * 0.1
+                    Layout.fillWidth: true
+
+                    RowLayout {
+                        spacing: ScreenTools.defaultFontPixelWidth * 0.5
+                        Layout.fillWidth: true
+
+                        QGCLabel {
+                            text: modelData.name
+                            Layout.fillWidth: true
+                            Layout.maximumWidth: ScreenTools.defaultFontPixelWidth * 80
+                            elide: Text.ElideRight
+                            wrapMode: Text.NoWrap                                
+                        }
+
+                        QGCButton {
+                            text: qsTr("Select")
+                            onClicked: {
+                                KmlPolygonLoader.selectPolygon(modelData)
+                                polygonClickMenu.close()
+                            }
+                        }
+
+                        QGCButton {
+                            text: qsTr("Delete")
+                            onClicked: {
+                                KmlPolygonLoader.removePolygon(modelData)
+                                polygonClickMenu.close()
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        height: 1
+                        color: Qt.rgba(qgcPal.text.r, qgcPal.text.g, qgcPal.text.b, 0.5)
+                        Layout.fillWidth: true
+                    }
+                }
+            }
+        }
+    }
+
     Connections {
         target: _missionController
 
@@ -342,6 +434,12 @@ Item {
         var centerLon = (minLon + maxLon) / 2
 
         editorMap.center = QtPositioning.coordinate(centerLat, centerLon)
+    }
+
+    function showPolygonMenuAtMouse(mouseX, mouseY, polygonsAtPoint) {
+        if (polygonsAtPoint.length > 0) {
+            polygonClickMenu.showAtMouse(mouseX, mouseY, polygonsAtPoint)
+        }
     }
 
 
@@ -478,6 +576,8 @@ Item {
             KmlPolygonOverlay {
                 polygonModel: KmlPolygonLoader.polygons
                 map: editorMap
+                popupMenuComponent: polygonRightClickMenu
+                root: _root 
             }               
 
             // UI for splitting the current segment
@@ -828,6 +928,7 @@ Item {
                 polygonGeoAwareness:    KmlPolygonLoader.selectedPolygon
                 kmlPolygonLoader:       KmlPolygonLoader
                 visible:                _editingLayer == _layerAwareness && KmlPolygonLoader.selectedPolygon
+                callback:               _root
             }
         }
 
@@ -1265,6 +1366,7 @@ Item {
                             width: ScreenTools.defaultFontPixelHeight * 1.2
                             height: width
                             color: qgcPal.text
+                            visible: false
 
                             QGCMouseArea {
                                 anchors.fill: parent
@@ -1290,6 +1392,7 @@ Item {
                             font.bold: true
                             verticalAlignment: Text.AlignVCenter
                             Layout.fillWidth: true
+                            elide: Text.ElideRight
                         }
 
                         QGCColoredImage {
