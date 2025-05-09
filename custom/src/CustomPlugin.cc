@@ -77,6 +77,40 @@ void CustomPlugin::setToolbox(QGCToolbox* toolbox)
     _customToolbox = new CustomToolbox(qgcApp());
 }
 
+void CustomPlugin::sendLogMessage(const QString& text, const QString& description, const QString& severityStr)
+{
+    static const QMap<QString, int> severityMap {
+        { "Emergency", 0 },
+        { "Alert",     1 },
+        { "Critical",  2 },
+        { "Error",     3 },
+        { "Warning",   4 },
+        { "Notice",    5 },
+        { "Info",      6 },
+        { "Debug",     7 }
+    };
+
+    int severity = severityMap.value(severityStr.trimmed(), 6); // default to Info
+
+    UASMessageHandler* msgHandler = qgcApp()->toolbox()->uasMessageHandler();
+    if (msgHandler) {
+        qDebug() << "severity" << severity;
+        msgHandler->handleTextMessage(1, 1, severity, text, description);
+    }
+}
+
+void CustomPlugin::setSpeedMessage(const QString& msg)
+{
+    if (_speedMessage != msg) {
+        _speedMessage = msg;
+        emit speedMessageChanged();
+    }
+    if (!msg.isEmpty()){
+        qgcApp()->toolbox()->audioOutput()->say(msg);
+    }
+}
+
+
 
 bool CustomPlugin::overrideSettingsGroupVisibility(QString name)
 {
@@ -252,7 +286,7 @@ QQmlApplicationEngine* CustomPlugin::createQmlApplicationEngine(QObject* parent)
 
     qmlRegisterSingletonType<Constants>("Constants", 1, 0, "Constants", Constants::constants_singleton_provider);
 
- 
+    qmlEngine->rootContext()->setContextProperty("CustomPlugin", this); 
 
     qmlRegisterSingletonType<KmlPolygonLoader>("QGroundControl.KML", 1, 0, "KmlPolygonLoader", kmlPolygonLoader_singletontype_provider);
 

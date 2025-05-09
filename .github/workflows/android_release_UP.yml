@@ -24,7 +24,7 @@ jobs:
        include:
          - architecture: 64bits
            eabi: arm64-v8a
-           ARTIFACT: QGroundControlUP64.apk
+           ARTIFACT: QGroundControlUP64-${{ github.ref_name }}.apk
 
     steps:
       - name: Checkout repo

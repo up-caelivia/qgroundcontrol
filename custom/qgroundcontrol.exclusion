@@ -64,6 +64,7 @@
 
 <file alias="PlanView.qml">src/PlanView/PlanView.qml</file>
 
+<file alias="QGroundControl/FlightDisplay/VehicleWarnings.qml">src/FlightDisplay/VehicleWarnings.qml</file>
 
 
 

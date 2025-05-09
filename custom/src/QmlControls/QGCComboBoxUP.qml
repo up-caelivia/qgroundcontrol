@@ -32,7 +32,7 @@ T.ComboBox {
     rightPadding:   padding + (control.mirrored || !indicator || !indicator.visible ? 0 : indicator.width)
 
     property bool   centeredLabel:  false
-    property bool   sizeToContents: false
+    property bool   sizeToContents: true
     property string alternateText:  ""
 
     property var    _qgcPal:            QGCPalette { colorGroupEnabled: enabled }
