@@ -435,6 +435,12 @@ SetupPage {
                                 fact:   _fenceEnable
                             }
 
+                            QGCLabel {
+                                text: qsTr("Altitude fence is not enabled if GeoFence is disabled")
+                                color: "red"
+                                visible: !enabledCheckBox.checked
+                            }
+
                             GridLayout {
                                 columns:    2
                                 enabled:    enabledCheckBox.checked
