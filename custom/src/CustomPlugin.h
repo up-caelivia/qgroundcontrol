@@ -47,6 +47,8 @@ private:
 class CustomPlugin : public QGCCorePlugin
 {
     Q_OBJECT
+
+    Q_PROPERTY(QString speedMessage READ speedMessage WRITE setSpeedMessage NOTIFY speedMessageChanged)
 public:
     CustomPlugin(QGCApplication* app, QGCToolbox *toolbox);
     ~CustomPlugin() {}
@@ -62,11 +64,19 @@ public:
     void registerQmlTypes();
     QVariantList&           settingsPages() override;
     void setToolbox(QGCToolbox* toolbox) override;
+    Q_INVOKABLE void sendLogMessage(const QString& text, const QString& description = "", const QString& severityStr = "Info");
 
-    private:
+    QString speedMessage() const { return _speedMessage; }
+    void setSpeedMessage(const QString& msg);
+
+signals:
+    void speedMessageChanged();
+
+private:
     CustomOptions*  _options = nullptr;
     QmlComponentInfo* _ntripSettings = nullptr;
     QmlComponentInfo* _aboutSettings = nullptr;
     QVariantList      _customSettingsList;
     CustomToolbox* _customToolbox = nullptr;
+    QString _speedMessage;
 };

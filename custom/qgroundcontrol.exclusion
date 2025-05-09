@@ -62,8 +62,9 @@
 
 <file alias="QGroundControl/Controls/ToolStripHoverButton.qml">src/QmlControls/ToolStripHoverButton.qml</file>
 
-<file alias="QGroundControl/Controls/SubMenuButton.qml">../src/QmlControls/SubMenuButton.qml</file>
+<file alias="QGroundControl/Controls/SubMenuButton.qml">src/QmlControls/SubMenuButton.qml</file>
 
+<file alias="QGroundControl/FlightDisplay/VehicleWarnings.qml">src/FlightDisplay/VehicleWarnings.qml</file>
 
 
 

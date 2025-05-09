@@ -40,30 +40,33 @@ Rectangle {
     property var _controller
     property var modality: _activeVehicle ? _activeVehicle.flightMode : ""
 
+    Timer {
+        id: speedMessageClearTimer
+        interval: 2000    // 2 secondi
+        repeat: false
+        running: false
+        onTriggered: {
+            CustomPlugin.speedMessage = ""
+        }
+    }
+
 
     function setModality() {
-
         for( var j = 0; j < Constants.factSpeedNames.length; j++) {
-
             _controller.object.searchText = Constants.factSpeedNames[j];
-
             for( var i = 0; i < _controller.object.parameters.rowCount(); i++ ) {
-
                 var fact = _controller.object.parameters.get(i)
-
                 if ( fact.name == Constants.factSpeedNames[j])  {
-
                     if(_isLowSpeed) {
                         fact.value = Constants.lowSpeed[j]
                     }
                     else {
-
-                        if(_isHighSpeed)
+                        if(_isHighSpeed){
                             fact.value = Constants.highSpeed[j]
-                        else
-                            fact.value = Constants.normalSpeed[j]
+                        } else {
+                            fact.value = Constants.normalSpeed[j]   
+                        }
                     }
-
                     fact.valueChanged(fact.value)
                     break
                 }
@@ -78,23 +81,19 @@ Rectangle {
     }
 
     onModalityChanged: {
-
         if(modality != "Loiter" && _isLowSpeed) {
-            showCriticalVehicleMessage("LOW SPEED MODE NOT AVAILABLE")
+            CustomPlugin.sendLogMessage("Low speed mode not available", "", "Warning")
+            CustomPlugin.speedMessage = "Low speed mode not available"
+            speedMessageClearTimer.stop()
         }
-
         if(modality == "Loiter" && _isLowSpeed) {
-            showCriticalVehicleMessage("LOW SPEED MODE ACTIVATED")
+            CustomPlugin.sendLogMessage("Low speed mode activated")
+            CustomPlugin.speedMessage = "Low speed mode activated"
+            speedMessageClearTimer.stop()
         }
-
     }
 
     QGCPalette { id: qgcPal; colorGroupEnabled: enabled }
-
-    function showCriticalVehicleMessage(message) {
-        mainWindow.closeCriticalVehicleMessage()
-        mainWindow.showCriticalVehicleMessage(message)
-    }
 
     MouseArea {
         anchors.fill:   parent
@@ -142,6 +141,9 @@ Rectangle {
                     enabled:        !_isLowSpeed
                     onClicked:      {
                         _isHighSpeed = false
+                        CustomPlugin.sendLogMessage("Normal speed mode enabled")
+                        CustomPlugin.speedMessage = "Normal Speed mode enabled"
+                        speedMessageClearTimer.restart()
                         setModality()
                     }
                 }
@@ -178,6 +180,9 @@ Rectangle {
                     onClicked:      {
 
                         _isHighSpeed = true
+                        CustomPlugin.sendLogMessage("High speed mode enabled")
+                        CustomPlugin.speedMessage = "High Speed mode enabled"
+                        speedMessageClearTimer.restart()
                         setModality()
 
                     }
@@ -221,25 +226,27 @@ Rectangle {
 
             MouseArea {
                 anchors.fill:   parent
-                        onClicked: {
-
-                               _isLowSpeed = ! _isLowSpeed
-
-                               if (!_isLowSpeed) {
-                                   showCriticalVehicleMessage("LOW SPEED MODE DISABLED")
-                                   setModality()
-                                   return
-                               }
-
-                               if(modality != "Loiter") {
-                                   showCriticalVehicleMessage("LOW SPEED MODE NOT AVAILABLE")
-                                   // TODO: change icon
-                               } else {
-                                   showCriticalVehicleMessage("LOW SPEED MODE ACTIVATED")
-                               }
-
-                               setModality()
-                           }
+                onClicked: {
+                    _isLowSpeed = ! _isLowSpeed
+                    console.log(CustomPlugin.Info)
+                    console.log(CustomPlugin.Warning)
+                    if (!_isLowSpeed) {
+                        CustomPlugin.sendLogMessage("Low speed mode disabled")
+                        CustomPlugin.speedMessage = "Low speed mode disabled"
+                        speedMessageClearTimer.restart()
+                        setModality()
+                        return
+                    }
+                    if(modality != "Loiter") {
+                        CustomPlugin.sendLogMessage("Low speed mode not available", "", "Warning")
+                        CustomPlugin.speedMessage = "Low speed mode not available"
+                    } else {
+                        CustomPlugin.sendLogMessage("Low speed mode activated")
+                        CustomPlugin.speedMessage = "Low speed mode activated"
+                    }
+                    speedMessageClearTimer.stop()
+                    setModality()
+                }
             }
         }
     }
