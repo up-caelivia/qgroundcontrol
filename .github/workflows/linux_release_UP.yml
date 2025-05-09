@@ -20,6 +20,7 @@ jobs:
 
     env:
       ARTIFACT:     QGroundControlUP-${{ github.ref_name }}.AppImage
+      ARTIFACT_FILENAME:     QGroundControlUP.AppImage
 
     steps:
       - name: Checkout repo
@@ -102,4 +103,4 @@ jobs:
         uses: actions/upload-artifact@master
         with:
           name: ${{ env.ARTIFACT }}
-          path: ${{ runner.temp }}/shadow_build_dir/package/${{ env.ARTIFACT }}
+          path: ${{ runner.temp }}/shadow_build_dir/package/${{ env.ARTIFACT_FILENAME }}

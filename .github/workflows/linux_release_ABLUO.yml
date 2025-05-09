@@ -20,6 +20,7 @@ jobs:
 
     env:
       ARTIFACT:     QGroundControlABLUO-${{ github.ref_name }}.AppImage
+      ARTIFACT_FILENAME:     QGroundControlABLUO.AppImage
 
     steps:
       - name: Checkout repo
@@ -103,4 +104,4 @@ jobs:
         uses: actions/upload-artifact@master
         with:
           name: ${{ env.ARTIFACT }}
-          path: ${{ runner.temp }}/shadow_build_dir/package/${{ env.ARTIFACT }}
+          path: ${{ runner.temp }}/shadow_build_dir/package/${{ env.ARTIFACT_FILENAME }}
