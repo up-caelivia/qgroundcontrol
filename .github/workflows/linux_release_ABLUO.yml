@@ -12,12 +12,14 @@ defaults:
 env:
   SOURCE_DIR:   ${{ github.workspace }}
   QT_VERSION:   5.15.2
-  ARTIFACT:     QGroundControlABLUO.AppImage
   BUILD_TYPE:   ${{ fromJSON('["DailyBuild", "StableBuild"]')[ github.ref_type == 'tag' || contains(github.ref, 'Stable_' ) ] }}
 
 jobs:
   build:
     runs-on:  ubuntu-22.04
+
+    env:
+      ARTIFACT:     QGroundControlABLUO-${{ github.ref_name }}.AppImage
 
     steps:
       - name: Checkout repo

@@ -12,12 +12,14 @@ defaults:
 env:
   SOURCE_DIR:   ${{ github.workspace }}
   QT_VERSION:   5.15.2
-  ARTIFACT:     QGroundControlUP-installer.exe
   BUILD_TYPE:   ${{ fromJSON('["DailyBuild", "StableBuild"]')[ github.ref_type == 'tag' || contains(github.ref, 'Stable_' ) ] }}
 
 jobs:
   build:
     runs-on:  windows-2019
+    
+    env:
+      ARTIFACT:     QGroundControlUP-installer-${{ github.ref_name }}.exe
 
     steps:
       - name: Checkout repo
@@ -95,6 +97,6 @@ jobs:
       - name: Save PDB artifact
         uses: actions/upload-artifact@master
         with:
-          name: qgroundcontrolUP.pdb
+          name: qgroundcontrolUP-${{ github.ref_name }}.pdb
           path: ${{ runner.temp }}\shadow_build_dir\staging\qgroundcontrolUP.pdb
 
