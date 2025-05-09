@@ -21,6 +21,7 @@ jobs:
     
     env:
       ARTIFACT:     QGroundControlUP-installer-${{ github.ref_name }}.exe
+      ARTIFACT_FILENAME:     QGroundControlUP-installer.exe
 
     steps:
       - name: Checkout repo
@@ -93,7 +94,7 @@ jobs:
         uses: actions/upload-artifact@master
         with:
           name: ${{ env.ARTIFACT }}
-          path: ${{ runner.temp }}\shadow_build_dir\staging\${{ env.ARTIFACT }}
+          path: ${{ runner.temp }}\shadow_build_dir\staging\${{ env.ARTIFACT_FILENAME }}
 
       - name: Save PDB artifact
         uses: actions/upload-artifact@master
