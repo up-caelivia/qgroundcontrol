@@ -847,6 +847,11 @@ VideoManager::_restartAllVideos()
 void
 VideoManager::_startReceiver(unsigned id)
 {
+    
+// Parametri fissi di forwarding
+bool enableForwarding = true;
+QString forwardingUrl = "rtmp://live.restream.io/live/re_9661937_3b2ba2320ad8911a7719";
+
 #if defined(QGC_GST_STREAMING)
     const QString source = _videoSettings->videoSource()->rawValue().toString();
     const unsigned rtsptimeout = _videoSettings->rtspTimeout()->rawValue().toUInt();
@@ -858,7 +863,7 @@ VideoManager::_startReceiver(unsigned id)
         qCDebug(VideoManagerLog) << "Unsupported receiver id" << id;
     } else if (_videoReceiver[id] != nullptr/* && _videoSink[id] != nullptr*/) {
         if (!_videoUri[id].isEmpty()) {
-            _videoReceiver[id]->start(_videoUri[id], timeout, _lowLatencyStreaming[id] ? -1 : 0);
+            _videoReceiver[id]->start(_videoUri[id], timeout, _lowLatencyStreaming[id] ? -1 : 0, enableForwarding, forwardingUrl);
         }
     }
 #else
