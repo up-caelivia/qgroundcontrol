@@ -89,7 +89,7 @@ public:
     ~GstVideoReceiver(void);
 
 public slots:
-    virtual void start(const QString& uri, unsigned timeout, int buffer = 0);
+    virtual void start(const QString& uri, unsigned timeout, int buffer = 0, bool enableForwarding = false, const QString& forwardingUrl = "") override;
     virtual void stop(void);
     virtual void startDecoding(void* sink);
     virtual void stopDecoding(void);
@@ -167,6 +167,10 @@ protected:
     bool                _endOfStream;
 
     static const char*  _kFileMux[FILE_FORMAT_MAX - FILE_FORMAT_MIN];
+
+    bool    _enableForwarding = false;
+    QString _forwardingHost;
+    int     _forwardingPort = -1;
 };
 
 void* createVideoSink(void* widget);
