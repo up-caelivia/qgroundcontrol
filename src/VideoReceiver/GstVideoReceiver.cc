@@ -21,7 +21,7 @@
 #include <QDateTime>
 #include <QSysInfo>
 
-QGC_LOGGING_CATEGORY(VideoReceiverLog, "VideoReceiver")
+QGC_LOGGING_CATEGORY(VideoReceiverLog, "VideoReceiverLog")
 
 //-----------------------------------------------------------------------------
 // Our pipeline look like this:

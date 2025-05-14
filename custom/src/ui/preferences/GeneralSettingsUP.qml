@@ -417,6 +417,27 @@ Rectangle {
                                     fact:       _videoSettings.enableStorageLimit
                                     visible:    _showSaveVideoSettings && fact.visible
                                 }
+
+                                QGCLabel {
+                                    text:               qsTr("Video Forward")
+                                    Layout.columnSpan:  2
+                                    Layout.alignment:   Qt.AlignHCenter
+                                }
+
+                                QGCLabel {
+                                    text: qsTr("Enable RTMP Forwarding")
+                                }
+                                FactCheckBox {
+                                    fact: _videoSettings.enableRTMPForwarding
+                                }
+
+                                QGCLabel {
+                                    text: qsTr("RTMP Server URL")
+                                }
+                                FactTextField {
+                                    Layout.preferredWidth: _comboFieldWidth
+                                    fact: _videoSettings.serverRTMPUrl
+                                }
                             }
                         }
                     }

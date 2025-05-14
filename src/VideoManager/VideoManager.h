@@ -141,6 +141,7 @@ protected slots:
     void _rtspUrlChanged            ();
     void _tcpUrlChanged             ();
     void _lowLatencyModeChanged     ();
+    void _forwardingChanged         ();
     void _updateUVC                 ();
     void _setActiveVehicle          (Vehicle* vehicle);
     void _aspectRatioChanged        ();

@@ -392,8 +392,9 @@ void
 VideoReceiverApp::startStreaming()
 {
     // Parametri fissi di forwarding
-    bool enableForwarding = true;
-    QString forwardingUrl = "rtmp://live.restream.io/live/re_9661937_3b2ba2320ad8911a7719";
+    _videoSettings = toolbox->settingsManager()->videoSettings();
+    bool enableForwarding = _videoSettings->enableRTMPForwarding()->rawValue().toBool();
+    QString forwardingUrl = _videoSettings->serverRTMPUrl()->rawValue().toString();
 
     // Avvia lo streaming con il forwarding
     _receiver->start(_url, _timeout, 0, enableForwarding, forwardingUrl);

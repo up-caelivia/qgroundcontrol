@@ -104,6 +104,8 @@ VideoManager::setToolbox(QGCToolbox *toolbox)
    connect(_videoSettings->tcpUrl(),        &Fact::rawValueChanged, this, &VideoManager::_tcpUrlChanged);
    connect(_videoSettings->aspectRatio(),   &Fact::rawValueChanged, this, &VideoManager::_aspectRatioChanged);
    connect(_videoSettings->lowLatencyMode(),&Fact::rawValueChanged, this, &VideoManager::_lowLatencyModeChanged);
+   connect(_videoSettings->enableRTMPForwarding(), &Fact::rawValueChanged, this, &VideoManager::_forwardingChanged);
+   connect(_videoSettings->serverRTMPUrl(), &Fact::rawValueChanged, this, &VideoManager::_forwardingChanged);
    MultiVehicleManager *pVehicleMgr = qgcApp()->toolbox()->multiVehicleManager();
    connect(pVehicleMgr, &MultiVehicleManager::activeVehicleChanged, this, &VideoManager::_setActiveVehicle);
 
@@ -547,6 +549,13 @@ VideoManager::_lowLatencyModeChanged()
 }
 
 //-----------------------------------------------------------------------------
+void
+VideoManager::_forwardingChanged()
+{
+    _restartAllVideos();
+}
+
+//-----------------------------------------------------------------------------
 bool
 VideoManager::hasVideo()
 {
@@ -849,8 +858,8 @@ VideoManager::_startReceiver(unsigned id)
 {
     
 // Parametri fissi di forwarding
-bool enableForwarding = true;
-QString forwardingUrl = "rtmp://live.restream.io/live/re_9661937_3b2ba2320ad8911a7719";
+bool enableForwarding = _videoSettings->enableRTMPForwarding()->rawValue().toBool();
+QString forwardingUrl = _videoSettings->serverRTMPUrl()->rawValue().toString();
 
 #if defined(QGC_GST_STREAMING)
     const QString source = _videoSettings->videoSource()->rawValue().toString();
