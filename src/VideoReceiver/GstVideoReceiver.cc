@@ -31,6 +31,8 @@ QGC_LOGGING_CATEGORY(VideoReceiverLog, "VideoReceiverLog")
 // _source-->_tee
 //              |
 //              +-->queue-->_recorderValve[-->_fileSink]
+//              |
+//              +-->queue-->glvmux-->rtmpsink   (forwarding branch)
 //
 
 GstVideoReceiver::GstVideoReceiver(QObject* parent)
@@ -67,13 +69,14 @@ GstVideoReceiver::~GstVideoReceiver(void)
     _slotHandler.shutdown();
 }
 
-void
-GstVideoReceiver::start(const QString& uri, unsigned timeout, int buffer)
+void GstVideoReceiver::start(const QString& uri, unsigned timeout, int buffer,
+                             bool enableForwarding, const QString& forwardingUrl)
 {
     if (_needDispatch()) {
         QString cachedUri = uri;
-        _slotHandler.dispatch([this, cachedUri, timeout, buffer]() {
-            start(cachedUri, timeout, buffer);
+        QString cachedForwardingUrl = forwardingUrl;
+        _slotHandler.dispatch([this, cachedUri, timeout, buffer, enableForwarding, cachedForwardingUrl]() {
+            start(cachedUri, timeout, buffer, enableForwarding, cachedForwardingUrl);
         });
         return;
     }
@@ -107,8 +110,19 @@ GstVideoReceiver::start(const QString& uri, unsigned timeout, int buffer)
 
     GstElement* decoderQueue = nullptr;
     GstElement* recorderQueue = nullptr;
+    GstElement* forwardQueue = nullptr;
+    GstElement* flvmux = nullptr;
+    GstElement* rtmpsink = nullptr;
+    GstElement* encoder = nullptr;
+    GstElement* payloader = nullptr;
+    GstElement* udpsink = nullptr;
 
     do {
+        if ((_pipeline = gst_pipeline_new("receiver")) == nullptr) {
+            qCCritical(VideoReceiverLog) << "gst_pipeline_new() failed";
+            break;
+        }
+
         if((_tee = gst_element_factory_make("tee", nullptr)) == nullptr)  {
             qCCritical(VideoReceiverLog) << "gst_element_factory_make('tee') failed";
             break;
@@ -127,34 +141,67 @@ GstVideoReceiver::start(const QString& uri, unsigned timeout, int buffer)
         gst_object_unref(pad);
         pad = nullptr;
 
-        if((decoderQueue = gst_element_factory_make("queue", nullptr)) == nullptr)  {
-            qCCritical(VideoReceiverLog) << "gst_element_factory_make('queue') failed";
-            break;
+        // Forwarding branch
+        if (enableForwarding && !forwardingUrl.isEmpty()) {
+            qCDebug(VideoReceiverLog) << "forwardingUrl" << forwardingUrl;
+            forwardQueue = gst_element_factory_make("queue", nullptr);
+
+            if (!forwardQueue) {
+                qCCritical(VideoReceiverLog) << "Failed to create forwardQueue";
+                break;
+            }
+
+            if (forwardingUrl.startsWith("rtmp://", Qt::CaseInsensitive)) {
+                qCDebug(VideoReceiverLog) << "rtmp forward";
+                flvmux = gst_element_factory_make("flvmux", nullptr);
+                rtmpsink = gst_element_factory_make("rtmpsink", nullptr);
+
+                if (!flvmux || !rtmpsink) {
+                    qCCritical(VideoReceiverLog) << "RTMP element creation failed";
+                    break;
+                }
+
+                g_object_set(flvmux, "streamable", TRUE, nullptr);
+                g_object_set(rtmpsink, "location", forwardingUrl.toUtf8().constData(), nullptr);
+
+                gst_bin_add_many(GST_BIN(_pipeline), forwardQueue, flvmux, rtmpsink, nullptr);
+            } else if (forwardingUrl.startsWith("udp://", Qt::CaseInsensitive)) {
+                qCDebug(VideoReceiverLog) << "udp forward";
+                encoder = gst_element_factory_make("x264enc", nullptr);
+                payloader = gst_element_factory_make("rtph264pay", nullptr);
+                udpsink = gst_element_factory_make("udpsink", nullptr);
+
+                if (!encoder || !payloader || !udpsink) {
+                    qCCritical(VideoReceiverLog) << "UDP forwarding element creation failed";
+                    break;
+                }
+
+                QUrl url(forwardingUrl);
+                QString host = url.host();
+                int port = url.port(5004);
+
+                g_object_set(encoder, "tune", 0x00000004, nullptr);
+                g_object_set(payloader, "config-interval", 1, "pt", 96, nullptr);
+                g_object_set(udpsink, "host", host.toUtf8().constData(), "port", port, "sync", FALSE, "async", FALSE, nullptr);
+
+                gst_bin_add_many(GST_BIN(_pipeline), forwardQueue, encoder, payloader, udpsink, nullptr);
+            } else {
+                qCDebug(VideoReceiverLog) << "Unsupported forwarding URL protocol:" << forwardingUrl;
+            }
+        } else {
+            qCDebug(VideoReceiverLog) << "Disabled forwarding:" << enableForwarding << " or empty address " << forwardingUrl;
         }
 
-        if((_decoderValve = gst_element_factory_make("valve", nullptr)) == nullptr)  {
-            qCCritical(VideoReceiverLog) << "gst_element_factory_make('valve') failed";
+        if((decoderQueue = gst_element_factory_make("queue", nullptr)) == nullptr ||
+           (_decoderValve = gst_element_factory_make("valve", nullptr)) == nullptr ||
+           (recorderQueue = gst_element_factory_make("queue", nullptr)) == nullptr ||
+           (_recorderValve = gst_element_factory_make("valve", nullptr)) == nullptr) {
+            qCCritical(VideoReceiverLog) << "Failed to create decoder/recorder elements";
             break;
         }
 
         g_object_set(_decoderValve, "drop", TRUE, nullptr);
-
-        if((recorderQueue = gst_element_factory_make("queue", nullptr)) == nullptr)  {
-            qCCritical(VideoReceiverLog) << "gst_element_factory_make('queue') failed";
-            break;
-        }
-
-        if((_recorderValve = gst_element_factory_make("valve", nullptr)) == nullptr)  {
-            qCCritical(VideoReceiverLog) << "gst_element_factory_make('valve') failed";
-            break;
-        }
-
         g_object_set(_recorderValve, "drop", TRUE, nullptr);
-
-        if ((_pipeline = gst_pipeline_new("receiver")) == nullptr) {
-            qCCritical(VideoReceiverLog) << "gst_pipeline_new() failed";
-            break;
-        }
 
         g_object_set(_pipeline, "message-forward", TRUE, nullptr);
 
@@ -168,7 +215,6 @@ GstVideoReceiver::start(const QString& uri, unsigned timeout, int buffer)
         pipelineUp = true;
 
         GstPad* srcPad = nullptr;
-
         GstIterator* it;
 
         if ((it = gst_element_iterate_src_pads(_source)) != nullptr) {
@@ -202,6 +248,22 @@ GstVideoReceiver::start(const QString& uri, unsigned timeout, int buffer)
             break;
         }
 
+        if (forwardQueue) {
+            if (flvmux && rtmpsink) {
+                if(!gst_element_link_many(_tee, forwardQueue, flvmux, rtmpsink, nullptr)) {
+                    qCCritical(VideoReceiverLog) << "Unable to link RTMP forwarding branch";
+                    break;
+                }
+                qCDebug(VideoReceiverLog) << "RTMP forwarding to:" << forwardingUrl;
+            } else if (encoder && payloader && udpsink) {
+                if(!gst_element_link_many(_tee, forwardQueue, encoder, payloader, udpsink, nullptr)) {
+                    qCCritical(VideoReceiverLog) << "Unable to link UDP forwarding branch";
+                    break;
+                }
+                qCDebug(VideoReceiverLog) << "UDP forwarding to:" << forwardingUrl;
+            }
+        }
+
         GstBus* bus = nullptr;
 
         if ((bus = gst_pipeline_get_bus(GST_PIPELINE(_pipeline))) != nullptr) {
@@ -218,14 +280,12 @@ GstVideoReceiver::start(const QString& uri, unsigned timeout, int buffer)
     if (!running) {
         qCCritical(VideoReceiverLog) << "Failed";
 
-        // In newer versions, the pipeline will clean up all references that are added to it
         if (_pipeline != nullptr) {
             gst_element_set_state(_pipeline, GST_STATE_NULL);
             gst_object_unref(_pipeline);
             _pipeline = nullptr;
         }
 
-        // If we failed before adding items to the pipeline, then clean up
         if (!pipelineUp) {
             if (_recorderValve != nullptr) {
                 gst_object_unref(_recorderValve);

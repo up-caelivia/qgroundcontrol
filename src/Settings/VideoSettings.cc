@@ -133,6 +133,8 @@ DECLARE_SETTINGSFACT(VideoSettings, disableWhenDisarmed)
 DECLARE_SETTINGSFACT(VideoSettings, lowLatencyMode)
 // Herelink HDMI source switching
 DECLARE_SETTINGSFACT(VideoSettings, cameraId)
+DECLARE_SETTINGSFACT(VideoSettings, enableRTMPForwarding)
+DECLARE_SETTINGSFACT(VideoSettings, serverRTMPUrl)
 
 DECLARE_SETTINGSFACT_NO_FUNC(VideoSettings, videoSource)
 {
