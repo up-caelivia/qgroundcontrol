@@ -16,6 +16,8 @@
 #include <QObject>
 #include "QmlComponentInfo.h"
 #include "CustomToolbox.h"
+#include <QGeoCoordinate>
+#include "Vehicle.h"
 
 class CustomOptions;
 class CustomPlugin;
@@ -65,6 +67,7 @@ public:
     QVariantList&           settingsPages() override;
     void setToolbox(QGCToolbox* toolbox) override;
     Q_INVOKABLE void sendLogMessage(const QString& text, const QString& description = "", const QString& severityStr = "Info");
+    Q_INVOKABLE QVariantList getSavParamCoordinates(Vehicle* vehicle);
 
     QString speedMessage() const { return _speedMessage; }
     void setSpeedMessage(const QString& msg);

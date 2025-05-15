@@ -29,6 +29,7 @@
 // #include "HorizontalFactValueGrid.h"
 // #include "InstrumentValueData.h"
 #include <list>
+#include "ParameterManager.h"
 
 void CustomPlugin::registerQmlTypes()
 {
@@ -416,6 +417,36 @@ QVariantList& CustomPlugin::settingsPages()
     return _customSettingsList;
 }
 
+QVariantList CustomPlugin::getSavParamCoordinates(Vehicle* vehicle) {
+    QVariantList coordinates;
+    if (!vehicle || !vehicle->parameterManager()) return coordinates;
+
+    QStringList suffixes = { "0", "A", "B" };
+    int componentId = FactSystem::defaultComponentId;
+
+    for (const QString& s : suffixes) {
+        QString latName = QString("SAV_LAT_%1").arg(s);
+        QString lonName = QString("SAV_LON_%1").arg(s);
+
+        Fact* latFact = vehicle->parameterManager()->getParameter(componentId, latName);
+        Fact* lonFact = vehicle->parameterManager()->getParameter(componentId, lonName);
+
+        if (latFact && lonFact &&
+            latFact->rawValue().isValid() &&
+            lonFact->rawValue().isValid())
+        {
+            QVariantMap entry;
+            entry["label"] = s;
+            entry["coordinate"] = QVariant::fromValue(QGeoCoordinate(
+                latFact->rawValue().toDouble(),
+                lonFact->rawValue().toDouble()
+            ));
+            coordinates.append(entry);
+        }
+    }
+
+    return coordinates;
+}
 
 
 
