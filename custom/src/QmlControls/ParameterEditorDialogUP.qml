@@ -57,6 +57,10 @@ QGCPopupDialog {
     }
 
     function totalDisplayDecimals(unit) {
+        if (fact.name.startsWith("SAV_LAT") || fact.name.startsWith("SAV_LON")) {
+            // For SAV parameters, we want to show 7 decimal places
+            return 7;
+        }
         return fact.decimalPlaces + decimalShiftFromConversion(unit)
     }
 

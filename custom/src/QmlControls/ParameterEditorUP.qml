@@ -281,6 +281,10 @@ Item {
                 if (modelFact.units == "cm")
                     return (modelFact.rawValue / 100).toFixed(modelFact.decimalPlaces+2) + " " + "m"
 
+                if (modelFact.name.startsWith("SAV_LAT") || modelFact.name.startsWith("SAV_LON")) {
+                    // For SAV parameters, we want to show 7 decimal places
+                    return (modelFact.rawValue).toFixed(7);
+                }
                 return modelFact.valueString + " " + modelFact.units
 
             }
