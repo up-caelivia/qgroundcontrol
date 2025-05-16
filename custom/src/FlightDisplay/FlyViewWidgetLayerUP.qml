@@ -269,4 +269,15 @@ Item {
         anchors.bottom:         speedControl.top
         anchors.margins:  _toolsMargin
     }
+
+    SavButtonWidgetUP {
+        anchors.rightMargin:    _toolsMargin + parentToolInsets.rightEdgeCenterInset
+        anchors.topMargin:      _toolsMargin + parentToolInsets.topEdgeRightInset
+        anchors.right:          parent.right
+        anchors.top:            parent.top
+        z:                      QGroundControl.zOrderWidgets
+        maxHeight:              parent.height - y - parentToolInsets.bottomEdgeLeftInset - _toolsMargin
+        visible:                !QGroundControl.videoManager.fullScreen
+    }        
+
 }

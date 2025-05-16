@@ -44,6 +44,7 @@
         <file alias="CustomNTRIP.qml">res/Custom/Widgets/CustomNTRIP.qml</file>
         <file alias="AboutUP.qml">res/Custom/Widgets/AboutUP.qml</file>
         <file alias="Custom/Widgets/SavParamMarkerUP.qml">res/Custom/Widgets/SavParamMarkerUP.qml</file>
+        <file alias="Custom/Widgets/SavButtonWidgetUP.qml">res/Custom/Widgets/SavButtonWidgetUP.qml</file>
     </qresource>
     <qresource prefix="/Custom/Constants">
         <file alias="Custom/Constants/Constants.qml">res/Custom/Constants/Constants.qml</file>
