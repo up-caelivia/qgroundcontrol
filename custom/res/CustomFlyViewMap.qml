@@ -23,6 +23,8 @@ import QGroundControl.Palette       1.0
 import QGroundControl.ScreenTools   1.0
 import QGroundControl.Vehicle       1.0
 
+import Custom.Widgets 1.0
+
 FlightMap {
     id:                         _root
     allowGCSLocationCenter:     true
@@ -56,6 +58,7 @@ FlightMap {
     property bool   _disableVehicleTracking:    false
     property bool   _keepVehicleCentered:       pipMode ? true : false
     property bool   _saveZoomLevelSetting:      true
+    property var    _savParamCoords:                    []
 
     function _adjustMapZoomForPipMode() {
         _saveZoomLevelSetting = false
@@ -95,6 +98,17 @@ FlightMap {
         function onFlickStarted() {     _disableVehicleTracking = true }
         function onPanFinished() {      panRecenterTimer.restart() }
         function onFlickFinished() {    panRecenterTimer.restart() }
+    }
+    
+    Connections {
+        target: CustomPlugin
+        onSavParamCoordinatesChanged: {
+            _savParamCoords = CustomPlugin.savParamCoordinates
+        }
+    }
+    
+    SavParamMarkerUP {
+        modelDataList: _savParamCoords
     }
 
     function pointInRect(point, rect) {
@@ -651,5 +665,6 @@ FlightMap {
 
         property real centerInset: visible ? parent.height - y : 0
     }
+
 
 }

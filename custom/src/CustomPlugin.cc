@@ -62,6 +62,10 @@ CustomPlugin::CustomPlugin(QGCApplication *app, QGCToolbox* toolbox)
     #ifdef Q_OS_WIN
         QApplication::setWindowIcon(QIcon(":/res/resources/icons/qgroundcontrol.ico"));
     #endif
+
+    _savParamTimer = new QTimer(this);
+    connect(_savParamTimer, &QTimer::timeout, this, &CustomPlugin::_updateSavParamCoordinates);
+    _savParamTimer->start(2000);
 }
 
 void CustomPlugin::setToolbox(QGCToolbox* toolbox)
@@ -421,34 +425,51 @@ QVariantList CustomPlugin::getSavParamCoordinates(Vehicle* vehicle) {
     QVariantList coordinates;
     if (!vehicle || !vehicle->parameterManager()) return coordinates;
 
-    QStringList suffixes = { "0", "A", "B" };
+    QStringList suffixes = { "0","1", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P" };
     int componentId = FactSystem::defaultComponentId;
 
     for (const QString& s : suffixes) {
         QString latName = QString("SAV_LAT_%1").arg(s);
         QString lonName = QString("SAV_LON_%1").arg(s);
 
-        Fact* latFact = vehicle->parameterManager()->getParameter(componentId, latName);
-        Fact* lonFact = vehicle->parameterManager()->getParameter(componentId, lonName);
+        auto* paramMgr = vehicle->parameterManager();
 
-        if (latFact && lonFact &&
-            latFact->rawValue().isValid() &&
-            lonFact->rawValue().isValid())
+        if (paramMgr->parameterExists(componentId, latName) &&
+            paramMgr->parameterExists(componentId, lonName))
         {
-            QVariantMap entry;
-            entry["label"] = s;
-            entry["coordinate"] = QVariant::fromValue(QGeoCoordinate(
-                latFact->rawValue().toDouble(),
-                lonFact->rawValue().toDouble()
-            ));
-            coordinates.append(entry);
+            Fact* latFact = paramMgr->getParameter(componentId, latName);
+            Fact* lonFact = paramMgr->getParameter(componentId, lonName);
+
+            if (latFact && lonFact &&
+                latFact->rawValue().isValid() &&
+                lonFact->rawValue().isValid())
+            {
+                QVariantMap entry;
+                entry["label"] = s;
+                entry["latitude"] = latFact->rawValue().toDouble();
+                entry["longitude"] = lonFact->rawValue().toDouble();
+                coordinates.append(entry);
+            }
         }
     }
 
     return coordinates;
 }
 
+QVariantList CustomPlugin::savParamCoordinates() const {
+    return _savParamCoordinates;
+}
 
+void CustomPlugin::_updateSavParamCoordinates() {
+    Vehicle* vehicle = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle();
+    if (!vehicle || !vehicle->parameterManager()) return;
+
+    QVariantList newCoords = getSavParamCoordinates(vehicle);
+    if (newCoords != _savParamCoordinates) {
+        _savParamCoordinates = newCoords;
+        emit savParamCoordinatesChanged();
+    }
+}
 
 
 

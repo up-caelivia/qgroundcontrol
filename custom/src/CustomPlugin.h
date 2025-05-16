@@ -49,8 +49,8 @@ private:
 class CustomPlugin : public QGCCorePlugin
 {
     Q_OBJECT
-
     Q_PROPERTY(QString speedMessage READ speedMessage WRITE setSpeedMessage NOTIFY speedMessageChanged)
+    Q_PROPERTY(QVariantList savParamCoordinates READ savParamCoordinates NOTIFY savParamCoordinatesChanged)
 public:
     CustomPlugin(QGCApplication* app, QGCToolbox *toolbox);
     ~CustomPlugin() {}
@@ -68,12 +68,17 @@ public:
     void setToolbox(QGCToolbox* toolbox) override;
     Q_INVOKABLE void sendLogMessage(const QString& text, const QString& description = "", const QString& severityStr = "Info");
     Q_INVOKABLE QVariantList getSavParamCoordinates(Vehicle* vehicle);
+    QVariantList savParamCoordinates() const;
 
     QString speedMessage() const { return _speedMessage; }
     void setSpeedMessage(const QString& msg);
 
 signals:
     void speedMessageChanged();
+    void savParamCoordinatesChanged();
+
+private slots:
+    void _updateSavParamCoordinates();
 
 private:
     CustomOptions*  _options = nullptr;
@@ -82,4 +87,6 @@ private:
     QVariantList      _customSettingsList;
     CustomToolbox* _customToolbox = nullptr;
     QString _speedMessage;
+    QVariantList _savParamCoordinates;
+    QTimer* _savParamTimer = nullptr;
 };

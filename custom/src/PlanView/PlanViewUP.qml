@@ -25,6 +25,8 @@ import QGroundControl.Palette           1.0
 import QGroundControl.Controllers       1.0
 import QGroundControl.ShapeFileHelper   1.0
 
+import Custom.Widgets  1.0
+
 Item {
     id: _root
 
@@ -52,7 +54,6 @@ Item {
     property var    _planViewSettings:                  QGroundControl.settingsManager.planViewSettings
     property bool   _promptForPlanUsageShowing:         false
     property var    _savParamCoords:                    []
-    property int    _savRetryCount:                      0
 
     readonly property var       _layers:                [_layerMission, _layerGeoFence, _layerRallyPoints]
 
@@ -74,43 +75,10 @@ Item {
     property bool _firstRallyLoadComplete:      false
     property bool _firstLoadComplete:           false
 
-    Timer {
-        id: savParamRetryTimer
-        interval: 2000 // 2 secondi
-        repeat: true
-        running: false
-        onTriggered: {
-            var vehicle = QGroundControl.multiVehicleManager.activeVehicle
-            if ((!vehicle ) || (!QGroundControl.multiVehicleManager.parameterReadyVehicleAvailable ) || (!CustomPlugin)) {
-                return
-            }
-
-            var data = CustomPlugin.getSavParamCoordinates(vehicle)
-
-            if (data.length > 0) {
-                _savParamCoords = data
-                running = false
-                _savRetryCount = 0
-            } else {
-                _savRetryCount++
-                if (_savRetryCount >= 20) {
-                    running = false
-                    _savRetryCount = 0
-                }
-            }
-        }
-    }
-
     Connections {
-        target: QGroundControl.multiVehicleManager
-        onActiveVehicleChanged: {
-            var vehicle = QGroundControl.multiVehicleManager.activeVehicle
-            if (vehicle && QGroundControl.multiVehicleManager.parameterReadyVehicleAvailable && CustomPlugin) {
-                _savParamCoords = CustomPlugin.getSavParamCoordinates(vehicle)
-            } else {
-                _savRetryCount = 0
-                savParamRetryTimer.start()
-            }
+        target: CustomPlugin
+        onSavParamCoordinatesChanged: {
+            _savParamCoords = CustomPlugin.savParamCoordinates
         }
     }
 
@@ -533,39 +501,8 @@ Item {
                 opacity:                _editingLayer != _layerRallyPoints ? editorMap._nonInteractiveOpacity : 1
             }
             
-            MapItemView {
-                model: _savParamCoords
-                delegate: MapQuickItem {
-                    coordinate: modelData.coordinate
-                    anchorPoint.x: icon.width / 2
-                    anchorPoint.y: icon.height
-                    visible: true
-                    sourceItem: Image {
-                        source: "/custom/img/waypoint.svg"
-                        fillMode:           Image.PreserveAspectFit
-                        width:                          _indicatorRadius * 3
-                        id:                             indicator
-                        anchors.horizontalCenter:       parent.left
-                        anchors.verticalCenter:         parent.top
-                        anchors.horizontalCenterOffset: anchorPointX
-                        // anchors.verticalCenterOffset:   anchorPointY
-
-                        horizontalAlignment: Image.AlignHCenter
-                        verticalAlignment: Image.AlignVCenter
-
-                        QGCLabel {
-                            anchors.fill:           parent
-                            anchors.bottomMargin: 15
-                            horizontalAlignment:    Text.AlignHCenter
-                            verticalAlignment:      Text.AlignVCenter
-                            color:                  "white"
-                            font.pointSize:         ScreenTools.defaultFontPointSize
-                            fontSizeMode:           Text.Fit
-                            text:                   modelData.label
-                        }
-                    }
-                    z: QGroundControl.zOrderWaypointLines + 1
-                }
+            SavParamMarkerUP {
+                modelDataList: _savParamCoords
             }
         }
 
