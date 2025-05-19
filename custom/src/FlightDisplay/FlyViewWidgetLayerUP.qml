@@ -271,9 +271,8 @@ Item {
     }
 
     SavButtonWidgetUP {
-        anchors.rightMargin:    _toolsMargin + parentToolInsets.rightEdgeCenterInset
-        anchors.topMargin:      _toolsMargin + parentToolInsets.topEdgeRightInset
-        anchors.right:          parent.right
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.topMargin:      _toolsMargin + Screen.height * 0.2
         anchors.top:            parent.top
         z:                      QGroundControl.zOrderWidgets
         maxHeight:              parent.height - y - parentToolInsets.bottomEdgeLeftInset - _toolsMargin
