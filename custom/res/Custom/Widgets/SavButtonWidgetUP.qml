@@ -22,7 +22,7 @@ ToolStrip {
     }
 
     Component.onCompleted: {
-        qgcPal.toolbarBackground = Qt.rgba(0, 0, 0, 0.5) // 50% trasparente nero
+        qgcPal.toolbarBackground = Qt.rgba(0, 0, 0, 0.7) // 50% trasparente nero
         _savParamCoords = CustomPlugin.savParamCoordinates
     }
 
@@ -35,53 +35,78 @@ ToolStrip {
         return null
     }
 
-    Column {
-        width: parent.width
-        height: parent.height
+    ColumnLayout {
+        anchors.fill: parent
+        spacing: ScreenTools.defaultFontPixelHeight
 
         QGCLabel {
             text: "SAV"
-            font.pointSize: ScreenTools.defaultFontPointSize * 1.2
+            font.pointSize: ScreenTools.defaultFontPointSize * 3
             color: qgcPal.text
             horizontalAlignment: Text.AlignHCenter
-            anchors.horizontalCenter: parent.horizontalCenter
-            //height: implicitHeight + ScreenTools.defaultFontPixelHeight
+            Layout.alignment: Qt.AlignHCenter
         }
 
         GridLayout {
-            anchors.fill: parent
-            columns: 4
-            rowSpacing: 4
-            columnSpacing: 4
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.leftMargin: ScreenTools.defaultFontPixelWidth
+            Layout.rightMargin: ScreenTools.defaultFontPixelWidth
+            Layout.bottomMargin: ScreenTools.defaultFontPixelWidth
+            columns: 5
+            rowSpacing: ScreenTools.defaultFontPixelHeight
+            columnSpacing: ScreenTools.defaultFontPixelHeight
 
             Repeater {
-                model: ["A", "B", "C", "D", "E", "F", "G", "H"]
+                model: ["1", "A", "2", "3", "4", "5", "6", "8", "10", "11"]
 
                 delegate: ToolButton {
                     text: modelData
-                    icon.source: "/qmlimages/MapAddMission.svg"
                     Layout.fillWidth: true
                     Layout.fillHeight: true
+                    Layout.preferredWidth: 100
+                    Layout.preferredHeight: 100
 
-                    background: Item {} 
+                    background: Rectangle {
+                        color: Qt.rgba(1, 1, 1, 0.2)  // Bianco al 20% di opacità
+                        radius: ScreenTools.defaultFontPixelHeight
+                        border.color: Qt.rgba(1, 1, 1, 0.6)
+                        border.width: 1
+                    }
+
                     contentItem: Column {
                         anchors.fill: parent
-                        spacing: ScreenTools.defaultFontPixelWidth
+                        spacing: 0
 
                         QGCColoredImage {
                             color: "white"
-                            width: Math.min(parent.width, parent.height - textId.height)  * 0.9
+                            width: Math.min(parent.width, parent.height - textTorretta.height) * 0.5
                             height: width
-                            mipmap:                     true
+                            mipmap: true
                             fillMode: Image.PreserveAspectFit
-                            source: "/qmlimages/MapAddMission.svg"
+                            source: "/res/QGCLogoWhite" //"/qmlimages/MapAddMission.svg"
                             anchors.horizontalCenter: parent.horizontalCenter
-                        }     
+                        }
+
+                        Rectangle {
+                            width: 1
+                            height: ScreenTools.defaultFontPixelHeight * 0.5
+                            color: "transparent"
+                        }
+
+                        QGCLabel {
+                            id: textTorretta
+                            text: "TORRETTA"
+                            font.pointSize: ScreenTools.defaultFontPointSize
+                            color: "white"
+                            horizontalAlignment: Text.AlignHCenter
+                            anchors.horizontalCenter: parent.horizontalCenter
+                        }
 
                         QGCLabel {
                             id: textId
                             text: modelData
-                            font.pointSize: ScreenTools.defaultFontPointSize
+                            font.pointSize: ScreenTools.defaultFontPointSize * 4
                             color: "white"
                             horizontalAlignment: Text.AlignHCenter
                             anchors.horizontalCenter: parent.horizontalCenter
@@ -89,84 +114,15 @@ ToolStrip {
                     }
 
                     onClicked: {
-                        console.log("Clicked:", modelData)
+                        const coord = findCoordByLabel(modelData)
+                        if (coord) {
+                            console.log("Clicked:", modelData, coord.latitude, coord.longitude)
+                        } else {
+                            console.log("Clicked:", modelData)
+                        }
                     }
                 }
             }
         }
     }
-/*
-    ToolStripActionList {
-        id: savToolStripActionList
-
-        model: [
-            ToolStripAction {
-                //text: "A"
-                iconSource: "/qmlimages/MapAddMission.svg"
-                onTriggered: {
-                    const c = _findSavCoord("A")
-                    if (c) console.log("A →", c.latitude, c.longitude)
-                }
-            },
-            ToolStripAction {
-                //text: "B"
-                iconSource: "/qmlimages/MapAddMission.svg"
-                onTriggered: {
-                    const c = _findSavCoord("B")
-                    if (c) console.log("B →", c.latitude, c.longitude)
-                }
-            },
-            ToolStripAction {
-                //text: "C"
-                iconSource: "/qmlimages/MapAddMission.svg"
-                onTriggered: {
-                    const c = _findSavCoord("C")
-                    if (c) console.log("C →", c.latitude, c.longitude)
-                }
-            },
-            ToolStripAction {
-                text: "D"
-                iconSource: "/qmlimages/MapAddMission.svg"
-                onTriggered: {
-                    const c = _findSavCoord("D")
-                    if (c) console.log("D →", c.latitude, c.longitude)
-                }
-            },
-            ToolStripAction {
-                text: "E"
-                iconSource: "/qmlimages/MapAddMission.svg"
-                onTriggered: {
-                    const c = _findSavCoord("E")
-                    if (c) console.log("E →", c.latitude, c.longitude)
-                }
-            },
-            ToolStripAction {
-                text: "F"
-                iconSource: "/qmlimages/MapAddMission.svg"
-                onTriggered: {
-                    const c = _findSavCoord("F")
-                    if (c) console.log("F →", c.latitude, c.longitude)
-                }
-            },
-            ToolStripAction {
-                text: "G"
-                iconSource: "/qmlimages/MapAddMission.svg"
-                onTriggered: {
-                    const c = _findSavCoord("G")
-                    if (c) console.log("G →", c.latitude, c.longitude)
-                }
-            },
-            ToolStripAction {
-                text: "H"
-                iconSource: "/qmlimages/MapAddMission.svg"
-                onTriggered: {
-                    const c = _findSavCoord("H")
-                    if (c) console.log("H →", c.latitude, c.longitude)
-                }
-            }
-        ]
-    }
-
-    model: savToolStripActionList.model
-*/
 }
