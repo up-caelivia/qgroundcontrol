@@ -29,6 +29,16 @@ ToolStripActionList {
         GuidedActionRTL { },
         GuidedActionPause { },
         GuidedActionActionList { },
-        GuidedActionGripper { }
+        GuidedActionGripper { },
+        ToolStripAction {
+            text: "SAV Btns"
+            iconSource: "/res/QGCLogoWhite" //"/qmlimages/MapAddMission.svg"
+            enabled:            true
+            visible:            true
+            onTriggered: {
+                //let popup = savButtonPopupComponent.createObject(mainWindow)
+                //popup.open()
+            }
+        }
     ]
 }
