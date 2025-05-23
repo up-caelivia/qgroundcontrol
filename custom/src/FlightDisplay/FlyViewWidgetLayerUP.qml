@@ -28,6 +28,7 @@ import QGroundControl.ScreenTools   1.0
 import QGroundControl.Vehicle       1.0
 
 import Custom.Widgets 1.0
+import Constants 1.0
 
 
 // This is the ui overlay layer for the widgets/tools for Fly View
@@ -276,7 +277,7 @@ Item {
         anchors.top:            parent.top
         z:                      QGroundControl.zOrderWidgets
         maxHeight:              parent.height - y - parentToolInsets.bottomEdgeLeftInset - _toolsMargin
-        visible:                !QGroundControl.videoManager.fullScreen
+        visible:                Constants.showSavButtons
     }        
 
 }

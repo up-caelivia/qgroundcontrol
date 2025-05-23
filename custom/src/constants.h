@@ -45,6 +45,8 @@ class Constants : public QObject {
 
     Q_PROPERTY(bool isABLUOApp READ isABLUOApp CONSTANT)
 
+    Q_PROPERTY(bool showSavButtons READ showSavButtons WRITE setShowSavButtons NOTIFY showSavButtonsChanged)
+
 public:
     explicit Constants(QObject* parent = nullptr) : QObject(parent) {
 
@@ -122,6 +124,12 @@ public:
     int numGLO() const {return numGLOV;}
 
     bool isABLUOApp() const { return _isABLUOApp; }
+    bool showSavButtons() const { return _showSavButtons; }
+    
+    void setShowSavButtons(bool value){
+        _showSavButtons = value;
+        emit showSavButtonsChanged();
+    }
 
     void setNtripEnabled(bool enable) {
         if (ntripEnableV != enable) {
@@ -222,6 +230,7 @@ signals:
     void numGPSChanged();
     void numGLOChanged();
     void developerChanged();
+    void showSavButtonsChanged();
 
 private slots:
 
@@ -262,6 +271,7 @@ private:
 #else
     bool _isABLUOApp = false;
 #endif
+    bool _showSavButtons = false;
 
 };
 

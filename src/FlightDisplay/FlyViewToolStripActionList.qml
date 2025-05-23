@@ -12,6 +12,8 @@ import QtQml.Models 2.12
 import QGroundControl           1.0
 import QGroundControl.Controls  1.0
 
+import Constants 1.0
+
 ToolStripActionList {
     id: _root
 
@@ -33,11 +35,11 @@ ToolStripActionList {
         ToolStripAction {
             text: "SAV Btns"
             iconSource: "/res/QGCLogoWhite" //"/qmlimages/MapAddMission.svg"
-            enabled:            true
-            visible:            true
+            enabled:    true
+            visible:    QGroundControl.parameterManager.parameterExists(vehicle, "SAV_NUM_TORR") &&
+                        QGroundControl.parameterManager.getParameter(vehicle, "SAV_NUM_TORR").value > 0
             onTriggered: {
-                //let popup = savButtonPopupComponent.createObject(mainWindow)
-                //popup.open()
+                Constants.showSavButtons = !Constants.showSavButtons
             }
         }
     ]

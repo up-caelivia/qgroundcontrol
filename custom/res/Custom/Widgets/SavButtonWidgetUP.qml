@@ -7,23 +7,28 @@ import QGroundControl.ScreenTools 1.0
 import QtQuick.Layouts 1.15
 import QtQuick.Window 2.15
 
+import Constants 1.0
+
 ToolStrip {
     id: savToolStrip
     width: Screen.width * 0.6
     height: Screen.height * 0.4
 
     property var _savParamCoords: []
+    property var _labels: []
 
     Connections {
         target: CustomPlugin
         onSavParamCoordinatesChanged: {
             _savParamCoords = CustomPlugin.savParamCoordinates
+            updateLabels()
         }
     }
 
     Component.onCompleted: {
         qgcPal.toolbarBackground = Qt.rgba(0, 0, 0, 0.7) // 50% trasparente nero
         _savParamCoords = CustomPlugin.savParamCoordinates
+        updateLabels()
     }
 
     function findCoordByLabel(label) {
@@ -33,6 +38,13 @@ ToolStrip {
             }
         }
         return null
+    }
+
+    function updateLabels() {
+        const excluded = ["SG", "MAR", "HOM"]
+        _labels = _savParamCoords
+            .filter(coord => !excluded.includes(coord.label))
+            .map(coord => coord.label)
     }
 
     ColumnLayout {
@@ -53,12 +65,12 @@ ToolStrip {
             Layout.leftMargin: ScreenTools.defaultFontPixelWidth
             Layout.rightMargin: ScreenTools.defaultFontPixelWidth
             Layout.bottomMargin: ScreenTools.defaultFontPixelWidth
-            columns: 5
+            columns: Math.ceil(_labels.length/2)
             rowSpacing: ScreenTools.defaultFontPixelHeight
             columnSpacing: ScreenTools.defaultFontPixelHeight
 
             Repeater {
-                model: ["1", "A", "2", "3", "4", "5", "6", "8", "10", "11"]
+                model: _labels
 
                 delegate: ToolButton {
                     text: modelData
@@ -120,6 +132,8 @@ ToolStrip {
                         } else {
                             console.log("Clicked:", modelData)
                         }
+                        CustomPlugin.savButtonPressed(modelData)
+                        Constants.showSavButtons = false
                     }
                 }
             }

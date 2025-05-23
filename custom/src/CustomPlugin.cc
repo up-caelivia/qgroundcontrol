@@ -425,32 +425,42 @@ QVariantList CustomPlugin::getSavParamCoordinates(Vehicle* vehicle) {
     QVariantList coordinates;
     if (!vehicle || !vehicle->parameterManager()) return coordinates;
 
-    QStringList suffixes = { "0","1", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P" };
+    QStringList suffixes = { "WP_HOM","WP_SG","WP_MAR", "A","1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11" };
     int componentId = FactSystem::defaultComponentId;
 
-    for (const QString& s : suffixes) {
-        QString latName = QString("SAV_LAT_%1").arg(s);
-        QString lonName = QString("SAV_LON_%1").arg(s);
+    for (QString& s : suffixes) {
+        QString latName = QString("SAV_%1_LAT").arg(s);
+        QString lonName = QString("SAV_%1_LON").arg(s);
+        QString altName = QString("SAV_%1_ALT").arg(s);
+        QString speedName = QString("SAV_%1_SPEED").arg(s);
 
         auto* paramMgr = vehicle->parameterManager();
 
         if (paramMgr->parameterExists(componentId, latName) &&
-            paramMgr->parameterExists(componentId, lonName))
+            paramMgr->parameterExists(componentId, lonName) &&
+            paramMgr->parameterExists(componentId, altName) &&
+            paramMgr->parameterExists(componentId, speedName))
         {
             Fact* latFact = paramMgr->getParameter(componentId, latName);
             Fact* lonFact = paramMgr->getParameter(componentId, lonName);
+            Fact* altFact = paramMgr->getParameter(componentId, altName);
+            Fact* speedFact = paramMgr->getParameter(componentId, speedName);
 
             if (latFact && lonFact &&
                 latFact->rawValue().isValid() &&
-                lonFact->rawValue().isValid())
+                lonFact->rawValue().isValid() &&
+                altFact->rawValue().isValid() &&
+                speedFact->rawValue().isValid())
             {
                 QVariantMap entry;
-                entry["label"] = s;
+                entry["label"] = s.replace("WP_", "");
                 entry["latitude"] = latFact->rawValue().toDouble();
                 entry["longitude"] = lonFact->rawValue().toDouble();
+                entry["altitude"] = altFact->rawValue().toDouble();
+                entry["speed"] = speedFact->rawValue().toDouble();
                 coordinates.append(entry);
             }
-        }
+        }  
     }
 
     return coordinates;
@@ -469,6 +479,30 @@ void CustomPlugin::_updateSavParamCoordinates() {
         _savParamCoordinates = newCoords;
         emit savParamCoordinatesChanged();
     }
+}
+
+void CustomPlugin::savButtonPressed(const QString& label)
+{
+    qDebug() << "SAV button pressed with label:" << label;
+
+    Vehicle* vehicle = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle();
+    if (!vehicle) {
+        qWarning() << "No active vehicle";
+        return;
+    }
+
+    int value = 0;
+    bool ok = false;
+    value = label.toInt(&ok);
+    int id = 0;
+
+    if (!ok) {
+        if (label == "A") id = 1;
+        else id = 0;  // default
+    }
+    else id = (1<<(value));
+
+    vehicle->sendMavCommand(vehicle->defaultComponentId(), MAV_CMD_USER_1, false, id );
 }
 
 

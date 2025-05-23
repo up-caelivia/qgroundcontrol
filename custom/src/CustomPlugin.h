@@ -69,6 +69,7 @@ public:
     Q_INVOKABLE void sendLogMessage(const QString& text, const QString& description = "", const QString& severityStr = "Info");
     Q_INVOKABLE QVariantList getSavParamCoordinates(Vehicle* vehicle);
     QVariantList savParamCoordinates() const;
+    Q_INVOKABLE void savButtonPressed(const QString& label);
 
     QString speedMessage() const { return _speedMessage; }
     void setSpeedMessage(const QString& msg);
