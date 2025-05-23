@@ -90,12 +90,12 @@ public:
 
 public slots:
     virtual void start(const QString& uri, unsigned timeout, int buffer = 0, bool enableForwarding = false, const QString& forwardingUrl = "") override;
-    virtual void stop(void);
-    virtual void startDecoding(void* sink);
-    virtual void stopDecoding(void);
-    virtual void startRecording(const QString& videoFile, FILE_FORMAT format);
-    virtual void stopRecording(void);
-    virtual void takeScreenshot(const QString& imageFile);
+    virtual void stop(void) override;
+    virtual void startDecoding(void* sink) override;
+    virtual void stopDecoding(void) override;
+    virtual void startRecording(const QString& videoFile, FILE_FORMAT format) override;
+    virtual void stopRecording(void) override;
+    virtual void takeScreenshot(const QString& imageFile) override;
 
 protected slots:
     virtual void _watchdog(void);
