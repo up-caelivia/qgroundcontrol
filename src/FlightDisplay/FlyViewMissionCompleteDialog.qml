@@ -17,6 +17,8 @@ import QGroundControl.Controls      1.0
 import QGroundControl.Palette       1.0
 import QGroundControl.ScreenTools   1.0
 
+import Custom.Widgets 1.0
+
 /// Dialog which shows up when a flight completes. Prompts the user for things like whether they should remove the plan from the vehicle.
 Item {
     visible: false
@@ -31,7 +33,7 @@ Item {
     property bool _vehicleWasArmed:                 false
     property bool _vehicleInMissionFlightMode:      _activeVehicle ? (_activeVehicle.flightMode === _activeVehicle.missionFlightMode) : false
     property bool _vehicleWasInMissionFlightMode:   false
-    property bool _showMissionCompleteDialog:       _vehicleWasArmed && _vehicleWasInMissionFlightMode &&
+    property bool _showMissionCompleteDialog:       _vehicleWasArmed && !CustomPlugin.isSAVenabled && _vehicleWasInMissionFlightMode  
                                                     (missionController.containsItems || geoFenceController.containsItems || rallyPointController.containsItems ||
                                                      (_activeVehicle ? _activeVehicle.cameraTriggerPoints.count !== 0 : false))
 

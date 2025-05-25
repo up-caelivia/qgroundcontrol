@@ -65,7 +65,7 @@ CustomPlugin::CustomPlugin(QGCApplication *app, QGCToolbox* toolbox)
 
     _savParamTimer = new QTimer(this);
     connect(_savParamTimer, &QTimer::timeout, this, &CustomPlugin::_updateSavParamCoordinates);
-    _savParamTimer->start(2000);
+    _savParamTimer->start(1000);
 }
 
 void CustomPlugin::setToolbox(QGCToolbox* toolbox)
@@ -424,8 +424,11 @@ QVariantList& CustomPlugin::settingsPages()
 QVariantList CustomPlugin::getSavParamCoordinates(Vehicle* vehicle) {
     QVariantList coordinates;
     if (!vehicle || !vehicle->parameterManager()) return coordinates;
+    if (_isSAVenabled == false || _isSAVexist == false) {
+        return coordinates;
+    }
 
-    QStringList suffixes = { "WP_HOM","WP_SG","WP_MAR", "A","1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11" };
+    QStringList suffixes = { "WP_SG","WP_MAR", "A","1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11" };
     int componentId = FactSystem::defaultComponentId;
 
     for (QString& s : suffixes) {
@@ -474,6 +477,26 @@ void CustomPlugin::_updateSavParamCoordinates() {
     Vehicle* vehicle = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle();
     if (!vehicle || !vehicle->parameterManager()) return;
 
+    if (vehicle->parameterManager()->parameterExists(FactSystem::defaultComponentId, "SAV_ENABLE")){
+        Fact* enableFact = vehicle->parameterManager()->getParameter(FactSystem::defaultComponentId, "SAV_ENABLE");
+        if (enableFact->rawValue().isValid()){
+            if ((enableFact->rawValue().toDouble() > 0) != _isSAVenabled) {
+                _isSAVenabled = (enableFact->rawValue().toDouble() > 0);
+                emit savEnableChanged();
+            }
+        }
+    }
+
+    if (vehicle->parameterManager()->parameterExists(FactSystem::defaultComponentId, "SAV_NUM_TORR")){
+        Fact* existFact = vehicle->parameterManager()->getParameter(FactSystem::defaultComponentId, "SAV_NUM_TORR");
+        if (existFact->rawValue().isValid()){
+            if ((existFact->rawValue().toDouble() > 0) != _isSAVexist) {
+                _isSAVexist = (existFact->rawValue().toDouble() > 0);
+                emit isSAVexistChanged();
+            }
+        }
+    }
+
     QVariantList newCoords = getSavParamCoordinates(vehicle);
     if (newCoords != _savParamCoordinates) {
         _savParamCoordinates = newCoords;
@@ -483,8 +506,6 @@ void CustomPlugin::_updateSavParamCoordinates() {
 
 void CustomPlugin::savButtonPressed(const QString& label)
 {
-    qDebug() << "SAV button pressed with label:" << label;
-
     Vehicle* vehicle = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle();
     if (!vehicle) {
         qWarning() << "No active vehicle";
@@ -505,7 +526,26 @@ void CustomPlugin::savButtonPressed(const QString& label)
     vehicle->sendMavCommand(vehicle->defaultComponentId(), MAV_CMD_USER_1, false, id );
 }
 
+bool CustomPlugin::isSAVenabled() {
+    return _isSAVenabled;
+}
 
+bool CustomPlugin::isSAVexist() {
+    return _isSAVexist;
+}
+
+void CustomPlugin::setSAVenabled(const bool& msg) {
+    Vehicle* vehicle = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle();
+    if (!vehicle || !vehicle->parameterManager()) return;
+
+    if (vehicle->parameterManager()->parameterExists(FactSystem::defaultComponentId, "SAV_ENABLE")){
+        Fact* existFact = vehicle->parameterManager()->getParameter(FactSystem::defaultComponentId, "SAV_ENABLE");
+        _isSAVexist = msg;    
+        qDebug() << "_isSAVexist " << msg;   
+        existFact->setRawValue(_isSAVexist);
+        emit savEnableChanged();  
+    }
+}
 
 
 

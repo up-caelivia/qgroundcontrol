@@ -58,6 +58,8 @@
 		<file alias="Gripper.svg">../resources/Gripper.svg</file>
 		<file alias="GripperRelease.svg">../resources/GripperRelease.svg</file>
 		<file alias="GripperGrab.svg">../resources/GripperGrab.svg</file>
+		<file alias="Enable_white.svg">res/Images/Enable_white.svg</file>
+		<file alias="Disable_white.svg">res/Images/Disable_white.svg</file>
 	</qresource>
 	<qresource prefix="/res/firmware">
 		<file alias="3drradio.png">../resources/firmware/3drradio.png</file>

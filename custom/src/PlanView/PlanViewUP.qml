@@ -503,6 +503,7 @@ Item {
             
             SavParamMarkerUP {
                 modelDataList: _savParamCoords
+                visible:       CustomPlugin.isSAVenabled && CustomPlugin.isSAVexist
             }
         }
 

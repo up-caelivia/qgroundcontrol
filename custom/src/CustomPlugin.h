@@ -51,6 +51,9 @@ class CustomPlugin : public QGCCorePlugin
     Q_OBJECT
     Q_PROPERTY(QString speedMessage READ speedMessage WRITE setSpeedMessage NOTIFY speedMessageChanged)
     Q_PROPERTY(QVariantList savParamCoordinates READ savParamCoordinates NOTIFY savParamCoordinatesChanged)
+    Q_PROPERTY(bool isSAVenabled READ isSAVenabled WRITE setSAVenabled NOTIFY savEnableChanged)
+    Q_PROPERTY(bool isSAVexist READ isSAVexist NOTIFY isSAVexistChanged)
+    
 public:
     CustomPlugin(QGCApplication* app, QGCToolbox *toolbox);
     ~CustomPlugin() {}
@@ -71,12 +74,18 @@ public:
     QVariantList savParamCoordinates() const;
     Q_INVOKABLE void savButtonPressed(const QString& label);
 
+    Q_INVOKABLE bool isSAVenabled();
+    Q_INVOKABLE bool isSAVexist();
+
     QString speedMessage() const { return _speedMessage; }
     void setSpeedMessage(const QString& msg);
+    void setSAVenabled(const bool& msg);
 
 signals:
     void speedMessageChanged();
     void savParamCoordinatesChanged();
+    void savEnableChanged();
+    void isSAVexistChanged();
 
 private slots:
     void _updateSavParamCoordinates();
@@ -90,4 +99,6 @@ private:
     QString _speedMessage;
     QVariantList _savParamCoordinates;
     QTimer* _savParamTimer = nullptr;
+    bool _isSAVenabled = false;
+    bool _isSAVexist = false;
 };

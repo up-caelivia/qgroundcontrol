@@ -11,11 +11,15 @@ import QtQml.Models 2.12
 
 import QGroundControl           1.0
 import QGroundControl.Controls  1.0
+import QtQuick 2.12
 
 import Constants 1.0
+import Custom.Widgets 1.0
 
 ToolStripActionList {
     id: _root
+    property bool _SAVenabled: CustomPlugin.isSAVenabled
+    property bool _SAVexist: CustomPlugin.isSAVexist
 
     signal displayPreFlightChecklist
 
@@ -26,20 +30,28 @@ ToolStripActionList {
             onTriggered:    mainWindow.showPlanView()
         },
         PreFlightCheckListShowAction { onTriggered: displayPreFlightChecklist() },
-        GuidedActionTakeoff { },
-        GuidedActionLand { },
-        GuidedActionRTL { },
-        GuidedActionPause { },
-        GuidedActionActionList { },
-        GuidedActionGripper { },
+        GuidedActionTakeoff { visible: !_SAVenabled && (_guidedController.showTakeoff || !_guidedController.showLand)},
+        GuidedActionLand {  visible: !_SAVenabled && (_guidedController.showLand && !_guidedController.showTakeoff)},
+        GuidedActionRTL {  visible:!_SAVenabled && _guidedController.showRTL},
+        GuidedActionPause {  visible: !_SAVenabled && _guidedController.showPause},
+        GuidedActionActionList {  visible: !_SAVenabled},
+        GuidedActionGripper {  visible: !_SAVenabled},
         ToolStripAction {
             text: "SAV Btns"
             iconSource: "/res/QGCLogoWhite" //"/qmlimages/MapAddMission.svg"
             enabled:    true
-            visible:    QGroundControl.parameterManager.parameterExists(vehicle, "SAV_NUM_TORR") &&
-                        QGroundControl.parameterManager.getParameter(vehicle, "SAV_NUM_TORR").value > 0
+            visible:    _SAVenabled
             onTriggered: {
                 Constants.showSavButtons = !Constants.showSavButtons
+            }
+        },
+        ToolStripAction {
+            text: "SAV"
+            iconSource: _SAVenabled ? "/res/Enable_white.svg" : "/res/Disable_white.svg"
+            enabled:    true
+            visible:    _SAVexist
+            onTriggered: {
+                CustomPlugin.isSAVenabled = !CustomPlugin.isSAVenabled
             }
         }
     ]

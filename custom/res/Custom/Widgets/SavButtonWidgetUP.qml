@@ -52,8 +52,8 @@ ToolStrip {
         spacing: ScreenTools.defaultFontPixelHeight
 
         QGCLabel {
-            text: "SAV"
-            font.pointSize: ScreenTools.defaultFontPointSize * 3
+            text: "SAV points"
+            font.pointSize: ScreenTools.isMobile ? ScreenTools.defaultFontPointSize *1.5 : ScreenTools.defaultFontPointSize * 3
             color: qgcPal.text
             horizontalAlignment: Text.AlignHCenter
             Layout.alignment: Qt.AlignHCenter
@@ -98,11 +98,12 @@ ToolStrip {
                             fillMode: Image.PreserveAspectFit
                             source: "/res/QGCLogoWhite" //"/qmlimages/MapAddMission.svg"
                             anchors.horizontalCenter: parent.horizontalCenter
+                            visible: !ScreenTools.isMobile
                         }
 
                         Rectangle {
                             width: 1
-                            height: ScreenTools.defaultFontPixelHeight * 0.5
+                            height: ScreenTools.isMobile ? ScreenTools.defaultFontPixelHeight * 0.2 : ScreenTools.defaultFontPixelHeight * 0.5
                             color: "transparent"
                         }
 
@@ -118,7 +119,7 @@ ToolStrip {
                         QGCLabel {
                             id: textId
                             text: modelData
-                            font.pointSize: ScreenTools.defaultFontPointSize * 4
+                            font.pointSize: ScreenTools.isMobile ? ScreenTools.defaultFontPointSize *1.5 : ScreenTools.defaultFontPointSize * 4
                             color: "white"
                             horizontalAlignment: Text.AlignHCenter
                             anchors.horizontalCenter: parent.horizontalCenter
