@@ -10,18 +10,22 @@
 	  <field name="UnitText">meters</field>
 	  <field name="Range">0 120</field>
 	  <field name="Increment">.1</field>
+        <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV longitude of mission point A" name="ArduCopter:SAV_A_LON" documentation="This value indicates the longitude of the waypoint of the Tower A" user="Advanced">
 	  <field name="Increment">0.0000001</field>
+        <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV latitude of mission point A" name="ArduCopter:SAV_A_LAT" documentation="This value indicates the latitude of the waypoint of the Tower A" user="Advanced">
 	  <field name="Increment">0.0000001</field>
+        <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV speed to reach mission point A" name="ArduCopter:SAV_A_SPEED" documentation="This value indicates the speed used to reach the waypoint of the Tower A" user="Advanced">
 	  <field name="Units">m/s</field>
 	  <field name="UnitText">meters per second</field>
 	  <field name="Range">0 20</field>
 	  <field name="Increment">.1</field>
+        <field name="RebootRequired">True</field>
 	</param>
 
 	<!-- === SAV 1 === -->
@@ -30,18 +34,22 @@
 	  <field name="UnitText">meters</field>
 	  <field name="Range">0 120</field>
 	  <field name="Increment">.1</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV longitude of mission point 1" name="ArduCopter:SAV_1_LON" documentation="This value indicates the longitude of the waypoint of the Tower 1" user="Advanced">
 	  <field name="Increment">0.0000001</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV latitude of mission point 1" name="ArduCopter:SAV_1_LAT" documentation="This value indicates the latitude of the waypoint of the Tower 1" user="Advanced">
 	  <field name="Increment">0.0000001</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV speed to reach mission point 1" name="ArduCopter:SAV_1_SPEED" documentation="This value indicates the speed used to reach the waypoint of the Tower 1" user="Advanced">
 	  <field name="Units">m/s</field>
 	  <field name="UnitText">meters per second</field>
 	  <field name="Range">0 20</field>
 	  <field name="Increment">.1</field>
+    <field name="RebootRequired">True</field>
 	</param>
 
 	<!-- === SAV 2 === -->
@@ -50,18 +58,22 @@
 	  <field name="UnitText">meters</field>
 	  <field name="Range">0 120</field>
 	  <field name="Increment">.1</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV longitude of mission point 2" name="ArduCopter:SAV_2_LON" documentation="This value indicates the longitude of the waypoint of the Tower 2" user="Advanced">
 	  <field name="Increment">0.0000001</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV latitude of mission point 2" name="ArduCopter:SAV_2_LAT" documentation="This value indicates the latitude of the waypoint of the Tower 2" user="Advanced">
 	  <field name="Increment">0.0000001</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV speed to reach mission point 2" name="ArduCopter:SAV_2_SPEED" documentation="This value indicates the speed used to reach the waypoint of the Tower 2" user="Advanced">
 	  <field name="Units">m/s</field>
 	  <field name="UnitText">meters per second</field>
 	  <field name="Range">0 20</field>
 	  <field name="Increment">.1</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	
 	<!-- === SAV 3 === -->
@@ -70,18 +82,22 @@
 	  <field name="UnitText">meters</field>
 	  <field name="Range">0 120</field>
 	  <field name="Increment">.1</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV longitude of mission point 3" name="ArduCopter:SAV_3_LON" documentation="This value indicates the longitude of the waypoint of the Tower 3" user="Advanced">
 	  <field name="Increment">0.0000001</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV latitude of mission point 3" name="ArduCopter:SAV_3_LAT" documentation="This value indicates the latitude of the waypoint of the Tower 3" user="Advanced">
 	  <field name="Increment">0.0000001</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV speed to reach mission point 3" name="ArduCopter:SAV_3_SPEED" documentation="This value indicates the speed used to reach the waypoint of the Tower 3" user="Advanced">
 	  <field name="Units">m/s</field>
 	  <field name="UnitText">meters per second</field>
 	  <field name="Range">0 20</field>
 	  <field name="Increment">.1</field>
+    <field name="RebootRequired">True</field>
 	</param>
 
 	<!-- === SAV 4 === -->
@@ -90,18 +106,22 @@
 	  <field name="UnitText">meters</field>
 	  <field name="Range">0 120</field>
 	  <field name="Increment">.1</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV longitude of mission point 4" name="ArduCopter:SAV_4_LON" documentation="This value indicates the longitude of the waypoint of the Tower 4" user="Advanced">
 	  <field name="Increment">0.0000001</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV latitude of mission point 4" name="ArduCopter:SAV_4_LAT" documentation="This value indicates the latitude of the waypoint of the Tower 4" user="Advanced">
 	  <field name="Increment">0.0000001</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV speed to reach mission point 4" name="ArduCopter:SAV_4_SPEED" documentation="This value indicates the speed used to reach the waypoint of the Tower 4" user="Advanced">
 	  <field name="Units">m/s</field>
 	  <field name="UnitText">meters per second</field>
 	  <field name="Range">0 20</field>
 	  <field name="Increment">.1</field>
+    <field name="RebootRequired">True</field>
 	</param>
 
 	<!-- === SAV 5 === -->
@@ -110,18 +130,22 @@
 	  <field name="UnitText">meters</field>
 	  <field name="Range">0 120</field>
 	  <field name="Increment">.1</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV longitude of mission point 5" name="ArduCopter:SAV_5_LON" documentation="This value indicates the longitude of the waypoint of the Tower 5" user="Advanced">
 	  <field name="Increment">0.0000001</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV latitude of mission point 5" name="ArduCopter:SAV_5_LAT" documentation="This value indicates the latitude of the waypoint of the Tower 5" user="Advanced">
 	  <field name="Increment">0.0000001</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV speed to reach mission point 5" name="ArduCopter:SAV_5_SPEED" documentation="This value indicates the speed used to reach the waypoint of the Tower 5" user="Advanced">
 	  <field name="Units">m/s</field>
 	  <field name="UnitText">meters per second</field>
 	  <field name="Range">0 20</field>
 	  <field name="Increment">.1</field>
+    <field name="RebootRequired">True</field>
 	</param>
 
 	<!-- === SAV 6 === -->
@@ -130,18 +154,22 @@
 	  <field name="UnitText">meters</field>
 	  <field name="Range">0 120</field>
 	  <field name="Increment">.1</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV longitude of mission point 6" name="ArduCopter:SAV_6_LON" documentation="This value indicates the longitude of the waypoint of the Tower 6" user="Advanced">
 	  <field name="Increment">0.0000001</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV latitude of mission point 6" name="ArduCopter:SAV_6_LAT" documentation="This value indicates the latitude of the waypoint of the Tower 6" user="Advanced">
 	  <field name="Increment">0.0000001</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV speed to reach mission point 6" name="ArduCopter:SAV_6_SPEED" documentation="This value indicates the speed used to reach the waypoint of the Tower 6" user="Advanced">
 	  <field name="Units">m/s</field>
 	  <field name="UnitText">meters per second</field>
 	  <field name="Range">0 20</field>
 	  <field name="Increment">.1</field>
+    <field name="RebootRequired">True</field>
 	</param>
 
 	<!-- === SAV 7 === -->
@@ -150,18 +178,22 @@
 	  <field name="UnitText">meters</field>
 	  <field name="Range">0 120</field>
 	  <field name="Increment">.1</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV longitude of mission point 7" name="ArduCopter:SAV_7_LON" documentation="This value indicates the longitude of the waypoint of the Tower 7" user="Advanced">
 	  <field name="Increment">0.0000001</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV latitude of mission point 7" name="ArduCopter:SAV_7_LAT" documentation="This value indicates the latitude of the waypoint of the Tower 7" user="Advanced">
 	  <field name="Increment">0.0000001</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV speed to reach mission point 7" name="ArduCopter:SAV_7_SPEED" documentation="This value indicates the speed used to reach the waypoint of the Tower 7" user="Advanced">
 	  <field name="Units">m/s</field>
 	  <field name="UnitText">meters per second</field>
 	  <field name="Range">0 20</field>
 	  <field name="Increment">.1</field>
+    <field name="RebootRequired">True</field>
 	</param>
 
 	<!-- === SAV 8 === -->
@@ -170,18 +202,22 @@
 	  <field name="UnitText">meters</field>
 	  <field name="Range">0 120</field>
 	  <field name="Increment">.1</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV longitude of mission point 8" name="ArduCopter:SAV_8_LON" documentation="This value indicates the longitude of the waypoint of the Tower 8" user="Advanced">
 	  <field name="Increment">0.0000001</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV latitude of mission point 8" name="ArduCopter:SAV_8_LAT" documentation="This value indicates the latitude of the waypoint of the Tower 8" user="Advanced">
 	  <field name="Increment">0.0000001</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV speed to reach mission point 8" name="ArduCopter:SAV_8_SPEED" documentation="This value indicates the speed used to reach the waypoint of the Tower 8" user="Advanced">
 	  <field name="Units">m/s</field>
 	  <field name="UnitText">meters per second</field>
 	  <field name="Range">0 20</field>
 	  <field name="Increment">.1</field>
+    <field name="RebootRequired">True</field>
 	</param>
 
 	<!-- === SAV 9 === -->
@@ -190,18 +226,22 @@
 	  <field name="UnitText">meters</field>
 	  <field name="Range">0 120</field>
 	  <field name="Increment">.1</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV longitude of mission point 9" name="ArduCopter:SAV_9_LON" documentation="This value indicates the longitude of the waypoint of the Tower 9" user="Advanced">
 	  <field name="Increment">0.0000001</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV latitude of mission point 9" name="ArduCopter:SAV_9_LAT" documentation="This value indicates the latitude of the waypoint of the Tower 9" user="Advanced">
 	  <field name="Increment">0.0000001</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV speed to reach mission point 9" name="ArduCopter:SAV_9_SPEED" documentation="This value indicates the speed used to reach the waypoint of the Tower 9" user="Advanced">
 	  <field name="Units">m/s</field>
 	  <field name="UnitText">meters per second</field>
 	  <field name="Range">0 20</field>
 	  <field name="Increment">.1</field>
+    <field name="RebootRequired">True</field>
 	</param>
 
 	<!-- === SAV 10 === -->
@@ -210,18 +250,22 @@
 	  <field name="UnitText">meters</field>
 	  <field name="Range">0 120</field>
 	  <field name="Increment">.1</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV longitude of mission point 10" name="ArduCopter:SAV_10_LON" documentation="This value indicates the longitude of the waypoint of the Tower 10" user="Advanced">
 	  <field name="Increment">0.0000001</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV latitude of mission point 10" name="ArduCopter:SAV_10_LAT" documentation="This value indicates the latitude of the waypoint of the Tower 10" user="Advanced">
 	  <field name="Increment">0.0000001</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV speed to reach mission point 10" name="ArduCopter:SAV_10_SPEED" documentation="This value indicates the speed used to reach the waypoint of the Tower 10" user="Advanced">
 	  <field name="Units">m/s</field>
 	  <field name="UnitText">meters per second</field>
 	  <field name="Range">0 20</field>
 	  <field name="Increment">.1</field>
+    <field name="RebootRequired">True</field>
 	</param>
 
 	<!-- === SAV 11 === -->
@@ -230,18 +274,22 @@
 	  <field name="UnitText">meters</field>
 	  <field name="Range">0 120</field>
 	  <field name="Increment">.1</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV longitude of mission point 11" name="ArduCopter:SAV_11_LON" documentation="This value indicates the longitude of the waypoint of the Tower 11" user="Advanced">
 	  <field name="Increment">0.0000001</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV latitude of mission point 11" name="ArduCopter:SAV_11_LAT" documentation="This value indicates the latitude of the waypoint of the Tower 11" user="Advanced">
 	  <field name="Increment">0.0000001</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV speed to reach mission point 11" name="ArduCopter:SAV_11_SPEED" documentation="This value indicates the speed used to reach the waypoint of the Tower 11" user="Advanced">
 	  <field name="Units">m/s</field>
 	  <field name="UnitText">meters per second</field>
 	  <field name="Range">0 20</field>
 	  <field name="Increment">.1</field>
+    <field name="RebootRequired">True</field>
 	</param>
 
 
@@ -251,18 +299,22 @@
 	  <field name="UnitText">meters</field>
 	  <field name="Range">0 120</field>
 	  <field name="Increment">.1</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV longitude of WP_HOM" name="ArduCopter:SAV_WP_HOM_LON" documentation="This value indicates the longitude of the home waypoint" user="Advanced">
 	  <field name="Increment">0.0000001</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV latitude of WP_HOM" name="ArduCopter:SAV_WP_HOM_LAT" documentation="This value indicates the latitude of the home waypoint" user="Advanced">
 	  <field name="Increment">0.0000001</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV speed to reach WP_HOM" name="ArduCopter:SAV_WP_HOM_SPEED" documentation="This value indicates the speed used to reach the home waypoint" user="Advanced">
 	  <field name="Units">m/s</field>
 	  <field name="UnitText">meters per second</field>
 	  <field name="Range">0 20</field>
 	  <field name="Increment">.1</field>
+    <field name="RebootRequired">True</field>
 	</param>
 
 	<!-- === WP_SG === -->
@@ -271,18 +323,22 @@
 	  <field name="UnitText">meters</field>
 	  <field name="Range">0 120</field>
 	  <field name="Increment">.1</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV longitude of WP_SG" name="ArduCopter:SAV_WP_SG_LON" documentation="This value indicates the longitude of the WP_SG waypoint" user="Advanced">
 	  <field name="Increment">0.0000001</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV latitude of WP_SG" name="ArduCopter:SAV_WP_SG_LAT" documentation="This value indicates the latitude of the WP_SG waypoint" user="Advanced">
 	  <field name="Increment">0.0000001</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV speed to reach WP_SG" name="ArduCopter:SAV_WP_SG_SPEED" documentation="This value indicates the speed used to reach the WP_SG waypoint" user="Advanced">
 	  <field name="Units">m/s</field>
 	  <field name="UnitText">meters per second</field>
 	  <field name="Range">0 20</field>
 	  <field name="Increment">.1</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	
 	<!-- === WP_MAR === -->
@@ -291,22 +347,27 @@
 	  <field name="UnitText">meters</field>
 	  <field name="Range">0 120</field>
 	  <field name="Increment">.1</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV longitude of WP_MAR" name="ArduCopter:SAV_WP_MAR_LON" documentation="This value indicates the longitude of the WP_MAR waypoint" user="Advanced">
 	  <field name="Increment">0.0000001</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV latitude of WP_MAR" name="ArduCopter:SAV_WP_MAR_LAT" documentation="This value indicates the latitude of the WP_MAR waypoint" user="Advanced">
 	  <field name="Increment">0.0000001</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	<param humanName="SAV speed to reach WP_MAR" name="ArduCopter:SAV_WP_MAR_SPEED" documentation="This value indicates the speed used to reach the WP_MAR waypoint" user="Advanced">
 	  <field name="Units">m/s</field>
 	  <field name="UnitText">meters per second</field>
 	  <field name="Range">0 20</field>
 	  <field name="Increment">.1</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	
 	<param humanName="SAV tower enabled" name="ArduCopter:SAV_NUM_TORR" documentation="bitmask to enable SAV towers" user="Advanced">
 	  <field name="Bitmask">0:towerA,1:tower1,2:tower2,3:tower3,4:tower4,5:tower5,6:tower6,7:tower7,8:tower8,9:tower9,10:tower10</field>
+    <field name="RebootRequired">True</field>
 	</param>
 	
 
@@ -322,6 +383,7 @@
         <field name="UnitText">degrees</field>
         <field name="Increment">0.01</field>
         <field name="Range">-360 360</field>
+        <field name="RebootRequired">True</field>
       </param>
 	  
       <param humanName="Fence altitude Margin for SAV mission" name="ArduCopter:SAV_FENCE_H_MARG" documentation="Using an altitude value in HOME point and TOWER point, the fence altitude value is the nominal altitude multiplied bu (1 + this value)" user="Advanced">
@@ -329,6 +391,7 @@
         <field name="UnitText">percent</field>
         <field name="Range">0 100</field>
         <field name="Increment">1</field>
+        <field name="RebootRequired">True</field>
       </param>
 	  
       <param humanName="Eeprom format version number" name="ArduCopter:FORMAT_VERSION" documentation="This value is incremented when changes are made to the eeprom format" user="Advanced">
