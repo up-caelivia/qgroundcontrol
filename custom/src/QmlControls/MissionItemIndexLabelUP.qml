@@ -147,9 +147,6 @@ Canvas {
             fontSizeMode:           Text.Fit
             text:                   _index
             visible:                _index != "L"
-            Component.onCompleted: {
-                console.log("label index: " + _index);
-            }
         }        
 
         QGCColoredImage {
