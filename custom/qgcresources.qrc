@@ -58,13 +58,6 @@
 		<file alias="Gripper.svg">../resources/Gripper.svg</file>
 		<file alias="GripperRelease.svg">../resources/GripperRelease.svg</file>
 		<file alias="GripperGrab.svg">../resources/GripperGrab.svg</file>
-		<file alias="Enable_white.svg">res/Images/Enable_white.svg</file>
-		<file alias="Disable_white.svg">res/Images/Disable_white.svg</file>
-		<file alias="Home_WP.svg">res/Images/Home.svg</file>
-		<file alias="Camera_WP.svg">res/Images/Camera.svg</file>		
-		<file alias="Sea_WP.svg">res/Images/Sea.svg</file>
-		<file alias="SeaSide_WP.svg">res/Images/SeaSide.svg</file>
-		<file alias="Lifeguard.svg">res/Images/Lifeguard.svg</file>
 	</qresource>
 	<qresource prefix="/res/firmware">
 		<file alias="3drradio.png">../resources/firmware/3drradio.png</file>

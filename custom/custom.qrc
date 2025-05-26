@@ -91,4 +91,13 @@
     <qresource prefix="/json">
         <file alias="NTRIP.SettingsGroup.json">src/Settings/NTRIP.SettingsGroup.json</file>
     </qresource>
+    <qresource prefix="/res">
+		<file alias="Enable_white.svg">res/Images/Enable_white.svg</file>
+		<file alias="Disable_white.svg">res/Images/Disable_white.svg</file>
+		<file alias="Home_WP.svg">res/Images/Home.svg</file>
+		<file alias="Camera_WP.svg">res/Images/Camera.svg</file>		
+		<file alias="Sea_WP.svg">res/Images/Sea.svg</file>
+		<file alias="SeaSide_WP.svg">res/Images/SeaSide.svg</file>
+		<file alias="Lifeguard.svg">res/Images/Lifeguard.svg</file>
+	</qresource>
 </RCC>
