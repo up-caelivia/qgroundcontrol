@@ -40,8 +40,8 @@ ToolStripActionList {
         GuidedActionActionList {  visible: !_SAVenabled},
         GuidedActionGripper {  visible: !_SAVenabled},
         ToolStripAction {
-            text: "SAV Btns"
-            iconSource: "/res/QGCLogoWhite" //"/qmlimages/MapAddMission.svg"
+            text: "SAV GoTo"
+            iconSource: "/res/Lifeguard.svg"
             enabled:    true
             visible:    _SAVenabled
             onTriggered: {

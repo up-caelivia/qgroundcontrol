@@ -29,15 +29,26 @@ MapItemView {
             fillMode: Image.PreserveAspectFit
             width: ScreenTools.defaultFontPixelHeight * 2.5
 
+            QGCColoredImage {
+                anchors.fill: parent
+                anchors.bottomMargin: 15
+                source: modelData.label == "MAR" ? "/res/Sea_WP.svg" : (modelData.label == "SG" ? "/res/SeaSide_WP.svg" : "/res/Camera_WP.svg")
+                visible: true
+                fillMode: Image.PreserveAspectFit
+                color: "white"
+            }
+
             QGCLabel {
                 anchors.fill: parent
                 anchors.bottomMargin: 15
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
-                color: "white"
+                color: "black"
                 font.pointSize: ScreenTools.defaultFontPointSize
                 fontSizeMode: Text.Fit
+                font.bold: true
                 text: modelData.label
+                visible: modelData.label != "MAR" && modelData.label != "SG"
             }
         }
 
