@@ -280,17 +280,7 @@ Item {
 
                 if (modelFact.units == "cm")
                     return (modelFact.rawValue / 100).toFixed(modelFact.decimalPlaces+2) + " " + "m"
-
-                if (modelFact.name.startsWith("SAV_")) {
-                    // For SAV parameters, we want to show 7 decimal places
-                    if (modelFact.name.includes("NUM_TORR")) {
-                        return (modelFact.rawValue).toFixed(0) + " " + modelFact.units
-                    }
-                    else if (modelFact.name.includes("_LAT") || modelFact.name.includes("_LON")) {
-                        return (modelFact.rawValue).toFixed(7) + " " + modelFact.units
-                    }
-                    return (modelFact.rawValue).toFixed(3)
-                }
+                    
                 return modelFact.valueString + " " + modelFact.units
 
             }
