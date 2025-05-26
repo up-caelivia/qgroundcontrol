@@ -306,7 +306,7 @@
 	</param>
 	
 	<param humanName="SAV tower enabled" name="ArduCopter:SAV_NUM_TORR" documentation="bitmask to enable SAV towers" user="Advanced">
-	  <field name="Bitmask">0:None,1:towerA,2:tower1,3:tower2,4:tower3,5:tower4,6:tower5,7:tower6,8:tower7,9:tower8,10:tower9,11:tower10</field>
+	  <field name="Bitmask">0:towerA,1:tower1,2:tower2,3:tower3,4:tower4,5:tower5,6:tower6,7:tower7,8:tower8,9:tower9,10:tower10</field>
 	</param>
 	
 
