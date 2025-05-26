@@ -20,6 +20,8 @@ ToolStripActionList {
     id: _root
     property bool _SAVenabled: CustomPlugin.isSAVenabled
     property bool _SAVexist: CustomPlugin.isSAVexist
+    property var    _activeVehicle:     QGroundControl.multiVehicleManager.activeVehicle
+    property var    _vehicleInAir:      _activeVehicle ? _activeVehicle.flying || _activeVehicle.landing : false
 
     signal displayPreFlightChecklist
 
@@ -28,6 +30,7 @@ ToolStripActionList {
             text:           qsTr("Plan")
             iconSource:     "/qmlimages/Plan.svg"
             onTriggered:    mainWindow.showPlanView()
+            visible: !_SAVenabled
         },
         PreFlightCheckListShowAction { onTriggered: displayPreFlightChecklist() },
         GuidedActionTakeoff { visible: !_SAVenabled && (_guidedController.showTakeoff || !_guidedController.showLand)},
@@ -49,7 +52,7 @@ ToolStripActionList {
             text: "SAV"
             iconSource: _SAVenabled ? "/res/Enable_white.svg" : "/res/Disable_white.svg"
             enabled:    true
-            visible:    _SAVexist
+            visible:    _SAVexist && !_vehicleInAir
             onTriggered: {
                 CustomPlugin.isSAVenabled = !CustomPlugin.isSAVenabled
             }

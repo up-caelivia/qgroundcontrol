@@ -128,11 +128,6 @@ ToolStrip {
 
                     onClicked: {
                         const coord = findCoordByLabel(modelData)
-                        if (coord) {
-                            console.log("Clicked:", modelData, coord.latitude, coord.longitude)
-                        } else {
-                            console.log("Clicked:", modelData)
-                        }
                         CustomPlugin.savButtonPressed(modelData)
                         Constants.showSavButtons = false
                     }

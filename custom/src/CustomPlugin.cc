@@ -541,7 +541,6 @@ void CustomPlugin::setSAVenabled(const bool& msg) {
     if (vehicle->parameterManager()->parameterExists(FactSystem::defaultComponentId, "SAV_ENABLE")){
         Fact* existFact = vehicle->parameterManager()->getParameter(FactSystem::defaultComponentId, "SAV_ENABLE");
         _isSAVexist = msg;    
-        qDebug() << "_isSAVexist " << msg;   
         existFact->setRawValue(_isSAVexist);
         emit savEnableChanged();  
     }
