@@ -13,9 +13,11 @@ ToolStrip {
     id: savToolStrip
     width: Screen.width * 0.6
     height: Screen.height * 0.4
+    color: Qt.rgba(0, 0, 0, 0.7)
 
     property var _savParamCoords: []
     property var _labels: []
+    
 
     Connections {
         target: CustomPlugin
@@ -26,7 +28,7 @@ ToolStrip {
     }
 
     Component.onCompleted: {
-        qgcPal.toolbarBackground = Qt.rgba(0, 0, 0, 0.7) // 50% trasparente nero
+        //qgcPal.toolbarBackground = Qt.rgba(0, 0, 0, 0.7)
         _savParamCoords = CustomPlugin.savParamCoordinates
         updateLabels()
     }
