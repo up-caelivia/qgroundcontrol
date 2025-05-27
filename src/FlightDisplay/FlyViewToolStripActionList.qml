@@ -40,7 +40,7 @@ ToolStripActionList {
         GuidedActionRTL {  visible:!_SAVenabled && _guidedController.showRTL},
         GuidedActionPause {  visible: !_SAVenabled && _guidedController.showPause},
         GuidedActionActionList {  visible: !_SAVenabled},
-        GuidedActionGripper {  visible: !_SAVenabled},
+        GuidedActionGripper {  visible: false},
         ToolStripAction {
             text: "SAV GoTo"
             iconSource: "/res/Lifeguard.svg"
