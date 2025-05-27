@@ -73,6 +73,7 @@ public:
     Q_INVOKABLE QVariantList getSavParamCoordinates(Vehicle* vehicle);
     QVariantList savParamCoordinates() const;
     Q_INVOKABLE void savButtonPressed(const QString& label);
+    Q_INVOKABLE void updateFence(QObject* controllerObj, bool isSAVenabled);
 
     Q_INVOKABLE bool isSAVenabled();
     Q_INVOKABLE bool isSAVexist();

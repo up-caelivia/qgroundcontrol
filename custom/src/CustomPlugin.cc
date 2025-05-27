@@ -30,6 +30,7 @@
 // #include "InstrumentValueData.h"
 #include <list>
 #include "ParameterManager.h"
+#include "GeoFenceController.h"
 
 void CustomPlugin::registerQmlTypes()
 {
@@ -503,6 +504,69 @@ void CustomPlugin::_updateSavParamCoordinates() {
         emit savParamCoordinatesChanged();
     }
 }
+
+void CustomPlugin::updateFence(QObject* controllerObj, bool isSAVenabled) {
+    GeoFenceController* controller = qobject_cast<GeoFenceController*>(controllerObj);
+    if (!controller) {
+        qWarning() << "Invalid GeoFenceController passed to updateFence";
+        return;
+    }
+
+    QString missionPath = qgcApp()->toolbox()->settingsManager()->appSettings()->missionSavePath();
+    QDir loadDir(missionPath);
+
+    QString savFile = loadDir.absoluteFilePath("sav.json");
+    QString noSavFile = loadDir.absoluteFilePath("no_sav.json");
+    if (isSAVenabled) {
+        {
+            QJsonObject json;
+            controller->save(json); 
+            QJsonDocument doc(json);
+            QFile saveFile(noSavFile);
+            if (saveFile.open(QIODevice::WriteOnly)) {
+                saveFile.write(doc.toJson());
+                saveFile.close();
+            } else {
+                qWarning() << "Non riesco a salvare no_sav.json!";
+            }
+        }
+        controller->removeAll();
+        QFile file(savFile);
+        if (file.open(QIODevice::ReadOnly)) {
+            QByteArray bytes = file.readAll();
+            QJsonDocument doc = QJsonDocument::fromJson(bytes);
+            QJsonObject json = doc.object();
+
+            QString errorString;
+            controller->load(json, errorString);
+            if (!errorString.isEmpty()) {
+                qWarning() << "Errore GeoFence JSON (sav.json):" << errorString;
+            }
+            //controller->setDirty(true);
+            controller->sendToVehicle();
+        } else {
+            qWarning() << "Impossibile aprire sav.json";
+        }
+    } else {
+        controller->removeAll();
+        QFile file(noSavFile);
+        if (file.open(QIODevice::ReadOnly)) {
+            QByteArray bytes = file.readAll();
+            QJsonDocument doc = QJsonDocument::fromJson(bytes);
+            QJsonObject json = doc.object();
+            QString errorString;
+            controller->load(json, errorString);
+            if (!errorString.isEmpty()) {
+                qWarning() << "Errore GeoFence JSON (no_sav.json):" << errorString;
+            }
+            //controller->setDirty(true);
+            controller->sendToVehicle();
+        } else {
+            qWarning() << "Impossibile aprire no_sav.json";
+        }
+    }
+}
+
 
 void CustomPlugin::savButtonPressed(const QString& label)
 {

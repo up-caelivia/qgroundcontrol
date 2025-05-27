@@ -7,14 +7,15 @@
  *
  ****************************************************************************/
 
-import QtQml.Models 2.12
+import QtQml.Models                 2.12
 
-import QGroundControl           1.0
-import QGroundControl.Controls  1.0
-import QtQuick 2.12
+import QGroundControl               1.0
+import QGroundControl.Controls      1.0
+import QGroundControl.Controllers   1.0
+import QtQuick                      2.12
 
-import Constants 1.0
-import Custom.Widgets 1.0
+import Constants                    1.0
+import Custom.Widgets               1.0
 
 ToolStripActionList {
     id: _root
@@ -22,6 +23,7 @@ ToolStripActionList {
     property bool _SAVexist: CustomPlugin.isSAVexist
     property var    _activeVehicle:     QGroundControl.multiVehicleManager.activeVehicle
     property var    _vehicleInAir:      _activeVehicle ? _activeVehicle.flying || _activeVehicle.landing : false
+    property var    _planMasterController:              globals.planMasterControllerPlanView
 
     signal displayPreFlightChecklist
 
@@ -55,6 +57,7 @@ ToolStripActionList {
             visible:    _SAVexist && !_vehicleInAir
             onTriggered: {
                 CustomPlugin.isSAVenabled = !CustomPlugin.isSAVenabled
+                CustomPlugin.updateFence(_planMasterController.geoFenceController, !_SAVenabled);
             }
         }
     ]
