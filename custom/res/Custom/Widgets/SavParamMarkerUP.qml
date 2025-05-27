@@ -11,6 +11,10 @@ MapItemView {
 
     // Inserisci qui la lista di elementi con proprietà `coordinate` e `label`
     property var modelDataList: []
+    property real   _smallRadiusRaw:    Math.ceil((ScreenTools.defaultFontPixelHeight * ScreenTools.smallFontPointRatio) / 2)
+    property real   _smallRadius:       _smallRadiusRaw + ((_smallRadiusRaw % 2 == 0) ? 1 : 0) + 2 // odd number for better centering
+    property real   _normalRadiusRaw:   Math.ceil(ScreenTools.defaultFontPixelHeight * 0.66)
+    property real   _normalRadius:      _normalRadiusRaw + ((_normalRadiusRaw % 2 == 0) ? 1 : 0)
 
     model: modelDataList
 
@@ -27,7 +31,7 @@ MapItemView {
             id: icon
             source: "/custom/img/waypoint.svg"
             fillMode: Image.PreserveAspectFit
-            width: ScreenTools.defaultFontPixelHeight * 2.5
+            width: (modelData.label == "MAR" || modelData.label == "SG") ? _smallRadius * 3: _normalRadius * 3
 
             QGCColoredImage {
                 anchors.fill: parent
