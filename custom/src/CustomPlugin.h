@@ -70,6 +70,9 @@ public:
     QVariantList&           settingsPages() override;
     void setToolbox(QGCToolbox* toolbox) override;
     Q_INVOKABLE void sendLogMessage(const QString& text, const QString& description = "", const QString& severityStr = "Info");
+    void onActiveVehicleChanged(Vehicle* vehicle);
+    void handleMavlinkMessage(const mavlink_message_t& message);
+
     Q_INVOKABLE QVariantList getSavParamCoordinates(Vehicle* vehicle);
     QVariantList savParamCoordinates() const;
     Q_INVOKABLE void savButtonPressed(const QString& label);
@@ -98,6 +101,11 @@ private:
     QVariantList      _customSettingsList;
     CustomToolbox* _customToolbox = nullptr;
     QString _speedMessage;
+    uint32_t _lastTimeBootMs = 0;
+    QMetaObject::Connection _vehicleConnection;
+    bool _vehicleListenerConnected = false;
+    bool _audioMuteScheduled = false;
+    
     QVariantList _savParamCoordinates;
     QTimer* _savParamTimer = nullptr;
     bool _isSAVenabled = false;
