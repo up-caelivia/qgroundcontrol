@@ -68,5 +68,9 @@
 
 <file alias="PlanView.qml">src/PlanView/PlanView.qml</file>
 
+<file alias="QGroundControl/FlightDisplay/FlyViewMissionCompleteDialog.qml">src/FlightDisplay/FlyViewMissionCompleteDialog.qml</file>
+
+<file alias="QGroundControl/FlightDisplay/FlyViewToolStripActionList.qml">src/FlightDisplay/FlyViewToolStripActionList.qml</file>
+
 
 
