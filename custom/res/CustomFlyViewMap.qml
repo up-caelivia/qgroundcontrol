@@ -555,6 +555,7 @@ FlightMap {
     // Handle guided mode clicks
     MouseArea {
         anchors.fill: parent
+        visible: !CustomPlugin.isSAVenabled || !CustomPlugin.isSAVexist
 
         Popup {
             id: clickMenu
