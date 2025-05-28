@@ -75,6 +75,9 @@ void CustomPlugin::setToolbox(QGCToolbox* toolbox)
         });
 
     _customToolbox = new CustomToolbox(qgcApp());
+
+    connect(qgcApp()->toolbox()->multiVehicleManager(), &MultiVehicleManager::activeVehicleChanged,
+        this, &CustomPlugin::onActiveVehicleChanged);
 }
 
 void CustomPlugin::sendLogMessage(const QString& text, const QString& description, const QString& severityStr)
@@ -425,6 +428,75 @@ QVariantList& CustomPlugin::settingsPages()
         _customSettingsList.insert(1, QVariant::fromValue(_commLinksSettings));   
     }
     return _customSettingsList;
+}
+
+void CustomPlugin::onActiveVehicleChanged(Vehicle* vehicle)
+{
+    qDebug() << "onActiveVehicleChanged";
+    if (!vehicle) {
+        qDebug() << "!vehicle";
+        if (_vehicleListenerConnected) {
+            disconnect(_vehicleConnection);
+            _vehicleListenerConnected = false;
+        }
+        return;
+    }
+
+    if (!_vehicleListenerConnected) {
+        qDebug() << "!_vehicleListenerConnected";
+        // Reconnect to the new vehicle's mavlink messages
+        _vehicleConnection = connect(vehicle, &Vehicle::mavlinkMessageReceived, this, &CustomPlugin::handleMavlinkMessage);
+        _vehicleListenerConnected = true;
+        _lastTimeBootMs = 0;
+        _audioMuteScheduled = false;
+        VehicleLinkManager* vlm = vehicle->vehicleLinkManager();
+        connect(vlm, &VehicleLinkManager::communicationLostChanged,
+        this, [this, vehicle](bool lost) {
+            qDebug() << "Vehicle communication lost changed! Lost:" << lost;
+            if (!lost) {
+                this->_vehicleConnection = connect(vehicle, &Vehicle::mavlinkMessageReceived, this, &CustomPlugin::handleMavlinkMessage);
+                this->_lastTimeBootMs = 0;
+                this->_audioMuteScheduled = false;
+            }
+        });
+    }
+}
+
+void CustomPlugin::handleMavlinkMessage(const mavlink_message_t& message)
+{
+    if (message.msgid == MAVLINK_MSG_ID_SYSTEM_TIME) {
+        mavlink_system_time_t sysTime;
+        mavlink_msg_system_time_decode(&message, &sysTime);
+        _lastTimeBootMs = sysTime.time_boot_ms;
+
+        // Only once, if time_boot_ms < 30000
+        if (_lastTimeBootMs > 0 && !_audioMuteScheduled) {
+            _audioMuteScheduled = true;
+            qgcApp()->toolbox()->settingsManager()->appSettings()->audioMuted()->setRawValue(true);
+            UASMessageHandler* msgHandler = qgcApp()->toolbox()->uasMessageHandler();
+            if (msgHandler) {
+                msgHandler->handleTextMessage(1, 1, 6, "Audio messages deactivated", "");
+            }
+            int unmuteDelay = 30000 - _lastTimeBootMs;
+            if (unmuteDelay < 10000)
+                unmuteDelay = 10000; // Ensure at least 10 seconds delay
+            if (unmuteDelay > 0) {
+                QTimer::singleShot(unmuteDelay, qgcApp(), []() {
+                    qgcApp()->toolbox()->settingsManager()->appSettings()->audioMuted()->setRawValue(false);
+                    UASMessageHandler* msgHandler = qgcApp()->toolbox()->uasMessageHandler();
+                    if (msgHandler) {
+                        msgHandler->handleTextMessage(1, 1, 6, "Audio messages re-activated", "");
+                    }
+                });
+            }
+            disconnect(_vehicleConnection);
+            _vehicleListenerConnected = false;
+        }
+        else {
+            disconnect(_vehicleConnection);
+            _vehicleListenerConnected = false;
+        }
+    }
 }
 
 

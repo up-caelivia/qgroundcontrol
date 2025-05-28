@@ -38,6 +38,8 @@ public:
     DEFINE_SETTINGFACT(forceVideoDecoder)
     // Herelink HDMI source switching
     DEFINE_SETTINGFACT(cameraId)
+    DEFINE_SETTINGFACT(enableRTMPForwarding)
+    DEFINE_SETTINGFACT(serverRTMPUrl)
 
     enum VideoDecoderOptions {
         ForceVideoDecoderDefault = 0,

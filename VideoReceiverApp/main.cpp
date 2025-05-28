@@ -391,7 +391,13 @@ VideoReceiverApp::exec()
 void
 VideoReceiverApp::startStreaming()
 {
-    _receiver->start(_url, _timeout);
+    // Parametri fissi di forwarding
+    _videoSettings = toolbox->settingsManager()->videoSettings();
+    bool enableForwarding = _videoSettings->enableRTMPForwarding()->rawValue().toBool();
+    QString forwardingUrl = _videoSettings->serverRTMPUrl()->rawValue().toString();
+
+    // Avvia lo streaming con il forwarding
+    _receiver->start(_url, _timeout, 0, enableForwarding, forwardingUrl);
 
     if (_decode) {
         startDecoding();

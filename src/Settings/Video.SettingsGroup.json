@@ -145,6 +145,20 @@
     "longDesc":         "Camera ID used for video streaming.",
     "type":             "uint32",
     "default":          0
+},
+{
+    "name":             "enableRTMPForwarding",
+    "shortDesc": "Enable RTMP forwarding",
+    "longDesc":  "If this option is enabled, the video stream is forwarded to the RTMP address",
+    "type":             "bool",
+    "default":     false
+},
+{
+    "name":             "serverRTMPUrl",
+    "shortDesc": "RTMP Url address",
+    "longDesc":  "RTMP url address to forward the video stream",
+    "type":             "string",
+    "default":     ""
 }
 ]
 }

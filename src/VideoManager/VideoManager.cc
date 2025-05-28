@@ -104,6 +104,8 @@ VideoManager::setToolbox(QGCToolbox *toolbox)
    connect(_videoSettings->tcpUrl(),        &Fact::rawValueChanged, this, &VideoManager::_tcpUrlChanged);
    connect(_videoSettings->aspectRatio(),   &Fact::rawValueChanged, this, &VideoManager::_aspectRatioChanged);
    connect(_videoSettings->lowLatencyMode(),&Fact::rawValueChanged, this, &VideoManager::_lowLatencyModeChanged);
+   connect(_videoSettings->enableRTMPForwarding(), &Fact::rawValueChanged, this, &VideoManager::_forwardingChanged);
+   connect(_videoSettings->serverRTMPUrl(), &Fact::rawValueChanged, this, &VideoManager::_forwardingChanged);
    MultiVehicleManager *pVehicleMgr = qgcApp()->toolbox()->multiVehicleManager();
    connect(pVehicleMgr, &MultiVehicleManager::activeVehicleChanged, this, &VideoManager::_setActiveVehicle);
 
@@ -547,6 +549,13 @@ VideoManager::_lowLatencyModeChanged()
 }
 
 //-----------------------------------------------------------------------------
+void
+VideoManager::_forwardingChanged()
+{
+    _restartAllVideos();
+}
+
+//-----------------------------------------------------------------------------
 bool
 VideoManager::hasVideo()
 {
@@ -847,6 +856,11 @@ VideoManager::_restartAllVideos()
 void
 VideoManager::_startReceiver(unsigned id)
 {
+    
+// Parametri fissi di forwarding
+bool enableForwarding = _videoSettings->enableRTMPForwarding()->rawValue().toBool();
+QString forwardingUrl = _videoSettings->serverRTMPUrl()->rawValue().toString();
+
 #if defined(QGC_GST_STREAMING)
     const QString source = _videoSettings->videoSource()->rawValue().toString();
     const unsigned rtsptimeout = _videoSettings->rtspTimeout()->rawValue().toUInt();
@@ -858,7 +872,7 @@ VideoManager::_startReceiver(unsigned id)
         qCDebug(VideoManagerLog) << "Unsupported receiver id" << id;
     } else if (_videoReceiver[id] != nullptr/* && _videoSink[id] != nullptr*/) {
         if (!_videoUri[id].isEmpty()) {
-            _videoReceiver[id]->start(_videoUri[id], timeout, _lowLatencyStreaming[id] ? -1 : 0);
+            _videoReceiver[id]->start(_videoUri[id], timeout, _lowLatencyStreaming[id] ? -1 : 0, enableForwarding, forwardingUrl);
         }
     }
 #else
