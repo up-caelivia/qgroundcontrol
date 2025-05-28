@@ -540,10 +540,10 @@ void CustomPlugin::updateFence(QObject* controllerObj, bool isSAVenabled) {
             QString errorString;
             controller->load(json, errorString);
             if (!errorString.isEmpty()) {
-                qgcApp()->showCriticalVehicleMessage(tr("Critical error: %1").arg(errorString));
+                qgcApp()->showCriticalVehicleMessage(tr("Critical Warning: %1").arg(errorString));
             }
         } else {
-            qgcApp()->showCriticalVehicleMessage(tr("Critical error: cannot open and load SAV GeoFence file (sav.json)"));
+            qgcApp()->showCriticalVehicleMessage(tr("Critical Warning: cannot open and load SAV GeoFence file (sav.json)"));
         }
     } else {
         controller->removeAll();
@@ -555,7 +555,7 @@ void CustomPlugin::updateFence(QObject* controllerObj, bool isSAVenabled) {
             QString errorString;
             controller->load(json, errorString);
             if (!errorString.isEmpty()) {
-                qgcApp()->showCriticalVehicleMessage(tr("Critical error: %1").arg(errorString));
+                qgcApp()->showCriticalVehicleMessage(tr("cannot load GeoFence file (no_sav.json): %1").arg(errorString));
             }
         } else {
             qgcApp()->showCriticalVehicleMessage(tr("cannot open and load GeoFence file (no_sav.json)"));
