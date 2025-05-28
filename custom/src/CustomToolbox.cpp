@@ -46,8 +46,6 @@ CustomToolbox::CustomToolbox(QGCApplication* app)
             });
             linkSearchTimer->stop();
 
-        } else {
-            qDebug() << "[CustomToolbox] Waiting for _tcpLink to be created...";
         }
     });
 

@@ -28,6 +28,7 @@ KmlPolygonLoader* KmlPolygonLoader::instance() {
 }
 
 bool KmlPolygonLoader::loadFromFile(const QString& filePath, const QVariantList& polygonCoords) {
+    int initialSize = _polygonObjects.size();
     bool returnValue = false;
     if (filePath.endsWith(".kml", Qt::CaseInsensitive)) {
         returnValue = loadFromKmlFile(filePath);
@@ -85,8 +86,12 @@ bool KmlPolygonLoader::loadFromFile(const QString& filePath, const QVariantList&
             polygon->deleteLater();
         }
     }
+    qgcApp()->showAppMessage(QString("Read %1 polygon(s), and loaded %2 polygon(s) on the map. Only polygons that fit within the current view are displayed.")
+        .arg(_polygonObjects.size() - initialSize)
+        .arg(validPolygons.size() - initialSize));
 
     _polygonObjects = validPolygons;
+
     emit polygonsChanged();
     return true;
 }
@@ -147,6 +152,9 @@ bool KmlPolygonLoader::loadFromJsonFile(const QString& filePath) {
             res = true;
         } else {
             res = parseED269Json(root);
+            if (!res) {
+                res = parseED318Json(root);
+            }
         }
         if (!res) {
             qWarning() << "Unknow JSON file.";
@@ -272,22 +280,25 @@ void KmlPolygonLoader::parseSwissCyprusKml(const QDomDocument& doc) {
                 color = QColor("blue");
             } 
         }
-
-        // Create and store the polygon object
-        _polygonObjects.append(new KmlPolygonObject(
-            name,
-            coordinates,
-            color,  
-            hmin,
-            hmax,
-            id,
-            description,
-            activationDate,
-            deactivationDate,
-            "",
-            this
-            // Add holes as needed in your KmlPolygonObject class
-        ));
+        
+        if (coordinates.size() > 0) {
+            // Create and store the polygon object
+            _polygonObjects.append(new KmlPolygonObject(
+                name,
+                coordinates,
+                color,  
+                hmin,
+                hmax,
+                id,
+                description,
+                activationDate,
+                deactivationDate,
+                "",
+                this
+                // Add holes as needed in your KmlPolygonObject class
+            ));
+            qDebug() << "Loaded polygon:" << name << "with" << coordinates.size() << "coordinates.";
+        }
     }
 }
 
@@ -342,19 +353,21 @@ void KmlPolygonLoader::parseUpCaeliViaKml(const QDomDocument& doc) {
         }
 
         // Create and store the polygon object
-        _polygonObjects.append(new KmlPolygonObject(
-            name,
-            coordinates,
-            color,  
-            hmin,
-            hmax,
-            id,
-            description,
-            activationDate,
-            deactivationDate,
-            "",
-            this
-        ));
+        if (coordinates.size() > 0) {
+            _polygonObjects.append(new KmlPolygonObject(
+                name,
+                coordinates,
+                color,  
+                hmin,
+                hmax,
+                id,
+                description,
+                activationDate,
+                deactivationDate,
+                "",
+                this
+            ));
+        }
     }
 }
 
@@ -364,7 +377,7 @@ bool KmlPolygonLoader::parseItalyFinnishGermanJson(const QJsonObject& root) {
     bool ret = false;
     for (const QJsonValue& val : features) {
         QJsonObject feature = val.toObject();
-        ret |= parseSingleFeature(feature); // Funzione helper
+        ret |= parseSingleFeatureED269(feature); // Funzione helper
     }
     return ret;
 }
@@ -376,15 +389,15 @@ bool KmlPolygonLoader::parseED269Json(const QJsonObject& root) {
         bool ret = false;
         for (const QJsonValue& val : features) {
             QJsonObject feature = val.toObject();
-            ret |= parseSingleFeature(feature);
+            ret |= parseSingleFeatureED269(feature);
         }
         return ret;
     } else {
-        return parseSingleFeature(root);
+        return parseSingleFeatureED269(root);
     }
 }
 
-bool KmlPolygonLoader::parseSingleFeature(const QJsonObject& feature) {
+bool KmlPolygonLoader::parseSingleFeatureED269(const QJsonObject& feature) {
     QString id = feature.value("identifier").toString();
     QString name = feature.value("name").toString();
     QString message = feature.value("message").toString("-");
@@ -496,24 +509,195 @@ bool KmlPolygonLoader::parseSingleFeature(const QJsonObject& feature) {
     QString description = message + "\n" + restriction + "\n\nREASON:\n" + reason + "\n\nSERVICE:\n" + service + "\n\nAUTHORITY:\n" + authority + "\n\nCONTACT:\n" + contact + "\n" + email;
     
     // Create and store the polygon object
-    _polygonObjects.append(new KmlPolygonObject(
-        name,
-        coordinates,
-        color,
-        hmin,
-        hmax,
-        id,
-        description,
-        activationDate,
-        deactivationDate,
-        activationSchedule,
-        this
-    ));
-    if (!coordinates.isEmpty()) {
+    if (coordinates.size() > 0) {
+        _polygonObjects.append(new KmlPolygonObject(
+            name,
+            coordinates,
+            color,
+            hmin,
+            hmax,
+            id,
+            description,
+            activationDate,
+            deactivationDate,
+            activationSchedule,
+            this
+        ));
         return true;
-    } 
+    }
     return false;
 }
+
+
+bool KmlPolygonLoader::parseED318Json(const QJsonObject& root) {
+    if (root.contains("features") && root.value("features").isArray()) {
+        QJsonArray features = root["features"].toArray();
+        bool ret = false;
+        for (const QJsonValue& val : features) {
+            QJsonObject feature = val.toObject();
+            ret |= parseSingleFeatureED318(feature);
+        }
+        return ret;
+    } else {
+        return parseSingleFeatureED318(root);
+    }
+}
+
+
+bool KmlPolygonLoader::parseSingleFeatureED318(const QJsonObject& feature) {
+    // 1. Properties
+    QJsonObject properties = feature.value("properties").toObject();
+    QString id = properties.value("identifier").toString();
+
+    // name: array di oggetti {text, lang}
+    QString name = "-";
+    QJsonArray nameArray = properties.value("name").toArray();
+    if (!nameArray.isEmpty()) {
+        QJsonObject nameObj = nameArray.first().toObject();
+        name = nameObj.value("text").toString("-");
+    }
+
+    QString message = "-";
+    // In questo schema non c’è "message", quindi lascialo "-"
+
+    // restriction/variant/type (adatta in base ai dati disponibili)
+    QString restriction = properties.value("type").toString();
+
+    // Reason: array di stringhe
+    QString reason = "-";
+    QJsonArray reasonsArray = properties.value("reason").toArray();
+    if (!reasonsArray.isEmpty()) {
+        QStringList reasonList;
+        for (const auto& r : reasonsArray)
+            reasonList << r.toString();
+        reason = reasonList.join(", ");
+    }
+
+    // otherReasonInfo: array di oggetti {text, lang}
+    QString otherReasonInfo = "-";
+    QJsonArray otherReasonArray = properties.value("otherReasonInfo").toArray();
+    if (!otherReasonArray.isEmpty()) {
+        QStringList otherReasonList;
+        for (const auto& obj : otherReasonArray)
+            otherReasonList << obj.toObject().value("text").toString();
+        otherReasonInfo = otherReasonList.join(", ");
+    }
+
+    // Zone Authority: array di oggetti
+    QString service = "-", authority = "-", email = "-", contact = "-";
+    QJsonArray zoneAuthArray = properties.value("zoneAuthority").toArray();
+    if (!zoneAuthArray.isEmpty()) {
+        QJsonObject auth = zoneAuthArray.first().toObject();
+
+        // authority (name) è array di oggetti {text, lang}
+        QJsonArray authorityNameArray = auth.value("name").toArray();
+        if (!authorityNameArray.isEmpty())
+            authority = authorityNameArray.first().toObject().value("text").toString("-");
+        email = auth.value("email").toString("-");
+        // contactName non c’è, ma puoi usare email o altro se vuoi
+    }
+
+    // Applicability Dates
+    QDateTime activationDate, deactivationDate;
+    QString activationSchedule;
+    QJsonArray applicabilityArray = properties.value("limitedApplicability").toArray();
+    if (!applicabilityArray.isEmpty()) {
+        QJsonObject applicability = applicabilityArray.first().toObject();
+        if (applicability.contains("startDateTime"))
+            activationDate = QDateTime::fromString(applicability["startDateTime"].toString(), Qt::ISODate);
+        if (applicability.contains("endDateTime"))
+            deactivationDate = QDateTime::fromString(applicability["endDateTime"].toString(), Qt::ISODate);
+
+        if (applicability.contains("schedule")) {
+            QJsonArray scheduleArray = applicability["schedule"].toArray();
+            QStringList scheduleLines;
+            for (const auto& s : scheduleArray) {
+                QJsonObject sched = s.toObject();
+
+                // Giorni
+                QString days;
+                if (sched.contains("day") && sched["day"].isArray()) {
+                    QJsonArray dayArray = sched["day"].toArray();
+                    QStringList dayList;
+                    for (const auto& d : dayArray)
+                        dayList << d.toString();
+                    days = dayList.join(", ");
+                }
+
+                // Start/End time
+                QString startTime = sched.value("startTime").toString("-");
+                QString endTime = sched.value("endTime").toString("-");
+
+                QString line = QString("day(s) %1: %2 - %3").arg(days, startTime, endTime);
+                scheduleLines << line;
+            }
+            if (!scheduleLines.isEmpty())
+                activationSchedule = "Schedule:\n" + scheduleLines.join("\n");
+        }
+    }
+
+    // 2. Geometry
+    QList<QGeoCoordinate> coordinates;
+    int hmin = 0, hmax = 9999;
+
+    QJsonObject geometry = feature.value("geometry").toObject();
+    // Polygon coordinates
+    if (geometry.value("type").toString() == "Polygon") {
+        QJsonArray polygons = geometry.value("coordinates").toArray();
+        for (const auto& poly : polygons) {
+            QJsonArray ring = poly.toArray();
+            for (const auto& coordPair : ring) {
+                QJsonArray coords = coordPair.toArray();
+                if (coords.size() == 2) {
+                    double lon = coords[0].toDouble();
+                    double lat = coords[1].toDouble();
+                    coordinates.append(QGeoCoordinate(lat, lon));
+                }
+            }
+        }
+    }
+
+    // Altitude: geometry.layer
+    QJsonObject layer = geometry.value("layer").toObject();
+    hmin = layer.value("lower").toInt(0);
+    hmax = layer.value("upper").toInt(9999);
+
+    // Color logic: come prima
+    QColor color = Qt::red;
+    if (hmin >= 120) {
+        color = Qt::green;
+    } else if (hmin > 0) {
+        color = QColor("orange");
+    } else {
+        color = Qt::red;
+    }
+    if (!activationDate.isNull() && !deactivationDate.isNull()) {
+        if (activationDate > QDateTime::currentDateTime() || deactivationDate < QDateTime::currentDateTime()) {
+            color = QColor("blue");
+        }
+    }
+
+    QString description = restriction + "\n" + otherReasonInfo + "\n\nREASON:\n" + reason + "\n\nSERVICE:\n" + service + "\n\nAUTHORITY:\n" + authority + "\n\nCONTACT:\n" + contact + "\n" + email;
+
+    if (coordinates.size() > 0) {
+        _polygonObjects.append(new KmlPolygonObject(
+            name,
+            coordinates,
+            color,
+            hmin,
+            hmax,
+            id,
+            description,
+            activationDate,
+            deactivationDate,
+            activationSchedule,
+            this
+        ));
+        return true;
+    }
+    return false;
+}
+
 
 
 void KmlPolygonLoader::parseBelgiumJson(const QJsonObject& root) {
@@ -607,20 +791,22 @@ void KmlPolygonLoader::parseBelgiumJson(const QJsonObject& root) {
         QString description = message + "\n\nREASON:\n" + reason + "\n\nCONTACT:\n" + email;
 
         // Create and store the polygon object
-        _polygonObjects.append(new KmlPolygonObject(
-            name,
-            coordinates,
-            color,  
-            hmin,
-            hmax,
-            id,
-            description,
-            activationDate,
-            deactivationDate,
-            activationSchedule,
-            this
-            // Add holes as needed in your KmlPolygonObject class
-        ));
+        if (coordinates.size() > 0) {
+            _polygonObjects.append(new KmlPolygonObject(
+                name,
+                coordinates,
+                color,  
+                hmin,
+                hmax,
+                id,
+                description,
+                activationDate,
+                deactivationDate,
+                activationSchedule,
+                this
+                // Add holes as needed in your KmlPolygonObject class
+            ));
+        }
     }
 }
 

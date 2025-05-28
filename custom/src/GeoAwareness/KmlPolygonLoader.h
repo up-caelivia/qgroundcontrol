@@ -42,8 +42,10 @@ private:
     bool parseItalyFinnishGermanJson(const QJsonObject& root);
     void parseBelgiumJson(const QJsonObject& root);
 
-    bool parseSingleFeature(const QJsonObject& feature);
     bool parseED269Json(const QJsonObject& root);
+    bool parseSingleFeatureED269(const QJsonObject& feature);
+    bool parseED318Json(const QJsonObject& root);
+    bool parseSingleFeatureED318(const QJsonObject& feature);
 
     bool isPointInPolygon(const QGeoCoordinate& point, const QList<QGeoCoordinate>& polygon);
 };
