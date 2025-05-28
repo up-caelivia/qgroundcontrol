@@ -162,6 +162,12 @@ QGCFlickable {
                             Layout.fillWidth:   true
                             visible:            !isNaN(polygonGeoAwareness.deactivationDate.getTime())
                         }
+                        QGCLabel {
+                            text:               polygonGeoAwareness.activationSchedule
+                            Layout.fillWidth:   true
+                            Layout.columnSpan:  2
+                            visible:            (polygonGeoAwareness.activationSchedule.length > 0)
+                        }
                     } // GridLayout
 
                     SectionHeader {

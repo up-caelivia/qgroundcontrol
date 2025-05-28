@@ -139,11 +139,16 @@ bool KmlPolygonLoader::loadFromJsonFile(const QString& filePath) {
         const QJsonObject root = doc.object();
 
         QString title = root.value("title").toString("");
+        bool res = false;
         if (title.contains("ITA ZoneVersion") || title.contains("Finnish UASZoneVersion")) {
-            parseItalyFinnishGermanJson(root);
+            res = parseItalyFinnishGermanJson(root);
         } else if (root.contains("0")) {
             parseBelgiumJson(root);
+            res = true;
         } else {
+            res = parseED269Json(root);
+        }
+        if (!res) {
             qWarning() << "Unknow JSON file.";
             qgcApp()->showAppMessage(QString("Unknow JSON file."));
         }
@@ -279,6 +284,7 @@ void KmlPolygonLoader::parseSwissCyprusKml(const QDomDocument& doc) {
             description,
             activationDate,
             deactivationDate,
+            "",
             this
             // Add holes as needed in your KmlPolygonObject class
         ));
@@ -346,109 +352,167 @@ void KmlPolygonLoader::parseUpCaeliViaKml(const QDomDocument& doc) {
             description,
             activationDate,
             deactivationDate,
+            "",
             this
         ));
     }
 }
 
 
-void KmlPolygonLoader::parseItalyFinnishGermanJson(const QJsonObject& root) {
+bool KmlPolygonLoader::parseItalyFinnishGermanJson(const QJsonObject& root) {
     QJsonArray features = root["features"].toArray();
+    bool ret = false;
     for (const QJsonValue& val : features) {
         QJsonObject feature = val.toObject();
-        QString id = feature.value("identifier").toString();
-        QString name = feature.value("name").toString();
-        QString message = feature.value("message").toString("-");
-        QString restriction = feature.value("restriction").toString();
+        ret |= parseSingleFeature(feature); // Funzione helper
+    }
+    return ret;
+}
 
-        // Reason
-        QString reason = "-";
-        QJsonArray reasonsArray = feature.value("reason").toArray();
-        if (!reasonsArray.isEmpty()) {
-            QStringList reasonList;
-            for (const auto& r : reasonsArray)
-                reasonList << r.toString();
-            reason = reasonList.join(", ");
+
+bool KmlPolygonLoader::parseED269Json(const QJsonObject& root) {
+    if (root.contains("features") && root.value("features").isArray()) {
+        QJsonArray features = root["features"].toArray();
+        bool ret = false;
+        for (const QJsonValue& val : features) {
+            QJsonObject feature = val.toObject();
+            ret |= parseSingleFeature(feature);
         }
+        return ret;
+    } else {
+        return parseSingleFeature(root);
+    }
+}
 
-        // Zone Authority
-        QString service = "-", authority = "-", email = "-", contact = "-";
-        QJsonArray zoneAuthArray = feature.value("zoneAuthority").toArray();
-        if (!zoneAuthArray.isEmpty()) {
-            QJsonObject auth = zoneAuthArray.first().toObject();
-            service = auth.value("service").toString("-");
-            authority = auth.value("name").toString("-");
-            email = auth.value("email").toString("-");
-            contact = auth.value("contactName").toString("-");
-        }
+bool KmlPolygonLoader::parseSingleFeature(const QJsonObject& feature) {
+    QString id = feature.value("identifier").toString();
+    QString name = feature.value("name").toString();
+    QString message = feature.value("message").toString("-");
+    QString restriction = feature.value("restriction").toString();
+    QString activationSchedule = "";
 
-        // Applicability Dates
-        QDateTime activationDate, deactivationDate;
-        QJsonArray applicabilityArray = feature.value("applicability").toArray();
-        if (!applicabilityArray.isEmpty()) {
-            QJsonObject applicability = applicabilityArray.first().toObject();
-            if (applicability.contains("startDateTime"))
-                activationDate = QDateTime::fromString(applicability["startDateTime"].toString(), Qt::ISODate);
-            if (applicability.contains("endDateTime"))
-                deactivationDate = QDateTime::fromString(applicability["endDateTime"].toString(), Qt::ISODate);
-        }
+    // Reason
+    QString reason = "-";
+    QJsonArray reasonsArray = feature.value("reason").toArray();
+    if (!reasonsArray.isEmpty()) {
+        QStringList reasonList;
+        for (const auto& r : reasonsArray)
+            reasonList << r.toString();
+        reason = reasonList.join(", ");
+    }
 
-        // Geometry: assume primo elemento
-        int hmin = 0, hmax = 9999;
-        QList<QGeoCoordinate> coordinates;
-        QJsonArray geometryArray = feature.value("geometry").toArray();
-        if (!geometryArray.isEmpty()) {
-            QJsonObject geometry = geometryArray.first().toObject();
-            hmin = geometry.value("lowerLimit").toInt(0);
-            hmax = geometry.value("upperLimit").toInt(9999);
+    // Zone Authority
+    QString service = "-", authority = "-", email = "-", contact = "-";
+    QJsonArray zoneAuthArray = feature.value("zoneAuthority").toArray();
+    if (!zoneAuthArray.isEmpty()) {
+        QJsonObject auth = zoneAuthArray.first().toObject();
+        service = auth.value("service").toString("-");
+        authority = auth.value("name").toString("-");
+        email = auth.value("email").toString("-");
+        contact = auth.value("contactName").toString("-");
+    }
 
-            QJsonObject projection = geometry.value("horizontalProjection").toObject();
-            QJsonArray polygons = projection.value("coordinates").toArray();
-            for (const auto& poly : polygons) {
-                QJsonArray ring = poly.toArray();
-                for (const auto& coordPair : ring) {
-                    QJsonArray coords = coordPair.toArray();
-                    if (coords.size() == 2) {
-                        double lon = coords[0].toDouble();
-                        double lat = coords[1].toDouble();
-                        coordinates.append(QGeoCoordinate(lat, lon));
+    // Applicability Dates
+    QDateTime activationDate, deactivationDate;
+    QJsonArray applicabilityArray = feature.value("applicability").toArray();
+    if (!applicabilityArray.isEmpty()) {
+        QJsonObject applicability = applicabilityArray.first().toObject();
+        if (applicability.contains("startDateTime"))
+            activationDate = QDateTime::fromString(applicability["startDateTime"].toString(), Qt::ISODate);
+        if (applicability.contains("endDateTime"))
+            deactivationDate = QDateTime::fromString(applicability["endDateTime"].toString(), Qt::ISODate);
+
+        if (applicability.contains("schedule")) {
+            QJsonArray scheduleArray = applicability["schedule"].toArray();
+            QStringList scheduleLines;
+            for (const auto& s : scheduleArray) {
+                QJsonObject sched = s.toObject();
+
+                // Giorni (può essere array di stringhe)
+                QString days;
+                if (sched.contains("day") && sched["day"].isArray()) {
+                    QJsonArray dayArray = sched["day"].toArray();
+                    QStringList dayList;
+                    for (const auto& d : dayArray) {
+                        dayList << d.toString();
                     }
+                    days = dayList.join(", ");
+                }
+
+                // Start/End time
+                QString startTime = sched.value("startTime").toString("-");
+                QString endTime = sched.value("endTime").toString("-");
+
+                // Costruisci la riga
+                QString line = QString("day(s) %1: %2 - %3").arg(days, startTime, endTime);
+                scheduleLines << line;
+            }
+
+            if (!scheduleLines.isEmpty()) {
+                activationSchedule = "Schedule:\n" + scheduleLines.join("\n");
+            }
+        }
+    }
+
+    // Geometry: assume primo elemento
+    int hmin = 0, hmax = 9999;
+    QList<QGeoCoordinate> coordinates;
+    QJsonArray geometryArray = feature.value("geometry").toArray();
+    if (!geometryArray.isEmpty()) {
+        QJsonObject geometry = geometryArray.first().toObject();
+        hmin = geometry.value("lowerLimit").toInt(0);
+        hmax = geometry.value("upperLimit").toInt(9999);
+
+        QJsonObject projection = geometry.value("horizontalProjection").toObject();
+        QJsonArray polygons = projection.value("coordinates").toArray();
+        for (const auto& poly : polygons) {
+            QJsonArray ring = poly.toArray();
+            for (const auto& coordPair : ring) {
+                QJsonArray coords = coordPair.toArray();
+                if (coords.size() == 2) {
+                    double lon = coords[0].toDouble();
+                    double lat = coords[1].toDouble();
+                    coordinates.append(QGeoCoordinate(lat, lon));
                 }
             }
         }
-
-        QColor color = Qt::red;
-        if (hmin >=120) {
-            color = Qt::green;
-        } else if (hmin > 0) {
-            color = QColor("orange");
-        } else {
-            color = Qt::red;
-        }
-
-        if (!activationDate.isNull() && !deactivationDate.isNull()) {
-            if (activationDate > QDateTime::currentDateTime() || deactivationDate < QDateTime::currentDateTime()) {
-                color = QColor("blue");
-            } 
-        }
-
-        QString description = message + "\n" + restriction + "\n\nREASON:\n" + reason + "\n\nSERVICE:\n" + service + "\n\nAUTHORITY:\n" + authority + "\n\nCONTACT:\n" + contact + "\n" + email;
-
-        // Create and store the polygon object
-        _polygonObjects.append(new KmlPolygonObject(
-            name,
-            coordinates,
-            color,  
-            hmin,
-            hmax,
-            id,
-            description,
-            activationDate,
-            deactivationDate,
-            this
-            // Add holes as needed in your KmlPolygonObject class
-        ));
     }
+
+    QColor color = Qt::red;
+    if (hmin >=120) {
+        color = Qt::green;
+    } else if (hmin > 0) {
+        color = QColor("orange");
+    } else {
+        color = Qt::red;
+    }
+
+    if (!activationDate.isNull() && !deactivationDate.isNull()) {
+        if (activationDate > QDateTime::currentDateTime() || deactivationDate < QDateTime::currentDateTime()) {
+            color = QColor("blue");
+        }
+    }
+
+    QString description = message + "\n" + restriction + "\n\nREASON:\n" + reason + "\n\nSERVICE:\n" + service + "\n\nAUTHORITY:\n" + authority + "\n\nCONTACT:\n" + contact + "\n" + email;
+    
+    // Create and store the polygon object
+    _polygonObjects.append(new KmlPolygonObject(
+        name,
+        coordinates,
+        color,
+        hmin,
+        hmax,
+        id,
+        description,
+        activationDate,
+        deactivationDate,
+        activationSchedule,
+        this
+    ));
+    if (!coordinates.isEmpty()) {
+        return true;
+    } 
+    return false;
 }
 
 
@@ -466,6 +530,7 @@ void KmlPolygonLoader::parseBelgiumJson(const QJsonObject& root) {
         hmin = properties.value("lowerLimit").toInt(0);
         hmax = properties.value("upperLimit").toInt(9999);
         email = properties.value("email").toString("-");
+        QString activationSchedule = "";
 
         // Reason
         QString reason = "-";
@@ -552,6 +617,7 @@ void KmlPolygonLoader::parseBelgiumJson(const QJsonObject& root) {
             description,
             activationDate,
             deactivationDate,
+            activationSchedule,
             this
             // Add holes as needed in your KmlPolygonObject class
         ));

@@ -11,6 +11,7 @@ KmlPolygonObject::KmlPolygonObject(const QString& name,
                                    const QString& description,
                                    const QDateTime& activationDate,
                                    const QDateTime& deactivationDate,
+                                   const QString& activationSchedule,
                                    QObject* parent)
     : QObject(parent)
     , _name(name)
@@ -22,6 +23,7 @@ KmlPolygonObject::KmlPolygonObject(const QString& name,
     , _description(description)
     , _activationDate(activationDate)
     , _deactivationDate(deactivationDate)
+    , _activationSchedule(activationSchedule)
 {
 }
 
@@ -86,6 +88,13 @@ void KmlPolygonObject::setDeactivationDate(const QDateTime& date) {
     if (date != _deactivationDate) {
         _deactivationDate = date;
         emit deactivationDateChanged();
+    }
+}
+
+void KmlPolygonObject::setActivationSchedule(const QString& description) {
+    if (description != _activationSchedule) {
+        _activationSchedule = description;
+        emit activationScheduleChanged();
     }
 }
 

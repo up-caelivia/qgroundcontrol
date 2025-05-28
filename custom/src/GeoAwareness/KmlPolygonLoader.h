@@ -39,8 +39,11 @@ private:
     void parseUpCaeliViaKml(const QDomDocument& doc);
 
     bool loadFromJsonFile(const QString& filePath);
-    void parseItalyFinnishGermanJson(const QJsonObject& root);
+    bool parseItalyFinnishGermanJson(const QJsonObject& root);
     void parseBelgiumJson(const QJsonObject& root);
+
+    bool parseSingleFeature(const QJsonObject& feature);
+    bool parseED269Json(const QJsonObject& root);
 
     bool isPointInPolygon(const QGeoCoordinate& point, const QList<QGeoCoordinate>& polygon);
 };

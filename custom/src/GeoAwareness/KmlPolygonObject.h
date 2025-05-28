@@ -5,6 +5,7 @@
 #include <QVariant>
 #include <QColor>
 #include <QDateTime>
+#include <QDebug>
 
 class KmlPolygonObject : public QObject {
     Q_OBJECT
@@ -17,6 +18,8 @@ class KmlPolygonObject : public QObject {
     Q_PROPERTY(QString description READ description WRITE setDescription NOTIFY descriptionChanged)
     Q_PROPERTY(QDateTime activationDate READ activationDate WRITE setActivationDate NOTIFY activationDateChanged)
     Q_PROPERTY(QDateTime deactivationDate READ deactivationDate WRITE setDeactivationDate NOTIFY deactivationDateChanged)
+    Q_PROPERTY(QString activationSchedule READ activationSchedule WRITE setActivationSchedule NOTIFY activationScheduleChanged)
+    
 
 public:
     KmlPolygonObject(const QString& name,
@@ -28,6 +31,7 @@ public:
                      const QString& description = "",
                      const QDateTime& activationDate = QDateTime(),
                      const QDateTime& deactivationDate = QDateTime(),
+                     const QString& activationSchedule = "",
                      QObject* parent = nullptr);
 
     QString name() const { return _name; }
@@ -56,6 +60,9 @@ public:
     QDateTime deactivationDate() const { return _deactivationDate; }
     void setDeactivationDate(const QDateTime& date);
 
+    QString activationSchedule() const { return _activationSchedule; }
+    void setActivationSchedule(const QString& description);
+
     bool contains(const QGeoCoordinate& coordinate) const;
 
 signals:
@@ -68,6 +75,7 @@ signals:
     void descriptionChanged();
     void activationDateChanged();
     void deactivationDateChanged();
+    void activationScheduleChanged();
 
 private:
     QString _name;
@@ -80,4 +88,5 @@ private:
     QString _description;
     QDateTime _activationDate;
     QDateTime _deactivationDate;
+    QString _activationSchedule;
 };
