@@ -623,7 +623,6 @@ void CustomPlugin::onActiveVehicleChanged(Vehicle* vehicle)
     }
 
     if (!_vehicleListenerConnected) {
-        qDebug() << "!_vehicleListenerConnected";
         // Reconnect to the new vehicle's mavlink messages
         _vehicleConnection = connect(vehicle, &Vehicle::mavlinkMessageReceived, this, &CustomPlugin::handleMavlinkMessage);
         _vehicleListenerConnected = true;
