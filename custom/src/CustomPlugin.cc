@@ -538,10 +538,29 @@ void CustomPlugin::updateFence(QObject* controllerObj, bool isSAVenabled) {
         if (file.open(QIODevice::ReadOnly)) {
             QByteArray bytes = file.readAll();
             QJsonDocument doc = QJsonDocument::fromJson(bytes);
-            QJsonObject json = doc.object();
+            QJsonObject root  = doc.object();
+            QJsonObject jsonToLoad;
+
+        if (root.contains("polygons") && root["polygons"].isArray()) {
+            // Formato 1: usa direttamente
+            jsonToLoad = root;
+        } else if (root.contains("geoFence") && root["geoFence"].isObject()) {
+            // Formato 2: estrai sotto-oggetto "geoFence"
+            QJsonObject geoFence = root["geoFence"].toObject();
+            // Simula il formato 1 ricreando il QJsonObject con le chiavi attese
+            QJsonObject simulatedFormat1;
+            if (geoFence.contains("polygons"))
+                simulatedFormat1.insert("polygons", geoFence["polygons"]);
+            if (geoFence.contains("circles"))
+                simulatedFormat1.insert("circles", geoFence["circles"]);
+            if (geoFence.contains("version"))
+                simulatedFormat1.insert("version", geoFence["version"]);
+
+            jsonToLoad = simulatedFormat1;
+        }
 
             QString errorString;
-            controller->load(json, errorString);
+            controller->load(jsonToLoad, errorString);
             if (!errorString.isEmpty()) {
                 qgcApp()->showCriticalVehicleMessage(tr("Critical Warning: %1").arg(errorString));
             }
