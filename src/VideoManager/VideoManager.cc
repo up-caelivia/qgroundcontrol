@@ -857,11 +857,12 @@ void
 VideoManager::_startReceiver(unsigned id)
 {
     
-// Parametri fissi di forwarding
-bool enableForwarding = _videoSettings->enableRTMPForwarding()->rawValue().toBool();
-QString forwardingUrl = _videoSettings->serverRTMPUrl()->rawValue().toString();
 
 #if defined(QGC_GST_STREAMING)
+    // Parametri fissi di forwarding
+    QString forwardingUrl = _videoSettings->serverRTMPUrl()->rawValue().toString();
+    bool enableForwarding = _videoSettings->enableRTMPForwarding()->rawValue().toBool();
+    
     const QString source = _videoSettings->videoSource()->rawValue().toString();
     const unsigned rtsptimeout = _videoSettings->rtspTimeout()->rawValue().toUInt();
     /* The gstreamer rtsp source will switch to tcp if udp is not available after 5 seconds.
