@@ -3,6 +3,7 @@ Module QGroundControl.FlightDisplay
 FlightDisplayViewWidgets        1.0 FlightDisplayViewWidgets.qml
 FlyView                         1.0 FlyView.qml
 FlyViewCustomLayer              1.0 FlyViewCustomLayer.qml
+FlyViewCustomLayerSAV           1.0 FlyViewCustomLayerSAV.qml
 FlyViewInstrumentPanel          1.0 FlyViewInstrumentPanel.qml
 FlyViewMap                      1.0 FlyViewMap.qml
 FlyViewMissionCompleteDialog    1.0 FlyViewMissionCompleteDialog.qml

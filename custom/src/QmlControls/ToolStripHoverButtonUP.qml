@@ -90,7 +90,7 @@ Button {
                 width:                      contentLayoutItem.width  * imageScale
                 smooth:                     true
                 mipmap:                     true
-                color:                      _currentContentColor
+                color:                      (String(control.imageSource).startsWith("qrc:/res/Enable_white.svg")) ? "#39FF14" : _currentContentColor
                 fillMode:                   Image.PreserveAspectFit
                 antialiasing:               true
                 sourceSize.height:          height

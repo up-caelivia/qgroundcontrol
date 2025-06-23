@@ -15,7 +15,7 @@ env:
   BUILD_TYPE:   ${{ fromJSON('["DailyBuild", "StableBuild"]')[ github.ref_type == 'tag' || contains(github.ref, 'Stable_' ) ] }}
 
 jobs:
-  build:    
+  build:
     if: "!contains(github.ref, '-beta')"
     runs-on:  windows-2019
     

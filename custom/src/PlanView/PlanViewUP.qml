@@ -57,6 +57,7 @@ Item {
     property var    _appSettings:                       QGroundControl.settingsManager.appSettings
     property var    _planViewSettings:                  QGroundControl.settingsManager.planViewSettings
     property bool   _promptForPlanUsageShowing:         false
+    property var    _savParamCoords:                    []
 
     readonly property var       _layers:                [_layerMission, _layerGeoFence, _layerRallyPoints, _layerAwareness]
 
@@ -79,6 +80,13 @@ Item {
     property bool _firstRallyLoadComplete:      false
     property bool _firstLoadComplete:           false
 
+
+    Connections {
+        target: CustomPlugin
+        onSavParamCoordinatesChanged: {
+            _savParamCoords = CustomPlugin.savParamCoordinates
+        }
+    }
     
 
     QGCFileDialog {
@@ -665,6 +673,11 @@ Item {
                 interactive:            _editingLayer == _layerRallyPoints
                 planView:               true
                 opacity:                _editingLayer != _layerRallyPoints ? editorMap._nonInteractiveOpacity : 1
+            }
+            
+            SavParamMarkerUP {
+                modelDataList: _savParamCoords
+                visible:       CustomPlugin.isSAVenabled && CustomPlugin.isSAVexist
             }
         }
 

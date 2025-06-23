@@ -27,6 +27,8 @@ import QGroundControl.Palette       1.0
 import QGroundControl.ScreenTools   1.0
 import QGroundControl.Vehicle       1.0
 
+import Custom.Widgets 1.0
+
 Item {
     id: _root
 
@@ -98,6 +100,15 @@ Item {
         parentToolInsets:   widgetLayer.totalToolInsets
         mapControl:         _mapControl
         visible:            !QGroundControl.videoManager.fullScreen
+    }
+
+    FlyViewCustomLayerSAV {
+        id:                 customOverlaySAV
+        anchors.fill:       widgetLayer
+        z:                  _fullItemZorder + 2
+        parentToolInsets:   widgetLayer.totalToolInsets
+        mapControl:         _mapControl
+        visible:            CustomPlugin.isSAVenabled && QGroundControl.videoManager.fullScreen
     }
 
     // Development tool for visualizing the insets for a paticular layer, enable if needed
