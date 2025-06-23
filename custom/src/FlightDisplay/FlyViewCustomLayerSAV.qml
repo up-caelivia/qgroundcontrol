@@ -107,7 +107,7 @@ Item {
 
     // TOP BOX !
     Rectangle {
-        anchors.horizontalCenter: attitudeIndicator.horizontalCenter
+        anchors.right: attitudeIndicator.right
         anchors.bottom: attitudeIndicator.top
         anchors.bottomMargin: ScreenTools.defaultFontPixelHeight * 0.1
         visible: proximityValues.telemetryAvailable && !isNaN(proximityValues.rotationNoneValue)
@@ -115,7 +115,7 @@ Item {
         width: attitudeIndicator.width * 0.6
         height: attitudeIndicator.height * 0.3
         radius: ScreenTools.defaultFontPixelHeight
-        color: qgcPal.window
+        color: Qt.rgba(qgcPal.window.r, qgcPal.window.g, qgcPal.window.b, 0.7)
 
         GridLayout {
             columnSpacing: ScreenTools.defaultFontPixelWidth * 0.3
@@ -128,7 +128,7 @@ Item {
 
 
             QGCColoredImage {
-                height: _indicatorsHeight
+                height: _indicatorsHeight * 0.8
                 width: height
                 source: "/custom/img/vertical_speed.svg"
                 fillMode: Image.PreserveAspectFit
@@ -140,7 +140,7 @@ Item {
             QGCLabel {
                 id: distanceLabel
                 text: "  " + distance.toFixed(1) + " m"
-                font.pointSize: ScreenTools.mediumFontPointSize
+                font.pointSize: ScreenTools.mediumFontPointSize * 0.8
                 Layout.fillWidth: true
                 Layout.minimumWidth: indicatorValueWidth
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
@@ -191,17 +191,15 @@ Item {
 
     // UPPER LEFT BOX !
     Rectangle {
-        anchors.horizontalCenter: left_box.horizontalCenter
-        anchors.bottom:           left_box.top
-        anchors.rightMargin:  ScreenTools.defaultFontPixelHeight * 0.4  // -attitudeIndicator.width / 3
-        anchors.bottomMargin:   ScreenTools.defaultFontPixelHeight * 0.1  // -attitudeIndicator.width / 3
-
-
-
-        width:  attitudeIndicator.width*0.6
+        id: upperLeftBox
+        anchors.top: attitudeIndicator.bottom
+        anchors.right: upperRightBox.left
+        anchors.topMargin: ScreenTools.defaultFontPixelHeight * 0.1
+        anchors.rightMargin: ScreenTools.defaultFontPixelHeight * 0.4
+        width:  attitudeIndicator.width*0.5
         height: attitudeIndicator.height * 0.3
         radius:                 ScreenTools.defaultFontPixelHeight
-        color:                  qgcPal.window
+        color:                  Qt.rgba(qgcPal.window.r, qgcPal.window.g, qgcPal.window.b, 0.7)
 
         GridLayout {
                     columnSpacing:          ScreenTools.defaultFontPixelWidth  * 0.5
@@ -215,7 +213,7 @@ Item {
             //anchors.rightMargin: 12
 
             QGCColoredImage {
-                height:                 _indicatorsHeight
+                height:                 _indicatorsHeight * 0.8
                 width:                  height
                 source:                "/custom/img/distance.svg"
                 fillMode:               Image.PreserveAspectFit
@@ -227,7 +225,7 @@ Item {
             QGCLabel {
                 text:                   _activeVehicle && !isNaN(_activeVehicle.distanceToHome.value) ? (('  0000' + _activeVehicle.distanceToHome.value.toFixed(0)).slice(-4) + ' ' + _activeVehicle.distanceToHome.units) : "   --/--"
                 color:                  _indicatorsColor
-                font.pointSize:         ScreenTools.mediumFontPointSize
+                font.pointSize:         ScreenTools.mediumFontPointSize * 0.8
                 Layout.fillWidth:       true
                 Layout.minimumWidth:    indicatorValueWidth
                 Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
@@ -238,53 +236,60 @@ Item {
 
     // LEFT BOX !
     Rectangle {
-            id: left_box
-            anchors.right:          attitudeIndicator.left
-            anchors.bottom : attitudeIndicator.bottom
-            anchors.rightMargin:  ScreenTools.defaultFontPixelHeight * 0.4  // -attitudeIndicator.width / 3
-            width:  attitudeIndicator.width*0.6
-            height: attitudeIndicator.height * 0.65
+            id: leftBox
+            anchors.top: upperLeftBox.bottom
+            anchors.right: rightBox.left
+            anchors.topMargin: ScreenTools.defaultFontPixelHeight * 0.1
+            anchors.rightMargin: ScreenTools.defaultFontPixelHeight * 0.4
+            width:  attitudeIndicator.width*0.5
+            height: attitudeIndicator.height * 0.3
             radius:                 ScreenTools.defaultFontPixelHeight
-            color:                  qgcPal.window
+            color:                  Qt.rgba(qgcPal.window.r, qgcPal.window.g, qgcPal.window.b, 0.7)
 
+            GridLayout {
+                        columnSpacing:          ScreenTools.defaultFontPixelWidth  * 0.5
+                        rowSpacing:             ScreenTools.defaultFontPixelHeight * 0.3
+                        columns:                2
 
-            QGCColoredImage {
-                source: "/custom/img/altitude.svg"
-                fillMode: Image.PreserveAspectFit
-                sourceSize.height: parent.height
+                property real   _indicatorsHeight:      ScreenTools.defaultFontPixelHeight
+                //anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
                 anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top: parent.top
-                color: qgcPal.text
-                height:                 _indicatorsHeight * 1.3
-                width:                  height
-                anchors.topMargin: ScreenTools.defaultFontPixelHeight * 0.5
-            }
+                //anchors.rightMargin: 12
+                
 
-            QGCLabel {
-                text:                   _altitude
-                color:                  _indicatorsColor
-                font.pointSize:         ScreenTools.largeFontPointSize * 1.4
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.bottom: parent.bottom
-                font.weight: Font.Bold
-                anchors.bottomMargin: ScreenTools.defaultFontPixelHeight * 0.1
+                QGCColoredImage {
+                    source: "/custom/img/altitude.svg"
+                    height:                 _indicatorsHeight * 0.8
+                    width:                  height
+                    fillMode:               Image.PreserveAspectFit
+                    sourceSize.height:      height
+                    Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
+                    color:                  qgcPal.text
+                }
 
+                QGCLabel {
+                    text:                   _altitude
+                    color:                  _indicatorsColor
+                    font.pointSize:         ScreenTools.mediumFontPointSize * 0.8
+                    Layout.fillWidth:       true
+                    Layout.minimumWidth:    indicatorValueWidth
+                    Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
+                }
             }
     }
 
     // UPPER RIGHT BOX !
     Rectangle {
-        anchors.horizontalCenter: right_box.horizontalCenter
-        anchors.bottom:           right_box.top
-        anchors.rightMargin:  ScreenTools.defaultFontPixelHeight * 0.4  // -attitudeIndicator.width / 3
-        anchors.bottomMargin:   ScreenTools.defaultFontPixelHeight * 0.1  // -attitudeIndicator.width / 3
-
-
-
-        width:  attitudeIndicator.width*0.6
+        id: upperRightBox
+        anchors.top: attitudeIndicator.bottom
+        anchors.right: attitudeIndicator.right
+        anchors.topMargin: ScreenTools.defaultFontPixelHeight * 0.1
+        anchors.leftMargin: ScreenTools.defaultFontPixelHeight * 0.4
+        width:  attitudeIndicator.width*0.5
         height: attitudeIndicator.height * 0.3
         radius:                 ScreenTools.defaultFontPixelHeight
-        color:                  qgcPal.window
+        color:                  Qt.rgba(qgcPal.window.r, qgcPal.window.g, qgcPal.window.b, 0.7)
 
         GridLayout {
                     columnSpacing:          ScreenTools.defaultFontPixelWidth  * 0.5
@@ -298,7 +303,7 @@ Item {
             //anchors.rightMargin: 12
 
             QGCColoredImage {
-                height:                 _indicatorsHeight * 1.5
+                height:                 _indicatorsHeight * 1.3
                 width:                  height
                 source:                "/custom/img/MovimentoY.svg"
                 fillMode:               Image.PreserveAspectFit
@@ -310,7 +315,7 @@ Item {
             QGCLabel {
                 text:                  _activeVehicle ? "  "+_activeVehicle.climbRate.value.toFixed(1) + ' ' + _activeVehicle.climbRate.units : "   --/--"
                 color:                  _indicatorsColor
-                font.pointSize:         ScreenTools.mediumFontPointSize
+                font.pointSize:         ScreenTools.mediumFontPointSize * 0.8
                 Layout.fillWidth:       true
                 Layout.minimumWidth:    indicatorValueWidth
                 Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
@@ -321,52 +326,61 @@ Item {
 
     // RIGHT BOX!
     Rectangle {
-        id: right_box
-        anchors.left:          attitudeIndicator.right
-        anchors.bottom : attitudeIndicator.bottom
-        anchors.leftMargin:  ScreenTools.defaultFontPixelHeight * 0.4  // -attitudeIndicator.width / 3
-        width:  attitudeIndicator.width*0.6
-        height: attitudeIndicator.height * 0.65
+        id: rightBox
+        anchors.top: upperRightBox.bottom
+        anchors.right: attitudeIndicator.right
+        anchors.topMargin: ScreenTools.defaultFontPixelHeight * 0.1
+        anchors.leftMargin: ScreenTools.defaultFontPixelHeight * 0.4
+        width:  attitudeIndicator.width*0.5
+        height: attitudeIndicator.height * 0.3
         radius:                 ScreenTools.defaultFontPixelHeight
-        color:                  qgcPal.window
+        color:                  Qt.rgba(qgcPal.window.r, qgcPal.window.g, qgcPal.window.b, 0.7)
 
-        QGCColoredImage {
-            source: "/custom/img/MovimentoZ.svg"
-            fillMode: Image.PreserveAspectFit
-            sourceSize.height: parent.height
+        GridLayout {
+                    columnSpacing:          ScreenTools.defaultFontPixelWidth  * 0.5
+                    rowSpacing:             ScreenTools.defaultFontPixelHeight * 0.3
+                    columns:                2
+
+            property real   _indicatorsHeight:      ScreenTools.defaultFontPixelHeight
+            //anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: parent.top
-            color: qgcPal.text
-            height:                 _indicatorsHeight * 2.5
-            width:                  height
-            // anchors.topMargin: ScreenTools.defaultFontPixelHeight * 0.5
-        }
+            //anchors.rightMargin: 12
+            
 
+            QGCColoredImage {
+                source: "/custom/img/MovimentoZ.svg"
+                height:                 _indicatorsHeight * 1.3
+                width:                  height
+                fillMode:               Image.PreserveAspectFit
+                sourceSize.height:      height
+                Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
+                color:                  qgcPal.text
+            }
 
-        QGCLabel {
-            text:                   _activeVehicle ? _activeVehicle.groundSpeed.value.toFixed(1) + ' ' + _activeVehicle.groundSpeed.units : "--/--"
-            color:                  _indicatorsColor
-            font.pointSize:         ScreenTools.largeFontPointSize * 1.4
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: parent.bottom
-            font.weight: Font.Bold
-            anchors.bottomMargin: ScreenTools.defaultFontPixelHeight * 0.1
-
+            QGCLabel {
+                text:                   _activeVehicle ? _activeVehicle.groundSpeed.value.toFixed(1) + ' ' + _activeVehicle.groundSpeed.units : "--/--"
+                color:                  _indicatorsColor
+                font.pointSize:         ScreenTools.mediumFontPointSize * 0.8
+                Layout.fillWidth:       true
+                Layout.minimumWidth:    indicatorValueWidth
+                Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
+            }
         }
     }
 
     // NAVIGATION BOX!
     Rectangle {
         id:                     attitudeIndicator
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottomMargin:   _toolsMargin + parentToolInsets.bottomEdgeRightInset
-        anchors.rightMargin:    _toolsMargin
-        anchors.bottom:         parent.bottom
+        anchors.left: parent.left
+        anchors.topMargin:   _toolsMargin + parentToolInsets.topEdgeRightInset
+        anchors.leftMargin:    _toolsMargin
+        anchors.top:         parent.top
        // height:                 ScreenTools.defaultFontPixelHeight * 10
-        height: parent.height / 4
+        height: parent.height / 5
         width:                  height * 1.98
         radius:                 height * 0.5
-        color:                  qgcPal.window   //qgcPal.windowShade
+        color:                  Qt.rgba(qgcPal.window.r, qgcPal.window.g, qgcPal.window.b, 0.7)
 
         CustomAttitudeWidget {
             id:                 attitude

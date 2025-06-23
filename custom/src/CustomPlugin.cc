@@ -29,6 +29,8 @@
 // #include "HorizontalFactValueGrid.h"
 // #include "InstrumentValueData.h"
 #include <list>
+#include "ParameterManager.h"
+#include "GeoFenceController.h"
 
 void CustomPlugin::registerQmlTypes()
 {
@@ -61,6 +63,10 @@ CustomPlugin::CustomPlugin(QGCApplication *app, QGCToolbox* toolbox)
     #ifdef Q_OS_WIN
         QApplication::setWindowIcon(QIcon(":/res/resources/icons/qgroundcontrol.ico"));
     #endif
+
+    _savParamTimer = new QTimer(this);
+    connect(_savParamTimer, &QTimer::timeout, this, &CustomPlugin::_updateSavParamCoordinates);
+    _savParamTimer->start(1000);
 }
 
 void CustomPlugin::setToolbox(QGCToolbox* toolbox)
@@ -419,6 +425,210 @@ QVariantList& CustomPlugin::settingsPages()
     return _customSettingsList;
 }
 
+QVariantList CustomPlugin::getSavParamCoordinates(Vehicle* vehicle) {
+    QVariantList coordinates;
+    if (!vehicle || !vehicle->parameterManager()) return coordinates;
+    if (_isSAVenabled == false || _isSAVexist == false) {
+        return coordinates;
+    }
+
+    QStringList suffixes = { "WP_SG","WP_MAR", "A","1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11" };
+    int componentId = FactSystem::defaultComponentId;
+
+    for (QString& s : suffixes) {
+        QString latName = QString("SAV_%1_LAT").arg(s);
+        QString lonName = QString("SAV_%1_LON").arg(s);
+        QString altName = QString("SAV_%1_ALT").arg(s);
+        QString speedName = QString("SAV_%1_SPEED").arg(s);
+
+        auto* paramMgr = vehicle->parameterManager();
+
+        if (paramMgr->parameterExists(componentId, latName) &&
+            paramMgr->parameterExists(componentId, lonName) &&
+            paramMgr->parameterExists(componentId, altName) &&
+            paramMgr->parameterExists(componentId, speedName))
+        {
+            Fact* latFact = paramMgr->getParameter(componentId, latName);
+            Fact* lonFact = paramMgr->getParameter(componentId, lonName);
+            Fact* altFact = paramMgr->getParameter(componentId, altName);
+            Fact* speedFact = paramMgr->getParameter(componentId, speedName);
+
+            if (latFact && lonFact &&
+                latFact->rawValue().isValid() &&
+                lonFact->rawValue().isValid() &&
+                altFact->rawValue().isValid() &&
+                speedFact->rawValue().isValid())
+            {
+                QVariantMap entry;
+                entry["label"] = s.replace("WP_", "");
+                entry["latitude"] = latFact->rawValue().toDouble();
+                entry["longitude"] = lonFact->rawValue().toDouble();
+                entry["altitude"] = altFact->rawValue().toDouble();
+                entry["speed"] = speedFact->rawValue().toDouble();
+                coordinates.append(entry);
+            }
+        }  
+    }
+
+    return coordinates;
+}
+
+QVariantList CustomPlugin::savParamCoordinates() const {
+    return _savParamCoordinates;
+}
+
+void CustomPlugin::_updateSavParamCoordinates() {
+    Vehicle* vehicle = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle();
+    if (!vehicle || !vehicle->parameterManager()) return;
+
+    if (vehicle->parameterManager()->parameterExists(FactSystem::defaultComponentId, "SAV_ENABLE")){
+        Fact* enableFact = vehicle->parameterManager()->getParameter(FactSystem::defaultComponentId, "SAV_ENABLE");
+        if (enableFact->rawValue().isValid()){
+            if ((enableFact->rawValue().toDouble() > 0) != _isSAVenabled) {
+                _isSAVenabled = (enableFact->rawValue().toDouble() > 0);
+                emit savEnableChanged();
+            }
+        }
+    }
+
+    if (vehicle->parameterManager()->parameterExists(FactSystem::defaultComponentId, "SAV_NUM_TORR")){
+        Fact* existFact = vehicle->parameterManager()->getParameter(FactSystem::defaultComponentId, "SAV_NUM_TORR");
+        if (existFact->rawValue().isValid()){
+            if ((existFact->rawValue().toDouble() > 0) != _isSAVexist) {
+                _isSAVexist = (existFact->rawValue().toDouble() > 0);
+                emit isSAVexistChanged();
+            }
+        }
+    }
+
+    QVariantList newCoords = getSavParamCoordinates(vehicle);
+    if (newCoords != _savParamCoordinates) {
+        _savParamCoordinates = newCoords;
+        emit savParamCoordinatesChanged();
+    }
+}
+
+void CustomPlugin::updateFence(QObject* controllerObj, bool isSAVenabled) {
+    GeoFenceController* controller = qobject_cast<GeoFenceController*>(controllerObj);
+    if (!controller) {
+        qWarning() << "Invalid GeoFenceController passed to updateFence";
+        return;
+    }
+
+    QString missionPath = qgcApp()->toolbox()->settingsManager()->appSettings()->missionSavePath();
+    QDir loadDir(missionPath);
+
+    QString savFile = loadDir.absoluteFilePath("sav.json");
+    QString noSavFile = loadDir.absoluteFilePath("no_sav.json");
+    if (isSAVenabled) {
+        {
+            QJsonObject json;
+            controller->save(json); 
+            QJsonDocument doc(json);
+            QFile saveFile(noSavFile);
+            if (saveFile.open(QIODevice::WriteOnly)) {
+                saveFile.write(doc.toJson());
+                saveFile.close();
+            } else {
+                qWarning() << "cannot save no_sav.json!";
+            }
+        }
+        controller->removeAll();
+        QFile file(savFile);
+        if (file.open(QIODevice::ReadOnly)) {
+            QByteArray bytes = file.readAll();
+            QJsonDocument doc = QJsonDocument::fromJson(bytes);
+            QJsonObject root  = doc.object();
+            QJsonObject jsonToLoad;
+
+        if (root.contains("polygons") && root["polygons"].isArray()) {
+            // Formato 1: usa direttamente
+            jsonToLoad = root;
+        } else if (root.contains("geoFence") && root["geoFence"].isObject()) {
+            // Formato 2: estrai sotto-oggetto "geoFence"
+            QJsonObject geoFence = root["geoFence"].toObject();
+            // Simula il formato 1 ricreando il QJsonObject con le chiavi attese
+            QJsonObject simulatedFormat1;
+            if (geoFence.contains("polygons"))
+                simulatedFormat1.insert("polygons", geoFence["polygons"]);
+            if (geoFence.contains("circles"))
+                simulatedFormat1.insert("circles", geoFence["circles"]);
+            if (geoFence.contains("version"))
+                simulatedFormat1.insert("version", geoFence["version"]);
+
+            jsonToLoad = simulatedFormat1;
+        }
+
+            QString errorString;
+            controller->load(jsonToLoad, errorString);
+            if (!errorString.isEmpty()) {
+                qgcApp()->showCriticalVehicleMessage(tr("Critical Warning: %1").arg(errorString));
+            }
+        } else {
+            qgcApp()->showCriticalVehicleMessage(tr("Critical Warning: cannot open and load SAV GeoFence file (sav.json)"));
+        }
+    } else {
+        controller->removeAll();
+        QFile file(noSavFile);
+        if (file.open(QIODevice::ReadOnly)) {
+            QByteArray bytes = file.readAll();
+            QJsonDocument doc = QJsonDocument::fromJson(bytes);
+            QJsonObject json = doc.object();
+            QString errorString;
+            controller->load(json, errorString);
+            if (!errorString.isEmpty()) {
+                qgcApp()->showCriticalVehicleMessage(tr("cannot load GeoFence file (no_sav.json): %1").arg(errorString));
+            }
+        } else {
+            qgcApp()->showCriticalVehicleMessage(tr("cannot open and load GeoFence file (no_sav.json)"));
+        }
+    }
+    controller->sendToVehicle();
+}
+
+
+void CustomPlugin::savButtonPressed(const QString& label)
+{
+    Vehicle* vehicle = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle();
+    if (!vehicle) {
+        qWarning() << "No active vehicle";
+        return;
+    }
+
+    int value = 0;
+    bool ok = false;
+    value = label.toInt(&ok);
+    int id = 0;
+
+    if (!ok) {
+        if (label == "A") id = 1;
+        else id = 0;  // default
+    }
+    else id = (1<<(value));
+
+    vehicle->sendMavCommand(vehicle->defaultComponentId(), MAV_CMD_USER_1, false, id );
+}
+
+bool CustomPlugin::isSAVenabled() {
+    return _isSAVenabled;
+}
+
+bool CustomPlugin::isSAVexist() {
+    return _isSAVexist;
+}
+
+void CustomPlugin::setSAVenabled(const bool& msg) {
+    Vehicle* vehicle = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle();
+    if (!vehicle || !vehicle->parameterManager()) return;
+
+    if (vehicle->parameterManager()->parameterExists(FactSystem::defaultComponentId, "SAV_ENABLE")){
+        Fact* existFact = vehicle->parameterManager()->getParameter(FactSystem::defaultComponentId, "SAV_ENABLE");
+        _isSAVexist = msg;    
+        existFact->setRawValue(_isSAVexist);
+        emit savEnableChanged();  
+    }
+}
+
 void CustomPlugin::onActiveVehicleChanged(Vehicle* vehicle)
 {
     qDebug() << "onActiveVehicleChanged";
@@ -432,7 +642,6 @@ void CustomPlugin::onActiveVehicleChanged(Vehicle* vehicle)
     }
 
     if (!_vehicleListenerConnected) {
-        qDebug() << "!_vehicleListenerConnected";
         // Reconnect to the new vehicle's mavlink messages
         _vehicleConnection = connect(vehicle, &Vehicle::mavlinkMessageReceived, this, &CustomPlugin::handleMavlinkMessage);
         _vehicleListenerConnected = true;
@@ -487,11 +696,6 @@ void CustomPlugin::handleMavlinkMessage(const mavlink_message_t& message)
         }
     }
 }
-
-
-
-
-
 
 
 

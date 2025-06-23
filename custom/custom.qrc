@@ -43,6 +43,8 @@
         <file alias="Custom/Widgets/qmldir">res/Custom/Widgets/qmldir</file>
         <file alias="CustomNTRIP.qml">res/Custom/Widgets/CustomNTRIP.qml</file>
         <file alias="AboutUP.qml">res/Custom/Widgets/AboutUP.qml</file>
+        <file alias="Custom/Widgets/SavParamMarkerUP.qml">res/Custom/Widgets/SavParamMarkerUP.qml</file>
+        <file alias="Custom/Widgets/SavButtonWidgetUP.qml">res/Custom/Widgets/SavButtonWidgetUP.qml</file>
     </qresource>
     <qresource prefix="/Custom/Constants">
         <file alias="Custom/Constants/Constants.qml">res/Custom/Constants/Constants.qml</file>
@@ -53,6 +55,7 @@
         <file alias="QGroundControl/FlightMap/FlightMap.qml">src/FlightMap/FlightMapUP.qml</file>
         <file alias="GeneralSettings.qml">src/ui/preferences/GeneralSettingsUP.qml</file>
         <file alias="QGroundControl/FlightDisplay/FlyViewCustomLayer.qml">src/FlightDisplay/FlyViewCustomLayerUP.qml</file>
+        <file alias="QGroundControl/FlightDisplay/FlyViewCustomLayerSAV.qml">src/FlightDisplay/FlyViewCustomLayerSAV.qml</file>
         <file alias="QGroundControl/FlightDisplay/FlyViewWidgetLayer.qml">src/FlightDisplay/FlyViewWidgetLayerUP.qml</file>
         <file alias="QGroundControl/Controls/MainToolBar.qml">src/ui/toolbar/MainToolBarUP.qml</file>
         <file alias="QGroundControl/Controls/TransectStyleMapVisuals.qml">src/PlanView/TransectStyleMapVisualsUP.qml</file>
@@ -79,6 +82,9 @@
         <file alias="QGroundControl/Controls/ToolStripHoverButton.qml">src/QmlControls/ToolStripHoverButtonUP.qml</file>
         <file alias="QGroundControl/Controls/SubMenuButton.qml">src/QmlControls/SubMenuButtonUP.qml</file>
 		<file alias="QGroundControl/FlightDisplay/VehicleWarnings.qml">src/FlightDisplay/VehicleWarningsUP.qml</file>
+        <file alias="PlanView.qml">src/PlanView/PlanViewUP.qml</file>
+        <file alias="QGroundControl/FlightDisplay/FlyViewMissionCompleteDialog.qml">src/FlightDisplay/FlyViewMissionCompleteDialogUP.qml</file>
+        <file alias="QGroundControl/FlightDisplay/FlyViewToolStripActionList.qml">src/FlightDisplay/FlyViewToolStripActionListUP.qml</file>
     </qresource>
     <qresource prefix="/toolbar">
         <file alias="GPSIndicator.qml">src/ui/toolbar/GPSIndicatorUP.qml</file>
@@ -88,4 +94,13 @@
     <qresource prefix="/json">
         <file alias="NTRIP.SettingsGroup.json">src/Settings/NTRIP.SettingsGroup.json</file>
     </qresource>
+    <qresource prefix="/res">
+		<file alias="Enable_white.svg">res/Images/Enable_white.svg</file>
+		<file alias="Disable_white.svg">res/Images/Disable_white.svg</file>
+		<file alias="Home_WP.svg">res/Images/Home.svg</file>
+		<file alias="Camera_WP.svg">res/Images/Camera.svg</file>		
+		<file alias="Sea_WP.svg">res/Images/Sea.svg</file>
+		<file alias="SeaSide_WP.svg">res/Images/SeaSide.svg</file>
+		<file alias="Lifeguard.svg">res/Images/Lifeguard.svg</file>
+	</qresource>
 </RCC>

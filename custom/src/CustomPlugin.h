@@ -16,6 +16,8 @@
 #include <QObject>
 #include "QmlComponentInfo.h"
 #include "CustomToolbox.h"
+#include <QGeoCoordinate>
+#include "Vehicle.h"
 
 class CustomOptions;
 class CustomPlugin;
@@ -47,8 +49,11 @@ private:
 class CustomPlugin : public QGCCorePlugin
 {
     Q_OBJECT
-
     Q_PROPERTY(QString speedMessage READ speedMessage WRITE setSpeedMessage NOTIFY speedMessageChanged)
+    Q_PROPERTY(QVariantList savParamCoordinates READ savParamCoordinates NOTIFY savParamCoordinatesChanged)
+    Q_PROPERTY(bool isSAVenabled READ isSAVenabled WRITE setSAVenabled NOTIFY savEnableChanged)
+    Q_PROPERTY(bool isSAVexist READ isSAVexist NOTIFY isSAVexistChanged)
+    
 public:
     CustomPlugin(QGCApplication* app, QGCToolbox *toolbox);
     ~CustomPlugin() {}
@@ -68,11 +73,26 @@ public:
     void onActiveVehicleChanged(Vehicle* vehicle);
     void handleMavlinkMessage(const mavlink_message_t& message);
 
+    Q_INVOKABLE QVariantList getSavParamCoordinates(Vehicle* vehicle);
+    QVariantList savParamCoordinates() const;
+    Q_INVOKABLE void savButtonPressed(const QString& label);
+    Q_INVOKABLE void updateFence(QObject* controllerObj, bool isSAVenabled);
+
+    Q_INVOKABLE bool isSAVenabled();
+    Q_INVOKABLE bool isSAVexist();
+
     QString speedMessage() const { return _speedMessage; }
     void setSpeedMessage(const QString& msg);
+    void setSAVenabled(const bool& msg);
 
 signals:
     void speedMessageChanged();
+    void savParamCoordinatesChanged();
+    void savEnableChanged();
+    void isSAVexistChanged();
+
+private slots:
+    void _updateSavParamCoordinates();
 
 private:
     CustomOptions*  _options = nullptr;
@@ -85,4 +105,9 @@ private:
     QMetaObject::Connection _vehicleConnection;
     bool _vehicleListenerConnected = false;
     bool _audioMuteScheduled = false;
+    
+    QVariantList _savParamCoordinates;
+    QTimer* _savParamTimer = nullptr;
+    bool _isSAVenabled = false;
+    bool _isSAVexist = false;
 };

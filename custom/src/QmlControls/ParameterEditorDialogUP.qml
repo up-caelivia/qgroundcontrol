@@ -35,6 +35,25 @@ QGCPopupDialog {
     property bool _allowDefaultReset: fact.defaultValueAvailable && (QGroundControl.corePlugin.showAdvancedUI || !_editingParameter)
     property bool _showCombo: fact.enumStrings.length !== 0 && fact.bitmaskStrings.length === 0 && !validate
 
+    property var _customBitmaskLabels: [
+        "towerA", "tower1", "tower2", "tower3", "tower4", "tower5",
+        "tower6", "tower7", "tower8", "tower9", "tower10"
+    ]
+    property var _customBitmaskValues: [
+        1 << 0,  // towerA
+        1 << 1,  // tower1
+        1 << 2,  // tower2
+        1 << 3,  // tower3
+        1 << 4,
+        1 << 5,
+        1 << 6,
+        1 << 7,
+        1 << 8,
+        1 << 9,
+        1 << 10
+    ]
+
+
     ParameterEditorController { id: controller }
 
     QGCPalette { id: qgcPal; colorGroupEnabled: true }
@@ -147,14 +166,15 @@ QGCPopupDialog {
     }
 
     function bitmaskValue() {
-        var value = 0
-        for (var i = 0; i < fact.bitmaskValues.length; ++i) {
-            var checkbox = bitmaskRepeater.itemAt(i)
-            if (checkbox.checked) {
-                value |= fact.bitmaskValues[i]
-            }
+        var bitmask = 0
+        var len = fact.name.startsWith("SAV_NUM_TORR") ? _customBitmaskLabels.length : fact.bitmaskStrings.length
+        for (var i = 0; i < len; ++i) {
+            var cb = bitmaskRepeater.itemAt(i)
+            var maskVal = fact.name.startsWith("SAV_NUM_TORR") ? _customBitmaskValues[i] : fact.bitmaskValues[i]
+            if (cb && cb.checked)
+                bitmask |= maskVal
         }
-        return value
+        return bitmask
     }
 
     Component.onCompleted: {
@@ -228,21 +248,40 @@ QGCPopupDialog {
         Column {
             id:         bitmaskColumn
             spacing:    ScreenTools.defaultFontPixelHeight / 2
-            visible:    fact.bitmaskStrings.length > 0
+            // Forza la colonna solo se il parametro è quello giusto
+            visible:    fact.bitmaskStrings.length > 0 || fact.name.startsWith("SAV_NUM_TORR")
 
             Repeater {
                 id:     bitmaskRepeater
-                model:  fact.bitmaskStrings
+                // Scegli il modello custom se è il tuo parametro, altrimenti quello standard
+                model:  fact.name.startsWith("SAV_NUM_TORR") ? _customBitmaskLabels : fact.bitmaskStrings
 
                 delegate: QGCCheckBox {
                     text: modelData
-                    checked: fact.value & fact.bitmaskValues[index]
+                    checked: {
+                        var maskVal = fact.name.startsWith("SAV_NUM_TORR") ? _customBitmaskValues[index] : fact.bitmaskValues[index]
+                        return fact.value & maskVal
+                    }
                     onClicked: {
-                        valueField.text = bitmaskValue()
+                        if (fact.name.startsWith("SAV_NUM_TORR")) {
+                            var bitmask = 0
+                            var len = _customBitmaskLabels.length 
+                            for (var i = 0; i < len; ++i) {
+                                var cb = bitmaskRepeater.itemAt(i)
+                                var maskVal = _customBitmaskValues[i]
+                                if (cb && cb.checked)
+                                    bitmask += maskVal
+                            }
+                            console.log(   "Bitmask value:", bitmask)
+                            valueField.text = bitmask
+                        } else {
+                            valueField.text = bitmaskValue()
+                        }
                     }
                 }
             }
         }
+
 
         QGCLabel {
             Layout.fillWidth:   true

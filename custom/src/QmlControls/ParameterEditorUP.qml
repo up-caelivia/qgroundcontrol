@@ -280,7 +280,7 @@ Item {
 
                 if (modelFact.units == "cm")
                     return (modelFact.rawValue / 100).toFixed(modelFact.decimalPlaces+2) + " " + "m"
-
+                    
                 return modelFact.valueString + " " + modelFact.units
 
             }

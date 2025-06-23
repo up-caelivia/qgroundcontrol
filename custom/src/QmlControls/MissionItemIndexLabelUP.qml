@@ -146,6 +146,16 @@ Canvas {
             font.pointSize:         ScreenTools.defaultFontPointSize
             fontSizeMode:           Text.Fit
             text:                   _index
+            visible:                _index != "L"
+        }        
+
+        QGCColoredImage {
+            anchors.fill: parent
+            anchors.bottomMargin: 15
+            source: "/res/Home_WP.svg"
+            visible: _index == "L"
+            fillMode: Image.PreserveAspectFit
+            color: "white"
         }
     }
 
