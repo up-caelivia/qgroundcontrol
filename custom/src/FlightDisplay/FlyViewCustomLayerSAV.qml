@@ -128,7 +128,7 @@ Item {
 
 
             QGCColoredImage {
-                height: _indicatorsHeight
+                height: _indicatorsHeight * 0.8
                 width: height
                 source: "/custom/img/vertical_speed.svg"
                 fillMode: Image.PreserveAspectFit
@@ -140,7 +140,7 @@ Item {
             QGCLabel {
                 id: distanceLabel
                 text: "  " + distance.toFixed(1) + " m"
-                font.pointSize: ScreenTools.mediumFontPointSize
+                font.pointSize: ScreenTools.mediumFontPointSize * 0.8
                 Layout.fillWidth: true
                 Layout.minimumWidth: indicatorValueWidth
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
@@ -213,7 +213,7 @@ Item {
             //anchors.rightMargin: 12
 
             QGCColoredImage {
-                height:                 _indicatorsHeight
+                height:                 _indicatorsHeight * 0.8
                 width:                  height
                 source:                "/custom/img/distance.svg"
                 fillMode:               Image.PreserveAspectFit
@@ -225,7 +225,7 @@ Item {
             QGCLabel {
                 text:                   _activeVehicle && !isNaN(_activeVehicle.distanceToHome.value) ? (('  0000' + _activeVehicle.distanceToHome.value.toFixed(0)).slice(-4) + ' ' + _activeVehicle.distanceToHome.units) : "   --/--"
                 color:                  _indicatorsColor
-                font.pointSize:         ScreenTools.mediumFontPointSize
+                font.pointSize:         ScreenTools.mediumFontPointSize * 0.8
                 Layout.fillWidth:       true
                 Layout.minimumWidth:    indicatorValueWidth
                 Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
@@ -260,7 +260,7 @@ Item {
 
                 QGCColoredImage {
                     source: "/custom/img/altitude.svg"
-                    height:                 _indicatorsHeight
+                    height:                 _indicatorsHeight * 0.8
                     width:                  height
                     fillMode:               Image.PreserveAspectFit
                     sourceSize.height:      height
@@ -271,7 +271,7 @@ Item {
                 QGCLabel {
                     text:                   _altitude
                     color:                  _indicatorsColor
-                    font.pointSize:         ScreenTools.mediumFontPointSize
+                    font.pointSize:         ScreenTools.mediumFontPointSize * 0.8
                     Layout.fillWidth:       true
                     Layout.minimumWidth:    indicatorValueWidth
                     Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
@@ -303,7 +303,7 @@ Item {
             //anchors.rightMargin: 12
 
             QGCColoredImage {
-                height:                 _indicatorsHeight * 1.5
+                height:                 _indicatorsHeight * 1.3
                 width:                  height
                 source:                "/custom/img/MovimentoY.svg"
                 fillMode:               Image.PreserveAspectFit
@@ -315,7 +315,7 @@ Item {
             QGCLabel {
                 text:                  _activeVehicle ? "  "+_activeVehicle.climbRate.value.toFixed(1) + ' ' + _activeVehicle.climbRate.units : "   --/--"
                 color:                  _indicatorsColor
-                font.pointSize:         ScreenTools.mediumFontPointSize
+                font.pointSize:         ScreenTools.mediumFontPointSize * 0.8
                 Layout.fillWidth:       true
                 Layout.minimumWidth:    indicatorValueWidth
                 Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
@@ -350,7 +350,7 @@ Item {
 
             QGCColoredImage {
                 source: "/custom/img/MovimentoZ.svg"
-                height:                 _indicatorsHeight * 1.5
+                height:                 _indicatorsHeight * 1.3
                 width:                  height
                 fillMode:               Image.PreserveAspectFit
                 sourceSize.height:      height
@@ -361,7 +361,7 @@ Item {
             QGCLabel {
                 text:                   _activeVehicle ? _activeVehicle.groundSpeed.value.toFixed(1) + ' ' + _activeVehicle.groundSpeed.units : "--/--"
                 color:                  _indicatorsColor
-                font.pointSize:         ScreenTools.mediumFontPointSize
+                font.pointSize:         ScreenTools.mediumFontPointSize * 0.8
                 Layout.fillWidth:       true
                 Layout.minimumWidth:    indicatorValueWidth
                 Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
