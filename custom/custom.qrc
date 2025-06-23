@@ -55,6 +55,7 @@
         <file alias="QGroundControl/FlightMap/FlightMap.qml">src/FlightMap/FlightMapUP.qml</file>
         <file alias="GeneralSettings.qml">src/ui/preferences/GeneralSettingsUP.qml</file>
         <file alias="QGroundControl/FlightDisplay/FlyViewCustomLayer.qml">src/FlightDisplay/FlyViewCustomLayerUP.qml</file>
+        <file alias="QGroundControl/FlightDisplay/FlyViewCustomLayerSAV.qml">src/FlightDisplay/FlyViewCustomLayerSAV.qml</file>
         <file alias="QGroundControl/FlightDisplay/FlyViewWidgetLayer.qml">src/FlightDisplay/FlyViewWidgetLayerUP.qml</file>
         <file alias="QGroundControl/Controls/MainToolBar.qml">src/ui/toolbar/MainToolBarUP.qml</file>
         <file alias="QGroundControl/Controls/TransectStyleMapVisuals.qml">src/PlanView/TransectStyleMapVisualsUP.qml</file>
