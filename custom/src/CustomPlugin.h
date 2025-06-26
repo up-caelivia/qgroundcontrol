@@ -53,6 +53,7 @@ class CustomPlugin : public QGCCorePlugin
     Q_PROPERTY(QVariantList savParamCoordinates READ savParamCoordinates NOTIFY savParamCoordinatesChanged)
     Q_PROPERTY(bool isSAVenabled READ isSAVenabled WRITE setSAVenabled NOTIFY savEnableChanged)
     Q_PROPERTY(bool isSAVexist READ isSAVexist NOTIFY isSAVexistChanged)
+    Q_PROPERTY(int rc6Value READ rc6Value NOTIFY rc6ValueChanged)
     
 public:
     CustomPlugin(QGCApplication* app, QGCToolbox *toolbox);
@@ -84,12 +85,14 @@ public:
     QString speedMessage() const { return _speedMessage; }
     void setSpeedMessage(const QString& msg);
     void setSAVenabled(const bool& msg);
+    int rc6Value() const { return _rc6Value; }
 
 signals:
     void speedMessageChanged();
     void savParamCoordinatesChanged();
     void savEnableChanged();
     void isSAVexistChanged();
+    void rc6ValueChanged();
 
 private slots:
     void _updateSavParamCoordinates();
@@ -110,4 +113,5 @@ private:
     QTimer* _savParamTimer = nullptr;
     bool _isSAVenabled = false;
     bool _isSAVexist = false;
+    int _rc6Value = 0;
 };

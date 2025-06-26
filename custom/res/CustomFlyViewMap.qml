@@ -105,6 +105,15 @@ FlightMap {
         onSavParamCoordinatesChanged: {
             _savParamCoords = CustomPlugin.savParamCoordinates
         }
+        onRc6ValueChanged: {
+            if (CustomPlugin.isSAVenabled) {
+                if (CustomPlugin.rc6Value > 1700) {
+                    QGroundControl.videoManager.fullScreen = true
+                } else {
+                    QGroundControl.videoManager.fullScreen = false
+                }
+            }
+        }
     }
     
     SavParamMarkerUP {

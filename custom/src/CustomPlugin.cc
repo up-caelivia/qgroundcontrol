@@ -662,6 +662,17 @@ void CustomPlugin::onActiveVehicleChanged(Vehicle* vehicle)
 
 void CustomPlugin::handleMavlinkMessage(const mavlink_message_t& message)
 {
+    if (message.msgid == MAVLINK_MSG_ID_RC_CHANNELS) {
+        mavlink_rc_channels_t rc;
+        mavlink_msg_rc_channels_decode(&message, &rc);
+
+        int newRC6 = rc.chan6_raw;  // canale 6 (indice base 1)
+        if (_rc6Value != newRC6) {
+            _rc6Value = newRC6;
+            emit rc6ValueChanged();
+        }
+        return;
+    }
     if (message.msgid == MAVLINK_MSG_ID_SYSTEM_TIME) {
         mavlink_system_time_t sysTime;
         mavlink_msg_system_time_decode(&message, &sysTime);
@@ -687,12 +698,8 @@ void CustomPlugin::handleMavlinkMessage(const mavlink_message_t& message)
                     }
                 });
             }
-            disconnect(_vehicleConnection);
-            _vehicleListenerConnected = false;
         }
         else {
-            disconnect(_vehicleConnection);
-            _vehicleListenerConnected = false;
         }
     }
 }
