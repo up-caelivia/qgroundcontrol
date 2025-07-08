@@ -38,6 +38,8 @@ Item {
     property color  _indicatorsColor:       qgcPal.text
     property bool   _isVehicleGps:          _activeVehicle ? _activeVehicle.gps.count.rawValue > 1 && _activeVehicle.gps.hdop.rawValue < 1.4 : false
     property string _altitude:              _activeVehicle ? (isNaN(_activeVehicle.altitudeRelative.value) ? "0.0" : _activeVehicle.altitudeRelative.value.toFixed(1)) + ' ' + _activeVehicle.altitudeRelative.units : "--/--"
+    property string _latitude:              _activeVehicle ? (isNaN(_activeVehicle.latitude) ? "0.0" : _activeVehicle.latitude.toFixed(6)) : "--/--"
+    property string _longitude:              _activeVehicle ? (isNaN(_activeVehicle.longitude) ? "0.0" : _activeVehicle.longitude.toFixed(6)) : "--/--"
     property string _distanceStr:           isNaN(_distance) ? "0" : _distance.toFixed(0) + ' ' + QGroundControl.unitsConversion.appSettingsHorizontalDistanceUnitsString
     property real   _heading:               _activeVehicle   ? _activeVehicle.heading.rawValue : 0
     property real   _distance:              _activeVehicle ? _activeVehicle.distanceToHome.rawValue : 0
@@ -279,6 +281,40 @@ Item {
             }
     }
 
+    //DOWNER LEFT BOX !
+    Rectangle {
+            id: downerLeftBox
+            anchors.top: leftBox.bottom
+            anchors.right: rightBox.left
+            anchors.topMargin: ScreenTools.defaultFontPixelHeight * 0.1
+            anchors.rightMargin: ScreenTools.defaultFontPixelHeight * 0.4
+            width:  attitudeIndicator.width*0.5
+            height: attitudeIndicator.height * 0.3
+            radius:                 ScreenTools.defaultFontPixelHeight
+            color:                  Qt.rgba(qgcPal.window.r, qgcPal.window.g, qgcPal.window.b, 0.7)
+
+            GridLayout {
+                        columnSpacing:          ScreenTools.defaultFontPixelWidth  * 0.5
+                        rowSpacing:             ScreenTools.defaultFontPixelHeight * 0.3
+                        columns:                1
+
+                property real   _indicatorsHeight:      ScreenTools.defaultFontPixelHeight
+                //anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.horizontalCenter: parent.horizontalCenter
+                //anchors.rightMargin: 12
+
+                QGCLabel {
+                    text:                   "LAT: " + _latitude
+                    color:                  _indicatorsColor
+                    font.pointSize:         ScreenTools.mediumFontPointSize * 0.6
+                    Layout.fillWidth:       true
+                    Layout.minimumWidth:    indicatorValueWidth
+                    Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
+                }
+            }
+    }
+
     // UPPER RIGHT BOX !
     Rectangle {
         id: upperRightBox
@@ -362,6 +398,40 @@ Item {
                 text:                   _activeVehicle ? _activeVehicle.groundSpeed.value.toFixed(1) + ' ' + _activeVehicle.groundSpeed.units : "--/--"
                 color:                  _indicatorsColor
                 font.pointSize:         ScreenTools.mediumFontPointSize * 0.8
+                Layout.fillWidth:       true
+                Layout.minimumWidth:    indicatorValueWidth
+                Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
+            }
+        }
+    }
+
+    // RIGHT BOX!
+    Rectangle {
+        id: donwerRightBox
+        anchors.top: rightBox.bottom
+        anchors.right: attitudeIndicator.right
+        anchors.topMargin: ScreenTools.defaultFontPixelHeight * 0.1
+        anchors.leftMargin: ScreenTools.defaultFontPixelHeight * 0.4
+        width:  attitudeIndicator.width*0.5
+        height: attitudeIndicator.height * 0.3
+        radius:                 ScreenTools.defaultFontPixelHeight
+        color:                  Qt.rgba(qgcPal.window.r, qgcPal.window.g, qgcPal.window.b, 0.7)
+
+        GridLayout {
+                    columnSpacing:          ScreenTools.defaultFontPixelWidth  * 0.5
+                    rowSpacing:             ScreenTools.defaultFontPixelHeight * 0.3
+                    columns:                1
+
+            property real   _indicatorsHeight:      ScreenTools.defaultFontPixelHeight
+            //anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.horizontalCenter: parent.horizontalCenter
+            //anchors.rightMargin: 12
+
+            QGCLabel {
+                text:                   "LON: " + _longitude
+                color:                  _indicatorsColor
+                font.pointSize:         ScreenTools.mediumFontPointSize * 0.6
                 Layout.fillWidth:       true
                 Layout.minimumWidth:    indicatorValueWidth
                 Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
