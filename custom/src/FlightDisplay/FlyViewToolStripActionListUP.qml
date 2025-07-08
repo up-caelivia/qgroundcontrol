@@ -35,11 +35,11 @@ ToolStripActionList {
             visible: !_SAVenabled
         },
         PreFlightCheckListShowAction { onTriggered: displayPreFlightChecklist() },
-        GuidedActionTakeoff { visible: !_SAVenabled && (_guidedController.showTakeoff || !_guidedController.showLand)},
-        GuidedActionLand {  visible: !_SAVenabled && (_guidedController.showLand && !_guidedController.showTakeoff)},
-        GuidedActionRTL {  visible:!_SAVenabled && _guidedController.showRTL},
-        GuidedActionPause {  visible: !_SAVenabled && _guidedController.showPause},
-        GuidedActionActionList {  visible: !_SAVenabled},
+        GuidedActionTakeoff { visible: false && !_SAVenabled && (_guidedController.showTakeoff || !_guidedController.showLand)},
+        GuidedActionLand {  visible: false && !_SAVenabled && (_guidedController.showLand && !_guidedController.showTakeoff)},
+        GuidedActionRTL {  visible: !_SAVenabled && _guidedController.showRTL},
+        GuidedActionPause {  visible: false && !_SAVenabled && _guidedController.showPause},
+        GuidedActionActionList {  visible: false && !_SAVenabled},
         GuidedActionGripper {  visible: false},
         ToolStripAction {
             text: "SAV GoTo"
