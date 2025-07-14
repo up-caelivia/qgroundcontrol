@@ -124,7 +124,7 @@ public:
     virtual bool    showMissionAbsoluteAltitude     () const { return true; }
     virtual bool    showSimpleMissionStart          () const { return false; }
     virtual bool    disableVehicleConnection        () const { return false; }  ///< true: vehicle connection is disabled
-    virtual bool    checkFirmwareVersion            () const { return true; }
+    virtual bool    checkFirmwareVersion            () const { return false; }
     virtual bool    showMavlinkLogOptions           () const { return true; }
     virtual bool    allowJoystickSelection          () const { return true; }   ///< false: custom build has automatically enabled a specific joystick
     /// Desktop builds save the main application size and position on close (and restore it on open)
