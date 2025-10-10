@@ -629,6 +629,20 @@ void CustomPlugin::setSAVenabled(const bool& msg) {
     }
 }
 
+
+bool CustomPlugin::isAbluoMapPlanEnabled() {
+    return _isAbluoMapPlanEnabled;
+}
+
+void  CustomPlugin::setAbluoMapPlanEnabled(const bool& msg){
+    Vehicle* vehicle = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle();
+    if (!vehicle || !vehicle->parameterManager()) return;
+
+    _isAbluoMapPlanEnabled = msg;    
+    emit abluoMapPlanChanged();  
+}
+
+
 void CustomPlugin::onActiveVehicleChanged(Vehicle* vehicle)
 {
     qDebug() << "onActiveVehicleChanged";

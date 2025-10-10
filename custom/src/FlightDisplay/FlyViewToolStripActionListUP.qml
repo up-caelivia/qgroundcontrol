@@ -59,6 +59,13 @@ ToolStripActionList {
                 CustomPlugin.isSAVenabled = !CustomPlugin.isSAVenabled
                 CustomPlugin.updateFence(_planMasterController.geoFenceController, !_SAVenabled);
             }
+        },
+        ToolStripAction {
+            text: "3D Surface"
+            iconSource:  "/res/Enable_white.svg"
+            enabled:    true
+            onTriggered:  { CustomPlugin.isAbluoMapPlanEnabled = !CustomPlugin.isAbluoMapPlanEnabled }  
         }
+
     ]
 }

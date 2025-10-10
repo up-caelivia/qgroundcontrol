@@ -54,6 +54,7 @@ class CustomPlugin : public QGCCorePlugin
     Q_PROPERTY(bool isSAVenabled READ isSAVenabled WRITE setSAVenabled NOTIFY savEnableChanged)
     Q_PROPERTY(bool isSAVexist READ isSAVexist NOTIFY isSAVexistChanged)
     Q_PROPERTY(int rc6Value READ rc6Value NOTIFY rc6ValueChanged)
+    Q_PROPERTY(bool isAbluoMapPlanEnabled READ isAbluoMapPlanEnabled WRITE setAbluoMapPlanEnabled NOTIFY abluoMapPlanChanged)
     
 public:
     CustomPlugin(QGCApplication* app, QGCToolbox *toolbox);
@@ -82,10 +83,13 @@ public:
     Q_INVOKABLE bool isSAVenabled();
     Q_INVOKABLE bool isSAVexist();
 
+    Q_INVOKABLE bool isAbluoMapPlanEnabled();
+
     QString speedMessage() const { return _speedMessage; }
     void setSpeedMessage(const QString& msg);
     void setSAVenabled(const bool& msg);
     int rc6Value() const { return _rc6Value; }
+    void setAbluoMapPlanEnabled(const bool& msg);
 
 signals:
     void speedMessageChanged();
@@ -93,6 +97,7 @@ signals:
     void savEnableChanged();
     void isSAVexistChanged();
     void rc6ValueChanged();
+    void abluoMapPlanChanged();
 
 private slots:
     void _updateSavParamCoordinates();
@@ -114,4 +119,5 @@ private:
     bool _isSAVenabled = false;
     bool _isSAVexist = false;
     int _rc6Value = 0;
+    bool _isAbluoMapPlanEnabled = false;
 };
