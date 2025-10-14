@@ -111,24 +111,6 @@ Item {
         visible:            CustomPlugin.isSAVenabled && QGroundControl.videoManager.fullScreen
     }
 
-    Loader {
-        id: overlaySurface2D
-        anchors.fill: widgetLayer
-        z: _fullItemZorder + 2
-        active: CustomPlugin.isAbluoMapPlanEnabled
-        source: "qrc:/Custom/Widgets/Custom/Widgets/Abluo3DSurfaceViewUP.qml"
-        onLoaded: {
-            if (item) {
-                //item.parentToolInsets = widgetLayer.totalToolInsets
-                //item.mapControl       = _mapControl   // ok: la property ora esiste
-                console.log("3D Surface View loaded");
-                // Se vuoi usare i tuoi punti reali:
-                // item.polygonCoords = CustomPlugin.savParamCoordinates
-            }
-            console.log("3D Surface View done");
-        }
-    }
-
     Item {
         id: thirdsGrid
         anchors.fill: parent

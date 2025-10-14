@@ -55,6 +55,8 @@ class CustomPlugin : public QGCCorePlugin
     Q_PROPERTY(bool isSAVexist READ isSAVexist NOTIFY isSAVexistChanged)
     Q_PROPERTY(int rc6Value READ rc6Value NOTIFY rc6ValueChanged)
     Q_PROPERTY(bool isAbluoMapPlanEnabled READ isAbluoMapPlanEnabled WRITE setAbluoMapPlanEnabled NOTIFY abluoMapPlanChanged)
+    Q_PROPERTY(QGeoCoordinate startCoordinate READ startCoordinate NOTIFY startCoordinateChanged)
+    Q_PROPERTY(QGeoCoordinate stopCoordinate  READ stopCoordinate  NOTIFY stopCoordinateChanged)
     
 public:
     CustomPlugin(QGCApplication* app, QGCToolbox *toolbox);

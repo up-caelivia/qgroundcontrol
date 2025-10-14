@@ -63,7 +63,7 @@ ToolStripActionList {
         ToolStripAction {
             text: "3D Surface"
             iconSource:  "/res/Enable_white.svg"
-            enabled:    true
+            enabled:    true //Constants.isABLUOApp
             onTriggered:  { CustomPlugin.isAbluoMapPlanEnabled = !CustomPlugin.isAbluoMapPlanEnabled }  
         }
 
