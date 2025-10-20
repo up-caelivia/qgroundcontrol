@@ -442,8 +442,8 @@ Item {
             confirmDialog.title = rtlTitle
             confirmDialog.message = rtlMessage
             if (_activeVehicle.supportsSmartRTL) {
-                confirmDialog.optionText = qsTr("Smart RTL")
-                confirmDialog.optionChecked = false
+                //confirmDialog.optionText = qsTr("Smart RTL")
+                //confirmDialog.optionChecked = false
             }
             confirmDialog.hideTrigger = Qt.binding(function() { return !showRTL })
             break;

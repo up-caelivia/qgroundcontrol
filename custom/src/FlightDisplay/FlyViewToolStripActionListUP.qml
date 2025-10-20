@@ -20,6 +20,7 @@ import Custom.Widgets               1.0
 ToolStripActionList {
     id: _root
     property bool _SAVenabled: CustomPlugin.isSAVenabled
+    property bool _isABLUO: Constants.isABLUOApp
     property bool _SAVexist: CustomPlugin.isSAVexist
     property var    _activeVehicle:     QGroundControl.multiVehicleManager.activeVehicle
     property var    _vehicleInAir:      _activeVehicle ? _activeVehicle.flying || _activeVehicle.landing : false
@@ -38,8 +39,8 @@ ToolStripActionList {
         GuidedActionTakeoff { visible: false && !_SAVenabled && (_guidedController.showTakeoff || !_guidedController.showLand)},
         GuidedActionLand {  visible: false && !_SAVenabled && (_guidedController.showLand && !_guidedController.showTakeoff)},
         GuidedActionRTL {  visible: !_SAVenabled && _guidedController.showRTL},
-        GuidedActionPause {  visible: false && !_SAVenabled && _guidedController.showPause},
-        GuidedActionActionList {  visible: false && !_SAVenabled},
+        GuidedActionPause {  visible: _isABLUO && !_SAVenabled && _guidedController.showPause},
+        GuidedActionActionList {  visible: _isABLUO && !_SAVenabled},
         GuidedActionGripper {  visible: false},
         ToolStripAction {
             text: "SAV GoTo"
@@ -61,9 +62,9 @@ ToolStripActionList {
             }
         },
         ToolStripAction {
-            text: "3D Surface"
-            iconSource:  "/res/Enable_white.svg"
-            enabled:    true //Constants.isABLUOApp
+            text: "ABLUO"
+            iconSource:  "/res/QGCLogoWhite"
+            visible:    _isABLUO
             onTriggered:  { CustomPlugin.isAbluoMapPlanEnabled = !CustomPlugin.isAbluoMapPlanEnabled }  
         }
 

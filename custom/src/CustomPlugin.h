@@ -60,7 +60,7 @@ class CustomPlugin : public QGCCorePlugin
     
 public:
     CustomPlugin(QGCApplication* app, QGCToolbox *toolbox);
-    ~CustomPlugin() {}
+    ~CustomPlugin() override;
 
     // Overrides from QGCCorePlugin
     QGCOptions*             options                         (void) final {return _options;}
@@ -93,6 +93,20 @@ public:
     int rc6Value() const { return _rc6Value; }
     void setAbluoMapPlanEnabled(const bool& msg);
 
+    Q_INVOKABLE void setStart();   // prende posizione corrente e la salva come S
+    Q_INVOKABLE void setStop();    // prende posizione corrente e la salva come T
+    // Genera la serpentina in GPS tra S e T (quote usate come AGL/relativa)
+    Q_INVOKABLE QVariantList buildAbluoPath(const QGeoCoordinate& s,
+                                            const QGeoCoordinate& t,
+                                            double pitch_m,
+                                            bool sideLeft);
+
+    // Upload missione (lista di punti GPS). Puoi tenere lo stub che avevamo.
+    Q_INVOKABLE void uploadAbluoMission(const QVariantList& points);
+
+    QGeoCoordinate startCoordinate() const { return _startCoordinate; }
+    QGeoCoordinate stopCoordinate()  const { return _stopCoordinate;  }
+
 signals:
     void speedMessageChanged();
     void savParamCoordinatesChanged();
@@ -100,6 +114,8 @@ signals:
     void isSAVexistChanged();
     void rc6ValueChanged();
     void abluoMapPlanChanged();
+    void startCoordinateChanged();
+    void stopCoordinateChanged();
 
 private slots:
     void _updateSavParamCoordinates();
@@ -122,4 +138,6 @@ private:
     bool _isSAVexist = false;
     int _rc6Value = 0;
     bool _isAbluoMapPlanEnabled = false;
+    QGeoCoordinate _startCoordinate;
+    QGeoCoordinate _stopCoordinate;
 };

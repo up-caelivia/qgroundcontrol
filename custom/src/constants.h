@@ -8,7 +8,9 @@
 #include <QVector>
 #include <QTimer>
 #include <QDateTime>
-
+#include <QSettings>         
+#include <QGeoCoordinate>    
+#include <limits>           
 
 class Constants : public QObject {
 
@@ -47,6 +49,12 @@ class Constants : public QObject {
 
     Q_PROPERTY(bool showSavButtons READ showSavButtons WRITE setShowSavButtons NOTIFY showSavButtonsChanged)
 
+    // ====== PERSISTENZA PIANO ABLUO ======
+    Q_PROPERTY(double        savedPitch READ savedPitch WRITE setSavedPitch NOTIFY savedPitchChanged)
+    Q_PROPERTY(QGeoCoordinate savedStart READ savedStart WRITE setSavedStart NOTIFY savedStartChanged)
+    Q_PROPERTY(QGeoCoordinate savedStop  READ savedStop  WRITE setSavedStop  NOTIFY savedStopChanged)
+    Q_PROPERTY(bool          savedSideLeft READ savedSideLeft WRITE setSavedSideLeft NOTIFY savedSideLeftChanged) // <<< AGGIUNTO
+
 public:
     explicit Constants(QObject* parent = nullptr) : QObject(parent) {
 
@@ -54,6 +62,8 @@ public:
         connect(m_timer, &QTimer::timeout, this, &Constants::checkNtripStatus);
         m_timer->start(2000); // Check every 2 seconds
 
+        // carica i valori persistenti
+        loadAbluoPlan();
     }
 
     // Destructor
@@ -213,6 +223,56 @@ public:
     QVector<QString> settingToShow() const { return {"Motors", "Safety"}; }
     int compassNumber() const { return 3; }
 
+    // ====== getter/setter persistenza ======
+    double savedPitch() const { return m_savedPitch; }
+    QGeoCoordinate savedStart() const { return m_savedStart; }
+    QGeoCoordinate savedStop() const { return m_savedStop; }
+
+    bool savedSideLeft() const { return m_savedSideLeft; }
+    void setSavedSideLeft(bool v) {
+        if (m_savedSideLeft != v) {
+            m_savedSideLeft = v;
+            saveAbluoPlan();
+            emit savedSideLeftChanged();
+        }
+    }
+
+    void setSavedPitch(double v) {
+        if (!qFuzzyCompare(1+v, 1+m_savedPitch)) {
+            m_savedPitch = v;
+            saveAbluoPlan();
+            emit savedPitchChanged();
+        }
+    }
+    void setSavedStart(const QGeoCoordinate& c) {
+        if (c != m_savedStart) {
+            m_savedStart = c;
+            saveAbluoPlan();
+            emit savedStartChanged();
+        }
+    }
+    void setSavedStop(const QGeoCoordinate& c) {
+        if (c != m_savedStop) {
+            m_savedStop = c;
+            saveAbluoPlan();
+            emit savedStopChanged();
+        }
+    }
+
+    Q_INVOKABLE void clearAbluoPlan() {
+        m_savedPitch = 0.0;
+        m_savedStart = QGeoCoordinate();
+        m_savedStop  = QGeoCoordinate();
+        saveAbluoPlan();
+        emit savedPitchChanged();
+        emit savedStartChanged();
+        emit savedStopChanged();
+    }
+
+    Q_INVOKABLE bool hasSavedStart() const { return m_savedStart.isValid(); }
+    Q_INVOKABLE bool hasSavedStop() const  { return m_savedStop.isValid();  }
+    
+
     static QObject* constants_singleton_provider(QQmlEngine* engine, QJSEngine* scriptEngine);
     static Constants* getInstance();
 
@@ -232,6 +292,12 @@ signals:
     void developerChanged();
     void showSavButtonsChanged();
 
+    // persistenza
+    void savedPitchChanged();
+    void savedStartChanged();
+    void savedStopChanged();
+    void savedSideLeftChanged();
+
 private slots:
 
     void checkNtripStatus() {
@@ -246,7 +312,6 @@ private slots:
         // Reset the message count for the next 2-second interval
         m_messageCount = 0;
     }
-
 
 private:
     bool m_developer = false;
@@ -273,8 +338,65 @@ private:
 #endif
     bool _showSavButtons = false;
 
+    // ====== storage plan ======
+    double        m_savedPitch = 0.0;
+    QGeoCoordinate m_savedStart;
+    QGeoCoordinate m_savedStop;
+    bool          m_savedSideLeft = true;
+
+    inline QString _key(const char* name) const {
+        return QStringLiteral("abl/planning/%1").arg(QString::fromUtf8(name));
+    }
+
+    void loadAbluoPlan() {
+        QSettings s;
+        m_savedPitch = s.value(_key("pitch"), 0.0).toDouble();
+
+        // Start
+        const double sLat = s.value(_key("startLat"), std::numeric_limits<double>::quiet_NaN()).toDouble();
+        const double sLon = s.value(_key("startLon"), std::numeric_limits<double>::quiet_NaN()).toDouble();
+        const double sAlt = s.value(_key("startAlt"), std::numeric_limits<double>::quiet_NaN()).toDouble();
+        if (qIsFinite(sLat) && qIsFinite(sLon)) {
+            m_savedStart = QGeoCoordinate(sLat, sLon, qIsFinite(sAlt) ? sAlt : 0.0);
+        } else {
+            m_savedStart = QGeoCoordinate();
+        }
+
+        // Stop
+        const double tLat = s.value(_key("stopLat"), std::numeric_limits<double>::quiet_NaN()).toDouble();
+        const double tLon = s.value(_key("stopLon"), std::numeric_limits<double>::quiet_NaN()).toDouble();
+        const double tAlt = s.value(_key("stopAlt"), std::numeric_limits<double>::quiet_NaN()).toDouble();
+        if (qIsFinite(tLat) && qIsFinite(tLon)) {
+            m_savedStop = QGeoCoordinate(tLat, tLon, qIsFinite(tAlt) ? tAlt : 0.0);
+        } else {
+            m_savedStop = QGeoCoordinate();
+        }
+        
+        m_savedSideLeft = s.value(_key("sideLeft"), true).toBool();
+    }
+
+    void saveAbluoPlan() const {
+        QSettings s;
+        s.setValue(_key("pitch"), m_savedPitch);
+
+        if (m_savedStart.isValid()) {
+            s.setValue(_key("startLat"), m_savedStart.latitude());
+            s.setValue(_key("startLon"), m_savedStart.longitude());
+            s.setValue(_key("startAlt"), m_savedStart.altitude());
+        } else {
+            s.remove(_key("startLat")); s.remove(_key("startLon")); s.remove(_key("startAlt"));
+        }
+
+        if (m_savedStop.isValid()) {
+            s.setValue(_key("stopLat"), m_savedStop.latitude());
+            s.setValue(_key("stopLon"), m_savedStop.longitude());
+            s.setValue(_key("stopAlt"), m_savedStop.altitude());
+        } else {
+            s.remove(_key("stopLat")); s.remove(_key("stopLon")); s.remove(_key("stopAlt"));
+        }
+
+         s.setValue(_key("sideLeft"), m_savedSideLeft);
+    }
 };
-
-
 
 #endif // CONSTANTS_H
