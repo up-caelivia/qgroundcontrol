@@ -25,18 +25,25 @@
 #include "constants.h"
 #include "CustomAnnouncer.h"
 #include "CustomToolbox.h"
-// #include "JoystickManager.h"
-// #include "HorizontalFactValueGrid.h"
-// #include "InstrumentValueData.h"
 #include <list>
 #include "ParameterManager.h"
 #include "GeoFenceController.h"
+#include "Fact.h"
+#include "FactSystem.h"
+
+#include <MissionManager.h>
+#include <MissionItem.h>
+#include <QGeoCoordinate>
+#include <QtMath>
+#include <limits>
 
 #include <QVariant>
 #include <QGeoCoordinate>
 #include <QVariantMap>
 #include <QtGlobal>
 #include <cmath>
+#include <limits>
+#include <QTimer>
 
 void CustomPlugin::registerQmlTypes()
 {
@@ -46,10 +53,8 @@ void CustomPlugin::registerQmlTypes()
         });
 }
 
-
 CustomFlyViewOptions::CustomFlyViewOptions(CustomOptions* options, QObject* parent)
     : QGCFlyViewOptions(options, parent) {}
-
 
 QGCFlyViewOptions* CustomOptions::flyViewOptions(void)
 {
@@ -59,16 +64,15 @@ QGCFlyViewOptions* CustomOptions::flyViewOptions(void)
     return _flyViewOptions;
 }
 
-
 CustomPlugin::CustomPlugin(QGCApplication *app, QGCToolbox* toolbox)
     : QGCCorePlugin(app, toolbox)
 {
     _options = new CustomOptions(this, this);
     QCoreApplication::setApplicationName(QStringLiteral(QGC_APPLICATION_NAME));  // set the folder on document to save the options
 
-    #ifdef Q_OS_WIN
-        QApplication::setWindowIcon(QIcon(":/res/resources/icons/qgroundcontrol.ico"));
-    #endif
+#ifdef Q_OS_WIN
+    QApplication::setWindowIcon(QIcon(":/res/resources/icons/qgroundcontrol.ico"));
+#endif
 
     Q_ASSERT(QThread::currentThread() == qApp->thread());
 
@@ -79,6 +83,9 @@ CustomPlugin::CustomPlugin(QGCApplication *app, QGCToolbox* toolbox)
     _savParamTimer = new QTimer(this);
     connect(_savParamTimer, &QTimer::timeout, this, &CustomPlugin::_updateSavParamCoordinates);
     _savParamTimer->start(1000);
+
+    // Inizializza cache velocità
+    _wpnavSpeedMps = std::numeric_limits<double>::quiet_NaN();
 }
 
 CustomPlugin::~CustomPlugin()
@@ -89,6 +96,7 @@ CustomPlugin::~CustomPlugin()
         _savParamTimer->deleteLater();
         _savParamTimer = nullptr;
     }
+    _detachWpnavWatcher();
 }
 
 void CustomPlugin::setToolbox(QGCToolbox* toolbox)
@@ -140,20 +148,13 @@ void CustomPlugin::setSpeedMessage(const QString& msg)
     }
 }
 
-
-
 bool CustomPlugin::overrideSettingsGroupVisibility(QString name)
 {
-    // We have set up our own specific brand imaging. Hide the brand image settings such that the end user
-    // can't change it.
-
     Constants constant;
 
-    if(constant.developer())
+    if (constant.developer())
         return true;
 
-
-    //qDebug() << "Setting name: " << name;
 #ifndef ABLUO_APP
     if (name == BrandImageSettings::name || name == AutoConnectSettings::name || name == ADSBVehicleManagerSettings::name || name == RTKSettings::name || name == PlanViewSettings::name) {
 #else
@@ -162,53 +163,16 @@ bool CustomPlugin::overrideSettingsGroupVisibility(QString name)
         return false;
     }
 
-
     return true;
 }
 
-
-// // This modifies QGC colors palette to match possible custom corporate branding
 void CustomPlugin::paletteOverride(QString colorName, QGCPalette::PaletteColorInfo_t& colorInfo)
 {
-
-
-  //   DECLARE_QGC_COLOR(window,               "#ffffff", "#ffffff", "#222222", "#222222")
-  //   DECLARE_QGC_COLOR(windowShadeLight,     "#909090", "#828282", "#707070", "#626262")
-  //   DECLARE_QGC_COLOR(windowShade,          "#d9d9d9", "#d9d9d9", "#333333", "#333333")
-  //   DECLARE_QGC_COLOR(windowShadeDark,      "#bdbdbd", "#bdbdbd", "#282828", "#282828")
-  //   DECLARE_QGC_COLOR(text,                 "#9d9d9d", "#000000", "#707070", "#ffffff")
-  //   DECLARE_QGC_COLOR(warningText,          "#cc0808", "#cc0808", "#f85761", "#f85761")
-  //   DECLARE_QGC_COLOR(button,               "#ffffff", "#ffffff", "#707070", "#626270")
-  //   DECLARE_QGC_COLOR(buttonText,           "#9d9d9d", "#000000", "#A6A6A6", "#ffffff")
-  //   DECLARE_QGC_COLOR(primaryButtonText,    "#2c2c2c", "#000000", "#2c2c2c", "#000000")
-  //   DECLARE_QGC_COLOR(textField,            "#ffffff", "#ffffff", "#707070", "#ffffff")
-  //   DECLARE_QGC_COLOR(textFieldText,        "#808080", "#000000", "#000000", "#000000")
-  //   DECLARE_QGC_COLOR(mapButton,            "#585858", "#000000", "#585858", "#000000")
-
-
-  //   DECLARE_QGC_COLOR(colorRed,             "#ed3939", "#ed3939", "#f32836", "#f32836")
-  //   DECLARE_QGC_COLOR(colorGrey,            "#808080", "#808080", "#bfbfbf", "#bfbfbf")
-  //   DECLARE_QGC_COLOR(colorBlue,            "#1a72ff", "#1a72ff", "#536dff", "#536dff")
-
-  //   DECLARE_QGC_COLOR(alertText,            "#000000", "#000000", "#000000", "#000000")
-  //   DECLARE_QGC_COLOR(missionItemEditor,    "#585858", "#dbfef8", "#585858", "#585d83")
-  //   DECLARE_QGC_COLOR(toolStripHoverColor,  "#585858", "#9D9D9D", "#585858", "#585d83")
-  //   DECLARE_QGC_COLOR(statusFailedText,     "#9d9d9d", "#000000", "#707070", "#ffffff")
-  //   DECLARE_QGC_COLOR(statusPassedText,     "#9d9d9d", "#000000", "#707070", "#ffffff")
-  //   DECLARE_QGC_COLOR(statusPendingText,    "#9d9d9d", "#000000", "#707070", "#ffffff")
-  //   DECLARE_QGC_COLOR(toolbarBackground,    "#ffffff", "#ffffff", "#222222", "#222222")
-
 #ifdef ABLUO_APP
     QColor color1 = QColor("#004F9F");
     QColor color2 = QColor("#76BEEA");
     QColor color3 = QColor("#76BEEA");
     QColor color4 = QColor("#004F9F");
-    if (colorName == QStringLiteral("buttonText")) {
-        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupEnabled]   = QColor("#2d2d2d");
-        colorInfo[QGCPalette::Dark][QGCPalette::ColorGroupDisabled]  = QColor("#7d7d7d");
-        colorInfo[QGCPalette::Light][QGCPalette::ColorGroupEnabled]  = QColor("#A6A6A6");
-        colorInfo[QGCPalette::Light][QGCPalette::ColorGroupDisabled] = QColor("#ffffff");
-    } else
 #else
     QColor color1 = QColor("#E73444");
     QColor color2 = QColor("#73969D");
@@ -414,7 +378,6 @@ QVariantList& CustomPlugin::settingsPages()
             QUrl::fromUserInput("qrc:/res/gear-white.svg")
         );
 
-        // Insert About page
         _customSettingsList.append(QVariant::fromValue(_aboutSettings));
     } 
     
@@ -674,6 +637,9 @@ void CustomPlugin::onActiveVehicleChanged(Vehicle* vehicle)
             disconnect(_vehicleConnection);
             _vehicleListenerConnected = false;
         }
+        _detachWpnavWatcher();  // reset watcher WPNAV
+        _wpnavSpeedMps = std::numeric_limits<double>::quiet_NaN();
+        emit wpnavSpeedMpsChanged();
         return;
     }
 
@@ -694,6 +660,9 @@ void CustomPlugin::onActiveVehicleChanged(Vehicle* vehicle)
             }
         });
     }
+
+    // collega/ricollega watcher WPNAV_SPEED
+    _attachWpnavWatcher(vehicle);
 }
 
 void CustomPlugin::handleMavlinkMessage(const mavlink_message_t& message)
@@ -799,6 +768,7 @@ void CustomPlugin::setStop()
     }
 }
 
+[[maybe_unused]]
 static QGeoCoordinate interpAlong(const QGeoCoordinate& a,
                                   const QGeoCoordinate& b,
                                   double tt)
@@ -811,120 +781,125 @@ static QGeoCoordinate interpAlong(const QGeoCoordinate& a,
 
 QVariantList CustomPlugin::buildAbluoPath(const QGeoCoordinate& s,
                                           const QGeoCoordinate& t,
-                                          double pitch_m,
-                                          bool sideLeft)
+                                          double pitch_m)
 {
     QVariantList out;
-    if (!s.isValid() || !t.isValid()) {
-        qWarning() << "[Abluo] buildAbluoPath: invalid S/T";
+    if (!s.isValid() || !t.isValid()) return out;
+
+    auto pushIfDiff = [](QVariantList& lst, const QGeoCoordinate& c) {
+        if (lst.isEmpty()) { lst << QVariant::fromValue(c); return; }
+        const QGeoCoordinate last = lst.last().value<QGeoCoordinate>();
+        // differenza minima: ~1 cm in planimetria o 1 cm in quota
+        if ( (!last.isValid() || !c.isValid()) ||
+             last.distanceTo(c) >= 0.01 ||
+             std::abs(last.altitude() - c.altitude()) >= 0.01 ) {
+            lst << QVariant::fromValue(c);
+        }
+    };
+
+    const double z0  = std::isfinite(s.altitude()) ? s.altitude() : 0.0;
+    const double z1  = std::isfinite(t.altitude()) ? t.altitude() : 0.0;
+    const double dz  = std::max(0.001, pitch_m);
+    const double dir = (z1 >= z0) ? +1.0 : -1.0;
+
+    // --- 0) caso triviale: S e T stessa planimetria → solo verticale a step ---
+    if (std::abs(s.latitude()  - t.latitude())  < 1e-12 &&
+        std::abs(s.longitude() - t.longitude()) < 1e-12)
+    {
+        QGeoCoordinate cur = s; cur.setAltitude(z0);
+        pushIfDiff(out, cur);
+        while ( (dir > 0 && cur.altitude() < z1) || (dir < 0 && cur.altitude() > z1) ) {
+            const double rem  = std::abs(z1 - cur.altitude());
+            const double step = std::min(dz, rem);
+            cur.setAltitude(cur.altitude() + dir*step);
+            pushIfDiff(out, cur);
+        }
+        // assesta esattamente su T (identica XY e quota z1)
+        QGeoCoordinate tt = t; tt.setAltitude(z1);
+        pushIfDiff(out, tt);
         return out;
     }
 
-    // Quote: interpretiamo s.altitude()/t.altitude() come AGL (relativa)
-    const double z0 = std::isfinite(s.altitude()) ? s.altitude() : 0.0;
-    const double z1 = std::isfinite(t.altitude()) ? t.altitude() : 0.0;
+    // --- 1) punto di partenza: S esatto ---
+    QGeoCoordinate cur = s; cur.setAltitude(z0);
+    pushIfDiff(out, cur);
 
-    // rettangolo lat/lon allineato ai meridiani: BL, BR, TL, TR
-    const double south = std::min(s.latitude(),  t.latitude());
-    const double north = std::max(s.latitude(),  t.latitude());
-    const double west  = std::min(s.longitude(), t.longitude());
-    const double east  = std::max(s.longitude(), t.longitude());
+    // siamo su “lato S” (XY = S). Questo flag indica su quale XY avviene il prossimo verticale.
+    bool atSideS = true;
 
-    const QGeoCoordinate bl(south, west);
-    const QGeoCoordinate br(south, east);
-    const QGeoCoordinate tl(north, west);
-    const QGeoCoordinate tr(north, east);
-
-    if (z0 == z1) {
-        // Nessuna estensione verticale: tratta come singolo segmento dal lato di S al lato di T alla stessa quota
-        const bool sLeft  = sideLeft;           // S lato scelto dall'utente
-        const QGeoCoordinate pS = sLeft ? interpAlong(bl, tl, 0.0) : interpAlong(br, tr, 0.0);
-        QGeoCoordinate pT = sLeft ? interpAlong(br, tr, 0.0) : interpAlong(bl, tl, 0.0);
-        QGeoCoordinate pS3 = pS; pS3.setAltitude(z0);
-        QGeoCoordinate pT3 = pT; pT3.setAltitude(z1);
-
-        out.append(QVariant::fromValue(pS3));
-        out.append(QVariant::fromValue(pT3));
-        return out;
+    // --- 2) primo orizzontale: S → XY(T) alla stessa quota z0 ---
+    {
+        QGeoCoordinate h = cur;
+        h.setLatitude (t.latitude());
+        h.setLongitude(t.longitude());
+        // quota invariata (z0)
+        pushIfDiff(out, h);
+        cur = h;
+        atSideS = false; // ora siamo sul lato T
     }
 
-    const double zBottom = std::min(z0, z1);
-    const double zTop    = std::max(z0, z1);
-    const double totalH  = std::max(0.001, zTop - zBottom);
-    const double stepH   = std::max(0.001, pitch_m);
+    // --- 3) loop: verticale a step verso z1 sul lato corrente, poi orizzontale all’altro lato ---
+    while ( (dir > 0 && cur.altitude() < z1) || (dir < 0 && cur.altitude() > z1) ) {
 
-    // Funzioni bordo sinistro/destro alla frazione verticale t=[0..1] (0=bottom; 1=top)
-    auto leftAt  = [&](double t) { return interpAlong(bl, tl, t); };
-    auto rightAt = [&](double t) { return interpAlong(br, tr, t); };
-
-    // Lato iniziale (sinistra=west / destra=east) secondo sideLeft
-    bool goToRight = sideLeft; // primo orizzontale: se S a sinistra vado a destra, viceversa
-
-    // Altitudine corrente
-    double y = z0;
-    // Direzione verticale: verso T
-    const double dir = (z1 > z0) ? +1.0 : -1.0;
-
-    auto frac = [&](double z) { return (z - zBottom) / totalH; };
-
-    // Punto iniziale S sulla parete (bordo scelto) alla quota z0
-    const double t0 = frac(z0);
-    QGeoCoordinate pL0 = leftAt(t0);  pL0.setAltitude(z0);
-    QGeoCoordinate pR0 = rightAt(t0); pR0.setAltitude(z0);
-    QGeoCoordinate pS  = sideLeft ? pL0 : pR0;
-
-    out.append(QVariant::fromValue(pS));
-
-    // Loop a gradini fino a T
-    while ((dir > 0 && y < z1) || (dir < 0 && y > z1)) {
-        // orizzontale alla quota y
-        if (goToRight) {
-            out.append(QVariant::fromValue(pR0));
-        } else {
-            out.append(QVariant::fromValue(pL0));
+        // 3a) VERTICALE sul lato corrente: cambia solo quota
+        {
+            const double rem  = std::abs(z1 - cur.altitude());
+            const double step = std::min(dz, rem);
+            QGeoCoordinate v = cur;
+            v.setAltitude(cur.altitude() + dir*step);
+            pushIfDiff(out, v);
+            cur = v;
         }
 
-        // step verticale verso T (ultimo step accorciato)
-        const double remaining = std::abs(z1 - y);
-        const double step = std::min(stepH, remaining);
-        y += dir * step;
+        // Se abbiamo raggiunto z1, esci: aggiusteremo XY su T sotto.
+        if (std::abs(cur.altitude() - z1) < 1e-9) break;
 
-        // punto alla nuova quota
-        const double tt = frac(y);
-        QGeoCoordinate pL = leftAt(tt);  pL.setAltitude(y);
-        QGeoCoordinate pR = rightAt(tt); pR.setAltitude(y);
-
-        // verticale sul bordo corrente
-        if (goToRight) {
-            out.append(QVariant::fromValue(pR));
-        } else {
-            out.append(QVariant::fromValue(pL));
+        // 3b) ORIZZONTALE verso l’altro lato alla stessa quota
+        {
+            QGeoCoordinate h = cur;
+            if (atSideS) {
+                // eravamo lato S → vai a XY(T)
+                h.setLatitude (t.latitude());
+                h.setLongitude(t.longitude());
+            } else {
+                // eravamo lato T → vai a XY(S)
+                h.setLatitude (s.latitude());
+                h.setLongitude(s.longitude());
+            }
+            // quota invariata
+            pushIfDiff(out, h);
+            cur = h;
+            atSideS = !atSideS;   // inverti lato
         }
-
-        // prepara prossima iterazione (aggiorna pL0/pR0 alla nuova quota)
-        pL0 = pL;
-        pR0 = pR;
-        goToRight = !goToRight;
     }
 
-    // Chiudi esattamente su T: T è sul lato opposto rispetto a S
-    const bool tIsRight = !sideLeft;
-    QGeoCoordinate pTop = tIsRight ? pR0 : pL0; // pL0/pR0 sono già all’ultima quota (z1)
-    // Se l’ultimo punto non è proprio T-side, aggiungi l’orizzontale finale
-    if ((tIsRight && (out.isEmpty() || out.last().value<QGeoCoordinate>() != pR0)) ||
-        (!tIsRight && (out.isEmpty() || out.last().value<QGeoCoordinate>() != pL0))) {
-        out.append(QVariant::fromValue(pTop));
+    // --- 4) chiusura: assicurati di terminare esattamente su T (XY(T), z1) ---
+    {
+        QGeoCoordinate last = cur;
+        // se l’ultima XY non è T, fai un ultimo orizzontale a quota z1
+        if (std::abs(last.latitude()  - t.latitude())  > 1e-12 ||
+            std::abs(last.longitude() - t.longitude()) > 1e-12)
+        {
+            QGeoCoordinate h = last;
+            h.setLatitude (t.latitude());
+            h.setLongitude(t.longitude());
+            // quota corrente già z1 (se non lo fosse, fissala)
+            h.setAltitude(z1);
+            pushIfDiff(out, h);
+            last = h;
+        }
+        // assesta esattamente quota z1 (di solito è già giusta)
+        if (std::abs(last.altitude() - z1) > 1e-9) {
+            QGeoCoordinate v = last; v.setAltitude(z1);
+            pushIfDiff(out, v);
+        }
     }
 
     return out;
 }
 
 
-#include <MissionManager.h>
-#include <MissionItem.h>
-#include <QGeoCoordinate>
-#include <QtMath>
-#include <limits>
+
 
 static bool coordFromVariant(const QVariant& v, QGeoCoordinate& out)
 {
@@ -968,7 +943,66 @@ void CustomPlugin::uploadAbluoMission(const QVariantList& points)
     }
     if (wps.size() < 2) { qWarning() << "[CustomPlugin] uploadAbluoMission: too few waypoints"; return; }
 
-    // 2) Costruisci MissionItem (frame RELATIVE ALT = AGL)
+    // --- Failsafe: primo segmento sempre orizzontale ----------------------------
+    // Scegli dinamicamente l'asse "orizzontale": quello con span più grande (in metri).
+    auto dist_m = [](double lat1, double lon1, double lat2, double lon2) {
+        QGeoCoordinate a(lat1, lon1), b(lat2, lon2);
+        return a.distanceTo(b);
+    };
+
+    double minLat =  std::numeric_limits<double>::infinity();
+    double maxLat = -std::numeric_limits<double>::infinity();
+    double minLon =  std::numeric_limits<double>::infinity();
+    double maxLon = -std::numeric_limits<double>::infinity();
+
+    for (const auto& c : wps) {
+        if (std::isfinite(c.latitude()))  { minLat = std::min(minLat, c.latitude());  maxLat = std::max(maxLat, c.latitude()); }
+        if (std::isfinite(c.longitude())) { minLon = std::min(minLon, c.longitude()); maxLon = std::max(maxLon, c.longitude()); }
+    }
+
+    // stima ampiezza in metri dei due assi alla lat media
+    double midLat = (std::isfinite(minLat) && std::isfinite(maxLat)) ? (0.5 * (minLat + maxLat)) : 0.0;
+    double spanLon_m = (std::isfinite(minLon) && std::isfinite(maxLon))
+        ? dist_m(midLat, minLon, midLat, maxLon) : 0.0;
+    double spanLat_m = (std::isfinite(minLat) && std::isfinite(maxLat))
+        ? dist_m(minLat, 0.0,  maxLat, 0.0)       : 0.0;
+
+    // scegli asse orizzontale: true → usa longitudine, false → usa latitudine
+    bool horizByLon = spanLon_m >= spanLat_m;
+
+    // se i primi due WP risultano sullo stesso lato lungo l’asse scelto, sposta WP1 sul lato opposto
+    if (wps.size() >= 2 && std::isfinite(minLon) && std::isfinite(maxLon) && std::isfinite(minLat) && std::isfinite(maxLat)) {
+        QGeoCoordinate& p0 = wps[0];
+        QGeoCoordinate& p1 = wps[1];
+
+        auto almostEqual = [](double a, double b) { return std::abs(a - b) < 1e-7; };
+
+        if (horizByLon) {
+            if (almostEqual(p0.longitude(), p1.longitude())) {
+                // manda p1 al lato opposto in LONGITUDINE, stessa lat/alt di p0
+                double dToMin = std::abs(p0.longitude() - minLon);
+                double dToMax = std::abs(p0.longitude() - maxLon);
+                double oppLon = (dToMin < dToMax) ? maxLon : minLon;
+                p1.setLatitude(p0.latitude());
+                p1.setLongitude(oppLon);
+                p1.setAltitude(p0.altitude());
+                qDebug() << "[CustomPlugin] forced horizontal (lon) first leg";
+            }
+        } else {
+            if (almostEqual(p0.latitude(), p1.latitude())) {
+                // manda p1 al lato opposto in LATITUDINE, stessa lon/alt di p0
+                double dToMin = std::abs(p0.latitude() - minLat);
+                double dToMax = std::abs(p0.latitude() - maxLat);
+                double oppLat = (dToMin < dToMax) ? maxLat : minLat;
+                p1.setLatitude(oppLat);
+                p1.setLongitude(p0.longitude());
+                p1.setAltitude(p0.altitude());
+                qDebug() << "[CustomPlugin] forced horizontal (lat) first leg";
+            }
+        }
+    }
+    // ----------------------------------------------------------------------------
+
     QList<MissionItem*> items; items.reserve(wps.size() + 1);
     for (int i=0;i<wps.size();++i) {
         const QGeoCoordinate& c = wps[i];
@@ -990,7 +1024,6 @@ void CustomPlugin::uploadAbluoMission(const QVariantList& points)
         items.push_back(mi);
     }
 
-    // --- APPEND RTL at the end ---
     {
         const int seq = items.size();
         MissionItem* rtl = new MissionItem(
@@ -1058,5 +1091,122 @@ void CustomPlugin::uploadAbluoMission(const QVariantList& points)
     }, Qt::QueuedConnection);
 
     mm->removeAll();
+}
 
+void CustomPlugin::clearAbluoMission()
+{
+    Vehicle* vehicle = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle();
+    if (!vehicle) {
+        qWarning() << "[CustomPlugin] clearAbluoMission: no active vehicle";
+        return;
+    }
+    MissionManager* mm = vehicle->missionManager();
+    if (!mm) {
+        qWarning() << "[CustomPlugin] clearAbluoMission: no MissionManager";
+        return;
+    }
+
+    if (mm->inProgress()) {
+        // Se c'è già un'operazione in corso, aspetta che finisca e poi riprova
+        qWarning() << "[CustomPlugin] clearAbluoMission: MissionManager busy, will retry";
+        QPointer<MissionManager> mmPtr(mm);
+        QObject::connect(mm, &MissionManager::inProgressChanged, qApp, [this, mmPtr]() {
+            if (!mmPtr || mmPtr->inProgress()) return;
+            QObject::disconnect(mmPtr, &MissionManager::inProgressChanged, nullptr, nullptr);
+            mmPtr->removeAll();
+        }, Qt::QueuedConnection);
+        return;
+    }
+
+    mm->removeAll();
+}
+
+
+// ======= NUOVO: gestione WPNAV_SPEED =======
+void CustomPlugin::_detachWpnavWatcher()
+{
+    if (_wpnavConnection) {
+        disconnect(_wpnavConnection);
+        _wpnavConnection = QMetaObject::Connection{};
+    }
+    _wpnavSpeedFact = nullptr;
+
+    if (_wpnavProbeTimer) {
+        _wpnavProbeTimer->stop();
+        _wpnavProbeTimer->deleteLater();
+        _wpnavProbeTimer = nullptr;
+    }
+}
+
+void CustomPlugin::_refreshWpnavFromFact()
+{
+    if (!_wpnavSpeedFact) return;
+    bool ok = false;
+    const double raw_cms = _wpnavSpeedFact->rawValue().toDouble(&ok); // ArduPilot: cm/s
+    const double mps = ok ? (raw_cms / 100.0) : std::numeric_limits<double>::quiet_NaN();
+    const bool bothNaN = (std::isnan(_wpnavSpeedMps) && std::isnan(mps));
+    if (!bothNaN && !qFuzzyCompare(_wpnavSpeedMps + 1.0, mps + 1.0)) {
+        _wpnavSpeedMps = mps;
+        emit wpnavSpeedMpsChanged();
+    }
+}
+
+void CustomPlugin::_startWpnavProbeTimer(ParameterManager* pm)
+{
+    if (_wpnavProbeTimer) return; // già attivo
+
+    _wpnavProbeTimer = new QTimer(this);
+    _wpnavProbeTimer->setInterval(500); // mezzo secondo
+    _wpnavProbeTimer->setSingleShot(false);
+
+    connect(_wpnavProbeTimer, &QTimer::timeout, this, [this, pm]() {
+        if (!pm) return;
+        const int comp = FactSystem::defaultComponentId;
+        if (pm->parameterExists(comp, QStringLiteral("WPNAV_SPEED"))) {
+            _wpnavSpeedFact = pm->getParameter(comp, QStringLiteral("WPNAV_SPEED"));
+            if (_wpnavSpeedFact) {
+                _refreshWpnavFromFact();
+                _wpnavConnection = connect(_wpnavSpeedFact, &Fact::rawValueChanged, this, [this]() {
+                    _refreshWpnavFromFact();
+                });
+                // trovato: stop & cleanup timer
+                if (_wpnavProbeTimer) {
+                    _wpnavProbeTimer->stop();
+                    _wpnavProbeTimer->deleteLater();
+                    _wpnavProbeTimer = nullptr;
+                }
+            }
+        }
+    });
+
+    _wpnavProbeTimer->start();
+}
+
+void CustomPlugin::_attachWpnavWatcher(Vehicle* v)
+{
+    _detachWpnavWatcher();
+
+    if (!v || !v->parameterManager()) {
+        _wpnavSpeedMps = std::numeric_limits<double>::quiet_NaN();
+        emit wpnavSpeedMpsChanged();
+        return;
+    }
+
+    ParameterManager* pm = v->parameterManager();
+    const int comp = FactSystem::defaultComponentId;
+
+    // Prova immediatamente
+    if (pm->parameterExists(comp, QStringLiteral("WPNAV_SPEED"))) {
+        _wpnavSpeedFact = pm->getParameter(comp, QStringLiteral("WPNAV_SPEED"));
+        if (_wpnavSpeedFact) {
+            _refreshWpnavFromFact();
+            _wpnavConnection = connect(_wpnavSpeedFact, &Fact::rawValueChanged, this, [this]() {
+                _refreshWpnavFromFact();
+            });
+            return;
+        }
+    }
+
+    // Se non c'è ancora, parte un probing periodico finché il parametro arriva
+    _startWpnavProbeTimer(pm);
 }

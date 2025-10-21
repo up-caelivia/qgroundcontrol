@@ -9,6 +9,8 @@ import QtQuick.Window 2.15
 import QtLocation 5.15
 import QtPositioning 5.15
 import Constants 1.0
+import QGroundControl.FactSystem 1.0
+import QGroundControl.Controllers 1.0
 
 ToolStrip {
     id: abluoToolStrip
@@ -32,7 +34,7 @@ ToolStrip {
         const lat = Number(c.latitude).toFixed(7)
         const lon = Number(c.longitude).toFixed(7)
         const agl = Number(c.altitude || 0).toFixed(2)
-        return `${lat}, ${lon}  AGL=${agl} m`
+        return `${lat}, ${lon}  alt=${agl} m`
     }
 
     Component.onCompleted: {
@@ -47,8 +49,6 @@ ToolStrip {
         leftPanel.sideLeft = (Constants.savedSideLeft !== undefined) ? !!Constants.savedSideLeft : true
         serpentine.build()
     }
-
-    // Mission state watcher – when in Auto, reduce drawing load
     Connections {
         target: QGroundControl.multiVehicleManager ? QGroundControl.multiVehicleManager.activeVehicle : null
         onFlightModeChanged: {
@@ -177,7 +177,7 @@ ToolStrip {
                 color: "white"
                 font.pixelSize: leftPanel.fontPx
                 x: leftPanel.imgLeft + leftPanel.imgW/2 - width/2
-                y: leftPanel.imgTop - 8 - height
+                y: leftPanel.imgTop - height * 1.2
                 z: 10
                 visible: bigImage.status === Image.Ready && leftPanel.width_m > 0
             }
@@ -188,7 +188,7 @@ ToolStrip {
                 text: leftPanel.dimValueHeightMeters
                 color: "white"
                 font.pixelSize: leftPanel.fontPx
-                x: leftPanel.imgLeft - 10 - height
+                x: leftPanel.imgLeft - height * 1.2
                 y: leftPanel.imgTop + leftPanel.imgH/2 - width/2
                 rotation: -90
                 transformOrigin: Item.Center
@@ -332,6 +332,7 @@ ToolStrip {
                     }
                     QGCButton {
                         text: "Set Stop"
+                        enabled: !abluoToolStrip.missionInProgress
                         Layout.fillWidth: true
                         onClicked: {
                             if (CustomPlugin && CustomPlugin.setStop) CustomPlugin.setStop()
@@ -387,14 +388,24 @@ ToolStrip {
                 Rectangle { height: 1; Layout.fillWidth: true; color: Qt.rgba(255,255,255,0.15) }
 
                 QGCLabel {
-                    text: "Total path length: " + (
-                           total_length_m >= 1000
-                           ? (total_length_m/1000).toFixed(2) + " km"
-                           : total_length_m.toFixed(2) + " m"
-                    )
+                    text: "Total path length: " + total_length_m.toFixed(2) + " m"
                     color: "white"
                     Layout.fillWidth: true
                 }
+
+                QGCLabel {
+                    text: {
+                        const L = total_length_m
+                        const s = CustomPlugin.wpnavSpeedMps
+                        const sp = isFinite(s) ? s.toFixed(1) + " m/s" : "--"
+                        if (!(L > 0) || !(s > 0)) return "Required time: -- @ " + sp
+                        const minutes = (L / s) / 60.0
+                        return "Required time: " + minutes.toFixed(1) + " min @ " + s.toFixed(1) + " m/s"
+                    }
+                    color: "white"
+                    Layout.fillWidth: true
+                }
+
 
                 QGCLabel {
                     text: "Start (S): " + fmtCoord(serpentine.s_coord) + "\nStop (T): " + fmtCoord(serpentine.t_coord)
@@ -405,56 +416,89 @@ ToolStrip {
 
                 Item { Layout.fillHeight: true }
 
-                QGCButton {
-                    id: uploadBtn
-                    text: "upload and start cleaning"
+                // --- row: Upload | Clear ---
+                RowLayout {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 3
+                    spacing: ScreenTools.defaultFontPixelWidth
 
-                    // Disabilita quando la missione è in corso, oppure se mancano dati minimi
-                    enabled: !abluoToolStrip.missionInProgress
-                            && serpentine.s_coord && serpentine.s_coord.isValid
-                            && serpentine.t_coord && serpentine.t_coord.isValid
-                            && abluoToolStrip.pitchValue > 0
+                    QGCButton {
+                        id: uploadBtn
+                        text: "Upload"
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 3
 
-                    // (opzionale) tooltip per feedback all’utente
-                    ToolTip.visible: hovered && !enabled
-                    ToolTip.text: abluoToolStrip.missionInProgress
-                                ? "Mission is running: upload disabled"
-                                : "Set Start/Stop and a positive Pitch to enable"
+                        enabled: !abluoToolStrip.missionInProgress
+                                && serpentine.s_coord && serpentine.s_coord.isValid
+                                && serpentine.t_coord && serpentine.t_coord.isValid
+                                && abluoToolStrip.pitchValue > 0
 
-                    onClicked: {
-                        if (!serpentine.s_coord || !serpentine.t_coord ||
-                            !serpentine.s_coord.isValid || !serpentine.t_coord.isValid) {
-                            if (CustomPlugin && CustomPlugin.sendLogMessage)
-                                CustomPlugin.sendLogMessage("Set Start and Stop before uploading the mission", "", "Warning")
-                            return
+                        ToolTip.visible: hovered && !enabled
+                        ToolTip.text: abluoToolStrip.missionInProgress
+                                    ? "Mission is running: upload disabled"
+                                    : "Set Start/Stop and a positive Pitch to enable"
+
+                        onClicked: {
+                            if (!serpentine.s_coord || !serpentine.t_coord ||
+                                !serpentine.s_coord.isValid || !serpentine.t_coord.isValid) {
+                                if (CustomPlugin && CustomPlugin.sendLogMessage)
+                                    CustomPlugin.sendLogMessage("Set Start and Stop before uploading the mission", "", "Warning")
+                                return
+                            }
+
+                            const pts = CustomPlugin.buildAbluoPath(
+                                serpentine.s_coord,
+                                serpentine.t_coord,
+                                abluoToolStrip.pitchValue
+                            )
+                            if (!pts || pts.length < 2) {
+                                if (CustomPlugin && CustomPlugin.sendLogMessage)
+                                    CustomPlugin.sendLogMessage("Empty path: check pitch and altitudes", "", "Warning")
+                                return
+                            }
+
+                            serpentine.path = pts
+
+                            if (CustomPlugin && CustomPlugin.uploadAbluoMission) {
+                                CustomPlugin.uploadAbluoMission(pts)
+                                if (CustomPlugin.sendLogMessage)
+                                    CustomPlugin.sendLogMessage("Mission uploaded: " + pts.length + " waypoints")
+                                CustomPlugin.isAbluoMapPlanEnabled = !CustomPlugin.isAbluoMapPlanEnabled
+                            }
                         }
+                    }
 
-                        const pts = CustomPlugin.buildAbluoPath(
-                            serpentine.s_coord,
-                            serpentine.t_coord,
-                            abluoToolStrip.pitchValue,
-                            leftPanel.sideLeft
-                        )
-                        if (!pts || pts.length < 2) {
-                            if (CustomPlugin && CustomPlugin.sendLogMessage)
-                                CustomPlugin.sendLogMessage("Empty path: check pitch and altitudes", "", "Warning")
-                            return
-                        }
+                    QGCButton {
+                        id: clearBtn
+                        text: "clear mission"
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 3
 
-                        serpentine.path = pts
+                        enabled: !abluoToolStrip.missionInProgress
+                        ToolTip.visible: hovered && !enabled
+                        ToolTip.text: "Mission is running: clear disabled"
 
-                        if (CustomPlugin && CustomPlugin.uploadAbluoMission) {
-                            CustomPlugin.uploadAbluoMission(pts)
-                            if (CustomPlugin.sendLogMessage)
-                                CustomPlugin.sendLogMessage("Mission uploaded: " + pts.length + " waypoints")
-                        } else if (CustomPlugin && CustomPlugin.sendLogMessage) {
-                            CustomPlugin.sendLogMessage("uploadAbluoMission not implemented in plugin", "", "Warning")
+                        onClicked: {
+                            // 1) clear local path
+                            serpentine.path = []
+                            serpentine.total_len_m = 0
+
+                            // 2) clear start/stop in UI and persistent vars
+                            serpentine.s_coord = QtPositioning.coordinate()
+                            serpentine.t_coord = QtPositioning.coordinate()
+                            Constants.savedStart = QtPositioning.coordinate()
+                            Constants.savedStop  = QtPositioning.coordinate()
+                            serpentine.build()
+
+                            // 3) ask plugin to clear mission on vehicle if available
+                            if (CustomPlugin && CustomPlugin.clearAbluoMission) {
+                                CustomPlugin.clearAbluoMission()
+                            }
+
+                            // 4) repaint serpentine canvas
+                            serpCanvas.schedulePaint()
                         }
                     }
                 }
-
             }
         }
     }
@@ -469,6 +513,29 @@ ToolStrip {
         property real height_m: 0
         property var  path: []
         property real total_len_m: 0
+
+        function _asCoord(p) {
+            if (!p) return null
+            if (p.isValid !== undefined && p.isValid) return p
+            if (p.latitude !== undefined && p.longitude !== undefined) {
+                return QtPositioning.coordinate(Number(p.latitude), Number(p.longitude), Number(p.altitude || 0))
+            }
+            return null
+        }
+
+        function _sumPathLen(list) {
+            let sum = 0
+            for (let i = 1; i < list.length; i++) {
+                const a = _asCoord(list[i-1])
+                const b = _asCoord(list[i])
+                if (a && b && a.isValid && b.isValid) sum += a.distanceTo(b)
+            }
+            return sum
+        }
+
+        onPathChanged: {
+            total_len_m = (Array.isArray(path) && path.length >= 2) ? _sumPathLen(path) : 0
+        }
 
         function _interp(c1, c2, tt) {
             const az = c1.azimuthTo(c2)
@@ -492,54 +559,91 @@ ToolStrip {
 
         function build() {
             if (!s_coord || !t_coord || !s_coord.isValid || !t_coord.isValid) { path = []; total_len_m = 0; return }
+
             _recalc_rect_metrics()
 
-            const z0 = s_coord.altitude || 0
-            const z1 = t_coord.altitude || z0
-            const dz = Math.max(0.001, pitch_m)
-            const totalH = Math.max(0.001, z1 - z0)
+            const z0 = Number(s_coord.altitude) || 0
+            const z1 = Number(t_coord.altitude) || 0
+            const dz = Math.max(0.001, Number(pitch_m) || 0.001)
+            const dir = (z1 >= z0) ? +1 : -1
 
             const south = Math.min(s_coord.latitude,  t_coord.latitude)
             const north = Math.max(s_coord.latitude,  t_coord.latitude)
             const west  = Math.min(s_coord.longitude, t_coord.longitude)
             const east  = Math.max(s_coord.longitude, t_coord.longitude)
-            const bl = QtPositioning.coordinate(south, west)
-            const br = QtPositioning.coordinate(south, east)
-            const tl = QtPositioning.coordinate(north, west)
-            const tr = QtPositioning.coordinate(north, east)
+
+            function metersBetween(lat1, lon1, lat2, lon2) {
+                return QtPositioning.coordinate(lat1, lon1).distanceTo(QtPositioning.coordinate(lat2, lon2))
+            }
+            const midLat = 0.5 * (south + north)
+            const spanLon_m = metersBetween(midLat, west, midLat, east)
+            const spanLat_m = metersBetween(south, 0, north, 0)
+            const horizByLon = spanLon_m >= spanLat_m
 
             let pts = []
+
+            // 1) Primo punto = S esatto alla quota z0
+            let p = QtPositioning.coordinate(s_coord.latitude, s_coord.longitude, z0)
+            pts.push(p)
+
+            // 2) Secondo punto = orizzontale alla stessa quota verso il lato opposto
+            let p2 = QtPositioning.coordinate(p.latitude, p.longitude, z0)
+            if (horizByLon) {
+                const dW = Math.abs(p.longitude - west)
+                const dE = Math.abs(p.longitude - east)
+                p2.longitude = (dW < dE) ? east : west
+            } else {
+                const dS = Math.abs(p.latitude - south)
+                const dN = Math.abs(p.latitude - north)
+                p2.latitude = (dS < dN) ? north : south
+            }
+            if (p2.distanceTo(pts[pts.length-1]) > 0.01) pts.push(p2) // evita duplicati
+
+            // 3) Verticale a gradini + orizzontale opposto a ogni quota
             let y = z0
-            let leftToRight = true
+            let cur = p2
+            while ((dir > 0 && y < z1) || (dir < 0 && y > z1)) {
+                const remaining = Math.abs(z1 - y)
+                const step = Math.min(dz, remaining)
+                y += dir * step
 
-            while (y < z1) {
-                const next = Math.min(z1, y + dz)
-                const t1 = (y    - z0) / totalH
-                const t2 = (next - z0) / totalH
+                // verticale
+                let v = QtPositioning.coordinate(cur.latitude, cur.longitude, y)
+                if (v.distanceTo(pts[pts.length-1]) > 0.01) pts.push(v)
 
-                const pL1 = _interp(bl, tl, t1); pL1.altitude = y
-                const pR1 = _interp(br, tr, t1); pR1.altitude = y
-                const pL2 = _interp(bl, tl, t2); pL2.altitude = next
-                const pR2 = _interp(br, tr, t2); pR2.altitude = next
-
-                if (leftToRight) { pts.push(pL1); pts.push(pR1) } else { pts.push(pR1); pts.push(pL1) }
-                if (leftToRight) { pts.push(pR2) } else { pts.push(pL2) }
-
-                leftToRight = !leftToRight
-                y = next
+                // orizzontale lato opposto
+                let h = QtPositioning.coordinate(v.latitude, v.longitude, y)
+                if (horizByLon) {
+                    const dW = Math.abs(v.longitude - west)
+                    const dE = Math.abs(v.longitude - east)
+                    h.longitude = (dW < dE) ? east : west
+                } else {
+                    const dS = Math.abs(v.latitude - south)
+                    const dN = Math.abs(v.latitude - north)
+                    h.latitude = (dS < dN) ? north : south
+                }
+                if (h.distanceTo(pts[pts.length-1]) > 0.01) pts.push(h)
+                cur = h
             }
 
-            const pRtop = _interp(br, tr, 1.0); pRtop.altitude = z1
-            const last = pts.length ? pts[pts.length-1] : null
-            if (!last || last.latitude !== pRtop.latitude || last.longitude !== pRtop.longitude || last.altitude !== pRtop.altitude) {
-                pts.push(pRtop)
+            // 4) Aggancio a T esatto
+            let last = pts[pts.length-1]
+            if (Math.abs(last.altitude - z1) > 0.01) {
+                let v = QtPositioning.coordinate(last.latitude, last.longitude, z1)
+                if (v.distanceTo(last) > 0.01) pts.push(v)
+                last = v
             }
+            const tExact = QtPositioning.coordinate(t_coord.latitude, t_coord.longitude, z1)
+            if (tExact.distanceTo(last) > 0.01) pts.push(tExact)
 
+            // 5) Lunghezza
             let sum = 0
             for (let i = 1; i < pts.length; i++) sum += pts[i-1].distanceTo(pts[i])
             total_len_m = sum
             path = pts
         }
+
+
 
         onS_coordChanged: build()
         onT_coordChanged: build()

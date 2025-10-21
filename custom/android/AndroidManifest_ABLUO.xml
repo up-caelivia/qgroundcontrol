@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.qgrouncontrol.up" android:installLocation="auto" android:versionCode="664300090" android:versionName="APP_VERSION_STR">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.qgroundcontrol.up" android:installLocation="auto" android:versionCode="664300090" android:versionName="APP_VERSION_STR">
 
     <!-- The following comment will be replaced upon deployment with default permissions based on the dependencies of the application.
          Remove the comment if you do not require these default permissions. -->
