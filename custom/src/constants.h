@@ -53,7 +53,9 @@ class Constants : public QObject {
     Q_PROPERTY(double        savedPitch READ savedPitch WRITE setSavedPitch NOTIFY savedPitchChanged)
     Q_PROPERTY(QGeoCoordinate savedStart READ savedStart WRITE setSavedStart NOTIFY savedStartChanged)
     Q_PROPERTY(QGeoCoordinate savedStop  READ savedStop  WRITE setSavedStop  NOTIFY savedStopChanged)
-    Q_PROPERTY(bool          savedSideLeft READ savedSideLeft WRITE setSavedSideLeft NOTIFY savedSideLeftChanged) // <<< AGGIUNTO
+    Q_PROPERTY(bool          savedSideLeft READ savedSideLeft WRITE setSavedSideLeft NOTIFY savedSideLeftChanged)
+    Q_PROPERTY(double        savedOrientation READ savedOrientation WRITE setSavedOrientation NOTIFY savedOrientationChanged)
+    
 
 public:
     explicit Constants(QObject* parent = nullptr) : QObject(parent) {
@@ -225,6 +227,7 @@ public:
 
     // ====== getter/setter persistenza ======
     double savedPitch() const { return m_savedPitch; }
+    int savedOrientation() const { return m_savedOrientation; }
     QGeoCoordinate savedStart() const { return m_savedStart; }
     QGeoCoordinate savedStop() const { return m_savedStop; }
 
@@ -244,6 +247,17 @@ public:
             emit savedPitchChanged();
         }
     }
+
+
+    void setSavedOrientation(double v) {
+        if (!qFuzzyCompare(1+v, 1+m_savedOrientation)) {
+            m_savedOrientation = v;
+            saveAbluoPlan();
+            emit savedOrientationChanged();
+        }
+    }
+    
+
     void setSavedStart(const QGeoCoordinate& c) {
         if (c != m_savedStart) {
             m_savedStart = c;
@@ -261,12 +275,14 @@ public:
 
     Q_INVOKABLE void clearAbluoPlan() {
         m_savedPitch = 0.0;
+        m_savedOrientation = 0;
         m_savedStart = QGeoCoordinate();
         m_savedStop  = QGeoCoordinate();
         saveAbluoPlan();
         emit savedPitchChanged();
         emit savedStartChanged();
         emit savedStopChanged();
+        emit savedOrientationChanged();
     }
 
     Q_INVOKABLE bool hasSavedStart() const { return m_savedStart.isValid(); }
@@ -294,6 +310,7 @@ signals:
 
     // persistenza
     void savedPitchChanged();
+    void savedOrientationChanged();
     void savedStartChanged();
     void savedStopChanged();
     void savedSideLeftChanged();
@@ -340,6 +357,7 @@ private:
 
     // ====== storage plan ======
     double        m_savedPitch = 0.0;
+    int          m_savedOrientation = 0;
     QGeoCoordinate m_savedStart;
     QGeoCoordinate m_savedStop;
     bool          m_savedSideLeft = true;
@@ -351,6 +369,7 @@ private:
     void loadAbluoPlan() {
         QSettings s;
         m_savedPitch = s.value(_key("pitch"), 0.0).toDouble();
+        m_savedOrientation = s.value(_key("orientationAbluo"), 0).toInt();
 
         // Start
         const double sLat = s.value(_key("startLat"), std::numeric_limits<double>::quiet_NaN()).toDouble();
@@ -378,6 +397,7 @@ private:
     void saveAbluoPlan() const {
         QSettings s;
         s.setValue(_key("pitch"), m_savedPitch);
+        s.setValue(_key("orientationAbluo"), m_savedOrientation);
 
         if (m_savedStart.isValid()) {
             s.setValue(_key("startLat"), m_savedStart.latitude());
