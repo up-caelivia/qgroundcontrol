@@ -7,43 +7,36 @@
    width="652"
    height="811"
    viewBox="0 0 652 811"
+   sodipodi:docname="facade.svg"
+   inkscape:version="1.3 (0e150ed6c4, 2023-07-21)"
+   inkscape:export-filename="facade.svg"
+   inkscape:export-xdpi="672"
+   inkscape:export-ydpi="672"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.4517117"
+     inkscape:cx="101.25978"
+     inkscape:cy="218.70734"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1" />
   <defs
      id="defs1">
-    <marker
-       style="overflow:visible"
-       id="marker3"
-       refX="0"
-       refY="0"
-       orient="auto-start-reverse"
-       markerWidth="1"
-       markerHeight="1"
-       viewBox="0 0 1 1"
-       preserveAspectRatio="xMidYMid">
-      <path
-         transform="scale(0.5)"
-         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
-         d="M 5.77,0 -2.88,5 V -5 Z"
-         id="path3" />
-    </marker>
-    <marker
-       style="overflow:visible"
-       id="Triangle"
-       refX="0"
-       refY="0"
-       orient="auto-start-reverse"
-       markerWidth="1"
-       markerHeight="1"
-       viewBox="0 0 1 1"
-       preserveAspectRatio="xMidYMid">
-      <path
-         transform="scale(0.5)"
-         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
-         d="M 5.77,0 -2.88,5 V -5 Z"
-         id="path135" />
-    </marker>
     <linearGradient
        x1="0"
        y1="0"
@@ -8944,38 +8937,6 @@
          d="m 3084.14,422.813 h -82.45 v 899.247 h 82.45 z"
          id="path1025" />
     </clipPath>
-    <marker
-       style="overflow:visible"
-       id="Triangle-5"
-       refX="0"
-       refY="0"
-       orient="auto-start-reverse"
-       markerWidth="1"
-       markerHeight="1"
-       viewBox="0 0 1 1"
-       preserveAspectRatio="xMidYMid">
-      <path
-         transform="scale(0.5)"
-         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
-         d="M 5.77,0 -2.88,5 V -5 Z"
-         id="path135-9" />
-    </marker>
-    <marker
-       style="overflow:visible"
-       id="marker3-9"
-       refX="0"
-       refY="0"
-       orient="auto-start-reverse"
-       markerWidth="1"
-       markerHeight="1"
-       viewBox="0 0 1 1"
-       preserveAspectRatio="xMidYMid">
-      <path
-         transform="scale(0.5)"
-         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
-         d="M 5.77,0 -2.88,5 V -5 Z"
-         id="path3-1" />
-    </marker>
   </defs>
   <g
      id="g1"
@@ -13506,11 +13467,27 @@
     </g>
   </g>
   <path
-     style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:4.90865;stroke-miterlimit:5;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#Triangle);marker-end:url(#marker3)"
+     style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:4.909;stroke-miterlimit:5;stroke-dasharray:none;stroke-opacity:1;marker-end:"
      d="M 16.664207,46.321026 V 789.9299"
      id="path1" />
   <path
-     style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:4.39668;stroke-miterlimit:5;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#Triangle-5);marker-end:url(#marker3-9)"
+     style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:4.397;stroke-miterlimit:5;stroke-dasharray:none;stroke-opacity:1"
      d="M 41.155329,14.943912 H 637.73827"
      id="path1-8" />
+  <path
+     style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:1;stroke-miterlimit:5;stroke-opacity:1;stroke-dasharray:none"
+     d="M 1.5498946,54.762941 31.600628,54.935152 16.618314,28.84526 Z"
+     id="path7" />
+  <path
+     style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:1;stroke-miterlimit:5;stroke-dasharray:none;stroke-opacity:1"
+     d="M 31.529716,781.17424 1.4789826,781.00203 16.461297,807.09192 Z"
+     id="path7-9" />
+  <path
+     style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:0.819071;stroke-miterlimit:5;stroke-dasharray:none;stroke-opacity:1"
+     d="M 630.53117,2.2364916 630.39497,27.72644 651.02982,15.017982 Z"
+     id="path7-1" />
+  <path
+     style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:0.819071;stroke-miterlimit:5;stroke-dasharray:none;stroke-opacity:1"
+     d="M 48.56719,27.820583 48.70339,2.330635 28.06854,15.039093 Z"
+     id="path7-1-0" />
 </svg>

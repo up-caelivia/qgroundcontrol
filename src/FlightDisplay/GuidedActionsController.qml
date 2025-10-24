@@ -532,6 +532,7 @@ Item {
         var rgVehicle;
         switch (actionCode) {
         case actionRTL:
+            CustomPlugin.cacheResumeIndex(_currentMissionIndex-1)
             _activeVehicle.guidedModeRTL(optionChecked)
             break
         case actionLand:
@@ -546,6 +547,9 @@ Item {
             break
         case actionStartMission:
         case actionContinueMission:
+            var next = Math.max(0, CustomPlugin.cachedResumeIndex)
+            _activeVehicle.setCurrentMissionSequence(next)
+            CustomPlugin.cacheResumeIndex(-1)
             _activeVehicle.startMission()
             break
         case actionMVStartMission:
@@ -582,6 +586,7 @@ Item {
             _activeVehicle.abortLanding(50)     // hardcoded value for climbOutAltitude that is currently ignored
             break
         case actionPause:
+             CustomPlugin.cacheResumeIndex(_currentMissionIndex)
             _activeVehicle.guidedModeChangeAltitude(sliderOutputValue, true /* pauseVehicle */)
             break
         case actionMVPause:

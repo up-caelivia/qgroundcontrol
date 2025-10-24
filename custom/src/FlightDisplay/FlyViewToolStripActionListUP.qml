@@ -40,7 +40,7 @@ ToolStripActionList {
         GuidedActionLand {  visible: false && !_SAVenabled && (_guidedController.showLand && !_guidedController.showTakeoff)},
         GuidedActionRTL {  visible: !_SAVenabled && _guidedController.showRTL},
         GuidedActionPause {  visible: _isABLUO && !_SAVenabled && _guidedController.showPause},
-        GuidedActionActionList {  visible: _isABLUO && !_SAVenabled},
+        GuidedActionActionList {  visible: false && !_SAVenabled},
         GuidedActionGripper {  visible: false},
         ToolStripAction {
             text: "SAV GoTo"

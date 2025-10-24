@@ -101,7 +101,7 @@ ToolStrip {
             property real pad: ScreenTools.defaultFontPixelHeight * 0.5
 
             // dimension labels
-            property real  fontPx: Math.round(ScreenTools.defaultFontPixelHeight * 1.0)
+            property real  fontPx: ScreenTools.defaultFontPixelHeight
             property real  width_m:  serpentine.width_m
             property real  height_m: serpentine.height_m
             property string dimValueWidthMeters:  width_m  > 0 ? width_m.toFixed(2)  + " m" : "--"
@@ -175,9 +175,8 @@ ToolStrip {
                 id: widthText
                 text: leftPanel.dimValueWidthMeters
                 color: "white"
-                font.pixelSize: leftPanel.fontPx
                 x: leftPanel.imgLeft + leftPanel.imgW/2 - width/2
-                y: leftPanel.imgTop - height * 1.2
+                y: leftPanel.imgTop - height * 0.8
                 z: 10
                 visible: bigImage.status === Image.Ready && leftPanel.width_m > 0
             }
@@ -187,8 +186,7 @@ ToolStrip {
                 id: heightText
                 text: leftPanel.dimValueHeightMeters
                 color: "white"
-                font.pixelSize: leftPanel.fontPx
-                x: leftPanel.imgLeft - height * 1.2
+                x: leftPanel.imgLeft - height * 1.5
                 y: leftPanel.imgTop + leftPanel.imgH/2 - width/2
                 rotation: -90
                 transformOrigin: Item.Center

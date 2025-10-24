@@ -91,8 +91,11 @@ CustomPlugin::CustomPlugin(QGCApplication *app, QGCToolbox* toolbox)
 CustomPlugin::~CustomPlugin()
 {
     if (_savParamTimer) {
-        // Stop in the timer's own thread (GUI) to avoid killTimer warnings
-        QMetaObject::invokeMethod(_savParamTimer, "stop", Qt::BlockingQueuedConnection);
+        if (_savParamTimer->thread() == QThread::currentThread()) {
+            _savParamTimer->stop();          
+        } else {
+            QMetaObject::invokeMethod(_savParamTimer, "stop", Qt::QueuedConnection);
+        }
         _savParamTimer->deleteLater();
         _savParamTimer = nullptr;
     }
@@ -1003,7 +1006,7 @@ void CustomPlugin::uploadAbluoMission(const QVariantList& points)
     }
     // ----------------------------------------------------------------------------
 
-    QList<MissionItem*> items; items.reserve(wps.size() + 1);
+    QList<MissionItem*> items; items.reserve(wps.size());
     for (int i=0;i<wps.size();++i) {
         const QGeoCoordinate& c = wps[i];
         auto* mi = new MissionItem(
@@ -1024,27 +1027,6 @@ void CustomPlugin::uploadAbluoMission(const QVariantList& points)
         items.push_back(mi);
     }
 
-    {
-        const int seq = items.size();
-        MissionItem* rtl = new MissionItem(
-            /*sequenceNumber*/ seq,
-            /*command*/        MAV_CMD_NAV_RETURN_TO_LAUNCH,
-            /*frame*/          MAV_FRAME_MISSION,
-            /*param1 hold*/    0.0,
-            /*param2 accept*/  0.0,
-            /*param3 pass*/    0.0,
-            /*param4 yaw*/     0.0,
-            /*x*/              0.0,
-            /*y*/              0.0,
-            /*z*/              0.0,
-            /*autocontinue*/   true,
-            /*isCurrentItem*/  false,
-            /*parent*/         nullptr
-        );
-        items.push_back(rtl);
-        qDebug() << "[CustomPlugin] appended RTL at sequence" << seq;
-    }
-
     qDebug() << "[CustomPlugin] prepared" << items.size() << "MissionItems. Clear+Upload...";
 
     if (mm->inProgress()) {
@@ -1056,37 +1038,52 @@ void CustomPlugin::uploadAbluoMission(const QVariantList& points)
     // Flag one-shot per evitare doppio upload da fallback/clear
     QSharedPointer<bool> started = QSharedPointer<bool>::create(false);
 
-    QPointer<MissionManager> mmPtr(mm);
-    // helper to start upload on GUI thread
-    auto startUpload = [mm, items]() {
-        qDebug() << "[CustomPlugin] writing mission items...";
-        QObject::connect(mm, &MissionManager::sendComplete, mm, [](bool ok){
-            qDebug() << "[CustomPlugin] mission upload done:" << ok;
-        }, Qt::QueuedConnection);
-        mm->writeMissionItems(items);   // ownership moves to MM
+    // Fallback timer (se removeAll non risponde)
+    QPointer<QTimer> fallback = new QTimer(qApp);
+    fallback->setSingleShot(true);
+    fallback->setInterval(3000);
+
+    auto stopFallback = [fallback]() {
+        if (fallback) {
+            QMetaObject::invokeMethod(fallback, "stop", Qt::QueuedConnection);
+            fallback->deleteLater();
+        }
     };
 
-    // Create fallback timer on GUI thread
-    QPointer<QTimer> fallback = new QTimer(qApp);          // parent = qApp (GUI thread)
-    fallback->setSingleShot(true);
-    fallback->setInterval(2500);
-
-    // If clear() never answers, run upload anyway
-    QObject::connect(fallback, &QTimer::timeout, qApp, [mm, startUpload]() {
+    // ⬇️ NIENTE mutable qui
+    auto startUpload = [mm, items, started, stopFallback]() {
         if (!mm || mm->inProgress()) return;
+        if (*started) return;
+        *started = true;
+        stopFallback();
+
+        qDebug() << "[CustomPlugin] writing mission items...";
+
+        QObject::connect(mm, &MissionManager::sendComplete, qApp, [=](bool ok){
+            qDebug() << "[CustomPlugin] mission upload done:" << ok;
+            // Qui puoi anche resettare un tuo flag di stato se ne tieni uno globale
+        }, Qt::QueuedConnection);
+
+        // (opzionale) aggancia anche un segnale di errore se esiste nella tua versione:
+        // QObject::connect(mm, &MissionManager::error, qApp, [](int code, const QString& err){
+        //     qWarning() << "[CustomPlugin] Mission upload error:" << code << err;
+        // }, Qt::QueuedConnection);
+
+        mm->writeMissionItems(items);   // ownership -> MissionManager
+        // NON fare items.clear() qui: non serve e richiede mutable
+    };
+
+    // se clear() non risponde, partiamo lo stesso
+    QObject::connect(fallback, &QTimer::timeout, qApp, [startUpload]() {
         qWarning() << "[CustomPlugin] clear timeout, fallback upload";
         startUpload();
     }, Qt::QueuedConnection);
 
     fallback->start();
 
-    // When removeAll completes, stop fallback and upload
-    QObject::connect(mm, &MissionManager::removeAllComplete, qApp,
-                    [fallback, startUpload](bool /*ok*/) {
-        if (fallback) {
-            QMetaObject::invokeMethod(fallback, "stop", Qt::QueuedConnection);
-            fallback->deleteLater();
-        }
+    // Quando removeAll completa: stop fallback e upload
+    QObject::connect(mm, &MissionManager::removeAllComplete, qApp, [startUpload, stopFallback](bool /*ok*/) {
+        stopFallback();
         startUpload();
     }, Qt::QueuedConnection);
 
@@ -1110,7 +1107,7 @@ void CustomPlugin::clearAbluoMission()
         // Se c'è già un'operazione in corso, aspetta che finisca e poi riprova
         qWarning() << "[CustomPlugin] clearAbluoMission: MissionManager busy, will retry";
         QPointer<MissionManager> mmPtr(mm);
-        QObject::connect(mm, &MissionManager::inProgressChanged, qApp, [this, mmPtr]() {
+        QObject::connect(mm, &MissionManager::inProgressChanged, qApp, [mmPtr]() {
             if (!mmPtr || mmPtr->inProgress()) return;
             QObject::disconnect(mmPtr, &MissionManager::inProgressChanged, nullptr, nullptr);
             mmPtr->removeAll();
@@ -1209,4 +1206,19 @@ void CustomPlugin::_attachWpnavWatcher(Vehicle* v)
 
     // Se non c'è ancora, parte un probing periodico finché il parametro arriva
     _startWpnavProbeTimer(pm);
+}
+
+void CustomPlugin::cacheResumeIndex(int index)
+{
+    if (index < 0) index = 0;
+    if (_cachedResumeIndex != index) {
+        _cachedResumeIndex = index;
+        emit cachedResumeIndexChanged();
+        qDebug() << "[CustomPlugin] cached resume index =" << _cachedResumeIndex;
+    }
+}
+
+int CustomPlugin::getCachedResumeIndex() const
+{
+    return _cachedResumeIndex;
 }
