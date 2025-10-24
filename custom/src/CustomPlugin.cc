@@ -817,7 +817,8 @@ static QGeoCoordinate interpAlong(const QGeoCoordinate& a,
 
 QVariantList CustomPlugin::buildAbluoPath(const QGeoCoordinate& s,
                                           const QGeoCoordinate& t,
-                                          double pitch_m)
+                                          double pitch_m,
+                                          int orientationMode)
 {
     QVariantList out;
     if (!s.isValid() || !t.isValid()) return out;
@@ -856,14 +857,63 @@ QVariantList CustomPlugin::buildAbluoPath(const QGeoCoordinate& s,
         return out;
     }
 
-    // --- 1) starting point: exact S ---
+    // ================== MODALITÀ VERTICALE (sweep lungo S→T) ==================
+    if (orientationMode == 1) {
+        // geometria lungo la geodetica S->T
+        const double L      = s.distanceTo(t);
+        if (!(L > 0.0)) {
+            // fallback: come triviale
+            QGeoCoordinate cur = s; cur.setAltitude(z0);
+            pushIfDiff(out, cur);
+            QGeoCoordinate tt = t; tt.setAltitude(z1);
+            pushIfDiff(out, tt);
+            return out;
+        }
+        const double bearing = s.azimuthTo(t);
+
+        // 1) S(z0) -> verticale a z1
+        QGeoCoordinate cur = s; cur.setAltitude(z0);
+        pushIfDiff(out, cur);
+        if (std::abs(z1 - z0) > 1e-9) {
+            QGeoCoordinate v = cur; v.setAltitude(z1);
+            pushIfDiff(out, v);
+            cur = v;
+        }
+        double currentAlt = z1;
+
+        // 2) punti intermedi ogni pitch_m lungo S->T
+        //    d = pitch, 2*pitch, ..., < L
+        for (double d = dz; d < L - 1e-6; d += dz) {
+            QGeoCoordinate pk = s.atDistanceAndAzimuth(d, bearing);
+            // orizzontale in planimetria a pk a quota corrente
+            pk.setAltitude(currentAlt);
+            pushIfDiff(out, pk);
+
+            // verticale alternata: z1->z0->z1->...
+            currentAlt = (std::abs(currentAlt - z1) < 1e-9) ? z0 : z1;
+            QGeoCoordinate pv = pk; pv.setAltitude(currentAlt);
+            pushIfDiff(out, pv);
+            cur = pv;
+        }
+
+        // 3) vai a T alla quota corrente
+        QGeoCoordinate tPlan = t; tPlan.setAltitude(currentAlt);
+        pushIfDiff(out, tPlan);
+
+        // 4) snap finale a T(z1)
+        if (std::abs(currentAlt - z1) > 1e-9) {
+            QGeoCoordinate tZ = t; tZ.setAltitude(z1);
+            pushIfDiff(out, tZ);
+        }
+        return out;
+    }
+
+    // ================== MODALITÀ ORIZZONTALE (la tua originale) ==================
+    // 1) starting point: exact S
     QGeoCoordinate cur = s; cur.setAltitude(z0);
     pushIfDiff(out, cur);
 
-    // we are on “S side” (XY = S). This flag marks on which XY the next vertical happens.
-    bool atSideS = true;
-
-    // --- 2) first horizontal: S → XY(T) at same altitude z0 ---
+    // “prima orizzontale” = S -> XY(T) a quota z0
     {
         QGeoCoordinate h = cur;
         h.setLatitude (t.latitude());
@@ -871,42 +921,33 @@ QVariantList CustomPlugin::buildAbluoPath(const QGeoCoordinate& s,
         // same altitude (z0)
         pushIfDiff(out, h);
         cur = h;
-        atSideS = false; // now we are on T side
     }
 
     // --- 3) loop: vertical step toward z1 on current side, then horizontal to the opposite side ---
-    while ( (dir > 0 && cur.altitude() < z1) || (dir < 0 && cur.altitude() > z1) ) {
-
-        // 3a) VERTICAL on current side: change only altitude
+    bool atSideS = false; // siamo su T dopo il primo orizzontale
+    while ((dir > 0 && cur.altitude() < z1) || (dir < 0 && cur.altitude() > z1)) {
+        // verticale
         {
             const double rem  = std::abs(z1 - cur.altitude());
             const double step = std::min(dz, rem);
-            QGeoCoordinate v = cur;
-            v.setAltitude(cur.altitude() + dir*step);
+            QGeoCoordinate v = cur; v.setAltitude(cur.altitude() + dir*step);
             pushIfDiff(out, v);
             cur = v;
         }
-
-        // If we reached z1, exit: we'll fix XY to T below.
         if (std::abs(cur.altitude() - z1) < 1e-9) break;
 
-        // 3b) HORIZONTAL to the opposite side at same altitude
-        {
-            QGeoCoordinate h = cur;
-            if (atSideS) {
-                // we were on S side → go to XY(T)
-                h.setLatitude (t.latitude());
-                h.setLongitude(t.longitude());
-            } else {
-                // we were on T side → go to XY(S)
-                h.setLatitude (s.latitude());
-                h.setLongitude(s.longitude());
-            }
-            // same altitude
-            pushIfDiff(out, h);
-            cur = h;
-            atSideS = !atSideS;   // flip side
+        // orizzontale all'altro lato (XY flip S<->T) a stessa quota
+        QGeoCoordinate h = cur;
+        if (atSideS) {
+            h.setLatitude (t.latitude());
+            h.setLongitude(t.longitude());
+        } else {
+            h.setLatitude (s.latitude());
+            h.setLongitude(s.longitude());
         }
+        pushIfDiff(out, h);
+        cur = h;
+        atSideS = !atSideS;
     }
 
     // --- 4) closure: ensure we end exactly on T (XY(T), z1) ---
@@ -953,7 +994,7 @@ static bool coordFromVariant(const QVariant& v, QGeoCoordinate& out)
     return false;
 }
 
-void CustomPlugin::uploadAbluoMission(const QVariantList& points)
+void CustomPlugin::uploadAbluoMission(const QVariantList& points, int orientationMode)
 {
     Vehicle* vehicle = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle();
     if (!vehicle) { qWarning() << "[CustomPlugin] uploadAbluoMission: no active vehicle"; return; }
@@ -979,64 +1020,33 @@ void CustomPlugin::uploadAbluoMission(const QVariantList& points)
     }
     if (wps.size() < 2) { qWarning() << "[CustomPlugin] uploadAbluoMission: too few waypoints"; return; }
 
-    // --- Failsafe: enforce first leg horizontal --------------------------------
-    // Dynamically choose the “horizontal” axis: the one with the largest span (in meters).
-    auto dist_m = [](double lat1, double lon1, double lat2, double lon2) {
-        QGeoCoordinate a(lat1, lon1), b(lat2, lon2);
-        return a.distanceTo(b);
-    };
-
-    double minLat =  std::numeric_limits<double>::infinity();
-    double maxLat = -std::numeric_limits<double>::infinity();
-    double minLon =  std::numeric_limits<double>::infinity();
-    double maxLon = -std::numeric_limits<double>::infinity();
-
-    for (const auto& c : wps) {
-        if (std::isfinite(c.latitude()))  { minLat = std::min(minLat, c.latitude());  maxLat = std::max(maxLat, c.latitude()); }
-        if (std::isfinite(c.longitude())) { minLon = std::min(minLon, c.longitude()); maxLon = std::max(maxLon, c.longitude()); }
-    }
-
-    // estimate span in meters of both axes at mid-latitude
-    double midLat = (std::isfinite(minLat) && std::isfinite(maxLat)) ? (0.5 * (minLat + maxLat)) : 0.0;
-    double spanLon_m = (std::isfinite(minLon) && std::isfinite(maxLon))
-        ? dist_m(midLat, minLon, midLat, maxLon) : 0.0;
-    double spanLat_m = (std::isfinite(minLat) && std::isfinite(maxLat))
-        ? dist_m(minLat, 0.0,  maxLat, 0.0)       : 0.0;
-
-    // choose horizontal axis: true → use longitude, false → use latitude
-    bool horizByLon = spanLon_m >= spanLat_m;
-
-    // if the first two WPs end up on the same side along the chosen axis, move WP1 to the opposite side
-    if (wps.size() >= 2 && std::isfinite(minLon) && std::isfinite(maxLon) && std::isfinite(minLat) && std::isfinite(maxLat)) {
+    // --- Force first leg by orientationMode --------------------------------------
+    if (wps.size() >= 2) {
         QGeoCoordinate& p0 = wps[0];
         QGeoCoordinate& p1 = wps[1];
+        const QGeoCoordinate& plast = wps.back(); // lo uso come riferimento per T
 
-        auto almostEqual = [](double a, double b) { return std::abs(a - b) < 1e-7; };
+        auto finiteOr = [](double v, double fallback){ return std::isfinite(v) ? v : fallback; };
 
-        if (horizByLon) {
-            if (almostEqual(p0.longitude(), p1.longitude())) {
-                // push p1 to opposite LONGITUDE side, keeping p0 lat/alt
-                double dToMin = std::abs(p0.longitude() - minLon);
-                double dToMax = std::abs(p0.longitude() - maxLon);
-                double oppLon = (dToMin < dToMax) ? maxLon : minLon;
-                p1.setLatitude(p0.latitude());
-                p1.setLongitude(oppLon);
-                p1.setAltitude(p0.altitude());
-                qDebug() << "[CustomPlugin] forced horizontal (lon) first leg";
-            }
+        if (orientationMode == 1) {
+            // VERTICALE: WP1 deve essere S.xy con quota di T
+            const double zS = finiteOr(p0.altitude(), 0.0);
+            const double zT = finiteOr(plast.altitude(), zS); // usa l'alt di ultimo WP come target
+            p1.setLatitude (p0.latitude());
+            p1.setLongitude(p0.longitude());
+            p1.setAltitude (zT);
+            qDebug() << "[CustomPlugin] forced first leg VERTICAL: S(zS)->S(zT)";
         } else {
-            if (almostEqual(p0.latitude(), p1.latitude())) {
-                // push p1 to opposite LATITUDE side, keeping p0 lon/alt
-                double dToMin = std::abs(p0.latitude() - minLat);
-                double dToMax = std::abs(p0.latitude() - maxLat);
-                double oppLat = (dToMin < dToMax) ? maxLat : minLat;
-                p1.setLatitude(oppLat);
-                p1.setLongitude(p0.longitude());
-                p1.setAltitude(p0.altitude());
-                qDebug() << "[CustomPlugin] forced horizontal (lat) first leg";
-            }
+            // ORIZZONTALE: WP1 deve essere T.xy con quota di S
+            const double zS = finiteOr(p0.altitude(), 0.0);
+            p1.setLatitude (plast.latitude());
+            p1.setLongitude(plast.longitude());
+            p1.setAltitude (zS);
+            qDebug() << "[CustomPlugin] forced first leg HORIZONTAL: S(zS)->T(zS)";
         }
     }
+    // -----------------------------------------------------------------------------
+
     // ----------------------------------------------------------------------------
 
     QList<MissionItem*> items; items.reserve(wps.size());

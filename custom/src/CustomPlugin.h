@@ -99,8 +99,9 @@ public:
 
     Q_INVOKABLE QVariantList buildAbluoPath(const QGeoCoordinate& s,
                                             const QGeoCoordinate& t,
-                                            double pitch_m);
-    Q_INVOKABLE void        uploadAbluoMission(const QVariantList& points);
+                                            double pitch_m,
+                                            int orientationMode);
+    Q_INVOKABLE void        uploadAbluoMission(const QVariantList& points, int orientationMode);
     Q_INVOKABLE void        clearAbluoMission();
 
     QGeoCoordinate          startCoordinate() const { return _startCoordinate; }

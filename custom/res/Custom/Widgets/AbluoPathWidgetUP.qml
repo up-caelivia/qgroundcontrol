@@ -29,6 +29,10 @@ ToolStrip {
     property alias total_length_m:  serpentine.total_len_m
     property real  pitchValue: 0
 
+    // 0 = orizzontale (bande E-W, avanzamento verticale)
+    // 1 = verticale   (bande N-S, avanzamento orizzontale)
+    property int orientationMode: 0
+
     function fmtCoord(c) {
         if (!c || !c.isValid) return "--"
         const lat = Number(c.latitude).toFixed(7)
@@ -43,6 +47,10 @@ ToolStrip {
             abluoToolStrip.pitchValue = Number(Constants.savedPitch) || 0
             serpentine.pitch_m = abluoToolStrip.pitchValue
             if (pitchField) pitchField.text = abluoToolStrip.pitchValue > 0 ? String(abluoToolStrip.pitchValue) : ""
+        }
+        if (Constants.savedOrientation !== undefined) {
+            orientationMode = Number(Constants.savedOrientation) === 1 ? 1 : 0
+            serpentine.orientation = orientationMode
         }
         if (Constants.savedStart && Constants.savedStart.isValid) serpentine.s_coord = Constants.savedStart
         if (Constants.savedStop  && Constants.savedStop.isValid)  serpentine.t_coord = Constants.savedStop
@@ -229,6 +237,7 @@ ToolStrip {
                     onWidth_mChanged:  serpCanvas.schedulePaint()
                     onHeight_mChanged: serpCanvas.schedulePaint()
                     onPathChanged:     serpCanvas.schedulePaint()
+                    onOrientationChanged: serpCanvas.schedulePaint()
                 }
                 Connections {
                     target: leftPanel
@@ -238,6 +247,7 @@ ToolStrip {
                 Connections {
                     target: abluoToolStrip
                     onPitchValueChanged: serpCanvas.schedulePaint()
+                    onOrientationModeChanged: serpCanvas.schedulePaint()
                 }
 
                 // keep passedWpIndex in sync with CustomPlugin
@@ -273,50 +283,73 @@ ToolStrip {
                     const topY    = inset
                     const bottomY = height - inset
 
-                    // meters->pixels (vertical)
+                    const rectWpx = Math.max(0, rightX - leftX)
                     const rectHpx = Math.max(0, bottomY - topY)
-                    if (rectHpx <= 0) return
-                    const pxPerMeterV = rectHpx / Math.max(0.001, leftPanel.height_m)
-                    const stepPxNom   = Math.max(1, abluoToolStrip.pitchValue * pxPerMeterV)
+                    if (rectWpx <= 0 || rectHpx <= 0) return
 
-                    // S/T in pixels
+                    // orientation: 0=orizzontale (avanzamento verticale), 1=verticale (avanzamento orizzontale)
+                    const isHorizontal = (abluoToolStrip.orientationMode === 0)
+
+                    // unità passo (metri -> pixel) lungo la direzione di avanzamento
+                    const pxPerMeterAdvance = isHorizontal
+                        ? (rectHpx / Math.max(0.001, leftPanel.height_m))
+                        : (rectWpx / Math.max(0.001, leftPanel.width_m))
+                    const stepPxNom = Math.max(1, abluoToolStrip.pitchValue * pxPerMeterAdvance)
+
+                    // punti S/T in pixel
                     const sPixX = leftPanel.sideLeft ? leftX : rightX
                     const tPixX = leftPanel.sideLeft ? rightX : leftX
                     const sPixY = leftPanel.sAbove ? topY : bottomY
                     const tPixY = leftPanel.sAbove ? bottomY : topY
 
-                    // vertical direction
-                    const dir = (tPixY > sPixY) ? +1 : -1
-
-                    // build pixel vertices with same pattern as original code
                     const pts = []
-                    let y = sPixY
-                    let goRight = leftPanel.sideLeft
-                    pts.push({x: sPixX, y: y})
 
-                    let stripes = 0
-                    const maxStripes = serpCanvas.maxStripes
-                    while (((dir > 0 && y < tPixY) || (dir < 0 && y > tPixY)) && stripes < maxStripes) {
-                        // horizontal
-                        pts.push({ x: (goRight ? rightX : leftX), y: y })
+                    if (isHorizontal) {
+                        // avanzamento lungo Y; bande orizzontali che vanno L<->R
+                        const dirY = (tPixY > sPixY) ? +1 : -1
+                        let y = sPixY
+                        let goRight = leftPanel.sideLeft
+                        pts.push({x: sPixX, y: y})
 
-                        // vertical (shorten last step)
-                        const remaining = Math.abs(tPixY - y)
-                        const step = Math.min(stepPxNom, remaining)
-                        y += dir * step
-                        pts.push({ x: (goRight ? rightX : leftX), y: y })
+                        let stripes = 0
+                        while (((dirY > 0 && y < tPixY) || (dirY < 0 && y > tPixY)) && stripes < serpCanvas.maxStripes) {
+                            // orizzontale
+                            pts.push({ x: (goRight ? rightX : leftX), y: y })
+                            // verticale (accorcia ultimo step)
+                            const remaining = Math.abs(tPixY - y)
+                            const step = Math.min(stepPxNom, remaining)
+                            y += dirY * step
+                            pts.push({ x: (goRight ? rightX : leftX), y: y })
 
-                        goRight = !goRight
-                        stripes++
+                            goRight = !goRight
+                            stripes++
+                        }
+                        const last = pts[pts.length - 1]
+                        if (last.x !== tPixX || last.y !== tPixY) pts.push({ x: tPixX, y: tPixY })
+                    } else {
+                        // verticale: avanzamento lungo X; bande verticali che vanno T<->B
+                        const dirX = (tPixX > sPixX) ? +1 : -1
+                        let x = sPixX
+                        let goDown = leftPanel.sAbove  // se S è sopra, prima banda scende
+                        pts.push({x: x, y: sPixY})
+
+                        let stripes = 0
+                        while (((dirX > 0 && x < tPixX) || (dirX < 0 && x > tPixX)) && stripes < serpCanvas.maxStripes) {
+                            // verticale
+                            pts.push({ x: x, y: (goDown ? bottomY : topY) })
+                            // orizzontale (accorcia ultimo step)
+                            const remaining = Math.abs(tPixX - x)
+                            const step = Math.min(stepPxNom, remaining)
+                            x += dirX * step
+                            pts.push({ x: x, y: (goDown ? bottomY : topY) })
+
+                            goDown = !goDown
+                            stripes++
+                        }
+                        const last = pts[pts.length - 1]
+                        if (last.x !== tPixX || last.y !== tPixY) pts.push({ x: tPixX, y: tPixY })
                     }
 
-                    // ensure it ends exactly on T
-                    const last = pts[pts.length - 1]
-                    if (last.x !== tPixX || last.y !== tPixY) {
-                        pts.push({ x: tPixX, y: tPixY })
-                    }
-
-                    // helper: draw a polyline between [iStart..iEnd] inclusive
                     function strokeFromTo(iStart, iEnd, color, lineWidth) {
                         if (iEnd <= iStart || iStart < 0 || iEnd >= pts.length) return
                         ctx.beginPath()
@@ -329,7 +362,6 @@ ToolStrip {
                         ctx.stroke()
                     }
 
-                    // 'cut' = last reached waypoint index
                     const cut = Math.min(
                         Math.max(serpCanvas.passedWpIndex, -1),
                         pts.length - 1
@@ -343,30 +375,20 @@ ToolStrip {
                         pts.length - 1
                     )
 
-                    // draw in three parts: red (past), orange (current), yellow (future)
                     if (cut < 0) {
-                        // all yellow
                         strokeFromTo(0, pts.length - 1, COL_YELLOW, lineW)
                     } else if (cut >= pts.length - 1) {
-                        // all red
                         strokeFromTo(0, pts.length - 1, COL_RED, lineW)
                     } else {
                         const passedEnd = idx - 1
-                        // RED: up to the last fully passed waypoint
                         if (passedEnd >= 1) {
                             strokeFromTo(0, passedEnd, COL_RED, lineW)
                         } else if (passedEnd === 0) {
-                            // draw at least the first point for visual continuity
                             strokeFromTo(0, 0, COL_RED, lineW)
                         }
-
-                        // ORANGE: current segment (between wp-1 and wp)
-                        // handle bounds when idx == 0 (initial segment)
                         const curStart = Math.max(0, passedEnd)
                         const curEnd   = Math.max(1, idx)
                         strokeFromTo(curStart, curEnd, COL_ORANGE, lineW)
-
-                        // YELLOW: from current wp onward (restart at idx for continuity)
                         strokeFromTo(idx, pts.length - 1, COL_YELLOW, lineW)
                     }
                 }
@@ -433,7 +455,7 @@ ToolStrip {
                     }
                 }
 
-                // row: Pitch (m) | [text field]
+                // row: Pitch (m) | [text field] | Orientamento [combo]
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: ScreenTools.defaultFontPixelWidth
@@ -447,7 +469,7 @@ ToolStrip {
                     QGCTextField {
                         id: pitchField
                         Layout.fillWidth: true
-                        placeholderText: "Insert pitch"
+                        placeholderText: "Inserisci pitch"
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
                         validator: DoubleValidator { bottom: 0; top: 1e6; decimals: 3 }
                         onEditingFinished: {
@@ -458,6 +480,20 @@ ToolStrip {
                             Constants.savedPitch = abluoToolStrip.pitchValue
                             serpentine.build()
                         }
+                    }
+                    QGCComboBox {
+                        id: orientationCombo
+                        //Layout.preferredWidth: ScreenTools.defaultFontPixelWidth * 16
+                        model: [qsTr("Horizontal"), qsTr("Vertical")]
+                        Layout.fillWidth:   true
+                        currentIndex: abluoToolStrip.orientationMode
+                        onActivated: {
+                            abluoToolStrip.orientationMode = currentIndex
+                            serpentine.orientation = currentIndex
+                            Constants.savedOrientation = currentIndex
+                            serpentine.build()
+                            serpCanvas.schedulePaint()
+                        }        
                     }
                 }
 
@@ -523,7 +559,9 @@ ToolStrip {
                             const pts = CustomPlugin.buildAbluoPath(
                                 serpentine.s_coord,
                                 serpentine.t_coord,
-                                abluoToolStrip.pitchValue
+                                abluoToolStrip.pitchValue,
+                                abluoToolStrip.orientationMode,
+                                abluoToolStrip.orientationMode
                             )
                             if (!pts || pts.length < 2) {
                                 if (CustomPlugin && CustomPlugin.sendLogMessage)
@@ -534,7 +572,7 @@ ToolStrip {
                             serpentine.path = pts
 
                             if (CustomPlugin && CustomPlugin.uploadAbluoMission) {
-                                CustomPlugin.uploadAbluoMission(pts)
+                                CustomPlugin.uploadAbluoMission(pts, abluoToolStrip.orientationMode)
                                 if (CustomPlugin.sendLogMessage)
                                     CustomPlugin.sendLogMessage("Mission uploaded: " + pts.length + " waypoints")
                                 CustomPlugin.isAbluoMapPlanEnabled = !CustomPlugin.isAbluoMapPlanEnabled
@@ -593,6 +631,8 @@ ToolStrip {
         property real height_m: 0
         property var  path: []
         property real total_len_m: 0
+        // 0=orizzontale (spazzate Est-Ovest), 1=verticale (spazzate Nord-Sud)
+        property int  orientation: 0
 
         function _asCoord(p) {
             if (!p) return null
@@ -628,12 +668,7 @@ ToolStrip {
             const z0 = s_coord.altitude || 0
             const z1 = t_coord.altitude || 0
             height_m = Math.abs(z1 - z0)
-            const west  = Math.min(s_coord.longitude, t_coord.longitude)
-            const east  = Math.max(s_coord.longitude, t_coord.longitude)
-            const midLa = 0.5 * (Number(s_coord.latitude) + Number(t_coord.latitude))
-            const pW = QtPositioning.coordinate(midLa, west)
-            const pE = QtPositioning.coordinate(midLa, east)
-            width_m  = pW.distanceTo(pE)
+            width_m = s_coord.distanceTo(t_coord)
             console.log(`AbluoPathWidgetUP: rectangle size: width=${width_m.toFixed(2)} m, height=${height_m.toFixed(2)} m`)
         }
 
@@ -645,7 +680,7 @@ ToolStrip {
             const z0 = Number(s_coord.altitude) || 0
             const z1 = Number(t_coord.altitude) || 0
             const dz = Math.max(0.001, Number(pitch_m) || 0.001)
-            const dir = (z1 >= z0) ? +1 : -1
+            const dirZ = (z1 >= z0) ? +1 : -1
 
             const south = Math.min(s_coord.latitude,  t_coord.latitude)
             const north = Math.max(s_coord.latitude,  t_coord.latitude)
@@ -655,20 +690,21 @@ ToolStrip {
             function metersBetween(lat1, lon1, lat2, lon2) {
                 return QtPositioning.coordinate(lat1, lon1).distanceTo(QtPositioning.coordinate(lat2, lon2))
             }
-            const midLat = 0.5 * (south + north)
-            const spanLon_m = metersBetween(midLat, west, midLat, east)
-            const spanLat_m = metersBetween(south, 0, north, 0)
-            const horizByLon = spanLon_m >= spanLat_m
+
+            // Selezione esplicita dell'asse delle spazzate
+            // orientation==0 -> spazzate per longitudine (E<->W) a lat costante
+            // orientation==1 -> spazzate per latitudine  (S<->N) a lon costante
+            const sweepByLon = (orientation === 0)
 
             let pts = []
 
-            // 1) First point = exact S at altitude z0
+            // 1) Primo punto = S esatta all'altitudine z0
             let p = QtPositioning.coordinate(s_coord.latitude, s_coord.longitude, z0)
             pts.push(p)
 
-            // 2) Second point = horizontal at same altitude to the opposite side
+            // 2) Secondo punto = fino al lato opposto lungo l'asse di "spazzata"
             let p2 = QtPositioning.coordinate(p.latitude, p.longitude, z0)
-            if (horizByLon) {
+            if (sweepByLon) {
                 const dW = Math.abs(p.longitude - west)
                 const dE = Math.abs(p.longitude - east)
                 p2.longitude = (dW < dE) ? east : west
@@ -677,23 +713,23 @@ ToolStrip {
                 const dN = Math.abs(p.latitude - north)
                 p2.latitude = (dS < dN) ? north : south
             }
-            if (p2.distanceTo(pts[pts.length-1]) > 0.01) pts.push(p2) // avoid duplicates
+            if (p2.distanceTo(pts[pts.length-1]) > 0.01) pts.push(p2)
 
-            // 3) Vertical steps + horizontal to the opposite side at each altitude
+            // 3) Passi verticali in quota + orizzontali (lungo asse di spazzata) a ogni quota
             let y = z0
             let cur = p2
-            while ((dir > 0 && y < z1) || (dir < 0 && y > z1)) {
+            while ((dirZ > 0 && y < z1) || (dirZ < 0 && y > z1)) {
                 const remaining = Math.abs(z1 - y)
                 const step = Math.min(dz, remaining)
-                y += dir * step
+                y += dirZ * step
 
-                // vertical
+                // verticale (quota)
                 let v = QtPositioning.coordinate(cur.latitude, cur.longitude, y)
                 if (v.distanceTo(pts[pts.length-1]) > 0.01) pts.push(v)
 
-                // horizontal to opposite side
+                // spostamento orizzontale al lato opposto secondo l'asse scelto
                 let h = QtPositioning.coordinate(v.latitude, v.longitude, y)
-                if (horizByLon) {
+                if (sweepByLon) {
                     const dW = Math.abs(v.longitude - west)
                     const dE = Math.abs(v.longitude - east)
                     h.longitude = (dW < dE) ? east : west
@@ -706,7 +742,7 @@ ToolStrip {
                 cur = h
             }
 
-            // 4) Snap exactly to T
+            // 4) Snap esatto su T
             let last = pts[pts.length-1]
             if (Math.abs(last.altitude - z1) > 0.01) {
                 let v = QtPositioning.coordinate(last.latitude, last.longitude, z1)
@@ -716,7 +752,7 @@ ToolStrip {
             const tExact = QtPositioning.coordinate(t_coord.latitude, t_coord.longitude, z1)
             if (tExact.distanceTo(last) > 0.01) pts.push(tExact)
 
-            // 5) Total length
+            // 5) lunghezza totale
             let sum = 0
             for (let i = 1; i < pts.length; i++) sum += pts[i-1].distanceTo(pts[i])
             total_len_m = sum
@@ -726,6 +762,7 @@ ToolStrip {
         onS_coordChanged: build()
         onT_coordChanged: build()
         onPitch_mChanged: build()
+        onOrientationChanged: build()
         Component.onCompleted: build()
     }
 }
