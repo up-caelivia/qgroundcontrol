@@ -84,7 +84,7 @@ CustomPlugin::CustomPlugin(QGCApplication *app, QGCToolbox* toolbox)
     connect(_savParamTimer, &QTimer::timeout, this, &CustomPlugin::_updateSavParamCoordinates);
     _savParamTimer->start(1000);
 
-    // Inizializza cache velocità
+    // Initialize speed cache
     _wpnavSpeedMps = std::numeric_limits<double>::quiet_NaN();
 }
 
@@ -350,7 +350,7 @@ QVariantList& CustomPlugin::settingsPages()
         QVariantList baseSettings = QGCCorePlugin::settingsPages();
         _customSettingsList = baseSettings;
 
-        //add NTRIP page
+        // add NTRIP page
         _ntripSettings = new QmlComponentInfo(
             tr("NTRIP"),
             QUrl::fromUserInput("qrc:/Custom/Widgets/CustomNTRIP.qml"),
@@ -374,7 +374,7 @@ QVariantList& CustomPlugin::settingsPages()
             _customSettingsList.append(QVariant::fromValue(_ntripSettings));
         }
 
-        //add About page
+        // add About page
         _aboutSettings = new QmlComponentInfo(
             tr("About"),
             QUrl::fromUserInput("qrc:/Custom/Widgets/AboutUP.qml"),
@@ -510,6 +510,7 @@ void CustomPlugin::updateFence(QObject* controllerObj, bool isSAVenabled) {
     QString noSavFile = loadDir.absoluteFilePath("no_sav.json");
     if (isSAVenabled) {
         {
+            // Save current fence to no_sav.json
             QJsonObject json;
             controller->save(json); 
             QJsonDocument doc(json);
@@ -530,12 +531,12 @@ void CustomPlugin::updateFence(QObject* controllerObj, bool isSAVenabled) {
             QJsonObject jsonToLoad;
 
         if (root.contains("polygons") && root["polygons"].isArray()) {
-            // Formato 1: usa direttamente
+            // Format 1: use as-is
             jsonToLoad = root;
         } else if (root.contains("geoFence") && root["geoFence"].isObject()) {
-            // Formato 2: estrai sotto-oggetto "geoFence"
+            // Format 2: extract nested "geoFence"
             QJsonObject geoFence = root["geoFence"].toObject();
-            // Simula il formato 1 ricreando il QJsonObject con le chiavi attese
+            // Simulate format 1 by reconstructing keys that controller expects
             QJsonObject simulatedFormat1;
             if (geoFence.contains("polygons"))
                 simulatedFormat1.insert("polygons", geoFence["polygons"]);
@@ -640,7 +641,7 @@ void CustomPlugin::onActiveVehicleChanged(Vehicle* vehicle)
             disconnect(_vehicleConnection);
             _vehicleListenerConnected = false;
         }
-        _detachWpnavWatcher();  // reset watcher WPNAV
+        _detachWpnavWatcher();  // reset WPNAV watcher
         _wpnavSpeedMps = std::numeric_limits<double>::quiet_NaN();
         emit wpnavSpeedMpsChanged();
         setAbluoCurrentWp(-1);
@@ -665,25 +666,24 @@ void CustomPlugin::onActiveVehicleChanged(Vehicle* vehicle)
         });
     }
 
-    // collega/ricollega watcher WPNAV_SPEED
+    // attach/re-attach WPNAV_SPEED watcher
     _attachWpnavWatcher(vehicle);
 
-    // Hook A: MissionManager::currentIndexChanged (OK in tutte le versioni)
+    // Hook A: MissionManager::currentIndexChanged (works across versions)
     if (vehicle->missionManager()) {
-        // stato iniziale
+        // initial state
         setAbluoCurrentWp(vehicle->missionManager()->currentIndex());
         qDebug() << "[Abluo] initial mission index =" << vehicle->missionManager()->currentIndex();
 
-        // aggiornamenti
+        // updates
         connect(vehicle->missionManager(), &MissionManager::currentIndexChanged,
                 this, [this](int idx){
-                    qDebug() << "[Abluo] MissionManager::currentIndexChanged ->" << idx;
                     setAbluoCurrentWp(idx);
                 },
                 Qt::UniqueConnection);
     }
 
-    // Hook B: MAVLink grezzo – **firma A 1 ARGOMENTO** nel tuo ramo
+    // Hook B: raw MAVLink – **single-argument signal** in this branch
     connect(vehicle, &Vehicle::mavlinkMessageReceived,
             this,
             [this](const mavlink_message_t& msg){
@@ -702,7 +702,7 @@ void CustomPlugin::handleMavlinkMessage(const mavlink_message_t& message)
         mavlink_rc_channels_t rc;
         mavlink_msg_rc_channels_decode(&message, &rc);
 
-        int newRC6 = rc.chan6_raw;  // canale 6 (indice base 1)
+        int newRC6 = rc.chan6_raw;  // channel 6 (1-based index)
         if (_rc6Value != newRC6) {
             _rc6Value = newRC6;
             emit rc6ValueChanged();
@@ -759,7 +759,7 @@ void CustomPlugin::setStart()
         return;
     }
 
-    // Altitudine: preferisci AGL (altitudeRelative), fallback AMSL, poi quella già in coordinate
+    // Altitude: prefer AGL (altitudeRelative), fallback AMSL, then use existing coordinate altitude
     double alt = c.altitude();
     if (v->altitudeRelative()) {
         alt = v->altitudeRelative()->rawValue().toDouble();
@@ -825,7 +825,7 @@ QVariantList CustomPlugin::buildAbluoPath(const QGeoCoordinate& s,
     auto pushIfDiff = [](QVariantList& lst, const QGeoCoordinate& c) {
         if (lst.isEmpty()) { lst << QVariant::fromValue(c); return; }
         const QGeoCoordinate last = lst.last().value<QGeoCoordinate>();
-        // differenza minima: ~1 cm in planimetria o 1 cm in quota
+        // minimum difference: ~1 cm in planimetry or 1 cm in altitude
         if ( (!last.isValid() || !c.isValid()) ||
              last.distanceTo(c) >= 0.01 ||
              std::abs(last.altitude() - c.altitude()) >= 0.01 ) {
@@ -838,7 +838,7 @@ QVariantList CustomPlugin::buildAbluoPath(const QGeoCoordinate& s,
     const double dz  = std::max(0.001, pitch_m);
     const double dir = (z1 >= z0) ? +1.0 : -1.0;
 
-    // --- 0) caso triviale: S e T stessa planimetria → solo verticale a step ---
+    // --- 0) trivial case: S and T have same XY → vertical-only steps ---
     if (std::abs(s.latitude()  - t.latitude())  < 1e-12 &&
         std::abs(s.longitude() - t.longitude()) < 1e-12)
     {
@@ -850,34 +850,34 @@ QVariantList CustomPlugin::buildAbluoPath(const QGeoCoordinate& s,
             cur.setAltitude(cur.altitude() + dir*step);
             pushIfDiff(out, cur);
         }
-        // assesta esattamente su T (identica XY e quota z1)
+        // snap exactly to T (same XY and altitude z1)
         QGeoCoordinate tt = t; tt.setAltitude(z1);
         pushIfDiff(out, tt);
         return out;
     }
 
-    // --- 1) punto di partenza: S esatto ---
+    // --- 1) starting point: exact S ---
     QGeoCoordinate cur = s; cur.setAltitude(z0);
     pushIfDiff(out, cur);
 
-    // siamo su “lato S” (XY = S). Questo flag indica su quale XY avviene il prossimo verticale.
+    // we are on “S side” (XY = S). This flag marks on which XY the next vertical happens.
     bool atSideS = true;
 
-    // --- 2) primo orizzontale: S → XY(T) alla stessa quota z0 ---
+    // --- 2) first horizontal: S → XY(T) at same altitude z0 ---
     {
         QGeoCoordinate h = cur;
         h.setLatitude (t.latitude());
         h.setLongitude(t.longitude());
-        // quota invariata (z0)
+        // same altitude (z0)
         pushIfDiff(out, h);
         cur = h;
-        atSideS = false; // ora siamo sul lato T
+        atSideS = false; // now we are on T side
     }
 
-    // --- 3) loop: verticale a step verso z1 sul lato corrente, poi orizzontale all’altro lato ---
+    // --- 3) loop: vertical step toward z1 on current side, then horizontal to the opposite side ---
     while ( (dir > 0 && cur.altitude() < z1) || (dir < 0 && cur.altitude() > z1) ) {
 
-        // 3a) VERTICALE sul lato corrente: cambia solo quota
+        // 3a) VERTICAL on current side: change only altitude
         {
             const double rem  = std::abs(z1 - cur.altitude());
             const double step = std::min(dz, rem);
@@ -887,44 +887,44 @@ QVariantList CustomPlugin::buildAbluoPath(const QGeoCoordinate& s,
             cur = v;
         }
 
-        // Se abbiamo raggiunto z1, esci: aggiusteremo XY su T sotto.
+        // If we reached z1, exit: we'll fix XY to T below.
         if (std::abs(cur.altitude() - z1) < 1e-9) break;
 
-        // 3b) ORIZZONTALE verso l’altro lato alla stessa quota
+        // 3b) HORIZONTAL to the opposite side at same altitude
         {
             QGeoCoordinate h = cur;
             if (atSideS) {
-                // eravamo lato S → vai a XY(T)
+                // we were on S side → go to XY(T)
                 h.setLatitude (t.latitude());
                 h.setLongitude(t.longitude());
             } else {
-                // eravamo lato T → vai a XY(S)
+                // we were on T side → go to XY(S)
                 h.setLatitude (s.latitude());
                 h.setLongitude(s.longitude());
             }
-            // quota invariata
+            // same altitude
             pushIfDiff(out, h);
             cur = h;
-            atSideS = !atSideS;   // inverti lato
+            atSideS = !atSideS;   // flip side
         }
     }
 
-    // --- 4) chiusura: assicurati di terminare esattamente su T (XY(T), z1) ---
+    // --- 4) closure: ensure we end exactly on T (XY(T), z1) ---
     {
         QGeoCoordinate last = cur;
-        // se l’ultima XY non è T, fai un ultimo orizzontale a quota z1
+        // if last XY is not T, do a final horizontal at altitude z1
         if (std::abs(last.latitude()  - t.latitude())  > 1e-12 ||
             std::abs(last.longitude() - t.longitude()) > 1e-12)
         {
             QGeoCoordinate h = last;
             h.setLatitude (t.latitude());
             h.setLongitude(t.longitude());
-            // quota corrente già z1 (se non lo fosse, fissala)
+            // altitude should already be z1 (if not, fix it)
             h.setAltitude(z1);
             pushIfDiff(out, h);
             last = h;
         }
-        // assesta esattamente quota z1 (di solito è già giusta)
+        // ensure altitude is exactly z1 (usually already correct)
         if (std::abs(last.altitude() - z1) > 1e-9) {
             QGeoCoordinate v = last; v.setAltitude(z1);
             pushIfDiff(out, v);
@@ -965,7 +965,7 @@ void CustomPlugin::uploadAbluoMission(const QVariantList& points)
         return;
     }
 
-    // 1) Normalizza punti -> QList<QGeoCoordinate> (finitezza garantita)
+    // 1) Normalize points -> QList<QGeoCoordinate> (finite values guaranteed)
     QList<QGeoCoordinate> wps; wps.reserve(points.size());
     for (const QVariant& v : points) {
         QGeoCoordinate c;
@@ -979,8 +979,8 @@ void CustomPlugin::uploadAbluoMission(const QVariantList& points)
     }
     if (wps.size() < 2) { qWarning() << "[CustomPlugin] uploadAbluoMission: too few waypoints"; return; }
 
-    // --- Failsafe: primo segmento sempre orizzontale ----------------------------
-    // Scegli dinamicamente l'asse "orizzontale": quello con span più grande (in metri).
+    // --- Failsafe: enforce first leg horizontal --------------------------------
+    // Dynamically choose the “horizontal” axis: the one with the largest span (in meters).
     auto dist_m = [](double lat1, double lon1, double lat2, double lon2) {
         QGeoCoordinate a(lat1, lon1), b(lat2, lon2);
         return a.distanceTo(b);
@@ -996,17 +996,17 @@ void CustomPlugin::uploadAbluoMission(const QVariantList& points)
         if (std::isfinite(c.longitude())) { minLon = std::min(minLon, c.longitude()); maxLon = std::max(maxLon, c.longitude()); }
     }
 
-    // stima ampiezza in metri dei due assi alla lat media
+    // estimate span in meters of both axes at mid-latitude
     double midLat = (std::isfinite(minLat) && std::isfinite(maxLat)) ? (0.5 * (minLat + maxLat)) : 0.0;
     double spanLon_m = (std::isfinite(minLon) && std::isfinite(maxLon))
         ? dist_m(midLat, minLon, midLat, maxLon) : 0.0;
     double spanLat_m = (std::isfinite(minLat) && std::isfinite(maxLat))
         ? dist_m(minLat, 0.0,  maxLat, 0.0)       : 0.0;
 
-    // scegli asse orizzontale: true → usa longitudine, false → usa latitudine
+    // choose horizontal axis: true → use longitude, false → use latitude
     bool horizByLon = spanLon_m >= spanLat_m;
 
-    // se i primi due WP risultano sullo stesso lato lungo l’asse scelto, sposta WP1 sul lato opposto
+    // if the first two WPs end up on the same side along the chosen axis, move WP1 to the opposite side
     if (wps.size() >= 2 && std::isfinite(minLon) && std::isfinite(maxLon) && std::isfinite(minLat) && std::isfinite(maxLat)) {
         QGeoCoordinate& p0 = wps[0];
         QGeoCoordinate& p1 = wps[1];
@@ -1015,7 +1015,7 @@ void CustomPlugin::uploadAbluoMission(const QVariantList& points)
 
         if (horizByLon) {
             if (almostEqual(p0.longitude(), p1.longitude())) {
-                // manda p1 al lato opposto in LONGITUDINE, stessa lat/alt di p0
+                // push p1 to opposite LONGITUDE side, keeping p0 lat/alt
                 double dToMin = std::abs(p0.longitude() - minLon);
                 double dToMax = std::abs(p0.longitude() - maxLon);
                 double oppLon = (dToMin < dToMax) ? maxLon : minLon;
@@ -1026,7 +1026,7 @@ void CustomPlugin::uploadAbluoMission(const QVariantList& points)
             }
         } else {
             if (almostEqual(p0.latitude(), p1.latitude())) {
-                // manda p1 al lato opposto in LATITUDINE, stessa lon/alt di p0
+                // push p1 to opposite LATITUDE side, keeping p0 lon/alt
                 double dToMin = std::abs(p0.latitude() - minLat);
                 double dToMax = std::abs(p0.latitude() - maxLat);
                 double oppLat = (dToMin < dToMax) ? maxLat : minLat;
@@ -1068,10 +1068,10 @@ void CustomPlugin::uploadAbluoMission(const QVariantList& points)
         return;
     }
 
-    // Flag one-shot per evitare doppio upload da fallback/clear
+    // One-shot flag to avoid double upload from fallback/clear
     QSharedPointer<bool> started = QSharedPointer<bool>::create(false);
 
-    // Fallback timer (se removeAll non risponde)
+    // Fallback timer (if removeAll does not respond)
     QPointer<QTimer> fallback = new QTimer(qApp);
     fallback->setSingleShot(true);
     fallback->setInterval(3000);
@@ -1083,7 +1083,7 @@ void CustomPlugin::uploadAbluoMission(const QVariantList& points)
         }
     };
 
-    // ⬇️ NIENTE mutable qui
+    // ⬇️ Do NOT capture mutable here
     auto startUpload = [mm, items, started, stopFallback]() {
         if (!mm || mm->inProgress()) return;
         if (*started) return;
@@ -1094,19 +1094,19 @@ void CustomPlugin::uploadAbluoMission(const QVariantList& points)
 
         QObject::connect(mm, &MissionManager::sendComplete, qApp, [=](bool ok){
             qDebug() << "[CustomPlugin] mission upload done:" << ok;
-            // Qui puoi anche resettare un tuo flag di stato se ne tieni uno globale
+            // You may reset any global state flag here if you keep one
         }, Qt::QueuedConnection);
 
-        // (opzionale) aggancia anche un segnale di errore se esiste nella tua versione:
+        // (optional) also hook an error signal if present in your QGC branch:
         // QObject::connect(mm, &MissionManager::error, qApp, [](int code, const QString& err){
         //     qWarning() << "[CustomPlugin] Mission upload error:" << code << err;
         // }, Qt::QueuedConnection);
 
         mm->writeMissionItems(items);   // ownership -> MissionManager
-        // NON fare items.clear() qui: non serve e richiede mutable
+        // Do NOT items.clear() here: not needed and would require mutable capture
     };
 
-    // se clear() non risponde, partiamo lo stesso
+    // If clear() does not respond, start anyway
     QObject::connect(fallback, &QTimer::timeout, qApp, [startUpload]() {
         qWarning() << "[CustomPlugin] clear timeout, fallback upload";
         startUpload();
@@ -1114,7 +1114,7 @@ void CustomPlugin::uploadAbluoMission(const QVariantList& points)
 
     fallback->start();
 
-    // Quando removeAll completa: stop fallback e upload
+    // When removeAll completes: stop fallback and upload
     QObject::connect(mm, &MissionManager::removeAllComplete, qApp, [startUpload, stopFallback](bool /*ok*/) {
         stopFallback();
         startUpload();
@@ -1138,7 +1138,7 @@ void CustomPlugin::clearAbluoMission()
     }
 
     if (mm->inProgress()) {
-        // Se c'è già un'operazione in corso, aspetta che finisca e poi riprova
+        // If an operation is already in progress, wait for it to finish and then retry
         qWarning() << "[CustomPlugin] clearAbluoMission: MissionManager busy, will retry";
         QPointer<MissionManager> mmPtr(mm);
         QObject::connect(mm, &MissionManager::inProgressChanged, qApp, [mmPtr]() {
@@ -1154,7 +1154,7 @@ void CustomPlugin::clearAbluoMission()
 }
 
 
-// ======= NUOVO: gestione WPNAV_SPEED =======
+// ======= NEW: WPNAV_SPEED handling =======
 void CustomPlugin::_detachWpnavWatcher()
 {
     if (_wpnavConnection) {
@@ -1185,10 +1185,10 @@ void CustomPlugin::_refreshWpnavFromFact()
 
 void CustomPlugin::_startWpnavProbeTimer(ParameterManager* pm)
 {
-    if (_wpnavProbeTimer) return; // già attivo
+    if (_wpnavProbeTimer) return; // already active
 
     _wpnavProbeTimer = new QTimer(this);
-    _wpnavProbeTimer->setInterval(500); // mezzo secondo
+    _wpnavProbeTimer->setInterval(500); // half a second
     _wpnavProbeTimer->setSingleShot(false);
 
     connect(_wpnavProbeTimer, &QTimer::timeout, this, [this, pm]() {
@@ -1201,7 +1201,7 @@ void CustomPlugin::_startWpnavProbeTimer(ParameterManager* pm)
                 _wpnavConnection = connect(_wpnavSpeedFact, &Fact::rawValueChanged, this, [this]() {
                     _refreshWpnavFromFact();
                 });
-                // trovato: stop & cleanup timer
+                // found: stop & cleanup timer
                 if (_wpnavProbeTimer) {
                     _wpnavProbeTimer->stop();
                     _wpnavProbeTimer->deleteLater();
@@ -1227,7 +1227,7 @@ void CustomPlugin::_attachWpnavWatcher(Vehicle* v)
     ParameterManager* pm = v->parameterManager();
     const int comp = FactSystem::defaultComponentId;
 
-    // Prova immediatamente
+    // Try immediately
     if (pm->parameterExists(comp, QStringLiteral("WPNAV_SPEED"))) {
         _wpnavSpeedFact = pm->getParameter(comp, QStringLiteral("WPNAV_SPEED"));
         if (_wpnavSpeedFact) {
@@ -1239,7 +1239,7 @@ void CustomPlugin::_attachWpnavWatcher(Vehicle* v)
         }
     }
 
-    // Se non c'è ancora, parte un probing periodico finché il parametro arriva
+    // If not available yet, start periodic probing until the parameter arrives
     _startWpnavProbeTimer(pm);
 }
 

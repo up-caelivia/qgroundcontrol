@@ -54,10 +54,9 @@ class CustomPlugin : public QGCCorePlugin
     Q_PROPERTY(bool           isAbluoMapPlanEnabled  READ isAbluoMapPlanEnabled  WRITE setAbluoMapPlanEnabled NOTIFY abluoMapPlanChanged)
     Q_PROPERTY(QGeoCoordinate startCoordinate        READ startCoordinate                                       NOTIFY startCoordinateChanged)
     Q_PROPERTY(QGeoCoordinate stopCoordinate         READ stopCoordinate                                        NOTIFY stopCoordinateChanged)
-    // NUOVO: velocità waypoint in m/s (da WPNAV_SPEED in cm/s)
-    Q_PROPERTY(double         wpnavSpeedMps          READ wpnavSpeedMps                                        NOTIFY wpnavSpeedMpsChanged)
-    Q_PROPERTY(int cachedResumeIndex READ getCachedResumeIndex NOTIFY cachedResumeIndexChanged)
-    Q_PROPERTY(int abluoCurrentWp READ abluoCurrentWp WRITE setAbluoCurrentWp NOTIFY abluoCurrentWpChanged)
+    Q_PROPERTY(double         wpnavSpeedMps          READ wpnavSpeedMps                                         NOTIFY wpnavSpeedMpsChanged)
+    Q_PROPERTY(int            cachedResumeIndex      READ getCachedResumeIndex                                  NOTIFY cachedResumeIndexChanged)
+    Q_PROPERTY(int            abluoCurrentWp         READ abluoCurrentWp        WRITE setAbluoCurrentWp         NOTIFY abluoCurrentWpChanged)
 
 
 public:
@@ -109,8 +108,8 @@ public:
 
     double                  wpnavSpeedMps() const { return _wpnavSpeedMps; }
 
-    Q_INVOKABLE void cacheResumeIndex(int index);  // salva l’indice
-    Q_INVOKABLE int  getCachedResumeIndex() const; // legge l’indice
+    Q_INVOKABLE void cacheResumeIndex(int index); 
+    Q_INVOKABLE int  getCachedResumeIndex() const; 
 
     int  abluoCurrentWp() const { return _abluoCurrentWp; }
     void setAbluoCurrentWp(int v);
@@ -162,10 +161,10 @@ private:
     QGeoCoordinate    _stopCoordinate;
 
     // Stato WPNAV_SPEED
-    double            _wpnavSpeedMps = std::numeric_limits<double>::quiet_NaN(); // m/s
+    double            _wpnavSpeedMps = std::numeric_limits<double>::quiet_NaN(); 
     Fact*             _wpnavSpeedFact = nullptr;
     QMetaObject::Connection _wpnavConnection;
-    QTimer*           _wpnavProbeTimer = nullptr;   // timer di probing per trovare il parametro
+    QTimer*           _wpnavProbeTimer = nullptr; 
     int _cachedResumeIndex = -1;
     int _abluoCurrentWp = -1;
 };

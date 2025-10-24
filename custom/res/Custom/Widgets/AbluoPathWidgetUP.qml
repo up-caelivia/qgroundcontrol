@@ -38,6 +38,7 @@ ToolStrip {
     }
 
     Component.onCompleted: {
+        // restore saved settings/coords if available
         if (Constants.savedPitch !== undefined) {
             abluoToolStrip.pitchValue = Number(Constants.savedPitch) || 0
             serpentine.pitch_m = abluoToolStrip.pitchValue
@@ -55,6 +56,7 @@ ToolStrip {
             const v = QGroundControl.multiVehicleManager.activeVehicle
             const autoMode = (v && v.flightMode === "Auto")
             abluoToolStrip.missionInProgress = !!autoMode
+            // keep canvas active even in AUTO so colors can update live
             serpCanvas.drawingEnabled = true
             serpCanvas.schedulePaint()
         }
@@ -66,6 +68,7 @@ ToolStrip {
         const v = vm.activeVehicle
         if (!v.coordinate || !v.coordinate.isValid) return null
 
+        // prefer relative altitude if available
         let altAgl = 0
         try {
             if (v.altitudeRelative && v.altitudeRelative.rawValue !== undefined) {
@@ -127,7 +130,7 @@ ToolStrip {
                 mipmap: true
             }
 
-            // real painted area
+            // area actually painted by the image
             readonly property real imgLeft:   bigImage.x + (bigImage.width  - bigImage.paintedWidth)  / 2
             readonly property real imgTop:    bigImage.y + (bigImage.height - bigImage.paintedHeight) / 2
             readonly property real imgRight:  imgLeft + bigImage.paintedWidth
@@ -135,14 +138,14 @@ ToolStrip {
             readonly property real imgW:      bigImage.paintedWidth
             readonly property real imgH:      bigImage.paintedHeight
 
-            // S/T markers
+            // S/T markers style
             property real markerSize:  Math.round(ScreenTools.defaultFontPixelHeight * 1.2)
             property real markerInset: Math.round(ScreenTools.defaultFontPixelHeight * 0.4)
             property color markerFill: "white"
             property color markerText: "black"
             property color markerBorder: "black"
 
-            // S
+            // S marker
             Item {
                 width: leftPanel.markerSize; height: leftPanel.markerSize
                 x: leftPanel.sideLeft
@@ -156,7 +159,7 @@ ToolStrip {
                 QGCLabel { anchors.centerIn: parent; text: "S"; color: leftPanel.markerText; font.bold: true; font.pointSize: ScreenTools.defaultFontPointSize * 1.1 }
             }
 
-            // T
+            // T marker
             Item {
                 width: leftPanel.markerSize; height: leftPanel.markerSize
                 x: leftPanel.sideLeft
@@ -170,7 +173,7 @@ ToolStrip {
                 QGCLabel { anchors.centerIn: parent; text: "T"; color: leftPanel.markerText; font.bold: true; font.pointSize: ScreenTools.defaultFontPointSize * 1.1 }
             }
 
-            // WIDTH (text only)
+            // WIDTH label (text only)
             QGCLabel {
                 id: widthText
                 text: leftPanel.dimValueWidthMeters
@@ -181,7 +184,7 @@ ToolStrip {
                 visible: bigImage.status === Image.Ready && leftPanel.width_m > 0
             }
 
-            // HEIGHT (text only, rotated)
+            // HEIGHT label (text only, rotated)
             QGCLabel {
                 id: heightText
                 text: leftPanel.dimValueHeightMeters
@@ -194,7 +197,7 @@ ToolStrip {
                 visible: bigImage.status === Image.Ready && leftPanel.height_m > 0
             }
 
-            // SERPENTINE
+            // SERPENTINE canvas
             Canvas {
                 id: serpCanvas
                 x: leftPanel.imgLeft
@@ -217,10 +220,10 @@ ToolStrip {
                     })
                 }
 
-                // nuovo: indice ultimo waypoint passato (–1 = nessuno)
+                // current mission "target" waypoint index; -1 = none yet
                 property int passedWpIndex: -1
 
-                // repaint su variazioni
+                // repaint triggers
                 Connections {
                     target: serpentine
                     onWidth_mChanged:  serpCanvas.schedulePaint()
@@ -237,7 +240,7 @@ ToolStrip {
                     onPitchValueChanged: serpCanvas.schedulePaint()
                 }
 
-                // collega al plugin (se disponibile) per tenere aggiornato passedWpIndex
+                // keep passedWpIndex in sync with CustomPlugin
                 Connections {
                     target: CustomPlugin
                     onAbluoCurrentWpChanged: {
@@ -285,7 +288,7 @@ ToolStrip {
                     // vertical direction
                     const dir = (tPixY > sPixY) ? +1 : -1
 
-                    // costruiamo i vertici in pixel (stesso tracciato del tuo codice originale)
+                    // build pixel vertices with same pattern as original code
                     const pts = []
                     let y = sPixY
                     let goRight = leftPanel.sideLeft
@@ -294,10 +297,10 @@ ToolStrip {
                     let stripes = 0
                     const maxStripes = serpCanvas.maxStripes
                     while (((dir > 0 && y < tPixY) || (dir < 0 && y > tPixY)) && stripes < maxStripes) {
-                        // orizzontale
+                        // horizontal
                         pts.push({ x: (goRight ? rightX : leftX), y: y })
 
-                        // verticale (accorcia l'ultimo passo)
+                        // vertical (shorten last step)
                         const remaining = Math.abs(tPixY - y)
                         const step = Math.min(stepPxNom, remaining)
                         y += dir * step
@@ -307,13 +310,13 @@ ToolStrip {
                         stripes++
                     }
 
-                    // chiusura su T
+                    // ensure it ends exactly on T
                     const last = pts[pts.length - 1]
                     if (last.x !== tPixX || last.y !== tPixY) {
                         pts.push({ x: tPixX, y: tPixY })
                     }
 
-                    // helper: disegna una polilinea tra due indici inclusivi
+                    // helper: draw a polyline between [iStart..iEnd] inclusive
                     function strokeFromTo(iStart, iEnd, color, lineWidth) {
                         if (iEnd <= iStart || iStart < 0 || iEnd >= pts.length) return
                         ctx.beginPath()
@@ -326,43 +329,44 @@ ToolStrip {
                         ctx.stroke()
                     }
 
-                    // cut = ultimo waypoint passato
+                    // 'cut' = last reached waypoint index
                     const cut = Math.min(
                         Math.max(serpCanvas.passedWpIndex, -1),
                         pts.length - 1
                     )
                     const lineW = 4
-                    const COL_RED    = "#FF3B30"
-                    const COL_ORANGE = "#FFA500"
-                    const COL_YELLOW = "#FFD600"
+                    const COL_RED    = "#FF3B30"  // past
+                    const COL_ORANGE = "#FFA500"  // current segment
+                    const COL_YELLOW = "#FFD600"  // remaining
                     const idx = Math.min(
                         Math.max(serpCanvas.passedWpIndex, -1),
                         pts.length - 1
                     )
 
+                    // draw in three parts: red (past), orange (current), yellow (future)
                     if (cut < 0) {
-                        // tutto giallo
+                        // all yellow
                         strokeFromTo(0, pts.length - 1, COL_YELLOW, lineW)
                     } else if (cut >= pts.length - 1) {
-                        // tutto rosso
+                        // all red
                         strokeFromTo(0, pts.length - 1, COL_RED, lineW)
                     } else {
                         const passedEnd = idx - 1
-                        // ROSSO: fino all'ultimo wp davvero superato
+                        // RED: up to the last fully passed waypoint
                         if (passedEnd >= 1) {
                             strokeFromTo(0, passedEnd, COL_RED, lineW)
                         } else if (passedEnd === 0) {
-                            // disegna almeno il primo punto per continuità visiva
+                            // draw at least the first point for visual continuity
                             strokeFromTo(0, 0, COL_RED, lineW)
                         }
 
-                        // ARANCIONE: segmento corrente (tra wp-1 e wp)
-                        // Attenzione ai bound quando idx==0 (segmento iniziale)
+                        // ORANGE: current segment (between wp-1 and wp)
+                        // handle bounds when idx == 0 (initial segment)
                         const curStart = Math.max(0, passedEnd)
                         const curEnd   = Math.max(1, idx)
                         strokeFromTo(curStart, curEnd, COL_ORANGE, lineW)
 
-                        // GIALLO: dal wp corrente in poi (riparto da idx per continuità)
+                        // YELLOW: from current wp onward (restart at idx for continuity)
                         strokeFromTo(idx, pts.length - 1, COL_YELLOW, lineW)
                     }
                 }
@@ -418,7 +422,7 @@ ToolStrip {
                     }
                 }
 
-                // optional: flip (hidden)
+                // optional: flip side (hidden)
                 QGCButton {
                     text: "Flip side"
                     Layout.fillWidth: true
@@ -478,7 +482,6 @@ ToolStrip {
                     Layout.fillWidth: true
                 }
 
-
                 QGCLabel {
                     text: "Start (S): " + fmtCoord(serpentine.s_coord) + "\nStop (T): " + fmtCoord(serpentine.t_coord)
                     color: "white"
@@ -537,7 +540,7 @@ ToolStrip {
                                 CustomPlugin.isAbluoMapPlanEnabled = !CustomPlugin.isAbluoMapPlanEnabled
                             }
 
-                            // reset il “passato”
+                            // reset the “passed” index
                             serpCanvas.passedWpIndex = -1
                             serpCanvas.schedulePaint()
                         }
@@ -570,7 +573,7 @@ ToolStrip {
                                 CustomPlugin.clearAbluoMission()
                             }
 
-                            // 4) reset indice passato e repaint
+                            // 4) reset passed index and repaint
                             serpCanvas.passedWpIndex = -1
                             serpCanvas.schedulePaint()
                         }
@@ -659,11 +662,11 @@ ToolStrip {
 
             let pts = []
 
-            // 1) Primo punto = S esatto alla quota z0
+            // 1) First point = exact S at altitude z0
             let p = QtPositioning.coordinate(s_coord.latitude, s_coord.longitude, z0)
             pts.push(p)
 
-            // 2) Secondo punto = orizzontale alla stessa quota verso il lato opposto
+            // 2) Second point = horizontal at same altitude to the opposite side
             let p2 = QtPositioning.coordinate(p.latitude, p.longitude, z0)
             if (horizByLon) {
                 const dW = Math.abs(p.longitude - west)
@@ -674,9 +677,9 @@ ToolStrip {
                 const dN = Math.abs(p.latitude - north)
                 p2.latitude = (dS < dN) ? north : south
             }
-            if (p2.distanceTo(pts[pts.length-1]) > 0.01) pts.push(p2) // evita duplicati
+            if (p2.distanceTo(pts[pts.length-1]) > 0.01) pts.push(p2) // avoid duplicates
 
-            // 3) Verticale a gradini + orizzontale opposto a ogni quota
+            // 3) Vertical steps + horizontal to the opposite side at each altitude
             let y = z0
             let cur = p2
             while ((dir > 0 && y < z1) || (dir < 0 && y > z1)) {
@@ -684,11 +687,11 @@ ToolStrip {
                 const step = Math.min(dz, remaining)
                 y += dir * step
 
-                // verticale
+                // vertical
                 let v = QtPositioning.coordinate(cur.latitude, cur.longitude, y)
                 if (v.distanceTo(pts[pts.length-1]) > 0.01) pts.push(v)
 
-                // orizzontale lato opposto
+                // horizontal to opposite side
                 let h = QtPositioning.coordinate(v.latitude, v.longitude, y)
                 if (horizByLon) {
                     const dW = Math.abs(v.longitude - west)
@@ -703,7 +706,7 @@ ToolStrip {
                 cur = h
             }
 
-            // 4) Aggancio a T esatto
+            // 4) Snap exactly to T
             let last = pts[pts.length-1]
             if (Math.abs(last.altitude - z1) > 0.01) {
                 let v = QtPositioning.coordinate(last.latitude, last.longitude, z1)
@@ -713,14 +716,12 @@ ToolStrip {
             const tExact = QtPositioning.coordinate(t_coord.latitude, t_coord.longitude, z1)
             if (tExact.distanceTo(last) > 0.01) pts.push(tExact)
 
-            // 5) Lunghezza
+            // 5) Total length
             let sum = 0
             for (let i = 1; i < pts.length; i++) sum += pts[i-1].distanceTo(pts[i])
             total_len_m = sum
             path = pts
         }
-
-
 
         onS_coordChanged: build()
         onT_coordChanged: build()
