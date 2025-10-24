@@ -643,6 +643,7 @@ void CustomPlugin::onActiveVehicleChanged(Vehicle* vehicle)
         _detachWpnavWatcher();  // reset watcher WPNAV
         _wpnavSpeedMps = std::numeric_limits<double>::quiet_NaN();
         emit wpnavSpeedMpsChanged();
+        setAbluoCurrentWp(-1);
         return;
     }
 
@@ -666,6 +667,33 @@ void CustomPlugin::onActiveVehicleChanged(Vehicle* vehicle)
 
     // collega/ricollega watcher WPNAV_SPEED
     _attachWpnavWatcher(vehicle);
+
+    // Hook A: MissionManager::currentIndexChanged (OK in tutte le versioni)
+    if (vehicle->missionManager()) {
+        // stato iniziale
+        setAbluoCurrentWp(vehicle->missionManager()->currentIndex());
+        qDebug() << "[Abluo] initial mission index =" << vehicle->missionManager()->currentIndex();
+
+        // aggiornamenti
+        connect(vehicle->missionManager(), &MissionManager::currentIndexChanged,
+                this, [this](int idx){
+                    qDebug() << "[Abluo] MissionManager::currentIndexChanged ->" << idx;
+                    setAbluoCurrentWp(idx);
+                },
+                Qt::UniqueConnection);
+    }
+
+    // Hook B: MAVLink grezzo – **firma A 1 ARGOMENTO** nel tuo ramo
+    connect(vehicle, &Vehicle::mavlinkMessageReceived,
+            this,
+            [this](const mavlink_message_t& msg){
+                if (msg.msgid == MAVLINK_MSG_ID_MISSION_CURRENT) {
+                    mavlink_mission_current_t cur{};
+                    mavlink_msg_mission_current_decode(&msg, &cur);
+                    setAbluoCurrentWp(static_cast<int>(cur.seq));
+                }
+            },
+            Qt::UniqueConnection);
 }
 
 void CustomPlugin::handleMavlinkMessage(const mavlink_message_t& message)
@@ -709,6 +737,11 @@ void CustomPlugin::handleMavlinkMessage(const mavlink_message_t& message)
         }
         else {
         }
+    }
+    if (message.msgid == MAVLINK_MSG_ID_MISSION_CURRENT) {
+        mavlink_mission_current_t cur{};
+        mavlink_msg_mission_current_decode(&message, &cur);
+        setAbluoCurrentWp(static_cast<int>(cur.seq));
     }
 }
 
@@ -1088,6 +1121,7 @@ void CustomPlugin::uploadAbluoMission(const QVariantList& points)
     }, Qt::QueuedConnection);
 
     mm->removeAll();
+    setAbluoCurrentWp(-1);
 }
 
 void CustomPlugin::clearAbluoMission()
@@ -1116,6 +1150,7 @@ void CustomPlugin::clearAbluoMission()
     }
 
     mm->removeAll();
+    setAbluoCurrentWp(-1);
 }
 
 
@@ -1221,4 +1256,10 @@ void CustomPlugin::cacheResumeIndex(int index)
 int CustomPlugin::getCachedResumeIndex() const
 {
     return _cachedResumeIndex;
+}
+
+void CustomPlugin::setAbluoCurrentWp(int v)
+{
+    _abluoCurrentWp = v;
+    emit abluoCurrentWpChanged();
 }

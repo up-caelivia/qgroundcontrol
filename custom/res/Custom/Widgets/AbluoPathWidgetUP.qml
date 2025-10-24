@@ -55,7 +55,7 @@ ToolStrip {
             const v = QGroundControl.multiVehicleManager.activeVehicle
             const autoMode = (v && v.flightMode === "Auto")
             abluoToolStrip.missionInProgress = !!autoMode
-            serpCanvas.drawingEnabled = !autoMode
+            serpCanvas.drawingEnabled = true
             serpCanvas.schedulePaint()
         }
     }
@@ -217,7 +217,10 @@ ToolStrip {
                     })
                 }
 
-                // repaint on value changes only
+                // nuovo: indice ultimo waypoint passato (–1 = nessuno)
+                property int passedWpIndex: -1
+
+                // repaint su variazioni
                 Connections {
                     target: serpentine
                     onWidth_mChanged:  serpCanvas.schedulePaint()
@@ -233,6 +236,23 @@ ToolStrip {
                     target: abluoToolStrip
                     onPitchValueChanged: serpCanvas.schedulePaint()
                 }
+
+                // collega al plugin (se disponibile) per tenere aggiornato passedWpIndex
+                Connections {
+                    target: CustomPlugin
+                    onAbluoCurrentWpChanged: {
+                        const len = Math.max(serpentine.path.length - 1, -1)
+                        serpCanvas.passedWpIndex = Math.min(Math.max(CustomPlugin.abluoCurrentWp, -1), len)
+                        serpCanvas.schedulePaint()
+                    }
+                }
+                Component.onCompleted: {
+                    if (CustomPlugin && CustomPlugin.abluoCurrentWp !== undefined) {
+                        const len = Math.max(serpentine.path.length - 1, -1)
+                        serpCanvas.passedWpIndex = Math.min(Math.max(CustomPlugin.abluoCurrentWp, -1), len)
+                    }
+                }
+
                 onWidthChanged:  schedulePaint()
                 onHeightChanged: schedulePaint()
 
@@ -265,32 +285,86 @@ ToolStrip {
                     // vertical direction
                     const dir = (tPixY > sPixY) ? +1 : -1
 
-                    // style
-                    ctx.strokeStyle = "#FFD600"
-                    ctx.lineWidth   = 2
-
-                    // draw
+                    // costruiamo i vertici in pixel (stesso tracciato del tuo codice originale)
+                    const pts = []
                     let y = sPixY
                     let goRight = leftPanel.sideLeft
-                    let stripes = 0
-                    ctx.beginPath()
-                    ctx.moveTo(sPixX, y)
+                    pts.push({x: sPixX, y: y})
 
+                    let stripes = 0
+                    const maxStripes = serpCanvas.maxStripes
                     while (((dir > 0 && y < tPixY) || (dir < 0 && y > tPixY)) && stripes < maxStripes) {
-                        ctx.lineTo(goRight ? rightX : leftX, y)      // horizontal
+                        // orizzontale
+                        pts.push({ x: (goRight ? rightX : leftX), y: y })
+
+                        // verticale (accorcia l'ultimo passo)
                         const remaining = Math.abs(tPixY - y)
-                        const step = Math.min(stepPxNom, remaining)  // shorten last step
+                        const step = Math.min(stepPxNom, remaining)
                         y += dir * step
-                        ctx.lineTo(goRight ? rightX : leftX, y)      // vertical
+                        pts.push({ x: (goRight ? rightX : leftX), y: y })
+
                         goRight = !goRight
                         stripes++
                     }
 
-                    // close exactly on T
-                    const curX = goRight ? leftX : rightX
-                    if (curX !== tPixX || y !== tPixY) ctx.lineTo(tPixX, tPixY)
+                    // chiusura su T
+                    const last = pts[pts.length - 1]
+                    if (last.x !== tPixX || last.y !== tPixY) {
+                        pts.push({ x: tPixX, y: tPixY })
+                    }
 
-                    ctx.stroke()
+                    // helper: disegna una polilinea tra due indici inclusivi
+                    function strokeFromTo(iStart, iEnd, color, lineWidth) {
+                        if (iEnd <= iStart || iStart < 0 || iEnd >= pts.length) return
+                        ctx.beginPath()
+                        ctx.moveTo(pts[iStart].x, pts[iStart].y)
+                        for (let i = iStart + 1; i <= iEnd; i++) {
+                            ctx.lineTo(pts[i].x, pts[i].y)
+                        }
+                        ctx.strokeStyle = color
+                        ctx.lineWidth   = lineWidth
+                        ctx.stroke()
+                    }
+
+                    // cut = ultimo waypoint passato
+                    const cut = Math.min(
+                        Math.max(serpCanvas.passedWpIndex, -1),
+                        pts.length - 1
+                    )
+                    const lineW = 4
+                    const COL_RED    = "#FF3B30"
+                    const COL_ORANGE = "#FFA500"
+                    const COL_YELLOW = "#FFD600"
+                    const idx = Math.min(
+                        Math.max(serpCanvas.passedWpIndex, -1),
+                        pts.length - 1
+                    )
+
+                    if (cut < 0) {
+                        // tutto giallo
+                        strokeFromTo(0, pts.length - 1, COL_YELLOW, lineW)
+                    } else if (cut >= pts.length - 1) {
+                        // tutto rosso
+                        strokeFromTo(0, pts.length - 1, COL_RED, lineW)
+                    } else {
+                        const passedEnd = idx - 1
+                        // ROSSO: fino all'ultimo wp davvero superato
+                        if (passedEnd >= 1) {
+                            strokeFromTo(0, passedEnd, COL_RED, lineW)
+                        } else if (passedEnd === 0) {
+                            // disegna almeno il primo punto per continuità visiva
+                            strokeFromTo(0, 0, COL_RED, lineW)
+                        }
+
+                        // ARANCIONE: segmento corrente (tra wp-1 e wp)
+                        // Attenzione ai bound quando idx==0 (segmento iniziale)
+                        const curStart = Math.max(0, passedEnd)
+                        const curEnd   = Math.max(1, idx)
+                        strokeFromTo(curStart, curEnd, COL_ORANGE, lineW)
+
+                        // GIALLO: dal wp corrente in poi (riparto da idx per continuità)
+                        strokeFromTo(idx, pts.length - 1, COL_YELLOW, lineW)
+                    }
                 }
             }
         }
@@ -462,6 +536,10 @@ ToolStrip {
                                     CustomPlugin.sendLogMessage("Mission uploaded: " + pts.length + " waypoints")
                                 CustomPlugin.isAbluoMapPlanEnabled = !CustomPlugin.isAbluoMapPlanEnabled
                             }
+
+                            // reset il “passato”
+                            serpCanvas.passedWpIndex = -1
+                            serpCanvas.schedulePaint()
                         }
                     }
 
@@ -492,7 +570,8 @@ ToolStrip {
                                 CustomPlugin.clearAbluoMission()
                             }
 
-                            // 4) repaint serpentine canvas
+                            // 4) reset indice passato e repaint
+                            serpCanvas.passedWpIndex = -1
                             serpCanvas.schedulePaint()
                         }
                     }

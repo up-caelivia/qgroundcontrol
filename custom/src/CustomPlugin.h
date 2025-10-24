@@ -57,6 +57,8 @@ class CustomPlugin : public QGCCorePlugin
     // NUOVO: velocità waypoint in m/s (da WPNAV_SPEED in cm/s)
     Q_PROPERTY(double         wpnavSpeedMps          READ wpnavSpeedMps                                        NOTIFY wpnavSpeedMpsChanged)
     Q_PROPERTY(int cachedResumeIndex READ getCachedResumeIndex NOTIFY cachedResumeIndexChanged)
+    Q_PROPERTY(int abluoCurrentWp READ abluoCurrentWp WRITE setAbluoCurrentWp NOTIFY abluoCurrentWpChanged)
+
 
 public:
     CustomPlugin(QGCApplication* app, QGCToolbox *toolbox);
@@ -110,6 +112,9 @@ public:
     Q_INVOKABLE void cacheResumeIndex(int index);  // salva l’indice
     Q_INVOKABLE int  getCachedResumeIndex() const; // legge l’indice
 
+    int  abluoCurrentWp() const { return _abluoCurrentWp; }
+    void setAbluoCurrentWp(int v);
+
 signals:
     void speedMessageChanged();
     void savParamCoordinatesChanged();
@@ -121,6 +126,8 @@ signals:
     void stopCoordinateChanged();
     void wpnavSpeedMpsChanged(); 
     void cachedResumeIndexChanged();
+    void abluoCurrentWpChanged();
+
 
 
 private slots:
@@ -160,4 +167,5 @@ private:
     QMetaObject::Connection _wpnavConnection;
     QTimer*           _wpnavProbeTimer = nullptr;   // timer di probing per trovare il parametro
     int _cachedResumeIndex = -1;
+    int _abluoCurrentWp = -1;
 };
