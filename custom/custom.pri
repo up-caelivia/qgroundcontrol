@@ -64,6 +64,7 @@ DEFINES += CUSTOMCLASS=CustomPlugin
 DEFINES += CUSTOMCORE_PLUGIN=CustomPlugin
 
 exists($$PWD/create_ABLUO) {
+    message(ABLUO VERSION FOUND)
     TARGET   = QGroundControlABLUO
     DEFINES += QGC_APPLICATION_NAME='"\\\"QGroundControlABLUO\\\""'
     QGC_APP_NAME        = "QGroundControlABLUO"
@@ -87,6 +88,7 @@ exists($$PWD/create_ABLUO) {
     DEFINES += ABLUO_APP
 
 } else {
+    message(UP VERSION FOUND)
     TARGET   = QGroundControlUP
     DEFINES += QGC_APPLICATION_NAME='"\\\"QGroundControlUP\\\""'
     QGC_APP_NAME        = "QGroundControlUP"

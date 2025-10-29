@@ -45,6 +45,7 @@
         <file alias="AboutUP.qml">res/Custom/Widgets/AboutUP.qml</file> 
         <file alias="Custom/Widgets/SavParamMarkerUP.qml">res/Custom/Widgets/SavParamMarkerUP.qml</file>
         <file alias="Custom/Widgets/SavButtonWidgetUP.qml">res/Custom/Widgets/SavButtonWidgetUP.qml</file>
+        <file alias="Custom/Widgets/AbluoPathWidgetUP.qml">res/Custom/Widgets/AbluoPathWidgetUP.qml</file>
 		<file alias="Custom/Widgets/AwarenessInfoHeader.qml">res/Custom/Widgets/AwarenessInfoHeader.qml</file>
 		<file alias="Custom/Widgets/AwarenessInfoViewer.qml">res/Custom/Widgets/AwarenessInfoViewer.qml</file>
     </qresource>
@@ -92,6 +93,7 @@
         <file alias="PlanView.qml">src/PlanView/PlanViewUP.qml</file>
         <file alias="QGroundControl/FlightDisplay/FlyViewMissionCompleteDialog.qml">src/FlightDisplay/FlyViewMissionCompleteDialogUP.qml</file>
         <file alias="QGroundControl/FlightDisplay/FlyViewToolStripActionList.qml">src/FlightDisplay/FlyViewToolStripActionListUP.qml</file>
+		<file alias="QGroundControl/FlightDisplay/GuidedActionsController.qml">src/FlightDisplay/GuidedActionsControllerUP.qml</file>
     </qresource>
     <qresource prefix="/toolbar">
         <file alias="GPSIndicator.qml">src/ui/toolbar/GPSIndicatorUP.qml</file>
@@ -109,5 +111,6 @@
 		<file alias="Sea_WP.svg">res/Images/Sea.svg</file>
 		<file alias="SeaSide_WP.svg">res/Images/SeaSide.svg</file>
 		<file alias="Lifeguard.svg">res/Images/Lifeguard.svg</file>
+		<file alias="facade.svg">res/Images/facade.svg</file>
 	</qresource>
 </RCC>

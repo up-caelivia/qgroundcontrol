@@ -111,6 +111,46 @@ Item {
         visible:            CustomPlugin.isSAVenabled && QGroundControl.videoManager.fullScreen
     }
 
+    Item {
+        id: thirdsGrid
+        anchors.fill: parent
+        visible: QGroundControl.videoManager.fullScreen // oppure la tua variabile che indica full screen
+        z:                  _fullItemZorder + 1
+
+        // Vertical lines
+        Rectangle {
+            x: parent.width / 3
+            width: 1
+            height: parent.height
+            color: "white"
+            opacity: 0.5
+        }
+        Rectangle {
+            x: parent.width * 2/3
+            width: 1
+            height: parent.height
+            color: "white"
+            opacity: 0.5
+        }
+
+        // Horizontal lines
+        Rectangle {
+            y: parent.height / 3
+            height: 1
+            width: parent.width
+            color: "white"
+            opacity: 0.5
+        }
+        Rectangle {
+            y: parent.height * 2/3
+            height: 1
+            width: parent.width
+            color: "white"
+            opacity: 0.5
+        }
+    }
+
+
     // Development tool for visualizing the insets for a paticular layer, enable if needed
     /*
     FlyViewInsetViewer {

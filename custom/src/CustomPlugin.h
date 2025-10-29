@@ -18,96 +18,160 @@
 #include "CustomToolbox.h"
 #include <QGeoCoordinate>
 #include "Vehicle.h"
+#include "Fact.h"
+#include "FactSystem.h"
+#include <limits>
 
+class QTimer;
 class CustomOptions;
 class CustomPlugin;
-
 
 class CustomFlyViewOptions : public QGCFlyViewOptions
 {
 public:
     CustomFlyViewOptions(CustomOptions* options, QObject* parent = nullptr);
-
-    // Overrides from CustomFlyViewOptions
-    bool                    showInstrumentPanel         (void) const final {return false;}
+    bool showInstrumentPanel(void) const final { return false; }
 };
-
 
 class CustomOptions : public QGCOptions
 {
 public:
     CustomOptions(CustomPlugin*, QObject* parent = nullptr) : QGCOptions(parent) {}
-
-    // Overrides from QGCOptions
-    QGCFlyViewOptions*      flyViewOptions(void) final;
+    QGCFlyViewOptions* flyViewOptions(void) final;
 
 private:
     CustomFlyViewOptions* _flyViewOptions = nullptr;
 };
 
-
 class CustomPlugin : public QGCCorePlugin
 {
     Q_OBJECT
-    Q_PROPERTY(QString speedMessage READ speedMessage WRITE setSpeedMessage NOTIFY speedMessageChanged)
-    Q_PROPERTY(QVariantList savParamCoordinates READ savParamCoordinates NOTIFY savParamCoordinatesChanged)
-    Q_PROPERTY(bool isSAVenabled READ isSAVenabled WRITE setSAVenabled NOTIFY savEnableChanged)
-    Q_PROPERTY(bool isSAVexist READ isSAVexist NOTIFY isSAVexistChanged)
-    
+    Q_PROPERTY(QString        speedMessage           READ speedMessage           WRITE setSpeedMessage        NOTIFY speedMessageChanged)
+    Q_PROPERTY(QVariantList   savParamCoordinates    READ savParamCoordinates                                   NOTIFY savParamCoordinatesChanged)
+    Q_PROPERTY(bool           isSAVenabled           READ isSAVenabled           WRITE setSAVenabled          NOTIFY savEnableChanged)
+    Q_PROPERTY(bool           isSAVexist             READ isSAVexist                                            NOTIFY isSAVexistChanged)
+    Q_PROPERTY(int            rc6Value               READ rc6Value                                             NOTIFY rc6ValueChanged)
+    Q_PROPERTY(bool           isAbluoMapPlanEnabled  READ isAbluoMapPlanEnabled  WRITE setAbluoMapPlanEnabled NOTIFY abluoMapPlanChanged)
+    Q_PROPERTY(QGeoCoordinate startCoordinate        READ startCoordinate                                       NOTIFY startCoordinateChanged)
+    Q_PROPERTY(QGeoCoordinate stopCoordinate         READ stopCoordinate                                        NOTIFY stopCoordinateChanged)
+    Q_PROPERTY(double         wpnavSpeedMps          READ wpnavSpeedMps                                         NOTIFY wpnavSpeedMpsChanged)
+    Q_PROPERTY(int            cachedResumeIndex      READ getCachedResumeIndex                                  NOTIFY cachedResumeIndexChanged)
+    Q_PROPERTY(int            abluoCurrentWp         READ abluoCurrentWp        WRITE setAbluoCurrentWp         NOTIFY abluoCurrentWpChanged)
+    Q_PROPERTY(int            abluoMissionCount      READ abluoMissionCount                                     NOTIFY abluoMissionCountChanged)
+
+
+
 public:
     CustomPlugin(QGCApplication* app, QGCToolbox *toolbox);
-    ~CustomPlugin() {}
+    ~CustomPlugin() override;
 
-    // Overrides from QGCCorePlugin
-    QGCOptions*             options                         (void) final {return _options;}
+    // QGCCorePlugin
+    QGCOptions*             options                         (void) final { return _options; }
     QString                 brandImageIndoor                (void) const final { return QStringLiteral("/custom/img/CustomAppIcon.png");}
-    QString                 brandImageOutdoor               (void) const final {    return QStringLiteral("/custom/img/CustomAppIcon.png");}
+    QString                 brandImageOutdoor               (void) const final { return QStringLiteral("/custom/img/CustomAppIcon.png");}
     bool                    overrideSettingsGroupVisibility (QString name) final;
     void                    paletteOverride                 (QString colorName, QGCPalette::PaletteColorInfo_t& colorInfo) final;
-    bool        adjustSettingMetaData                  (const QString& settingsGroup, FactMetaData& metaData) override;
+    bool                    adjustSettingMetaData           (const QString& settingsGroup, FactMetaData& metaData) override;
     QQmlApplicationEngine*  createQmlApplicationEngine      (QObject* parent) override;
-    void registerQmlTypes();
+    void                    registerQmlTypes();
     QVariantList&           settingsPages() override;
-    void setToolbox(QGCToolbox* toolbox) override;
-    Q_INVOKABLE void sendLogMessage(const QString& text, const QString& description = "", const QString& severityStr = "Info");
-    void onActiveVehicleChanged(Vehicle* vehicle);
-    void handleMavlinkMessage(const mavlink_message_t& message);
+    void                    setToolbox(QGCToolbox* toolbox) override;
+
+    Q_INVOKABLE void        sendLogMessage(const QString& text, const QString& description = "", const QString& severityStr = "Info");
+    void                    onActiveVehicleChanged(Vehicle* vehicle);
+    void                    handleMavlinkMessage(const mavlink_message_t& message);
 
     Q_INVOKABLE QVariantList getSavParamCoordinates(Vehicle* vehicle);
-    QVariantList savParamCoordinates() const;
-    Q_INVOKABLE void savButtonPressed(const QString& label);
-    Q_INVOKABLE void updateFence(QObject* controllerObj, bool isSAVenabled);
+    QVariantList            savParamCoordinates() const;
+    Q_INVOKABLE void        savButtonPressed(const QString& label);
+    Q_INVOKABLE void        updateFence(QObject* controllerObj, bool isSAVenabled);
 
-    Q_INVOKABLE bool isSAVenabled();
-    Q_INVOKABLE bool isSAVexist();
+    Q_INVOKABLE bool        isSAVenabled();
+    Q_INVOKABLE bool        isSAVexist();
+    Q_INVOKABLE bool        isAbluoMapPlanEnabled();
 
-    QString speedMessage() const { return _speedMessage; }
-    void setSpeedMessage(const QString& msg);
-    void setSAVenabled(const bool& msg);
+    QString                 speedMessage() const { return _speedMessage; }
+    void                    setSpeedMessage(const QString& msg);
+    void                    setSAVenabled(const bool& msg);
+    int                     rc6Value() const { return _rc6Value; }
+    void                    setAbluoMapPlanEnabled(const bool& msg);
+
+    Q_INVOKABLE void        setStart();
+    Q_INVOKABLE void        setStop();
+
+    Q_INVOKABLE QVariantList buildAbluoPath(const QGeoCoordinate& s,
+                                            const QGeoCoordinate& t,
+                                            double pitch_m,
+                                            int orientationMode);
+    Q_INVOKABLE void        uploadAbluoMission(const QVariantList& points, int orientationMode);
+    Q_INVOKABLE void        clearAbluoMission();
+
+    QGeoCoordinate          startCoordinate() const { return _startCoordinate; }
+    QGeoCoordinate          stopCoordinate () const { return _stopCoordinate;  }
+
+    double                  wpnavSpeedMps() const { return _wpnavSpeedMps; }
+
+    Q_INVOKABLE void cacheResumeIndex(int index); 
+    Q_INVOKABLE int  getCachedResumeIndex() const; 
+
+    int  abluoCurrentWp() const { return _abluoCurrentWp; }
+    void setAbluoCurrentWp(int v);
+    int abluoMissionCount() const { return _abluoMissionCount; }
 
 signals:
     void speedMessageChanged();
     void savParamCoordinatesChanged();
     void savEnableChanged();
     void isSAVexistChanged();
+    void rc6ValueChanged();
+    void abluoMapPlanChanged();
+    void startCoordinateChanged();
+    void stopCoordinateChanged();
+    void wpnavSpeedMpsChanged(); 
+    void cachedResumeIndexChanged();
+    void abluoCurrentWpChanged();
+    void abluoMissionCountChanged();
+
+
 
 private slots:
     void _updateSavParamCoordinates();
+
+private:
+    // Helpers per WPNAV_SPEED
+    void _attachWpnavWatcher(Vehicle* v);
+    void _detachWpnavWatcher();
+    void _refreshWpnavFromFact();
+    void _startWpnavProbeTimer(ParameterManager* pm);
+    void setAbluoMissionCount(int c);
 
 private:
     CustomOptions*  _options = nullptr;
     QmlComponentInfo* _ntripSettings = nullptr;
     QmlComponentInfo* _aboutSettings = nullptr;
     QVariantList      _customSettingsList;
-    CustomToolbox* _customToolbox = nullptr;
-    QString _speedMessage;
-    uint32_t _lastTimeBootMs = 0;
+    CustomToolbox*    _customToolbox = nullptr;
+    QString           _speedMessage;
+    uint32_t          _lastTimeBootMs = 0;
     QMetaObject::Connection _vehicleConnection;
-    bool _vehicleListenerConnected = false;
-    bool _audioMuteScheduled = false;
-    
-    QVariantList _savParamCoordinates;
-    QTimer* _savParamTimer = nullptr;
-    bool _isSAVenabled = false;
-    bool _isSAVexist = false;
+    bool              _vehicleListenerConnected = false;
+    bool              _audioMuteScheduled = false;
+
+    QVariantList      _savParamCoordinates;
+    QTimer*           _savParamTimer = nullptr;
+    bool              _isSAVenabled = false;
+    bool              _isSAVexist = false;
+    int               _rc6Value = 0;
+    bool              _isAbluoMapPlanEnabled = false;
+    QGeoCoordinate    _startCoordinate;
+    QGeoCoordinate    _stopCoordinate;
+
+    // Stato WPNAV_SPEED
+    double            _wpnavSpeedMps = std::numeric_limits<double>::quiet_NaN(); 
+    Fact*             _wpnavSpeedFact = nullptr;
+    QMetaObject::Connection _wpnavConnection;
+    QTimer*           _wpnavProbeTimer = nullptr; 
+    int _cachedResumeIndex = -1;
+    int _abluoCurrentWp = -1;
+    int _abluoMissionCount = 0;
 };

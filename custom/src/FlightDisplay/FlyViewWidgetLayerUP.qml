@@ -279,6 +279,15 @@ Item {
         z:                      QGroundControl.zOrderWidgets
         maxHeight:              parent.height - y - parentToolInsets.bottomEdgeLeftInset - _toolsMargin
         visible:                Constants.showSavButtons
-    }        
+    }   
+
+    AbluoPathWidgetUP {
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.topMargin:      _toolsMargin + Screen.height * 0.2
+        anchors.top:            parent.top
+        z:                      QGroundControl.zOrderWidgets
+        maxHeight:              parent.height - y - parentToolInsets.bottomEdgeLeftInset - _toolsMargin
+        visible:                CustomPlugin.isAbluoMapPlanEnabled
+    }      
 
 }
