@@ -57,7 +57,22 @@ ToolStrip {
 
         leftPanel.sideLeft = (Constants.savedSideLeft !== undefined) ? !!Constants.savedSideLeft : true
         serpentine.build()
+
+        // *** NEW ***
+        // se il plugin espone già quanti waypoint ha la missione corrente sul veicolo,
+        // inizializza serpentine.path di conseguenza così serpCanvas sa già la lunghezza
+        if (CustomPlugin && CustomPlugin.abluoMissionCount !== undefined) {
+            serpentine.setPathLengthFromCount(CustomPlugin.abluoMissionCount)
+            serpCanvas.schedulePaint()
+
+            // riallinea passedWpIndex con la nuova lunghezza
+            const len = Math.max(serpentine.path.length - 1, -1)
+            if (CustomPlugin.abluoCurrentWp !== undefined) {
+                serpCanvas.passedWpIndex = Math.min(Math.max(CustomPlugin.abluoCurrentWp, -1), len)
+            }
+        }
     }
+
     Connections {
         target: QGroundControl.multiVehicleManager ? QGroundControl.multiVehicleManager.activeVehicle : null
         onFlightModeChanged: {
@@ -259,6 +274,26 @@ ToolStrip {
                         serpCanvas.schedulePaint()
                     }
                 }
+
+                // *** NEW ***
+                // se cambia il numero di waypoint nella missione caricata sul veicolo,
+                // aggiorniamo la "lunghezza" locale e riallineiamo passedWpIndex
+                Connections {
+                    target: CustomPlugin
+                    onAbluoMissionCountChanged: {
+                        if (CustomPlugin.abluoMissionCount !== undefined) {
+                            serpentine.setPathLengthFromCount(CustomPlugin.abluoMissionCount)
+
+                            const len = Math.max(serpentine.path.length - 1, -1)
+                            serpCanvas.passedWpIndex = Math.min(
+                                Math.max(CustomPlugin.abluoCurrentWp, -1),
+                                len
+                            )
+                            serpCanvas.schedulePaint()
+                        }
+                    }
+                }
+
                 Component.onCompleted: {
                     if (CustomPlugin && CustomPlugin.abluoCurrentWp !== undefined) {
                         const len = Math.max(serpentine.path.length - 1, -1)
@@ -363,7 +398,7 @@ ToolStrip {
                     }
 
                     const cut = Math.min(
-                        Math.max(serpCanvas.passedWpIndex, -1),
+                        Math.max(serpCanvas.passedWpIndex-1, -1),
                         pts.length - 1
                     )
                     const lineW = 4
@@ -371,7 +406,7 @@ ToolStrip {
                     const COL_ORANGE = "#FFA500"  // current segment
                     const COL_YELLOW = "#FFD600"  // remaining
                     const idx = Math.min(
-                        Math.max(serpCanvas.passedWpIndex, -1),
+                        Math.max(serpCanvas.passedWpIndex-1, -1),
                         pts.length - 1
                     )
 
@@ -560,7 +595,6 @@ ToolStrip {
                                 serpentine.s_coord,
                                 serpentine.t_coord,
                                 abluoToolStrip.pitchValue,
-                                abluoToolStrip.orientationMode,
                                 abluoToolStrip.orientationMode
                             )
                             if (!pts || pts.length < 2) {
@@ -580,6 +614,14 @@ ToolStrip {
 
                             // reset the “passed” index
                             serpCanvas.passedWpIndex = -1
+
+                            // *** NEW ***
+                            // aggiorna anche la lunghezza del path locale in base al numero waypoint effettivi caricati,
+                            // se il plugin l'ha già aggiornato
+                            if (CustomPlugin && CustomPlugin.abluoMissionCount !== undefined) {
+                                serpentine.setPathLengthFromCount(CustomPlugin.abluoMissionCount)
+                            }
+
                             serpCanvas.schedulePaint()
                         }
                     }
@@ -633,6 +675,22 @@ ToolStrip {
         property real total_len_m: 0
         // 0=orizzontale (spazzate Est-Ovest), 1=verticale (spazzate Nord-Sud)
         property int  orientation: 0
+
+        // *** NEW ***
+        // Imposta serpentine.path a una certa lunghezza (dummy), per riflettere
+        // quanti waypoint ha la missione caricata a bordo, anche se non abbiamo
+        // le coordinate qui in QML.
+        function setPathLengthFromCount(cnt) {
+            if (!isFinite(cnt) || cnt <= 0) {
+                path = []
+                return
+            }
+            const tmp = []
+            for (var i = 0; i < cnt; i++) {
+                tmp.push(i)    // valore segnaposto
+            }
+            path = tmp
+        }
 
         function _asCoord(p) {
             if (!p) return null

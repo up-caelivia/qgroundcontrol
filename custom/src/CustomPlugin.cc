@@ -645,6 +645,8 @@ void CustomPlugin::onActiveVehicleChanged(Vehicle* vehicle)
         _wpnavSpeedMps = std::numeric_limits<double>::quiet_NaN();
         emit wpnavSpeedMpsChanged();
         setAbluoCurrentWp(-1);
+        setAbluoMissionCount(0);
+
         return;
     }
 
@@ -669,21 +671,64 @@ void CustomPlugin::onActiveVehicleChanged(Vehicle* vehicle)
     // attach/re-attach WPNAV_SPEED watcher
     _attachWpnavWatcher(vehicle);
 
-    // Hook A: MissionManager::currentIndexChanged (works across versions)
-    if (vehicle->missionManager()) {
-        // initial state
-        setAbluoCurrentWp(vehicle->missionManager()->currentIndex());
-        qDebug() << "[Abluo] initial mission index =" << vehicle->missionManager()->currentIndex();
+    // ---------------------------------------------------------------------
+    // Hook MissionManager
+    // ---------------------------------------------------------------------
+    MissionManager* mm = vehicle->missionManager();
+    if (mm) {
 
-        // updates
-        connect(vehicle->missionManager(), &MissionManager::currentIndexChanged,
-                this, [this](int idx){
-                    setAbluoCurrentWp(idx);
-                },
-                Qt::UniqueConnection);
+        // funzione helper locale: conta quanti waypoint ha la missione attuale
+        auto updateCount = [this, mm]() {
+            // missionItems() è la lista interna di MissionItem* del MissionManager
+            const auto items = mm->missionItems();
+            const int count = items.count();
+            setAbluoMissionCount(count);
+        };
+
+        // stato iniziale: indice corrente e numero di WP
+        setAbluoCurrentWp(mm->currentIndex());
+
+        updateCount(); // imposta abluoMissionCount() subito all'attacco
+
+        // aggiornamenti runtime dell'indice corrente waypoint
+        connect(
+            mm,
+            &MissionManager::currentIndexChanged,
+            this,
+            [this](int idx) {
+                setAbluoCurrentWp(idx);
+            },
+            Qt::UniqueConnection
+        );
+
+        // quando la missione viene riscritta sul veicolo (upload completato)
+        connect(
+            mm,
+            &MissionManager::sendComplete,
+            this,
+            [updateCount](bool ok){
+                updateCount();
+            },
+            Qt::UniqueConnection
+        );
+
+        // quando la missione viene cancellata dal veicolo
+        connect(
+            mm,
+            &MissionManager::removeAllComplete,
+            this,
+            [updateCount](bool ok){
+                updateCount();
+            },
+            Qt::UniqueConnection
+        );
+
+    } else {
+        // niente mission manager = niente missione
+        setAbluoCurrentWp(-1);
+        setAbluoMissionCount(0);
     }
 
-    // Hook B: raw MAVLink – **single-argument signal** in this branch
     connect(vehicle, &Vehicle::mavlinkMessageReceived,
             this,
             [this](const mavlink_message_t& msg){
@@ -695,6 +740,7 @@ void CustomPlugin::onActiveVehicleChanged(Vehicle* vehicle)
             },
             Qt::UniqueConnection);
 }
+
 
 void CustomPlugin::handleMavlinkMessage(const mavlink_message_t& message)
 {
@@ -865,6 +911,7 @@ QVariantList CustomPlugin::buildAbluoPath(const QGeoCoordinate& s,
             // fallback: come triviale
             QGeoCoordinate cur = s; cur.setAltitude(z0);
             pushIfDiff(out, cur);
+            out << QVariant::fromValue(cur);
             QGeoCoordinate tt = t; tt.setAltitude(z1);
             pushIfDiff(out, tt);
             return out;
@@ -874,6 +921,7 @@ QVariantList CustomPlugin::buildAbluoPath(const QGeoCoordinate& s,
         // 1) S(z0) -> verticale a z1
         QGeoCoordinate cur = s; cur.setAltitude(z0);
         pushIfDiff(out, cur);
+        out << QVariant::fromValue(cur);
         if (std::abs(z1 - z0) > 1e-9) {
             QGeoCoordinate v = cur; v.setAltitude(z1);
             pushIfDiff(out, v);
@@ -912,6 +960,7 @@ QVariantList CustomPlugin::buildAbluoPath(const QGeoCoordinate& s,
     // 1) starting point: exact S
     QGeoCoordinate cur = s; cur.setAltitude(z0);
     pushIfDiff(out, cur);
+    out << QVariant::fromValue(cur);
 
     // “prima orizzontale” = S -> XY(T) a quota z0
     {
@@ -1019,35 +1068,7 @@ void CustomPlugin::uploadAbluoMission(const QVariantList& points, int orientatio
         }
     }
     if (wps.size() < 2) { qWarning() << "[CustomPlugin] uploadAbluoMission: too few waypoints"; return; }
-
-    // --- Force first leg by orientationMode --------------------------------------
-    if (wps.size() >= 2) {
-        QGeoCoordinate& p0 = wps[0];
-        QGeoCoordinate& p1 = wps[1];
-        const QGeoCoordinate& plast = wps.back(); // lo uso come riferimento per T
-
-        auto finiteOr = [](double v, double fallback){ return std::isfinite(v) ? v : fallback; };
-
-        if (orientationMode == 1) {
-            // VERTICALE: WP1 deve essere S.xy con quota di T
-            const double zS = finiteOr(p0.altitude(), 0.0);
-            const double zT = finiteOr(plast.altitude(), zS); // usa l'alt di ultimo WP come target
-            p1.setLatitude (p0.latitude());
-            p1.setLongitude(p0.longitude());
-            p1.setAltitude (zT);
-            qDebug() << "[CustomPlugin] forced first leg VERTICAL: S(zS)->S(zT)";
-        } else {
-            // ORIZZONTALE: WP1 deve essere T.xy con quota di S
-            const double zS = finiteOr(p0.altitude(), 0.0);
-            p1.setLatitude (plast.latitude());
-            p1.setLongitude(plast.longitude());
-            p1.setAltitude (zS);
-            qDebug() << "[CustomPlugin] forced first leg HORIZONTAL: S(zS)->T(zS)";
-        }
-    }
-    // -----------------------------------------------------------------------------
-
-    // ----------------------------------------------------------------------------
+    setAbluoMissionCount(wps.size());
 
     QList<MissionItem*> items; items.reserve(wps.size());
     for (int i=0;i<wps.size();++i) {
@@ -1132,6 +1153,7 @@ void CustomPlugin::uploadAbluoMission(const QVariantList& points, int orientatio
 
     mm->removeAll();
     setAbluoCurrentWp(-1);
+    cacheResumeIndex(-1);
 }
 
 void CustomPlugin::clearAbluoMission()
@@ -1161,6 +1183,7 @@ void CustomPlugin::clearAbluoMission()
 
     mm->removeAll();
     setAbluoCurrentWp(-1);
+    setAbluoMissionCount(0);
 }
 
 
@@ -1272,4 +1295,10 @@ void CustomPlugin::setAbluoCurrentWp(int v)
 {
     _abluoCurrentWp = v;
     emit abluoCurrentWpChanged();
+}
+
+void CustomPlugin::setAbluoMissionCount(int c) {
+    if (_abluoMissionCount == c) return;
+    _abluoMissionCount = c;
+    emit abluoMissionCountChanged();
 }

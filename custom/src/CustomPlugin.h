@@ -57,6 +57,8 @@ class CustomPlugin : public QGCCorePlugin
     Q_PROPERTY(double         wpnavSpeedMps          READ wpnavSpeedMps                                         NOTIFY wpnavSpeedMpsChanged)
     Q_PROPERTY(int            cachedResumeIndex      READ getCachedResumeIndex                                  NOTIFY cachedResumeIndexChanged)
     Q_PROPERTY(int            abluoCurrentWp         READ abluoCurrentWp        WRITE setAbluoCurrentWp         NOTIFY abluoCurrentWpChanged)
+    Q_PROPERTY(int            abluoMissionCount      READ abluoMissionCount                                     NOTIFY abluoMissionCountChanged)
+
 
 
 public:
@@ -114,6 +116,7 @@ public:
 
     int  abluoCurrentWp() const { return _abluoCurrentWp; }
     void setAbluoCurrentWp(int v);
+    int abluoMissionCount() const { return _abluoMissionCount; }
 
 signals:
     void speedMessageChanged();
@@ -127,6 +130,7 @@ signals:
     void wpnavSpeedMpsChanged(); 
     void cachedResumeIndexChanged();
     void abluoCurrentWpChanged();
+    void abluoMissionCountChanged();
 
 
 
@@ -139,6 +143,7 @@ private:
     void _detachWpnavWatcher();
     void _refreshWpnavFromFact();
     void _startWpnavProbeTimer(ParameterManager* pm);
+    void setAbluoMissionCount(int c);
 
 private:
     CustomOptions*  _options = nullptr;
@@ -168,4 +173,5 @@ private:
     QTimer*           _wpnavProbeTimer = nullptr; 
     int _cachedResumeIndex = -1;
     int _abluoCurrentWp = -1;
+    int _abluoMissionCount = 0;
 };
