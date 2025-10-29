@@ -68,7 +68,7 @@ CustomPlugin::CustomPlugin(QGCApplication *app, QGCToolbox* toolbox)
     : QGCCorePlugin(app, toolbox)
 {
     _options = new CustomOptions(this, this);
-    QCoreApplication::setApplicationName(QStringLiteral(QGC_APPLICATION_NAME));  // set the folder on document to save the options
+    QCoreApplication::setApplicationName(QStringLiteral(QGC_APPLICATION_NAME));  // set the document folder where to save options
 
 #ifdef Q_OS_WIN
     QApplication::setWindowIcon(QIcon(":/res/resources/icons/qgroundcontrol.ico"));
@@ -92,7 +92,7 @@ CustomPlugin::~CustomPlugin()
 {
     if (_savParamTimer) {
         if (_savParamTimer->thread() == QThread::currentThread()) {
-            _savParamTimer->stop();          
+            _savParamTimer->stop();
         } else {
             QMetaObject::invokeMethod(_savParamTimer, "stop", Qt::QueuedConnection);
         }
@@ -275,7 +275,7 @@ QQmlApplicationEngine* CustomPlugin::createQmlApplicationEngine(QObject* parent)
 
     qmlRegisterSingletonType<Constants>("Constants", 1, 0, "Constants", Constants::constants_singleton_provider);
 
-    qmlEngine->rootContext()->setContextProperty("CustomPlugin", this); 
+    qmlEngine->rootContext()->setContextProperty("CustomPlugin", this);
 
     #ifdef QT_DEBUG     // start with a custom connection only in debug build!
         MockLink::startAPMArduCopterMockLink(false);
@@ -336,9 +336,9 @@ bool CustomPlugin::adjustSettingMetaData(const QString& settingsGroup, FactMetaD
         } else if (metaData.name() == VideoSettings::videoSourceName) {
             metaData.setRawDefaultValue(VideoSettings::videoSourceHerelinkAirUnit);
         }
-    } 
+    }
 
-    return true; // Show all settings in ui
+    return true; // Show all settings in UI
 }
 
 QVariantList& CustomPlugin::settingsPages()
@@ -350,7 +350,7 @@ QVariantList& CustomPlugin::settingsPages()
         QVariantList baseSettings = QGCCorePlugin::settingsPages();
         _customSettingsList = baseSettings;
 
-        // add NTRIP page
+        // Add NTRIP page
         _ntripSettings = new QmlComponentInfo(
             tr("NTRIP"),
             QUrl::fromUserInput("qrc:/Custom/Widgets/CustomNTRIP.qml"),
@@ -374,7 +374,7 @@ QVariantList& CustomPlugin::settingsPages()
             _customSettingsList.append(QVariant::fromValue(_ntripSettings));
         }
 
-        // add About page
+        // Add About page
         _aboutSettings = new QmlComponentInfo(
             tr("About"),
             QUrl::fromUserInput("qrc:/Custom/Widgets/AboutUP.qml"),
@@ -382,8 +382,8 @@ QVariantList& CustomPlugin::settingsPages()
         );
 
         _customSettingsList.append(QVariant::fromValue(_aboutSettings));
-    } 
-    
+    }
+
     Constants* constants = Constants::getInstance();
     if (!constants->developer()) {
         qDebug() << "finding Comm Links page";
@@ -408,7 +408,7 @@ QVariantList& CustomPlugin::settingsPages()
             QUrl::fromUserInput("qrc:/res/waves.svg")
         );
         // Insert Comm Links page
-        _customSettingsList.insert(1, QVariant::fromValue(_commLinksSettings));   
+        _customSettingsList.insert(1, QVariant::fromValue(_commLinksSettings));
     }
     return _customSettingsList;
 }
@@ -455,7 +455,7 @@ QVariantList CustomPlugin::getSavParamCoordinates(Vehicle* vehicle) {
                 entry["speed"] = speedFact->rawValue().toDouble();
                 coordinates.append(entry);
             }
-        }  
+        }
     }
 
     return coordinates;
@@ -512,7 +512,7 @@ void CustomPlugin::updateFence(QObject* controllerObj, bool isSAVenabled) {
         {
             // Save current fence to no_sav.json
             QJsonObject json;
-            controller->save(json); 
+            controller->save(json);
             QJsonDocument doc(json);
             QFile saveFile(noSavFile);
             if (saveFile.open(QIODevice::WriteOnly)) {
@@ -612,9 +612,9 @@ void CustomPlugin::setSAVenabled(const bool& msg) {
 
     if (vehicle->parameterManager()->parameterExists(FactSystem::defaultComponentId, "SAV_ENABLE")){
         Fact* existFact = vehicle->parameterManager()->getParameter(FactSystem::defaultComponentId, "SAV_ENABLE");
-        _isSAVexist = msg;    
+        _isSAVexist = msg;
         existFact->setRawValue(_isSAVexist);
-        emit savEnableChanged();  
+        emit savEnableChanged();
     }
 }
 
@@ -627,8 +627,8 @@ void  CustomPlugin::setAbluoMapPlanEnabled(const bool& msg){
     Vehicle* vehicle = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle();
     if (!vehicle || !vehicle->parameterManager()) return;
 
-    _isAbluoMapPlanEnabled = msg;    
-    emit abluoMapPlanChanged();  
+    _isAbluoMapPlanEnabled = msg;
+    emit abluoMapPlanChanged();
 }
 
 
@@ -677,20 +677,20 @@ void CustomPlugin::onActiveVehicleChanged(Vehicle* vehicle)
     MissionManager* mm = vehicle->missionManager();
     if (mm) {
 
-        // funzione helper locale: conta quanti waypoint ha la missione attuale
+        // local helper function: count how many waypoints the current mission has
         auto updateCount = [this, mm]() {
-            // missionItems() è la lista interna di MissionItem* del MissionManager
+            // missionItems() is the internal MissionManager list of MissionItem*
             const auto items = mm->missionItems();
             const int count = items.count();
             setAbluoMissionCount(count);
         };
 
-        // stato iniziale: indice corrente e numero di WP
+        // initial state: current waypoint index and number of WPs
         setAbluoCurrentWp(mm->currentIndex());
 
-        updateCount(); // imposta abluoMissionCount() subito all'attacco
+        updateCount(); // immediately set abluoMissionCount() when attaching
 
-        // aggiornamenti runtime dell'indice corrente waypoint
+        // runtime updates of the current waypoint index
         connect(
             mm,
             &MissionManager::currentIndexChanged,
@@ -701,7 +701,7 @@ void CustomPlugin::onActiveVehicleChanged(Vehicle* vehicle)
             Qt::UniqueConnection
         );
 
-        // quando la missione viene riscritta sul veicolo (upload completato)
+        // when the mission is written to the vehicle (upload complete)
         connect(
             mm,
             &MissionManager::sendComplete,
@@ -712,7 +712,7 @@ void CustomPlugin::onActiveVehicleChanged(Vehicle* vehicle)
             Qt::UniqueConnection
         );
 
-        // quando la missione viene cancellata dal veicolo
+        // when the mission is cleared from the vehicle
         connect(
             mm,
             &MissionManager::removeAllComplete,
@@ -724,7 +724,7 @@ void CustomPlugin::onActiveVehicleChanged(Vehicle* vehicle)
         );
 
     } else {
-        // niente mission manager = niente missione
+        // no MissionManager = no mission
         setAbluoCurrentWp(-1);
         setAbluoMissionCount(0);
     }
@@ -872,7 +872,7 @@ QVariantList CustomPlugin::buildAbluoPath(const QGeoCoordinate& s,
     auto pushIfDiff = [](QVariantList& lst, const QGeoCoordinate& c) {
         if (lst.isEmpty()) { lst << QVariant::fromValue(c); return; }
         const QGeoCoordinate last = lst.last().value<QGeoCoordinate>();
-        // minimum difference: ~1 cm in planimetry or 1 cm in altitude
+        // minimum difference: ~1 cm in XY or 1 cm in altitude
         if ( (!last.isValid() || !c.isValid()) ||
              last.distanceTo(c) >= 0.01 ||
              std::abs(last.altitude() - c.altitude()) >= 0.01 ) {
@@ -885,7 +885,7 @@ QVariantList CustomPlugin::buildAbluoPath(const QGeoCoordinate& s,
     const double dz  = std::max(0.001, pitch_m);
     const double dir = (z1 >= z0) ? +1.0 : -1.0;
 
-    // --- 0) trivial case: S and T have same XY → vertical-only steps ---
+    // --- 0) trivial case: S and T share the same XY → vertical-only steps ---
     if (std::abs(s.latitude()  - t.latitude())  < 1e-12 &&
         std::abs(s.longitude() - t.longitude()) < 1e-12)
     {
@@ -903,12 +903,12 @@ QVariantList CustomPlugin::buildAbluoPath(const QGeoCoordinate& s,
         return out;
     }
 
-    // ================== MODALITÀ VERTICALE (sweep lungo S→T) ==================
+    // ================== VERTICAL MODE (sweep along S→T) ==================
     if (orientationMode == 1) {
-        // geometria lungo la geodetica S->T
+        // geometry along the geodesic from S to T
         const double L      = s.distanceTo(t);
         if (!(L > 0.0)) {
-            // fallback: come triviale
+            // fallback: same as trivial
             QGeoCoordinate cur = s; cur.setAltitude(z0);
             pushIfDiff(out, cur);
             out << QVariant::fromValue(cur);
@@ -918,7 +918,7 @@ QVariantList CustomPlugin::buildAbluoPath(const QGeoCoordinate& s,
         }
         const double bearing = s.azimuthTo(t);
 
-        // 1) S(z0) -> verticale a z1
+        // 1) S(z0) -> vertical climb/descend to z1
         QGeoCoordinate cur = s; cur.setAltitude(z0);
         pushIfDiff(out, cur);
         out << QVariant::fromValue(cur);
@@ -929,26 +929,26 @@ QVariantList CustomPlugin::buildAbluoPath(const QGeoCoordinate& s,
         }
         double currentAlt = z1;
 
-        // 2) punti intermedi ogni pitch_m lungo S->T
+        // 2) intermediate points every pitch_m along S->T
         //    d = pitch, 2*pitch, ..., < L
         for (double d = dz; d < L - 1e-6; d += dz) {
             QGeoCoordinate pk = s.atDistanceAndAzimuth(d, bearing);
-            // orizzontale in planimetria a pk a quota corrente
+            // horizontal in XY to pk at the current altitude
             pk.setAltitude(currentAlt);
             pushIfDiff(out, pk);
 
-            // verticale alternata: z1->z0->z1->...
+            // alternate altitude: z1 -> z0 -> z1 -> ...
             currentAlt = (std::abs(currentAlt - z1) < 1e-9) ? z0 : z1;
             QGeoCoordinate pv = pk; pv.setAltitude(currentAlt);
             pushIfDiff(out, pv);
             cur = pv;
         }
 
-        // 3) vai a T alla quota corrente
+        // 3) go to T at the current altitude
         QGeoCoordinate tPlan = t; tPlan.setAltitude(currentAlt);
         pushIfDiff(out, tPlan);
 
-        // 4) snap finale a T(z1)
+        // 4) final snap to T(z1)
         if (std::abs(currentAlt - z1) > 1e-9) {
             QGeoCoordinate tZ = t; tZ.setAltitude(z1);
             pushIfDiff(out, tZ);
@@ -956,13 +956,13 @@ QVariantList CustomPlugin::buildAbluoPath(const QGeoCoordinate& s,
         return out;
     }
 
-    // ================== MODALITÀ ORIZZONTALE (la tua originale) ==================
+    // ================== HORIZONTAL MODE (the original logic) ==================
     // 1) starting point: exact S
     QGeoCoordinate cur = s; cur.setAltitude(z0);
     pushIfDiff(out, cur);
     out << QVariant::fromValue(cur);
 
-    // “prima orizzontale” = S -> XY(T) a quota z0
+    // "first horizontal": S -> T's XY at altitude z0
     {
         QGeoCoordinate h = cur;
         h.setLatitude (t.latitude());
@@ -972,10 +972,10 @@ QVariantList CustomPlugin::buildAbluoPath(const QGeoCoordinate& s,
         cur = h;
     }
 
-    // --- 3) loop: vertical step toward z1 on current side, then horizontal to the opposite side ---
-    bool atSideS = false; // siamo su T dopo il primo orizzontale
+    // 3) loop: go vertically toward z1 on current side, then horizontally to the opposite side
+    bool atSideS = false; // after the first horizontal, we are on T side
     while ((dir > 0 && cur.altitude() < z1) || (dir < 0 && cur.altitude() > z1)) {
-        // verticale
+        // vertical step
         {
             const double rem  = std::abs(z1 - cur.altitude());
             const double step = std::min(dz, rem);
@@ -985,7 +985,7 @@ QVariantList CustomPlugin::buildAbluoPath(const QGeoCoordinate& s,
         }
         if (std::abs(cur.altitude() - z1) < 1e-9) break;
 
-        // orizzontale all'altro lato (XY flip S<->T) a stessa quota
+        // horizontal translation to the opposite side (flip between S and T XY) at same altitude
         QGeoCoordinate h = cur;
         if (atSideS) {
             h.setLatitude (t.latitude());
@@ -999,7 +999,7 @@ QVariantList CustomPlugin::buildAbluoPath(const QGeoCoordinate& s,
         atSideS = !atSideS;
     }
 
-    // --- 4) closure: ensure we end exactly on T (XY(T), z1) ---
+    // 4) closure: make sure we end exactly on T (XY(T), z1)
     {
         QGeoCoordinate last = cur;
         // if last XY is not T, do a final horizontal at altitude z1
@@ -1055,7 +1055,7 @@ void CustomPlugin::uploadAbluoMission(const QVariantList& points, int orientatio
         return;
     }
 
-    // 1) Normalize points -> QList<QGeoCoordinate> (finite values guaranteed)
+    // 1) Normalize points -> QList<QGeoCoordinate> (guarantee finite values)
     QList<QGeoCoordinate> wps; wps.reserve(points.size());
     for (const QVariant& v : points) {
         QGeoCoordinate c;

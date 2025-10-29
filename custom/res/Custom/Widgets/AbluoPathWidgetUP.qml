@@ -29,8 +29,8 @@ ToolStrip {
     property alias total_length_m:  serpentine.total_len_m
     property real  pitchValue: 0
 
-    // 0 = orizzontale (bande E-W, avanzamento verticale)
-    // 1 = verticale   (bande N-S, avanzamento orizzontale)
+    // 0 = horizontal (E-W stripes, vertical progression)
+    // 1 = vertical   (N-S stripes, horizontal progression)
     property int orientationMode: 0
 
     function fmtCoord(c) {
@@ -58,14 +58,13 @@ ToolStrip {
         leftPanel.sideLeft = (Constants.savedSideLeft !== undefined) ? !!Constants.savedSideLeft : true
         serpentine.build()
 
-        // *** NEW ***
-        // se il plugin espone già quanti waypoint ha la missione corrente sul veicolo,
-        // inizializza serpentine.path di conseguenza così serpCanvas sa già la lunghezza
+        // if the plugin already exposes how many waypoints the current mission on the vehicle has,
+        // initialize serpentine.path accordingly so serpCanvas already knows its length
         if (CustomPlugin && CustomPlugin.abluoMissionCount !== undefined) {
             serpentine.setPathLengthFromCount(CustomPlugin.abluoMissionCount)
             serpCanvas.schedulePaint()
 
-            // riallinea passedWpIndex con la nuova lunghezza
+            // align passedWpIndex with the new length
             const len = Math.max(serpentine.path.length - 1, -1)
             if (CustomPlugin.abluoCurrentWp !== undefined) {
                 serpCanvas.passedWpIndex = Math.min(Math.max(CustomPlugin.abluoCurrentWp, -1), len)
@@ -275,9 +274,8 @@ ToolStrip {
                     }
                 }
 
-                // *** NEW ***
-                // se cambia il numero di waypoint nella missione caricata sul veicolo,
-                // aggiorniamo la "lunghezza" locale e riallineiamo passedWpIndex
+                // if the number of waypoints in the loaded mission changes on the vehicle,
+                // update the local "length" accordingly and realign passedWpIndex
                 Connections {
                     target: CustomPlugin
                     onAbluoMissionCountChanged: {
@@ -322,16 +320,16 @@ ToolStrip {
                     const rectHpx = Math.max(0, bottomY - topY)
                     if (rectWpx <= 0 || rectHpx <= 0) return
 
-                    // orientation: 0=orizzontale (avanzamento verticale), 1=verticale (avanzamento orizzontale)
+                    // orientation: 0=horizontal (vertical progression), 1=vertical (horizontal progression)
                     const isHorizontal = (abluoToolStrip.orientationMode === 0)
 
-                    // unità passo (metri -> pixel) lungo la direzione di avanzamento
+                    // step unit (meters -> pixels) along the progression direction
                     const pxPerMeterAdvance = isHorizontal
                         ? (rectHpx / Math.max(0.001, leftPanel.height_m))
                         : (rectWpx / Math.max(0.001, leftPanel.width_m))
                     const stepPxNom = Math.max(1, abluoToolStrip.pitchValue * pxPerMeterAdvance)
 
-                    // punti S/T in pixel
+                    // S/T points in pixels
                     const sPixX = leftPanel.sideLeft ? leftX : rightX
                     const tPixX = leftPanel.sideLeft ? rightX : leftX
                     const sPixY = leftPanel.sAbove ? topY : bottomY
@@ -340,7 +338,7 @@ ToolStrip {
                     const pts = []
 
                     if (isHorizontal) {
-                        // avanzamento lungo Y; bande orizzontali che vanno L<->R
+                        // move along Y; horizontal stripes going L<->R
                         const dirY = (tPixY > sPixY) ? +1 : -1
                         let y = sPixY
                         let goRight = leftPanel.sideLeft
@@ -348,9 +346,9 @@ ToolStrip {
 
                         let stripes = 0
                         while (((dirY > 0 && y < tPixY) || (dirY < 0 && y > tPixY)) && stripes < serpCanvas.maxStripes) {
-                            // orizzontale
+                            // horizontal segment
                             pts.push({ x: (goRight ? rightX : leftX), y: y })
-                            // verticale (accorcia ultimo step)
+                            // vertical step (shorten last step)
                             const remaining = Math.abs(tPixY - y)
                             const step = Math.min(stepPxNom, remaining)
                             y += dirY * step
@@ -362,17 +360,17 @@ ToolStrip {
                         const last = pts[pts.length - 1]
                         if (last.x !== tPixX || last.y !== tPixY) pts.push({ x: tPixX, y: tPixY })
                     } else {
-                        // verticale: avanzamento lungo X; bande verticali che vanno T<->B
+                        // vertical: move along X; vertical stripes going T<->B
                         const dirX = (tPixX > sPixX) ? +1 : -1
                         let x = sPixX
-                        let goDown = leftPanel.sAbove  // se S è sopra, prima banda scende
+                        let goDown = leftPanel.sAbove  // if S is above, first stripe goes down
                         pts.push({x: x, y: sPixY})
 
                         let stripes = 0
                         while (((dirX > 0 && x < tPixX) || (dirX < 0 && x > tPixX)) && stripes < serpCanvas.maxStripes) {
-                            // verticale
+                            // vertical segment
                             pts.push({ x: x, y: (goDown ? bottomY : topY) })
-                            // orizzontale (accorcia ultimo step)
+                            // horizontal step (shorten last step)
                             const remaining = Math.abs(tPixX - x)
                             const step = Math.min(stepPxNom, remaining)
                             x += dirX * step
@@ -402,7 +400,7 @@ ToolStrip {
                         pts.length - 1
                     )
                     const lineW = 4
-                    const COL_RED    = "#FF3B30"  // past
+                    const COL_RED    = "#FF3B30"  // already flown
                     const COL_ORANGE = "#FFA500"  // current segment
                     const COL_YELLOW = "#FFD600"  // remaining
                     const idx = Math.min(
@@ -490,7 +488,7 @@ ToolStrip {
                     }
                 }
 
-                // row: Pitch (m) | [text field] | Orientamento [combo]
+                // row: Pitch (m) | [text field] | Orientation [combo]
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: ScreenTools.defaultFontPixelWidth
@@ -504,7 +502,7 @@ ToolStrip {
                     QGCTextField {
                         id: pitchField
                         Layout.fillWidth: true
-                        placeholderText: "Inserisci pitch"
+                        placeholderText: "Enter pitch"
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
                         validator: DoubleValidator { bottom: 0; top: 1e6; decimals: 3 }
                         onEditingFinished: {
@@ -528,7 +526,7 @@ ToolStrip {
                             Constants.savedOrientation = currentIndex
                             serpentine.build()
                             serpCanvas.schedulePaint()
-                        }        
+                        }
                     }
                 }
 
@@ -615,9 +613,8 @@ ToolStrip {
                             // reset the “passed” index
                             serpCanvas.passedWpIndex = -1
 
-                            // *** NEW ***
-                            // aggiorna anche la lunghezza del path locale in base al numero waypoint effettivi caricati,
-                            // se il plugin l'ha già aggiornato
+                            // also update the local path length using the actual waypoint count,
+                            // if the plugin already updated it
                             if (CustomPlugin && CustomPlugin.abluoMissionCount !== undefined) {
                                 serpentine.setPathLengthFromCount(CustomPlugin.abluoMissionCount)
                             }
@@ -673,13 +670,12 @@ ToolStrip {
         property real height_m: 0
         property var  path: []
         property real total_len_m: 0
-        // 0=orizzontale (spazzate Est-Ovest), 1=verticale (spazzate Nord-Sud)
+        // 0=horizontal (E-W sweeps), 1=vertical (N-S sweeps)
         property int  orientation: 0
 
-        // *** NEW ***
-        // Imposta serpentine.path a una certa lunghezza (dummy), per riflettere
-        // quanti waypoint ha la missione caricata a bordo, anche se non abbiamo
-        // le coordinate qui in QML.
+        // Set serpentine.path to a certain (dummy) length, to reflect
+        // how many waypoints are currently loaded on the vehicle mission,
+        // even if we don't actually have those coordinates here in QML.
         function setPathLengthFromCount(cnt) {
             if (!isFinite(cnt) || cnt <= 0) {
                 path = []
@@ -687,7 +683,7 @@ ToolStrip {
             }
             const tmp = []
             for (var i = 0; i < cnt; i++) {
-                tmp.push(i)    // valore segnaposto
+                tmp.push(i)    // placeholder value
             }
             path = tmp
         }
@@ -749,18 +745,18 @@ ToolStrip {
                 return QtPositioning.coordinate(lat1, lon1).distanceTo(QtPositioning.coordinate(lat2, lon2))
             }
 
-            // Selezione esplicita dell'asse delle spazzate
-            // orientation==0 -> spazzate per longitudine (E<->W) a lat costante
-            // orientation==1 -> spazzate per latitudine  (S<->N) a lon costante
+            // Explicit sweep axis selection
+            // orientation==0 -> sweeps by longitude (E<->W) at constant lat
+            // orientation==1 -> sweeps by latitude  (S<->N) at constant lon
             const sweepByLon = (orientation === 0)
 
             let pts = []
 
-            // 1) Primo punto = S esatta all'altitudine z0
+            // 1) First point = exact S at altitude z0
             let p = QtPositioning.coordinate(s_coord.latitude, s_coord.longitude, z0)
             pts.push(p)
 
-            // 2) Secondo punto = fino al lato opposto lungo l'asse di "spazzata"
+            // 2) Second point = go to the opposite side along the "sweep" axis
             let p2 = QtPositioning.coordinate(p.latitude, p.longitude, z0)
             if (sweepByLon) {
                 const dW = Math.abs(p.longitude - west)
@@ -773,7 +769,7 @@ ToolStrip {
             }
             if (p2.distanceTo(pts[pts.length-1]) > 0.01) pts.push(p2)
 
-            // 3) Passi verticali in quota + orizzontali (lungo asse di spazzata) a ogni quota
+            // 3) Vertical steps in altitude + horizontal sweeps at each altitude
             let y = z0
             let cur = p2
             while ((dirZ > 0 && y < z1) || (dirZ < 0 && y > z1)) {
@@ -781,11 +777,11 @@ ToolStrip {
                 const step = Math.min(dz, remaining)
                 y += dirZ * step
 
-                // verticale (quota)
+                // vertical (altitude step)
                 let v = QtPositioning.coordinate(cur.latitude, cur.longitude, y)
                 if (v.distanceTo(pts[pts.length-1]) > 0.01) pts.push(v)
 
-                // spostamento orizzontale al lato opposto secondo l'asse scelto
+                // horizontal sweep to the opposite side for the chosen axis
                 let h = QtPositioning.coordinate(v.latitude, v.longitude, y)
                 if (sweepByLon) {
                     const dW = Math.abs(v.longitude - west)
@@ -800,7 +796,7 @@ ToolStrip {
                 cur = h
             }
 
-            // 4) Snap esatto su T
+            // 4) Snap exactly to T
             let last = pts[pts.length-1]
             if (Math.abs(last.altitude - z1) > 0.01) {
                 let v = QtPositioning.coordinate(last.latitude, last.longitude, z1)
@@ -810,7 +806,7 @@ ToolStrip {
             const tExact = QtPositioning.coordinate(t_coord.latitude, t_coord.longitude, z1)
             if (tExact.distanceTo(last) > 0.01) pts.push(tExact)
 
-            // 5) lunghezza totale
+            // 5) total path length
             let sum = 0
             for (let i = 1; i < pts.length; i++) sum += pts[i-1].distanceTo(pts[i])
             total_len_m = sum
