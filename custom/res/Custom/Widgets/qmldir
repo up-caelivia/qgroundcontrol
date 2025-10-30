@@ -13,4 +13,7 @@ AboutUP    1.0     AboutUP.qml
 SavParamMarkerUP 1.0 SavParamMarkerUP.qml
 SavButtonWidgetUP     1.0     SavButtonWidgetUP.qml
 AbluoPathWidgetUP    1.0     AbluoPathWidgetUP.qml
+AwarenessInfoHeader 1.0     AwarenessInfoHeader.qml
+AwarenessInfoViewer 1.0     AwarenessInfoViewer.qml
+
 

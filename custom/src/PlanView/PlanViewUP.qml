@@ -25,7 +25,11 @@ import QGroundControl.Palette           1.0
 import QGroundControl.Controllers       1.0
 import QGroundControl.ShapeFileHelper   1.0
 
-import Custom.Widgets  1.0
+import QGroundControl.KML 1.0
+import Custom.GeoAwareness 1.0
+import Custom.Widgets 1.0
+
+import QtQuick.Controls 2.4 as Controls2
 
 Item {
     id: _root
@@ -36,7 +40,7 @@ Item {
     readonly property real  _margin:                    ScreenTools.defaultFontPixelHeight * 0.5
     readonly property real  _toolsMargin:               ScreenTools.defaultFontPixelWidth * 0.75
     readonly property real  _radius:                    ScreenTools.defaultFontPixelWidth  * 0.5
-    readonly property real  _rightPanelWidth:           Math.min(parent.width / 3, ScreenTools.defaultFontPixelWidth * 30)
+    readonly property real  _rightPanelWidth:           Math.min(parent.width / 3, ScreenTools.defaultFontPixelWidth * 50)
     readonly property var   _defaultVehicleCoordinate:  QtPositioning.coordinate(37.803784, -122.462276)
     readonly property bool  _waypointsOnlyMode:         QGroundControl.corePlugin.options.missionWaypointsOnly
 
@@ -55,11 +59,12 @@ Item {
     property bool   _promptForPlanUsageShowing:         false
     property var    _savParamCoords:                    []
 
-    readonly property var       _layers:                [_layerMission, _layerGeoFence, _layerRallyPoints]
+    readonly property var       _layers:                [_layerMission, _layerGeoFence, _layerRallyPoints, _layerAwareness]
 
     readonly property int       _layerMission:              1
     readonly property int       _layerGeoFence:             2
     readonly property int       _layerRallyPoints:          3
+    readonly property int       _layerAwareness:            4
     readonly property string    _armedVehicleUploadPrompt:  qsTr("Vehicle is currently armed. Do you want to upload the mission to the vehicle?")
 
     function mapCenter() {
@@ -75,10 +80,39 @@ Item {
     property bool _firstRallyLoadComplete:      false
     property bool _firstLoadComplete:           false
 
+
     Connections {
         target: CustomPlugin
         onSavParamCoordinatesChanged: {
             _savParamCoords = CustomPlugin.savParamCoordinates
+        }
+    }
+    
+
+    QGCFileDialog {
+        id:             kmlFileDialog
+        folder:         QGroundControl.settingsManager.appSettings.missionSavePath
+        title:          qsTr("Select KML/JSON File")
+        selectExisting: true
+        nameFilters:    [ "KML/JSON Files (*.kml *.json *.geojson)" ]
+
+        onAcceptedForLoad: {
+            
+            var coords = [
+                editorMap.toCoordinate(Qt.point(0, 0)),
+                editorMap.toCoordinate(Qt.point(editorMap.width, 0)),
+                editorMap.toCoordinate(Qt.point(editorMap.width, editorMap.height)),
+                editorMap.toCoordinate(Qt.point(0, editorMap.height)),
+                editorMap.toCoordinate(Qt.point(0, 0))
+            ]
+
+            KmlPolygonLoader.loadFromFile(file.toString().replace("file://", ""), coords)
+            close()
+        }
+
+        onAcceptedForSave: {
+            KmlPolygonLoader.exportToKmlFile(file.toString().replace("file://", ""))
+            close()
         }
     }
 
@@ -253,6 +287,109 @@ Item {
         }
     }
 
+    
+    Controls2.Popup {
+        id: polygonClickMenu
+        modal: true
+        focus: true
+
+        property var polygons: []
+        
+        Timer {
+            id: popupSizeFixTimer
+            interval: 30
+            repeat: false
+            onTriggered: {
+                showAtMouse(polygonClickMenu.x, polygonClickMenu.y, polygonClickMenu.polygons, true)
+            }
+        }
+
+        function showAtMouse(mouseX, mouseY, polygonData, secondStep = false) {
+            polygonClickMenu.polygons = polygonData
+
+            var newX = mouseX
+            var newY = mouseY
+
+            var menuWidth = polygonClickMenu.implicitWidth
+            var menuHeight = polygonClickMenu.implicitHeight
+
+            if (newX + menuWidth > _root.width) {
+                newX = _root.width - menuWidth
+            }
+            if (newY + menuHeight > _root.height) {
+                newY = _root.height - menuHeight
+            }
+
+            x = newX
+            y = newY
+            open()
+            if (!secondStep) {
+                popupSizeFixTimer.start()
+            }
+        }
+
+        background: Rectangle {
+            radius: ScreenTools.defaultFontPixelHeight * 0.5
+            color: qgcPal.window
+            border.color: qgcPal.text
+        }
+
+        ColumnLayout {
+            spacing: ScreenTools.defaultFontPixelHeight * 0.1
+            Layout.fillWidth: true
+
+            Rectangle {
+                height: 1
+                color: Qt.rgba(qgcPal.text.r, qgcPal.text.g, qgcPal.text.b, 0.5)
+                Layout.fillWidth: true
+            }
+
+            Repeater {
+                model: polygonClickMenu.polygons
+
+                ColumnLayout {
+                    spacing: ScreenTools.defaultFontPixelHeight * 0.1
+                    Layout.fillWidth: true
+
+                    RowLayout {
+                        spacing: ScreenTools.defaultFontPixelWidth * 0.5
+                        Layout.fillWidth: true
+
+                        QGCLabel {
+                            text: modelData.name
+                            Layout.fillWidth: true
+                            Layout.maximumWidth: ScreenTools.defaultFontPixelWidth * 80
+                            elide: Text.ElideRight
+                            wrapMode: Text.NoWrap                                
+                        }
+
+                        QGCButton {
+                            text: qsTr("Select")
+                            onClicked: {
+                                KmlPolygonLoader.selectPolygon(modelData, true)
+                                polygonClickMenu.close()
+                            }
+                        }
+
+                        QGCButton {
+                            text: qsTr("Delete")
+                            onClicked: {
+                                KmlPolygonLoader.removePolygon(modelData)
+                                polygonClickMenu.close()
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        height: 1
+                        color: Qt.rgba(qgcPal.text.r, qgcPal.text.g, qgcPal.text.b, 0.5)
+                        Layout.fillWidth: true
+                    }
+                }
+            }
+        }
+    }
+
     Connections {
         target: _missionController
 
@@ -305,6 +442,35 @@ Item {
             }
         }
     }
+
+    function fitPolygonToMap(coords) {
+        if (!coords || coords.length === 0)
+            return
+
+        var minLat = coords[0].latitude
+        var maxLat = coords[0].latitude
+        var minLon = coords[0].longitude
+        var maxLon = coords[0].longitude
+
+        for (var i = 1; i < coords.length; i++) {
+            minLat = Math.min(minLat, coords[i].latitude)
+            maxLat = Math.max(maxLat, coords[i].latitude)
+            minLon = Math.min(minLon, coords[i].longitude)
+            maxLon = Math.max(maxLon, coords[i].longitude)
+        }
+
+        var centerLat = (minLat + maxLat) / 2
+        var centerLon = (minLon + maxLon) / 2
+
+        editorMap.center = QtPositioning.coordinate(centerLat, centerLon)
+    }
+
+    function showPolygonMenuAtMouse(mouseX, mouseY, polygonsAtPoint) {
+        if (polygonsAtPoint.length > 0) {
+            polygonClickMenu.showAtMouse(mouseX, mouseY, polygonsAtPoint, false)
+        }
+    }
+
 
     QGCFileDialog {
         id:             fileDialog
@@ -435,6 +601,14 @@ Item {
                     opacity:    _editingLayer == _layerMission ? 1 : editorMap._nonInteractiveOpacity
                 }
             }
+    
+            KmlPolygonOverlay {
+                polygonModel: KmlPolygonLoader.polygons
+                map: editorMap
+                popupMenuComponent: polygonRightClickMenu
+                root: _root 
+                selectedPolygon: KmlPolygonLoader.selectedPolygon
+            }               
 
             // UI for splitting the current segment
             MapQuickItem {
@@ -548,6 +722,15 @@ Item {
                         dropPanelComponent:     syncDropPanel
                     },
                     ToolStripAction {
+                        text:                   qsTr("UGZ")
+                        enabled:                !_planMasterController.syncInProgress
+                        visible:                true
+                        showAlternateIcon:      _planMasterController.dirty
+                        iconSource:             "/qmlimages/MapSync.svg"
+                        alternateIconSource:    "/qmlimages/MapSyncChanged.svg"
+                        dropPanelComponent:     ugzDropPanel
+                    },
+                    ToolStripAction {
                         text:       qsTr("Takeoff")
                         iconSource: "/res/takeoff.svg"
                         enabled:    _missionController.isInsertTakeoffValid
@@ -657,16 +840,33 @@ Item {
                     width:      parent.width
                     visible:    QGroundControl.corePlugin.options.enablePlanViewSelector
                     Component.onCompleted: currentIndex = 0
+
+                    property real totalImplicitWidth: missionBtn.implicitWidth + fenceBtn.implicitWidth + rallyBtn.implicitWidth + awarenessBtn.implicitWidth
+                    property real availableExtra: width - totalImplicitWidth
+                    property real extraPerTab: Math.max(0, (width - totalImplicitWidth) / 4)                    
+
                     QGCTabButton {
+                        id: missionBtn
                         text:       qsTr("Mission")
+                        width: implicitWidth + layerTabBar.extraWidthPerTab
                     }
                     QGCTabButton {
+                        id: fenceBtn
                         text:       qsTr("Fence")
                         enabled:    _geoFenceController.supported
+                        width: implicitWidth + layerTabBar.extraWidthPerTab
                     }
                     QGCTabButton {
+                        id: rallyBtn
                         text:       qsTr("Rally")
                         enabled:    _rallyPointController.supported
+                        width: implicitWidth + layerTabBar.extraWidthPerTab
+                    }
+                    QGCTabButton {
+                        id: awarenessBtn
+                        text:       qsTr("Awareness")
+                        enabled:    true
+                        width: implicitWidth + layerTabBar.extraWidthPerTab
                     }
                 }
             }
@@ -742,6 +942,28 @@ Item {
                 visible:                _editingLayer == _layerRallyPoints && _rallyPointController.points.count
                 rallyPoint:             _rallyPointController.currentRallyPoint
                 controller:             _rallyPointController
+            }
+
+            // Awareness Info Tab
+            AwarenessInfoHeader {
+                id:                     awarenessInfoHeader
+                anchors.top:            rightControls.bottom
+                anchors.topMargin:      ScreenTools.defaultFontPixelHeight * 0.25
+                anchors.left:           parent.left
+                anchors.right:          parent.right
+                visible:                _editingLayer == _layerAwareness
+            }
+            // GeoFence Editor
+            AwarenessInfoViewer {
+                anchors.top:            rightControls.bottom
+                anchors.topMargin:      ScreenTools.defaultFontPixelHeight * 0.25
+                anchors.bottom:         parent.bottom
+                anchors.left:           parent.left
+                anchors.right:          parent.right
+                polygonGeoAwareness:    KmlPolygonLoader.selectedPolygon
+                kmlPolygonLoader:       KmlPolygonLoader
+                visible:                _editingLayer == _layerAwareness && KmlPolygonLoader.selectedPolygon !== null
+                callback:               _root
             }
         }
 
@@ -1065,6 +1287,224 @@ Item {
                     onClicked: {
                         dropPanel.hide()
                         clearButtonClicked()
+                    }
+                }
+            }
+        }
+    }
+
+    Component {
+        id: ugzDropPanel
+
+        ColumnLayout {
+            id: panelRoot
+            spacing: _margin
+            property var selectedPolygon: null
+
+            SectionHeader {
+                Layout.fillWidth: true
+                text: qsTr("No-Fly Zones Management")
+                showSpacer: false
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: _margin
+
+                QGCButton {
+                    text: qsTr("Delete All")
+                    onClicked: KmlPolygonLoader.clearPolygons()
+                }
+
+                QGCButton {
+                    text: qsTr("Add from file")
+                    
+                    onClicked: {
+                        kmlFileDialog.title=qsTr("Select KML/JSON File")
+                        kmlFileDialog.selectExisting = true
+                        kmlFileDialog.nameFilters = [ "KML/JSON Files (*.kml *.json *.geojson)" ]
+                        kmlFileDialog.openForLoad()
+                    }
+                }
+
+                QGCButton {
+                    text: qsTr("Replace from file")
+                    onClicked: {
+                        KmlPolygonLoader.clearPolygons()
+                        kmlFileDialog.title=qsTr("Select KML/JSON File")
+                        kmlFileDialog.selectExisting = true
+                        kmlFileDialog.nameFilters = [ "KML/JSON Files (*.kml *.json *.geojson)" ]
+                        kmlFileDialog.openForLoad()
+                    }
+                }
+
+                QGCButton {
+                    text: qsTr("Export KML file")
+                    onClicked: {                     
+                        kmlFileDialog.title =          qsTr("Save KML")
+                        kmlFileDialog.selectExisting = false
+                        kmlFileDialog.nameFilters =    ShapeFileHelper.fileDialogKMLFilters
+                        kmlFileDialog.openForSave()
+                    }
+                }
+            }
+
+            SectionHeader {
+                Layout.fillWidth: true
+                text: qsTr("Loaded polygons:")
+                showSpacer: false
+            }
+
+            ListView {
+                Layout.fillWidth: true
+                Layout.preferredHeight: Screen.height * 0.50
+                clip: true
+                model: KmlPolygonLoader.polygons                
+                visible: renameDialog.visible === false
+
+                delegate: Item {
+                    width: ListView.view.width
+                    height: ScreenTools.defaultFontPixelHeight * 2
+
+                    Rectangle {
+                        anchors.fill: parent
+                        color: mouseArea.containsMouse ? qgcPal.buttonHighlight : "transparent"
+                        radius: 4
+                    }
+
+                    MouseArea {
+                        id: mouseArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+
+                        property var lastClickTime: 0
+                        property var doubleClickThreshold: 250 // ms
+
+                        onClicked: {
+                            var currentTime = Date.now()
+                            if (currentTime - lastClickTime < doubleClickThreshold) {
+                                fitPolygonToMap(modelData.coordinates)
+                            } else {
+                                KmlPolygonLoader.selectPolygon(modelData, true) 
+                            }
+                            lastClickTime = currentTime
+                        }
+                    }
+
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.margins: _margin
+                        spacing: _margin
+
+                        QGCColoredImage {
+                            source: "qrc:/InstrumentValueIcons/edit-pencil.svg"
+                            width: ScreenTools.defaultFontPixelHeight * 1.2
+                            height: width
+                            color: qgcPal.text
+                            visible: false
+
+                            QGCMouseArea {
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    panelRoot.selectedPolygon = modelData
+                                }
+                            }
+                        }
+
+                        Rectangle {
+                            width: ScreenTools.defaultFontPixelHeight * 1.2
+                            height: width
+                            color: modelData.color ? modelData.color : "red"
+                            border.color: "black"
+                            radius: 2
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+
+                        QGCLabel {
+                            text: modelData.name
+                            font.bold: true
+                            verticalAlignment: Text.AlignVCenter
+                            Layout.fillWidth: true
+                            elide: Text.ElideRight
+                        }
+
+                        QGCColoredImage {
+                            source: "qrc:/InstrumentValueIcons/close.svg"
+                            width: ScreenTools.defaultFontPixelHeight * 1.2
+                            height: width
+                            color: qgcPal.text
+
+                            QGCMouseArea {
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    KmlPolygonLoader.removePolygon(modelData)
+                                }
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        height: 1
+                        color: qgcPal.text
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                    }
+                }
+            }
+
+            Rectangle {
+                id: renameDialog
+                visible: selectedPolygon !== null
+                width: ScreenTools.defaultFontPixelWidth * 40
+                height: ScreenTools.defaultFontPixelHeight * 8
+                color: qgcPal.window
+                border.color: qgcPal.text
+                radius: 8
+                Layout.fillWidth: true
+                z: 1000
+
+                ColumnLayout {
+                    anchors.fill: parent
+                    anchors.margins: _margin
+                    spacing: _margin
+
+                    QGCLabel {
+                        text: qsTr("Rename Polygon")
+                        font.bold: true
+                        Layout.alignment: Qt.AlignHCenter
+                    }
+
+                    QGCTextField {
+                        id: renameField
+                        Layout.fillWidth: true
+                        text: panelRoot.selectedPolygon ? panelRoot.selectedPolygon.name : ""
+                        Component.onCompleted: selectAll()
+                    }
+
+                    RowLayout {
+                        Layout.alignment: Qt.AlignRight
+                        spacing: _margin
+
+                        QGCButton {
+                            text: qsTr("Cancel")
+                            onClicked: selectedPolygon = null
+                        }
+
+                        QGCButton {
+                            text: qsTr("OK")
+                            enabled: renameField.text.trim().length > 0
+                            onClicked: {
+                                if (selectedPolygon) {
+                                    selectedPolygon.name = renameField.text.trim()
+                                }
+                                selectedPolygon = null
+                            }
+                        }
                     }
                 }
             }

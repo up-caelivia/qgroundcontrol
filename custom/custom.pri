@@ -76,12 +76,14 @@ exists($$PWD/create_ABLUO) {
         $$QMAKE_COPY $$PWD/android/AndroidManifest_ABLUO.xml $$PWD/android/AndroidManifest.xml
     PRE_TARGETDEPS += $$manifest_copy_target.target
     QMAKE_EXTRA_TARGETS += manifest_copy_target
+    message(copy AndroidManifest_ABLUO)
    
     images_copy_target.target = $$PWD/android/res
     images_copy_target.commands = \
         $$QMAKE_COPY_DIR \"$$PWD/android/res_ABLUO\" \"$$PWD/android/res\"
     PRE_TARGETDEPS += $$images_copy_target.target
     QMAKE_EXTRA_TARGETS += images_copy_target
+    message(copy res_ABLUO)
 
     DEFINES += ABLUO_APP
 
@@ -95,15 +97,17 @@ exists($$PWD/create_ABLUO) {
     linux {
         manifest_copy_target.target = $$PWD/android/AndroidManifest.xml
         manifest_copy_target.commands = \
-            $$QMAKE_COPY \"$$PWD/android/AndroidManifest_UP.xml\" \"$$PWD/android/AndroidManifest.xml\"
+            $$QMAKE_COPY $$PWD/android/AndroidManifest_UP.xml $$PWD/android/AndroidManifest.xml
         PRE_TARGETDEPS += $$manifest_copy_target.target
         QMAKE_EXTRA_TARGETS += manifest_copy_target
+        message("copy AndroidManifest_UP")
    
         images_copy_target.target = $$PWD/android/res
         images_copy_target.commands = \
-            $$QMAKE_COPY_DIR \"$$PWD/android/res_UP\" \"$$PWD/android/res\"
+            $$QMAKE_COPY_DIR $$PWD/android/res_UP $$PWD/android/res
         PRE_TARGETDEPS += $$images_copy_target.target
         QMAKE_EXTRA_TARGETS += images_copy_target
+        message("copy res_UP")
     }
 }
 
@@ -137,7 +141,9 @@ SOURCES += \
     $$PWD/src/ParseNTRIP.cpp \
     $$PWD/src/constants.cpp \
     $$PWD/src/CustomAnnouncer.cpp \
-    $$PWD/src/VideoStreamControl.cc
+    $$PWD/src/VideoStreamControl.cc \
+    $$PWD/src/GeoAwareness/KmlPolygonObject.cpp \
+    $$PWD/src/GeoAwareness/KmlPolygonLoader.cpp
 
 HEADERS += \
     $$PWD/src/CustomPlugin.h \
@@ -145,9 +151,12 @@ HEADERS += \
     $$PWD/src/ParseNTRIP.h \
     $$PWD/src/constants.h \
     $$PWD/src/CustomAnnouncer.h \
-    $$PWD/src/VideoStreamControl.h
+    $$PWD/src/VideoStreamControl.h \
+    $$PWD/src/GeoAwareness/KmlPolygonObject.h \
+    $$PWD/src/GeoAwareness/KmlPolygonLoader.h
 
-INCLUDEPATH += $$PWD/src
+INCLUDEPATH += $$PWD/src \
+               $$PWD/src/GeoAwareness
 
 # Enable Herelink AirUnit video config
 DEFINES += QGC_HERELINK_AIRUNIT_VIDEO

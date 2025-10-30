@@ -25,6 +25,9 @@ import QGroundControl.Vehicle       1.0
 
 import Custom.Widgets 1.0
 
+import QGroundControl.KML 1.0
+import Custom.GeoAwareness 1.0
+
 FlightMap {
     id:                         _root
     allowGCSLocationCenter:     true
@@ -89,6 +92,12 @@ FlightMap {
     onCenterChanged: {
         QGroundControl.flightMapPosition = center
     }
+    
+    
+    KmlPolygonOverlay {
+        polygonModel: KmlPolygonLoader.polygons
+        showBorder: false
+    }   
 
     // We track whether the user has panned or not to correctly handle automatic map positioning
     Connections {
@@ -223,6 +232,9 @@ FlightMap {
                     var vehicleOffsetCoord = _root.toCoordinate(vehicleOffsetPoint, false /* clipToViewport */)
                     animatedMapRecenter(_root.center, vehicleOffsetCoord)
                 }
+            }
+            if (KmlPolygonLoader.checkDronePosition()) {
+                showCriticalVehicleMessage("WARNING : drone violated the geo-awareness zone")
             }
         }
     }

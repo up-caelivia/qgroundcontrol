@@ -23,6 +23,7 @@
 #include "QGCToolbox.h"
 #include "MultiVehicleManager.h"
 #include "constants.h"
+#include "KmlPolygonLoader.h"
 #include "CustomAnnouncer.h"
 #include "CustomToolbox.h"
 #include <list>
@@ -266,16 +267,26 @@ void CustomPlugin::paletteOverride(QString colorName, QGCPalette::PaletteColorIn
     }
 }
 
+static QObject* kmlPolygonLoader_singletontype_provider(QQmlEngine* engine, QJSEngine* scriptEngine)
+{
+    Q_UNUSED(engine)
+    Q_UNUSED(scriptEngine)
+    return KmlPolygonLoader::instance();
+}
+
 // We override this so we can get access to QQmlApplicationEngine and use it to register our qml module
 QQmlApplicationEngine* CustomPlugin::createQmlApplicationEngine(QObject* parent)
 {
     QQmlApplicationEngine* qmlEngine = QGCCorePlugin::createQmlApplicationEngine(parent);
     qmlEngine->addImportPath("qrc:/Custom/Widgets");
     qmlEngine->addImportPath("qrc:/Custom/Constants");
+    qmlEngine->addImportPath("qrc:/Custom/GeoAwareness");
 
     qmlRegisterSingletonType<Constants>("Constants", 1, 0, "Constants", Constants::constants_singleton_provider);
 
     qmlEngine->rootContext()->setContextProperty("CustomPlugin", this);
+
+    qmlRegisterSingletonType<KmlPolygonLoader>("QGroundControl.KML", 1, 0, "KmlPolygonLoader", kmlPolygonLoader_singletontype_provider);
 
     #ifdef QT_DEBUG     // start with a custom connection only in debug build!
         MockLink::startAPMArduCopterMockLink(false);

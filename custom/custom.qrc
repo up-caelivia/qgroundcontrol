@@ -42,14 +42,21 @@
         <file alias="Custom/Widgets/CustomRadarWidget.qml">res/Custom/Widgets/CustomRadarWidget.qml</file>
         <file alias="Custom/Widgets/qmldir">res/Custom/Widgets/qmldir</file>
         <file alias="CustomNTRIP.qml">res/Custom/Widgets/CustomNTRIP.qml</file>
-        <file alias="AboutUP.qml">res/Custom/Widgets/AboutUP.qml</file>
+        <file alias="AboutUP.qml">res/Custom/Widgets/AboutUP.qml</file> 
         <file alias="Custom/Widgets/SavParamMarkerUP.qml">res/Custom/Widgets/SavParamMarkerUP.qml</file>
         <file alias="Custom/Widgets/SavButtonWidgetUP.qml">res/Custom/Widgets/SavButtonWidgetUP.qml</file>
         <file alias="Custom/Widgets/AbluoPathWidgetUP.qml">res/Custom/Widgets/AbluoPathWidgetUP.qml</file>
+		<file alias="Custom/Widgets/AwarenessInfoHeader.qml">res/Custom/Widgets/AwarenessInfoHeader.qml</file>
+		<file alias="Custom/Widgets/AwarenessInfoViewer.qml">res/Custom/Widgets/AwarenessInfoViewer.qml</file>
     </qresource>
     <qresource prefix="/Custom/Constants">
         <file alias="Custom/Constants/Constants.qml">res/Custom/Constants/Constants.qml</file>
         <file alias="Custom/Constants/qmldir">res/Custom/Constants/qmldir</file>
+    </qresource>
+    <qresource prefix="/Custom/GeoAwareness">
+        <file alias="Custom/GeoAwareness/KmlPolygonLoaderSingleton.qml">res/Custom/GeoAwareness/KmlPolygonLoaderSingleton.qml</file>
+        <file alias="Custom/GeoAwareness/qmldir">res/Custom/GeoAwareness/qmldir</file>
+        <file alias="Custom/GeoAwareness/KmlPolygonOverlay.qml">res/Custom/GeoAwareness/KmlPolygonOverlay.qml</file>
     </qresource>
     <qresource prefix="/qml">
         <file alias="CustomSetupView.qml">res/Custom/Widgets/CustomSetupView.qml</file>
@@ -79,7 +86,7 @@
 		<file alias="QGroundControl/Controls/QGCComboBox.qml">src/QmlControls/QGCComboBoxUP.qml</file>
 		<file alias="QGroundControl/FactControls/FactTextField.qml">src/FactSystem/FactControls/FactTextFieldUP.qml</file>
         <file alias="QGroundControl/Controls/ParameterEditor.qml">src/QmlControls/ParameterEditorUP.qml</file>
-        <file alias="QGroundControl/FactControls/FactComboBox.qml">src/FactSystem/FactControls/FactComboBoxUP.qml</file>
+        <file alias="QGroundControl/FactControls/FactComboBox.qml">src/FactSystem/FactControls/FactComboBoxUP.qml</file>  
         <file alias="QGroundControl/Controls/ToolStripHoverButton.qml">src/QmlControls/ToolStripHoverButtonUP.qml</file>
         <file alias="QGroundControl/Controls/SubMenuButton.qml">src/QmlControls/SubMenuButtonUP.qml</file>
 		<file alias="QGroundControl/FlightDisplay/VehicleWarnings.qml">src/FlightDisplay/VehicleWarningsUP.qml</file>

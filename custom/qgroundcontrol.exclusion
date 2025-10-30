@@ -50,8 +50,6 @@
 
 <file alias="QGroundControl/FactControls/FactTextField.qml">src/FactSystem/FactControls/FactTextField.qml</file>
 
-<file alias="QGroundControl/Controls/ParameterEditor.qml">src/QmlControls/ParameterEditorUP.qml</file>
-
 <file alias="QGroundControl/Controls/QGCComboBox.qml">src/QmlControls/QGCComboBox.qml</file>
 
 <file alias="QGroundControl/Controls/ParameterEditor.qml">src/QmlControls/ParameterEditor.qml</file>
@@ -63,6 +61,8 @@
 <file alias="QGroundControl/Controls/ToolStripHoverButton.qml">src/QmlControls/ToolStripHoverButton.qml</file>
 
 <file alias="QGroundControl/Controls/SubMenuButton.qml">src/QmlControls/SubMenuButton.qml</file>
+
+<file alias="PlanView.qml">src/PlanView/PlanView.qml</file>
 
 <file alias="QGroundControl/FlightDisplay/VehicleWarnings.qml">src/FlightDisplay/VehicleWarnings.qml</file>
 
