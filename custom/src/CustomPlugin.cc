@@ -645,6 +645,7 @@ void  CustomPlugin::setAbluoMapPlanEnabled(const bool& msg){
 
 void CustomPlugin::onActiveVehicleChanged(Vehicle* vehicle)
 {
+    _detachGpsFixWatcher();
     qDebug() << "onActiveVehicleChanged";
     if (!vehicle) {
         qDebug() << "!vehicle";
@@ -750,6 +751,8 @@ void CustomPlugin::onActiveVehicleChanged(Vehicle* vehicle)
                 }
             },
             Qt::UniqueConnection);
+
+    _attachGpsFixWatcher(vehicle);
 }
 
 
@@ -1312,4 +1315,50 @@ void CustomPlugin::setAbluoMissionCount(int c) {
     if (_abluoMissionCount == c) return;
     _abluoMissionCount = c;
     emit abluoMissionCountChanged();
+}
+
+void CustomPlugin::_detachGpsFixWatcher()
+{
+    if (_gpsFixConn) {
+        disconnect(_gpsFixConn);
+        _gpsFixConn = QMetaObject::Connection{};
+    }
+    _lastFixType = -1;
+}
+
+void CustomPlugin::_attachGpsFixWatcher(Vehicle* v)
+{
+    _detachGpsFixWatcher();
+    if (!v) return;
+
+    FactGroup* gps = v->gpsFactGroup();
+    if (!gps) return;
+
+    Fact* lockFact = gps->getFact(QStringLiteral("lock"));
+    if (!lockFact) {
+        QTimer::singleShot(500, this, [this, v](){ _attachGpsFixWatcher(v); });
+        return;
+    }
+
+    _lastFixType = lockFact->rawValue().toInt(); 
+
+    _gpsFixConn = connect(lockFact, &Fact::rawValueChanged, this, [this, lockFact]() {
+        const int newFix = lockFact->rawValue().toInt();
+
+        if (_lastFixType < 0) {     
+            _lastFixType = newFix;
+            return;
+        }
+
+        const bool toFixed    = (_lastFixType < 6 && newFix == 6);
+        const bool fromFixed  = (_lastFixType == 6 && newFix < 6);
+
+        if (toFixed) {
+            sendLogMessage(tr("GPS RTK fixed reached."), QString(), QStringLiteral("Warning"));
+        } else if (fromFixed) {
+            sendLogMessage(tr("GPS RTK fixed lost."), QString(), QStringLiteral("Critical"));
+        }
+
+        _lastFixType = newFix;
+    });
 }

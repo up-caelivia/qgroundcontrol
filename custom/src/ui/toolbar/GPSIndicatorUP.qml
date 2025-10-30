@@ -101,8 +101,11 @@ Item {
         if( _activeVehicle && _activeVehicle.gps.lock.rawValue === 1)  // No fix
             return qgcPal.colorOrange;
 
-        if ( _activeVehicle && (_activeVehicle.gps.lock.rawValue === 6 || _activeVehicle.gps.lock.rawValue === 5) )  // RTK fixed / RTK Float
+        if ( _activeVehicle && _activeVehicle.gps.lock.rawValue === 5) // RTK Float
             return qgcPal.colorBlue;
+
+        if ( _activeVehicle && _activeVehicle.gps.lock.rawValue === 6) // RTK fixed
+            return "#ff00bf";
 
         return qgcPal.colorGreen;  // 3d/2d fix etc...
 

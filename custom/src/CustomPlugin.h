@@ -144,6 +144,8 @@ private:
     void _refreshWpnavFromFact();
     void _startWpnavProbeTimer(ParameterManager* pm);
     void setAbluoMissionCount(int c);
+    void _attachGpsFixWatcher(Vehicle* v);
+    void _detachGpsFixWatcher();
 
 private:
     CustomOptions*  _options = nullptr;
@@ -174,4 +176,7 @@ private:
     int _cachedResumeIndex = -1;
     int _abluoCurrentWp = -1;
     int _abluoMissionCount = 0;
+    
+    QMetaObject::Connection _gpsFixConn{};
+    int _lastFixType = -1;
 };
