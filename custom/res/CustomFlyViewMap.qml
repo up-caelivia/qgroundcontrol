@@ -233,9 +233,7 @@ FlightMap {
                     animatedMapRecenter(_root.center, vehicleOffsetCoord)
                 }
             }
-            if (KmlPolygonLoader.checkDronePosition()) {
-                showCriticalVehicleMessage("WARNING : drone violated the geo-awareness zone")
-            }
+            KmlPolygonLoader.checkDronePosition()
         }
     }
 

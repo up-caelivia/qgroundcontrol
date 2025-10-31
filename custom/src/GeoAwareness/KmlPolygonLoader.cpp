@@ -858,11 +858,13 @@ bool KmlPolygonLoader::checkDronePosition(){
     for (QObject* obj : _polygonObjects) {
         auto* polygon = qobject_cast<KmlPolygonObject*>(obj);
         if (polygon && polygon->contains(dronePos)) {
-            if (dronePos.altitude() > polygon->hmin()) {                
+            if (vehicle->altitudeRelative()->rawValue().toDouble() > polygon->hmin()) {                
                 if (_selectedPolygonFence != polygon) {
                     _selectedPolygonFence = polygon;
-                    QString msg = QString( "drone violated the geo-awareness zone");
-                    qgcApp()->toolbox()->audioOutput()->say(msg);
+                        UASMessageHandler* msgHandler = qgcApp()->toolbox()->uasMessageHandler();
+                        if (msgHandler) {
+                            msgHandler->handleTextMessage(1, 1, 2, "WARNING : drone violated the geo-awareness zone", QString());
+                        }
                     return true;
                 }
             }
