@@ -1354,9 +1354,11 @@ void CustomPlugin::_attachGpsFixWatcher(Vehicle* v)
         const bool fromFixed  = (_lastFixType == 6 && newFix < 6);
 
         if (toFixed) {
-            sendLogMessage(tr("GPS RTK fixed reached."), QString(), QStringLiteral("Warning"));
+            sendLogMessage(tr("GPS RTK fixed reached."), QString(), QStringLiteral("Warning")); 
+            qgcApp()->toolbox()->audioOutput()->say("GPS RTK fixed reached");
         } else if (fromFixed) {
             sendLogMessage(tr("GPS RTK fixed lost."), QString(), QStringLiteral("Critical"));
+            qgcApp()->toolbox()->audioOutput()->say("GPS RTK fixed lost");
         }
 
         _lastFixType = newFix;

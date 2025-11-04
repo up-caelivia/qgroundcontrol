@@ -863,7 +863,9 @@ bool KmlPolygonLoader::checkDronePosition(){
                     _selectedPolygonFence = polygon;
                         UASMessageHandler* msgHandler = qgcApp()->toolbox()->uasMessageHandler();
                         if (msgHandler) {
-                            msgHandler->handleTextMessage(1, 1, 2, "WARNING : drone violated the geo-awareness zone", QString());
+                            QString msg = QString("WARNING : drone violated the geo-awareness zone");
+                            msgHandler->handleTextMessage(1, 1, 2, msg, QString());
+                            qgcApp()->toolbox()->audioOutput()->say(msg);
                         }
                     return true;
                 }
