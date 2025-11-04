@@ -27,7 +27,7 @@ ToolStrip {
     // Public API
     property alias serpentine_path: serpentine.path
     property alias total_length_m:  serpentine.total_len_m
-    property real  pitchValue: 0
+    property real  pitchValue: 1
 
     // 0 = horizontal (E-W stripes, vertical progression)
     // 1 = vertical   (N-S stripes, horizontal progression)
@@ -44,9 +44,13 @@ ToolStrip {
     Component.onCompleted: {
         // restore saved settings/coords if available
         if (Constants.savedPitch !== undefined) {
-            abluoToolStrip.pitchValue = Number(Constants.savedPitch) || 0
+            const v = Math.max(0.25, Number(Constants.savedPitch) || 1)
+            abluoToolStrip.pitchValue = v
+            serpentine.pitch_m = v
+            if (pitchField) pitchField.text = String(v)
+        } else {
             serpentine.pitch_m = abluoToolStrip.pitchValue
-            if (pitchField) pitchField.text = abluoToolStrip.pitchValue > 0 ? String(abluoToolStrip.pitchValue) : ""
+            if (pitchField) pitchField.text = String(abluoToolStrip.pitchValue)
         }
         if (Constants.savedOrientation !== undefined) {
             orientationMode = Number(Constants.savedOrientation) === 1 ? 1 : 0
@@ -506,11 +510,14 @@ ToolStrip {
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
                         validator: DoubleValidator { bottom: 0; top: 1e6; decimals: 3 }
                         onEditingFinished: {
-                            abluoToolStrip.pitchValue = Number(text)
-                            serpentine.pitch_m = abluoToolStrip.pitchValue
-                            if (CustomPlugin && !isNaN(abluoToolStrip.pitchValue) && CustomPlugin.setPitch)
-                                CustomPlugin.setPitch(abluoToolStrip.pitchValue)
-                            Constants.savedPitch = abluoToolStrip.pitchValue
+                            let v = Number(text)
+                            if (!isFinite(v)) v = 0.25
+                            v = Math.max(0.25, v)             
+                            abluoToolStrip.pitchValue = v
+                            serpentine.pitch_m = v
+                            if (CustomPlugin && CustomPlugin.setPitch) CustomPlugin.setPitch(v)
+                            Constants.savedPitch = v
+                            text = String(v)   
                             serpentine.build()
                         }
                     }
@@ -665,7 +672,7 @@ ToolStrip {
         id: serpentine
         property var  s_coord: QtPositioning.coordinate()
         property var  t_coord: QtPositioning.coordinate()
-        property real pitch_m: 10
+        property real pitch_m: 1
         property real width_m:  0
         property real height_m: 0
         property var  path: []
