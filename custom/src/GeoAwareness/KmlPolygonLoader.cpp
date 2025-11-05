@@ -19,6 +19,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
+
 KmlPolygonLoader::KmlPolygonLoader(QObject* parent)
     : QObject(parent) {}
 
@@ -853,26 +854,36 @@ bool KmlPolygonLoader::checkDronePosition(){
         return false;
     }
 
-    QGeoCoordinate dronePos = vehicle->coordinate();
+    const QGeoCoordinate dronePos = vehicle->coordinate();
+    const double altRel = vehicle->altitudeRelative()->rawValue().toDouble();
+
+    KmlPolygonObject* hit = nullptr;
 
     for (QObject* obj : _polygonObjects) {
         auto* polygon = qobject_cast<KmlPolygonObject*>(obj);
-        if (polygon && polygon->contains(dronePos)) {
-            if (vehicle->altitudeRelative()->rawValue().toDouble() > polygon->hmin()) {                
-                if (_selectedPolygonFence != polygon) {
-                    _selectedPolygonFence = polygon;
-                        UASMessageHandler* msgHandler = qgcApp()->toolbox()->uasMessageHandler();
-                        if (msgHandler) {
-                            QString msg = QString("WARNING : drone violated the geo-awareness zone");
-                            msgHandler->handleTextMessage(1, 1, 2, msg, QString());
-                            qgcApp()->toolbox()->audioOutput()->say(msg);
-                        }
-                    return true;
-                }
-            }
-        }
+        if (!polygon) continue;
+        if (!polygon->contains(dronePos)) continue;
+        if (altRel <= polygon->hmin()) continue;
+
+        hit = polygon;
+        break; 
     }
-    _selectedPolygonFence = nullptr;
+
+    if (hit) {
+        if (_selectedPolygonFence != hit) {
+            if (auto* msgHandler = qgcApp()->toolbox()->uasMessageHandler()) {
+                const QString msg = QStringLiteral("drone violated the geo-awareness zone");
+                msgHandler->handleTextMessage(1, 1, 2, msg, QString());
+                qgcApp()->toolbox()->audioOutput()->say("WARNING : " + msg);
+            }
+            _selectedPolygonFence = hit;
+        }
+        return true;
+    }
+
+    if (_selectedPolygonFence) {
+        _selectedPolygonFence = nullptr;
+    }
     return false;
 }
 
