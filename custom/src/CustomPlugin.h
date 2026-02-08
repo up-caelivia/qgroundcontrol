@@ -58,6 +58,9 @@ class CustomPlugin : public QGCCorePlugin
     Q_PROPERTY(int            cachedResumeIndex      READ getCachedResumeIndex                                  NOTIFY cachedResumeIndexChanged)
     Q_PROPERTY(int            abluoCurrentWp         READ abluoCurrentWp        WRITE setAbluoCurrentWp         NOTIFY abluoCurrentWpChanged)
     Q_PROPERTY(int            abluoMissionCount      READ abluoMissionCount                                     NOTIFY abluoMissionCountChanged)
+    Q_PROPERTY(QString        tripFlightTimeStr      READ tripFlightTimeStr                                     NOTIFY tripFlightTimeChanged)
+    Q_PROPERTY(qulonglong     tripFlightTimeSec      READ tripFlightTimeSec                                     NOTIFY tripFlightTimeChanged)
+
 
 
 
@@ -117,6 +120,10 @@ public:
     int  abluoCurrentWp() const { return _abluoCurrentWp; }
     void setAbluoCurrentWp(int v);
     int abluoMissionCount() const { return _abluoMissionCount; }
+    
+    QString     tripFlightTimeStr() const { return _tripFlightTimeStr; }
+    qulonglong  tripFlightTimeSec() const { return _tripFlightTimeSec; }
+
 
 signals:
     void speedMessageChanged();
@@ -131,6 +138,7 @@ signals:
     void cachedResumeIndexChanged();
     void abluoCurrentWpChanged();
     void abluoMissionCountChanged();
+    void tripFlightTimeChanged();
 
 
 
@@ -146,6 +154,20 @@ private:
     void setAbluoMissionCount(int c);
     void _attachGpsFixWatcher(Vehicle* v);
     void _detachGpsFixWatcher();
+
+    // Trip flight time (resiliente a restart QGC)
+    void _attachTripWatchers(Vehicle* v);
+    void _detachTripWatchers();
+    void _startTripProbeTimer(ParameterManager* pm);
+    void _tryRestoreTripBaseline(Vehicle* v);
+    void _saveTripBaseline(Vehicle* v, qulonglong flt, qulonglong boot);
+    void _clearTripBaseline(Vehicle* v);
+    void _recomputeTrip(Vehicle* v);
+
+    static QString _tripKey(Vehicle* v);
+    static QString _fmtHhMmSs(qulonglong seconds); 
+    void _startTripTickTimer();
+    void _stopTripTickTimer();
 
 private:
     CustomOptions*  _options = nullptr;
@@ -179,4 +201,23 @@ private:
     
     QMetaObject::Connection _gpsFixConn{};
     int _lastFixType = -1;
+        // Trip baseline persisted in QSettings
+    Fact* _statFltTimeFact = nullptr;
+    Fact* _statBootCntFact = nullptr;
+    QMetaObject::Connection _fltTimeConn{};
+    QMetaObject::Connection _bootCntConn{};
+    QMetaObject::Connection _armedConn{};
+    QTimer* _tripProbeTimer = nullptr;
+
+    bool _tripBaselineValid = false;
+    qulonglong _tripBaselineFlt = 0;
+    qulonglong _tripBaselineBoot = 0;
+
+    qulonglong _tripFlightTimeSec = 0;
+    QString _tripFlightTimeStr = QStringLiteral("0000:00:00");
+
+    QTimer* _tripTickTimer = nullptr;
+    bool _tripUsingLocalTick = false;
+    qulonglong _tripLocalSec = 0;
+    qulonglong _lastStatFltSeen = 0;
 };

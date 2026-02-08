@@ -82,7 +82,7 @@ Item {
 
         QGCLabel {
             color:  Constants.isABLUOApp ? qgcPal.text : qgcPal.buttonText
-            text:  _activeVehicle ?  _activeVehicle.getFact("flightTime").valueString : "--/--"
+            text:  _activeVehicle ?  CustomPlugin.tripFlightTimeStr : "--/--"
         }
 
         QGCLabel {

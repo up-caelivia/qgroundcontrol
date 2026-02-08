@@ -46,6 +46,9 @@
 #include <limits>
 #include <QTimer>
 
+#include <QSettings>
+
+
 void CustomPlugin::registerQmlTypes()
 {
     qmlRegisterSingletonType<CustomAnnouncer>("CustomAnnouncer", 1, 0, "CustomAnnouncer",
@@ -658,6 +661,7 @@ void CustomPlugin::onActiveVehicleChanged(Vehicle* vehicle)
         emit wpnavSpeedMpsChanged();
         setAbluoCurrentWp(-1);
         setAbluoMissionCount(0);
+        _detachTripWatchers();
 
         return;
     }
@@ -682,6 +686,7 @@ void CustomPlugin::onActiveVehicleChanged(Vehicle* vehicle)
 
     // attach/re-attach WPNAV_SPEED watcher
     _attachWpnavWatcher(vehicle);
+    _attachTripWatchers(vehicle);
 
     // ---------------------------------------------------------------------
     // Hook MissionManager
@@ -1363,4 +1368,323 @@ void CustomPlugin::_attachGpsFixWatcher(Vehicle* v)
 
         _lastFixType = newFix;
     });
+}
+
+QString CustomPlugin::_tripKey(Vehicle* v)
+{
+    // Per single-vehicle va benissimo.
+    // Se vuoi più robustezza, possiamo includere anche sysid (se accessibile).
+    return QStringLiteral("TripFlight/%1").arg(v ? v->id() : -1);
+}
+
+QString CustomPlugin::_fmtHhMmSs(qulonglong s)
+{
+    const qulonglong h = s / 3600ULL;
+    const qulonglong m = (s % 3600ULL) / 60ULL;
+    const qulonglong sec = s % 60ULL;
+    return QString::asprintf("%04llu:%02llu:%02llu",
+                             (unsigned long long)h,
+                             (unsigned long long)m,
+                             (unsigned long long)sec);
+}
+
+void CustomPlugin::_saveTripBaseline(Vehicle* v, qulonglong flt, qulonglong boot)
+{
+    if (!v) return;
+    QSettings s;
+    const QString k = _tripKey(v);
+    s.setValue(k + "/valid", true);
+    s.setValue(k + "/baseline_flt", QVariant::fromValue<qulonglong>(flt));
+    s.setValue(k + "/baseline_boot", QVariant::fromValue<qulonglong>(boot));
+
+    _tripBaselineValid = true;
+    _tripBaselineFlt = flt;
+    _tripBaselineBoot = boot;
+}
+
+void CustomPlugin::_clearTripBaseline(Vehicle* v)
+{
+    if (!v) return;
+    QSettings s;
+    s.remove(_tripKey(v));
+
+    _tripBaselineValid = false;
+    _tripBaselineFlt = 0;
+    _tripBaselineBoot = 0;
+}
+
+void CustomPlugin::_recomputeTrip(Vehicle* v)
+{
+    if (!v || !v->armed() || !_tripBaselineValid || !_statFltTimeFact) {
+        if (_tripFlightTimeSec != 0 || _tripFlightTimeStr != QStringLiteral("0000:00:00")) {
+            _tripFlightTimeSec = 0;
+            _tripFlightTimeStr = QStringLiteral("0000:00:00");
+            emit tripFlightTimeChanged();
+        }
+        return;
+    }
+
+    const qulonglong nowFlt = _statFltTimeFact->rawValue().toULongLong();
+    qulonglong trip = 0;
+    if (nowFlt >= _tripBaselineFlt)
+        trip = nowFlt - _tripBaselineFlt;
+
+    const QString str = _fmtHhMmSs(trip);
+    if (_tripFlightTimeSec != trip || _tripFlightTimeStr != str) {
+        _tripFlightTimeSec = trip;
+        _tripFlightTimeStr = str;
+        emit tripFlightTimeChanged();
+    }
+}
+
+void CustomPlugin::_tryRestoreTripBaseline(Vehicle* v)
+{
+    if (!v || !v->armed()) return;
+    if (!_statFltTimeFact || !_statBootCntFact) return;
+
+    QSettings s;
+    const QString k = _tripKey(v);
+    if (!s.value(k + "/valid", false).toBool())
+        return;
+
+    const qulonglong savedFlt  = s.value(k + "/baseline_flt").toULongLong();
+    const qulonglong savedBoot = s.value(k + "/baseline_boot").toULongLong();
+
+    const qulonglong nowBoot = _statBootCntFact->rawValue().toULongLong();
+    const qulonglong nowFlt  = _statFltTimeFact->rawValue().toULongLong();
+
+    // Sicurezza: se autopilot reboot o dato incoerente -> non ripristinare
+    if (nowBoot != savedBoot) return;
+    if (nowFlt < savedFlt) return;
+
+    _tripBaselineValid = true;
+    _tripBaselineFlt = savedFlt;
+    _tripBaselineBoot = savedBoot;
+}
+
+void CustomPlugin::_detachTripWatchers()
+{
+    if (_fltTimeConn) { disconnect(_fltTimeConn); _fltTimeConn = {}; }
+    if (_bootCntConn) { disconnect(_bootCntConn); _bootCntConn = {}; }
+    if (_armedConn)   { disconnect(_armedConn);   _armedConn = {}; }
+
+    _statFltTimeFact = nullptr;
+    _statBootCntFact = nullptr;
+
+    if (_tripProbeTimer) {
+        _tripProbeTimer->stop();
+        _tripProbeTimer->deleteLater();
+        _tripProbeTimer = nullptr;
+    }
+
+    // Non azzerare baseline qui: se QGC cambia veicolo ok, ma
+    // se crasha e riparte la baseline deve restare in QSettings.
+    _tripBaselineValid = false;
+    _tripBaselineFlt = 0;
+    _tripBaselineBoot = 0;
+
+    // reset UI
+    _tripFlightTimeSec = 0;
+    _tripFlightTimeStr = QStringLiteral("0000:00:00");
+    emit tripFlightTimeChanged();
+    _stopTripTickTimer();
+}
+
+void CustomPlugin::_startTripProbeTimer(ParameterManager* pm)
+{
+    if (_tripProbeTimer) return;
+
+    _tripProbeTimer = new QTimer(this);
+    _tripProbeTimer->setInterval(500);
+    _tripProbeTimer->setSingleShot(false);
+
+    connect(_tripProbeTimer, &QTimer::timeout, this, [this, pm]() {
+        if (!pm) return;
+
+        const int comp = FactSystem::defaultComponentId;
+
+        if (!_statFltTimeFact && pm->parameterExists(comp, QStringLiteral("STAT_FLTTIME"))) {
+            _statFltTimeFact = pm->getParameter(comp, QStringLiteral("STAT_FLTTIME"));
+            if (_statFltTimeFact) {
+                _fltTimeConn = connect(_statFltTimeFact, &Fact::rawValueChanged, this, [this]() {
+                    Vehicle* av = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle();
+                    _recomputeTrip(av);
+                });
+            }
+        }
+
+        if (!_statBootCntFact && pm->parameterExists(comp, QStringLiteral("STAT_BOOTCNT"))) {
+            _statBootCntFact = pm->getParameter(comp, QStringLiteral("STAT_BOOTCNT"));
+        }
+
+        if (_statFltTimeFact && _statBootCntFact) {
+            _tripProbeTimer->stop();
+            _tripProbeTimer->deleteLater();
+            _tripProbeTimer = nullptr;
+
+            Vehicle* av = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle();
+
+            _tryRestoreTripBaseline(av);
+
+            if (av && av->armed() && !_tripBaselineValid) {
+                const qulonglong flt  = _statFltTimeFact->rawValue().toULongLong();
+                const qulonglong boot = _statBootCntFact->rawValue().toULongLong();
+                qDebug() << "[Trip] probe: creating baseline now flt=" << flt << "boot=" << boot;
+                _saveTripBaseline(av, flt, boot);
+            }
+
+            if (av && av->armed() && _tripBaselineValid) {
+                if (_statFltTimeFact) {
+                    const qulonglong statNow = _statFltTimeFact->rawValue().toULongLong();
+                    _tripLocalSec = (statNow >= _tripBaselineFlt) ? (statNow - _tripBaselineFlt) : 0;
+                    _lastStatFltSeen = statNow;
+                } else {
+                    _tripLocalSec = 0;
+                    _lastStatFltSeen = 0;
+                }
+                _startTripTickTimer();
+            }
+
+            // 4) update UI
+            _recomputeTrip(av);
+        }
+
+    });
+
+    _tripProbeTimer->start();
+}
+
+void CustomPlugin::_attachTripWatchers(Vehicle* v)
+{
+    _detachTripWatchers();
+    if (!v || !v->parameterManager()) return;
+
+    ParameterManager* pm = v->parameterManager();
+    const int comp = FactSystem::defaultComponentId;
+
+    // hook armedChanged
+    _armedConn = connect(v, &Vehicle::armedChanged, this, [this](bool armed) {
+        Vehicle* av = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle();
+        if (!av) return;
+
+        if (!armed) {
+            _stopTripTickTimer();
+            _clearTripBaseline(av);
+
+            _tripLocalSec = 0;
+            _lastStatFltSeen = 0;
+            _tripUsingLocalTick = false;
+
+            _tripFlightTimeSec = 0;
+            _tripFlightTimeStr = QStringLiteral("0000:00:00");
+            emit tripFlightTimeChanged();
+            return;
+        }
+
+        // armed=true
+        // reset tick counters for this flight
+        _tripLocalSec = 0;
+        _tripUsingLocalTick = false;
+        _lastStatFltSeen = _statFltTimeFact ? _statFltTimeFact->rawValue().toULongLong() : 0;
+
+        if (_statFltTimeFact && _statBootCntFact) {
+            const qulonglong flt  = _statFltTimeFact->rawValue().toULongLong();
+            const qulonglong boot = _statBootCntFact->rawValue().toULongLong();
+            _saveTripBaseline(av, flt, boot);
+        } 
+
+        if (_tripBaselineValid) {
+            _startTripTickTimer();
+        }
+    }, Qt::UniqueConnection);
+
+
+    // try immediately
+    if (pm->parameterExists(comp, QStringLiteral("STAT_FLTTIME"))) {
+        _statFltTimeFact = pm->getParameter(comp, QStringLiteral("STAT_FLTTIME"));
+        if (_statFltTimeFact) {
+            _fltTimeConn = connect(_statFltTimeFact, &Fact::rawValueChanged, this, [this]() {
+                Vehicle* av = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle();
+                _recomputeTrip(av);
+            });
+        }
+    }
+    if (pm->parameterExists(comp, QStringLiteral("STAT_BOOTCNT"))) {
+        _statBootCntFact = pm->getParameter(comp, QStringLiteral("STAT_BOOTCNT"));
+    }
+
+    if (!(_statFltTimeFact && _statBootCntFact)) {
+        _startTripProbeTimer(pm);
+        return;
+    }
+
+    _tryRestoreTripBaseline(v);
+
+    if (v && v->armed()) {
+        if (!_tripBaselineValid) {
+            const qulonglong flt  = _statFltTimeFact->rawValue().toULongLong();
+            const qulonglong boot = _statBootCntFact->rawValue().toULongLong();
+            _saveTripBaseline(v, flt, boot);
+        }
+
+        if (_tripBaselineValid) {
+            _tripLocalSec = 0;
+            _lastStatFltSeen = _statFltTimeFact->rawValue().toULongLong();
+            _startTripTickTimer();
+        }
+    }
+
+    _recomputeTrip(v);
+}
+
+void CustomPlugin::_startTripTickTimer()
+{
+    if (_tripTickTimer) return;
+
+    _tripTickTimer = new QTimer(this);
+    _tripTickTimer->setInterval(1000);
+    _tripTickTimer->setSingleShot(false);
+
+    connect(_tripTickTimer, &QTimer::timeout, this, [this]() {
+        qDebug() << "[TripTick] local =" << _tripLocalSec;
+        Vehicle* v = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle();
+        if (!v || !v->armed() || !_tripBaselineValid) {
+            return;
+        }
+        _tripLocalSec += 1;
+        if (_statFltTimeFact) {
+            const qulonglong statNow = _statFltTimeFact->rawValue().toULongLong();
+
+            if (statNow != _lastStatFltSeen) {
+                _lastStatFltSeen = statNow;
+
+                if (statNow >= _tripBaselineFlt) {
+                    const qulonglong statTrip = statNow - _tripBaselineFlt;
+
+                    if (qAbs((qint64)statTrip - (qint64)_tripLocalSec) > 2) {
+                        _tripLocalSec = statTrip;
+                    }
+                }
+            }
+        }
+        
+        const QString str = _fmtHhMmSs(_tripLocalSec);
+        if (_tripFlightTimeSec != _tripLocalSec || _tripFlightTimeStr != str) {
+            _tripFlightTimeSec = _tripLocalSec;
+            _tripFlightTimeStr = str;
+            emit tripFlightTimeChanged();
+        }
+    });
+
+
+
+    _tripTickTimer->start();
+}
+
+void CustomPlugin::_stopTripTickTimer()
+{
+    if (!_tripTickTimer) return;
+    _tripTickTimer->stop();
+    _tripTickTimer->deleteLater();
+    _tripTickTimer = nullptr;
 }
