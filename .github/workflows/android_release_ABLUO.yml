@@ -14,6 +14,8 @@ env:
   SOURCE_DIR:   ${{ github.workspace }}
   QT_VERSION:   5.15.2
   BUILD_TYPE:   ${{ fromJSON('["DailyBuild", "StableBuild"]')[ github.ref_type == 'tag' || contains(github.ref, 'Stable_' ) ] }}
+  ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+  ANDROID_HOME: /usr/local/lib/android/sdk
 
 jobs:
   build:
@@ -42,48 +44,35 @@ jobs:
         run: |
           git fetch --all --tags -f --depth 1
 
-      - name: Install Android SDK platforms
-        env:
-          JAVA_HOME: /usr/lib/jvm/java-11-openjdk-amd64
-          ANDROID_SDK_ROOT: /opt/android/sdk
-          ANDROID_HOME: /opt/android/sdk
+      - name: Debug Android SDK (runner)
         run: |
-          set -x
-          export PATH=/usr/lib/jvm/java-11-openjdk-amd64/bin:$PATH
-          export LANG=en_US.UTF-8
-          export LC_ALL=en_US.UTF-8
-      
-          mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools
-          curl -Lo /tmp/cmdline-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-7302050_latest.zip
-          unzip -q /tmp/cmdline-tools.zip -d ${ANDROID_SDK_ROOT}/cmdline-tools
-          mv ${ANDROID_SDK_ROOT}/cmdline-tools/cmdline-tools ${ANDROID_SDK_ROOT}/cmdline-tools/latest
-      
-          export PATH=${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:$PATH
-      
-          yes | sdkmanager --sdk_root=${ANDROID_SDK_ROOT} --licenses || true
-          sdkmanager --sdk_root=${ANDROID_SDK_ROOT} "platforms;android-29" "build-tools;29.0.2" "platform-tools"
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          ls -la $ANDROID_SDK_ROOT || true
+          ls -la $ANDROID_SDK_ROOT/platforms || true
+          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --version || true
 
-      - name: Check installed Android SDKs (before)
+      - name: Ensure Android platform installed
         run: |
-          ls ${ANDROID_SDK_ROOT}/platforms
-        
-      - name: Remove unwanted Android SDKs
-        run: |
-          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-33-ext4"
-          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-33-ext5"
-          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-34"
-          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-34-ext8"
-          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-34-ext10"
-          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-34-ext11"
-          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-34-ext12"
-          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-35"
-          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-35-ext14"
-          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-35-ext15"
-          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-36"
-          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-36-ext18"
-          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-36-ext19"
-          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "platforms;android-36.1"
-        
+          set -eux
+          export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
+          yes | sdkmanager --licenses || true
+          sdkmanager --sdk_root=$ANDROID_SDK_ROOT \
+            "platform-tools" \
+            "platforms;android-33" \
+            "build-tools;33.0.2"
+
+          echo "Installed platforms:"
+          ls -la $ANDROID_SDK_ROOT/platforms
+      - name: Install Android NDK
+        uses: nttld/setup-ndk@v1
+        id: setup-ndk
+        with:
+          ndk-version: r21d
+          add-to-path: false
+
+      - name: Remove Android SDKs to force usage of android-33 only
+        run: ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --list_installed | grep "platforms;android-" | grep -v "platforms;android-33 " | awk '{print $1}' | xargs -I {} ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "{}"
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
@@ -94,14 +83,6 @@ jobs:
           dir:          ${{ runner.temp }}
           modules:      qtcharts
           setup-python: ${{ !env.ACT }}
-
-      - name: Install Android NDK
-        uses: nttld/setup-ndk@v1
-        id: setup-ndk
-        with:
-          ndk-version: r21d
-          add-to-path: false
-
       - name: Install ccache
         run:  sudo apt-get install ccache
 
@@ -149,6 +130,7 @@ jobs:
           ANDROID_NDK_LATEST_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
           ANDROID_NDK: ${{ steps.setup-ndk.outputs.ndk-path }}
         run:  |
+            set -eux
             touch ${SOURCE_DIR}/custom/create_ABLUO
             mkdir -p ${SOURCE_DIR}/custom/android/res
             cp -rf ${SOURCE_DIR}/custom/android/res_ABLUO/* ${SOURCE_DIR}/custom/android/res
