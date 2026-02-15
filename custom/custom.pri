@@ -160,3 +160,8 @@ INCLUDEPATH += $$PWD/src \
 
 # Enable Herelink AirUnit video config
 DEFINES += QGC_HERELINK_AIRUNIT_VIDEO
+
+# ---- MSVC: avoid warning-as-error for lambda capture / QObject::connect on Windows
+win32:msvc {
+    QMAKE_CXXFLAGS += /wd4573
+}
