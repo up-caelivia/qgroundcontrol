@@ -881,13 +881,15 @@ bool KmlPolygonLoader::checkDronePosition()
 
     if (pm) {
 
-        Fact* loitFact = pm->getParameter(FactSystem::defaultComponentId, "LOIT_SPEED");
+        if (pm->parameterExists(FactSystem::defaultComponentId, "LOIT_SPEED")){
+            Fact* loitFact = pm->getParameter(FactSystem::defaultComponentId, "LOIT_SPEED");
+            if (loitFact) { loitSpeed_cm_s = loitFact->rawValue().toDouble(); }
+        }
 
-        if (loitFact) { loitSpeed_cm_s = loitFact->rawValue().toDouble(); }
-
-        Fact* pilotUpFact = pm->getParameter(FactSystem::defaultComponentId, "PILOT_SPEED_UP");
-
-        if (pilotUpFact) { pilotSpeedUp_cm_s = pilotUpFact->rawValue().toDouble();}
+        if (pm->parameterExists(FactSystem::defaultComponentId, "PILOT_SPEED_UP")){
+            Fact* pilotUpFact = pm->getParameter(FactSystem::defaultComponentId, "PILOT_SPEED_UP");
+            if (pilotUpFact) { pilotSpeedUp_cm_s = pilotUpFact->rawValue().toDouble();}
+        }
     }
 
     const double loitSpeed_m_s    = loitSpeed_cm_s / 100.0;
