@@ -959,7 +959,7 @@ bool KmlPolygonLoader::checkDronePosition()
                 const QString msg =
                     QStringLiteral("drone violated the geo-awareness zone");
 
-                msgHandler->handleTextMessage(1, 1, 2, msg, QString());
+                msgHandler->handleTextMessage(1, 1, 2, QTime::currentTime().toString("hh:mm:ss.zzz") + " " + msg, QString());
                 qgcApp()->toolbox()->audioOutput()->say("WARNING : " + msg);
             }
 
@@ -976,7 +976,7 @@ bool KmlPolygonLoader::checkDronePosition()
                 const QString msg =
                     QStringLiteral("drone close to a geo-awareness zone");
 
-                msgHandler->handleTextMessage(1, 1, 1, msg, QString());
+                msgHandler->handleTextMessage(1, 1, 1, QTime::currentTime().toString("hh:mm:ss.zzz") + " " + msg, QString());
                 qgcApp()->toolbox()->audioOutput()->say("CAUTION : " + msg);
             }
 
