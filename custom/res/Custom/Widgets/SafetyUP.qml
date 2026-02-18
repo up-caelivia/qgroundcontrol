@@ -138,6 +138,7 @@ SetupPage {
                                 QGCCheckBox {
                                     text:       qsTr("Maximum Altitude")
                                     checked:    _fenceType.rawValue & _maxAltitudeFenceBitMask
+                                    id:         maximumAltitudeCheckBox
 
                                     onClicked: {
                                         if (checked) {
@@ -150,6 +151,20 @@ SetupPage {
 
                                 FactTextField {
                                     fact: _fenceAltMax
+                                }
+                                
+                                QGCLabel {
+                                    text: qsTr("Altitude fence is not enabled if Maximum Altitude is disabled")
+                                    color: "red"
+                                    visible: !maximumAltitudeCheckBox.checked
+                                    Layout.columnSpan:      2
+                                }
+
+                                QGCLabel {
+                                    text: qsTr("Warning: the fence altitude is higher than the 120 m EU regulation limit")
+                                    color: "red"
+                                    visible: maximumAltitudeCheckBox.checked && _fenceAltMax.value > 12000
+                                    Layout.columnSpan:      2
                                 }
 
                                 QGCCheckBox {
