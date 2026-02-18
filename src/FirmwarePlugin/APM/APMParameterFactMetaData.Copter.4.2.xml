@@ -7874,7 +7874,7 @@
         <field name="UnitText">degrees</field>
       </param>
       <param humanName="Loiter Horizontal Maximum Speed" name="LOIT_SPEED" documentation="Defines the maximum speed in cm/s which the aircraft will travel horizontally while in loiter mode" user="Standard">
-        <field name="Range">20 3500</field>
+        <field name="Range">20 1000</field>
         <field name="Increment">50</field>
         <field name="Units">cm/s</field>
         <field name="UnitText">centimeters per second</field>
@@ -20439,7 +20439,7 @@
     </parameters>
     <parameters name="WPNAV_">
       <param humanName="Waypoint Horizontal Speed Target" name="WPNAV_SPEED" documentation="Defines the speed in cm/s which the aircraft will attempt to maintain horizontally during a WP mission" user="Standard">
-        <field name="Range">20 2000</field>
+        <field name="Range">20 1000</field>
         <field name="Increment">50</field>
         <field name="Units">cm/s</field>
         <field name="UnitText">centimeters per second</field>
@@ -20451,13 +20451,13 @@
         <field name="UnitText">centimeters</field>
       </param>
       <param humanName="Waypoint Climb Speed Target" name="WPNAV_SPEED_UP" documentation="Defines the speed in cm/s which the aircraft will attempt to maintain while climbing during a WP mission" user="Standard">
-        <field name="Range">10 1000</field>
+        <field name="Range">10 500</field>
         <field name="Increment">50</field>
         <field name="Units">cm/s</field>
         <field name="UnitText">centimeters per second</field>
       </param>
       <param humanName="Waypoint Descent Speed Target" name="WPNAV_SPEED_DN" documentation="Defines the speed in cm/s which the aircraft will attempt to maintain while descending during a WP mission" user="Standard">
-        <field name="Range">10 500</field>
+        <field name="Range">10 250</field>
         <field name="Increment">10</field>
         <field name="Units">cm/s</field>
         <field name="UnitText">centimeters per second</field>
