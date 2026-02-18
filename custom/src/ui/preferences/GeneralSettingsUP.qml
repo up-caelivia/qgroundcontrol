@@ -749,7 +749,7 @@ Rectangle {
                                 FactCheckBox {
                                     text:       qsTr("Enable Remote ID")
                                     fact:       _remoteIDEnable
-                                    visible:    _remoteIDEnable.visible
+                                    visible:    false
                                     property Fact _remoteIDEnable: QGroundControl.settingsManager.remoteIDSettings.enable
                                 }
                             }
