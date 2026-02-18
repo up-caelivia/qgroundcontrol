@@ -19,6 +19,11 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
+#include "ParameterManager.h"
+#include "FactSystem.h"
+#include "Fact.h"
+
+
 
 KmlPolygonLoader::KmlPolygonLoader(QObject* parent)
     : QObject(parent) {}
@@ -848,7 +853,8 @@ QObject* KmlPolygonLoader::selectedPolygon() const {
     return _selectedPolygon;
 }
 
-bool KmlPolygonLoader::checkDronePosition(){
+bool KmlPolygonLoader::checkDronePosition()
+{
     Vehicle* vehicle = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle();
     if (!vehicle || !vehicle->coordinate().isValid()) {
         return false;
@@ -857,35 +863,136 @@ bool KmlPolygonLoader::checkDronePosition(){
     const QGeoCoordinate dronePos = vehicle->coordinate();
     const double altRel = vehicle->altitudeRelative()->rawValue().toDouble();
 
-    KmlPolygonObject* hit = nullptr;
+    // --------------------------------------------------------
+    // Dynamic "near" buffer computation
+    // Requirement: give warning early enough so the drone can stop in < 3s
+    // We use a 4s safety buffer.
+    // Horizontal: 4s * LOIT_SPEED
+    // Vertical:   4s * PILOT_SPEED_UP
+    // Note: ArduPilot params are usually in cm/s -> convert to m/s
+    // --------------------------------------------------------
 
-    for (QObject* obj : _polygonObjects) {
-        auto* polygon = qobject_cast<KmlPolygonObject*>(obj);
-        if (!polygon) continue;
-        if (!polygon->contains(dronePos)) continue;
-        if (altRel <= polygon->hmin()) continue;
+    const double bufferSec = 4.0;
 
-        hit = polygon;
-        break; 
+    auto* pm = vehicle->parameterManager();
+
+    double loitSpeed_cm_s = 1000.0;     // default fallback
+    double pilotSpeedUp_cm_s = 500.0;  // default fallback
+
+    if (pm) {
+
+        Fact* loitFact = pm->getParameter(FactSystem::defaultComponentId, "LOIT_SPEED");
+
+        if (loitFact) { loitSpeed_cm_s = loitFact->rawValue().toDouble(); }
+
+        Fact* pilotUpFact = pm->getParameter(FactSystem::defaultComponentId, "PILOT_SPEED_UP");
+
+        if (pilotUpFact) { pilotSpeedUp_cm_s = pilotUpFact->rawValue().toDouble();}
     }
 
-    if (hit) {
-        if (_selectedPolygonFence != hit) {
+    const double loitSpeed_m_s    = loitSpeed_cm_s / 100.0;
+    const double pilotUp_m_s      = pilotSpeedUp_cm_s / 100.0;
+
+    double nearHorizMeters = bufferSec * loitSpeed_m_s;
+    double nearVertMeters  = bufferSec * pilotUp_m_s;
+
+    KmlPolygonObject* violationHit = nullptr;
+    KmlPolygonObject* nearHit      = nullptr;
+
+    for (QObject* obj : _polygonObjects) {
+
+        auto* polygon = qobject_cast<KmlPolygonObject*>(obj);
+        if (!polygon)
+            continue;
+
+        bool inside = polygon->contains(dronePos);
+
+        // --------------------------------------------------------
+        // VIOLATION CHECK:
+        // Drone is inside the polygon and above minimum altitude
+        // --------------------------------------------------------
+        if (inside && altRel > polygon->hmin()) {
+            violationHit = polygon;
+            break; // violation has priority
+        } else if (inside && (altRel < polygon->hmin() || altRel > polygon->hmax())) {
+            inside = false;
+        }
+
+        // --------------------------------------------------------
+        // NEAR CHECK:
+        // Drone is outside but close to the polygon
+        // --------------------------------------------------------
+
+        // Horizontal proximity (distance from polygon edge)
+        const bool nearHoriz =
+            polygon->containsOrNear(dronePos, nearHorizMeters);
+
+        // Vertical distance from altitude band [hmin, hmax]
+        double vertDist = 0.0;
+
+        if (altRel < polygon->hmin()) {
+            // Drone below minimum altitude
+            vertDist = polygon->hmin() - altRel;
+        }
+
+        const bool nearVert = (vertDist <= nearVertMeters);
+
+        // Near condition:
+        // - outside polygon
+        // - close horizontally
+        // - close vertically
+        if (!inside && nearHoriz && nearVert) {
+            nearHit = polygon;
+            break;
+        }
+    }
+
+    // --------------------------------------------------------
+    // ALERT MANAGEMENT
+    // Avoid repeating the same audio/message continuously
+    // --------------------------------------------------------
+
+    // Violation alert (highest priority)
+    if (violationHit) {
+        if (_selectedPolygonFence != violationHit || _lastAlertType != 2) {
             if (auto* msgHandler = qgcApp()->toolbox()->uasMessageHandler()) {
-                const QString msg = QStringLiteral("drone violated the geo-awareness zone");
+                const QString msg =
+                    QStringLiteral("drone violated the geo-awareness zone");
+
                 msgHandler->handleTextMessage(1, 1, 2, msg, QString());
                 qgcApp()->toolbox()->audioOutput()->say("WARNING : " + msg);
             }
-            _selectedPolygonFence = hit;
+
+            _selectedPolygonFence = violationHit;
+            _lastAlertType = 2; // violation state
         }
         return true;
     }
 
-    if (_selectedPolygonFence) {
-        _selectedPolygonFence = nullptr;
+    // Near alert (warning level)
+    if (nearHit) {
+        if (_selectedPolygonFence != nearHit || _lastAlertType != 1) {
+            if (auto* msgHandler = qgcApp()->toolbox()->uasMessageHandler()) {
+                const QString msg =
+                    QStringLiteral("drone close to a geo-awareness zone");
+
+                msgHandler->handleTextMessage(1, 1, 1, msg, QString());
+                qgcApp()->toolbox()->audioOutput()->say("CAUTION : " + msg);
+            }
+
+            _selectedPolygonFence = nearHit;
+            _lastAlertType = 1; // near state
+        }
+        return false;
     }
+
+    // No active warning or violation
+    _selectedPolygonFence = nullptr;
+    _lastAlertType = 0;
+
     return false;
 }
+
 
 bool KmlPolygonLoader::exportToKmlFile(const QString& filePath) {
     QDomDocument doc;

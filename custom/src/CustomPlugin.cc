@@ -1646,7 +1646,6 @@ void CustomPlugin::_startTripTickTimer()
     _tripTickTimer->setSingleShot(false);
 
     connect(_tripTickTimer, &QTimer::timeout, this, [this]() {
-        qDebug() << "[TripTick] local =" << _tripLocalSec;
         Vehicle* v = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle();
         if (!v || !v->armed() || !_tripBaselineValid) {
             return;

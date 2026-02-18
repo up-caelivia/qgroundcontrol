@@ -65,6 +65,10 @@ public:
 
     bool contains(const QGeoCoordinate& coordinate) const;
 
+    bool containsOrNear(const QGeoCoordinate& coordinate, double thresholdMeters) const;
+
+    double minDistanceToEdges(const QGeoCoordinate& point) const;
+    
 signals:
     void nameChanged();
     void coordinatesChanged();
