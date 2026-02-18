@@ -448,6 +448,18 @@ bool RemoteIDManager::_isEUOperatorIDValid(const QString& operatorID) const
         qCDebug(RemoteIDManagerLog) << "OperatorID country code not uppercase";
         return false;
     }
+    
+    // country code list (ISO 3166-1 alpha-3)
+    static const QSet<QString> validCountryCodes = {
+        "AUT","BEL","BGR","HRV","CYP","CZE","DNK","EST","FIN","FRA",
+        "DEU","GRC","HUN","ISL","IRL","ITA","LVA","LIE","LTU","LUX",
+        "MLT","NLD","NOR","POL","PRT","ROU","SVK","SVN","ESP","SWE","CHE"
+    };
+
+    if (!validCountryCodes.contains(countryCode)) {
+        qCDebug(RemoteIDManagerLog) << "OperatorID invalid country code:" << countryCode;
+        return false;
+    }
 
     const QString number = operatorID.mid(3, 12);
     const QChar checksum = operatorID.at(15);
