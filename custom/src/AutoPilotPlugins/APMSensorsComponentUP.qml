@@ -704,6 +704,61 @@ SetupPage {
                         }
                     }
 
+                    QGCButton {
+                        width:  _buttonWidth
+                        text:   _levelHorizonText
+
+                        readonly property string _levelHorizonText: qsTr("Level Horizon")
+                        visible: Constants.developer
+                        onClicked: {
+                            if (controller.accelSetupNeeded) {
+                                mainWindow.showMessageDialog(_levelHorizonText, qsTr("Accelerometer must be calibrated prior to Level Horizon."))
+                            } else {
+                                mainWindow.showMessageDialog(_levelHorizonText,
+                                                             qsTr("To level the horizon you need to place the vehicle in its level flight position and press Ok."),
+                                                             StandardButton.Cancel | StandardButton.Ok,
+                                                             function() { controller.levelHorizon() })
+                            }
+                        }
+                    }
+
+                    QGCButton {
+                        width:      _buttonWidth
+                        text:       qsTr("Gyro")
+                        visible:    (globals.activeVehicle && (globals.activeVehicle.multiRotor | globals.activeVehicle.rover | globals.activeVehicle.sub)) && Constants.developer
+                        onClicked:  mainWindow.showMessageDialog(qsTr("Calibrate Gyro"),
+                                                                 qsTr("For Gyroscope calibration you will need to place your vehicle on a surface and leave it still.\n\nClick Ok to start calibration."),
+                                                                 StandardButton.Cancel | StandardButton.Ok,
+                                                                 function() { controller.calibrateGyro() })
+                    }
+
+                    QGCButton {
+                        width:      _buttonWidth
+                        text:       _calibratePressureText
+                        visible: Constants.developer
+                        onClicked:  mainWindow.showMessageDialog(_calibratePressureText,
+                                                                 qsTr("Pressure calibration will set the %1 to zero at the current pressure reading. %2").arg(_altText).arg(_helpTextFW),
+                                                                 StandardButton.Cancel | StandardButton.Ok,
+                                                                 function() { controller.calibratePressure() })
+
+                        readonly property string _altText:                  globals.activeVehicle.sub ? qsTr("depth") : qsTr("altitude")
+                        readonly property string _helpTextFW:               globals.activeVehicle.fixedWing ? qsTr("To calibrate the airspeed sensor shield it from the wind. Do not touch the sensor or obstruct any holes during the calibration.") : ""
+                        readonly property string _calibratePressureText:    globals.activeVehicle.fixedWing ? qsTr("Baro/Airspeed") : qsTr("Pressure")
+                    }
+
+                    QGCButton {
+                        width:      _buttonWidth
+                        text:       qsTr("CompassMot")
+                        visible:    (globals.activeVehicle ? globals.activeVehicle.supportsMotorInterference : false) && Constants.developer
+                        onClicked:  compassMotDialogComponent.createObject(mainWindow).open()
+                    }
+
+                    QGCButton {
+                        width:      _buttonWidth
+                        text:       qsTr("Sensor Settings")
+                        visible: Constants.developer
+                        onClicked:  showOrientationsDialog(_calTypeSet)
+                    }		
                 } // Column - Cal Buttons
 
                 Column {
@@ -713,13 +768,14 @@ SetupPage {
                     anchors.left:       buttonColumn.left
                     spacing:            buttonColumn.spacing
 
-                    // QGCButton {
-                    //     id:         nextButton
-                    //     width:      _buttonWidth
-                    //     text:       qsTr("Next")
-                    //     enabled:    false
-                    //     onClicked:  controller.nextClicked()
-                    // }
+                    QGCButton {
+                        id:         nextButton
+                        width:      _buttonWidth
+                        text:       qsTr("Next")
+                        enabled:    false
+                        visible:    Constants.developer
+                        onClicked:  controller.nextClicked()
+                    }
 
                     QGCButton {
                         id:         cancelButton
@@ -738,6 +794,14 @@ SetupPage {
                 anchors.bottom:     parent.bottom
                 anchors.left:       buttonFlickable.right
                 anchors.right:      parent.right
+
+							 
+											   
+											   
+												
+				 
+
+																						
 
                 Item {
                     id:     centerPanel
