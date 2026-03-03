@@ -222,7 +222,7 @@ public:
 
 
 
-    QVector<QString> settingToShow() const { return {"Motors", "Safety"}; }
+    QVector<QString> settingToShow() const { return {"Safety"}; }
     int compassNumber() const { return 3; }
 
     // ====== getter/setter persistenza ======
