@@ -4,6 +4,8 @@
 
 <file alias="QGroundControl/Controls/MainToolBar.qml">src/ui/toolbar/MainToolBar.qml</file>
 
+<file alias="QGroundControl/Controls/RemoteIDIndicator.qml">src/ui/toolbar/RemoteIDIndicator.qml</file>
+
 <file alias="QGroundControl/Controls/TransectStyleMapVisuals.qml">src/PlanView/TransectStyleMapVisuals.qml</file>
 
 <file alias="QGroundControl/FlightMap/MissionLineView.qml">src/FlightMap/MapItems/MissionLineView.qml</file>
@@ -39,6 +41,8 @@
 <file alias="QGroundControl/FlightMap/FlightMap.qml">src/FlightMap/FlightMap.qml</file>
 
 <file alias="GeneralSettings.qml">src/ui/preferences/GeneralSettings.qml</file>
+
+<file alias="RemoteIDSettings.qml">src/ui/preferences/RemoteIDSettings.qml</file>
 
 <file alias="QGroundControl/FlightDisplay/ProximityRadarValues.qml">src/FlightDisplay/ProximityRadarValues.qml</file>
 

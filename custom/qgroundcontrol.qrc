@@ -11,7 +11,6 @@
 		<file alias="ModeIndicator.qml">../src/ui/toolbar/ModeIndicator.qml</file>
 		<file alias="MultiVehicleSelector.qml">../src/ui/toolbar/MultiVehicleSelector.qml</file>
 		<file alias="RCRSSIIndicator.qml">../src/ui/toolbar/RCRSSIIndicator.qml</file>
-		<file alias="RemoteIDIndicator.qml">../src/ui/toolbar/RemoteIDIndicator.qml</file>
 		<file alias="TelemetryRSSIIndicator.qml">../src/ui/toolbar/TelemetryRSSIIndicator.qml</file>
 		<file alias="VTOLModeIndicator.qml">../src/ui/toolbar/VTOLModeIndicator.qml</file>
 		<file alias="APMSupportForwardingIndicator.qml">../src/ui/toolbar/APMSupportForwardingIndicator.qml</file>
@@ -35,7 +34,6 @@
 		<file alias="BluetoothSettings.qml">../src/ui/preferences/BluetoothSettings.qml</file>
 		<file alias="CorridorScanEditor.qml">../src/PlanView/CorridorScanEditor.qml</file>
 		<file alias="DebugWindow.qml">../src/ui/preferences/DebugWindow.qml</file>
-		<file alias="RemoteIDSettings.qml">../src/ui/preferences/RemoteIDSettings.qml</file>
 		<file alias="ESP8266Component.qml">../src/AutoPilotPlugins/Common/ESP8266Component.qml</file>
 		<file alias="ESP8266ComponentSummary.qml">../src/AutoPilotPlugins/Common/ESP8266ComponentSummary.qml</file>
 		<file alias="ExitWithErrorWindow.qml">../src/ui/ExitWithErrorWindow.qml</file>
