@@ -866,13 +866,13 @@ bool KmlPolygonLoader::checkDronePosition()
     // --------------------------------------------------------
     // Dynamic "near" buffer computation
     // Requirement: give warning early enough so the drone can stop in < 3s
-    // We use a 4s safety buffer.
-    // Horizontal: 4s * LOIT_SPEED
-    // Vertical:   4s * PILOT_SPEED_UP
+    // We use a 5s safety buffer.
+    // Horizontal: 5s * LOIT_SPEED
+    // Vertical:   5s * PILOT_SPEED_UP
     // Note: ArduPilot params are usually in cm/s -> convert to m/s
     // --------------------------------------------------------
 
-    const double bufferSec = 4.0;
+    const double bufferSec = 5.0;
 
     auto* pm = vehicle->parameterManager();
 
