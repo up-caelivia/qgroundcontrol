@@ -17,7 +17,7 @@ env:
 jobs:
   build:
     if: "!contains(github.ref, '-beta')"
-    runs-on:  windows-2019
+    runs-on:  windows-latest
     
     env:
       ARTIFACT:     QGroundControlUP-installer-${{ github.ref_name }}.exe
