@@ -94,7 +94,6 @@ Item {
         screenX:                 flyViewVideoMouseArea.mouseX
         screenY:                 flyViewVideoMouseArea.mouseY
         cameraTrackingEnabled:   videoStreaming._camera && videoStreaming._camera.trackingEnabled
-        visible:                 false  
     }
 
     MouseArea {
@@ -113,12 +112,12 @@ Item {
         property var trackingROI:   null
         property var trackingStatus: trackingStatusComponent.createObject(flyViewVideoMouseArea, {})
 
-        //onClicked:       onScreenGimbalController.clickControl()
+        onClicked:       onScreenGimbalController.clickControl()
         onDoubleClicked: QGroundControl.videoManager.fullScreen = !QGroundControl.videoManager.fullScreen
 
 
         onPressed: {
-            //onScreenGimbalController.pressControl()
+            onScreenGimbalController.pressControl()
 
             _track_rec_x = mouse.x
             _track_rec_y = mouse.y
@@ -151,7 +150,7 @@ Item {
             }
         }
         onReleased: {
-            //onScreenGimbalController.releaseControl()
+            onScreenGimbalController.releaseControl()
             
             //if there is already a selection, delete it
             if (trackingROI !== null) {
