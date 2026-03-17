@@ -1267,9 +1267,9 @@ QGCCameraControl::_updateActiveList()
     }
     QStringList active;
     for(QString key: _settings) {
-        if(!exclusionList.contains(key)) {
+        // if(!exclusionList.contains(key)) {
             active.append(key);
-        }
+        // }
     }
     if(active != _activeSettings) {
         qCDebug(CameraControlVerboseLog) << "Excluding" << exclusionList;

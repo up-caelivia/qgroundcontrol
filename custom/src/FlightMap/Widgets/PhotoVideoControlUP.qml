@@ -25,8 +25,6 @@ import QGroundControl.FactControls      1.0
 
 Rectangle {
     height:     mainLayout.height + (_margins * 2)
-    width:     height * 1.2
-
     color:      Qt.rgba(qgcPal.window.r, qgcPal.window.g, qgcPal.window.b, 0.5)
     radius:     _margins
     visible:    (_mavlinkCamera || _videoStreamAvailable || _simpleCameraAvailable) && multiVehiclePanelSelector.showSingleVehiclePanel
@@ -104,7 +102,7 @@ Rectangle {
     function toggleShooting() {
         console.log("toggleShooting", _anyVideoStreamAvailable)
 
-        // This whole mavlinkCameraCaptureVideoOrPhotos stuff is to work around some strange qml boolean testing
+        // This whole mavlinkCameraCaptureVideoOrPhotos stuff is to work around some strange qml boolean testing 
         // behavior which wasn't working correctly. This should work:
         //    if (_mavlinkCamera && (_mavlinkCamera.capturesVideo || _mavlinkCamera.capturesPhotos) ) {
         // but it doesn't for some strange reason. Hence all the stuff below...
@@ -114,7 +112,7 @@ Rectangle {
                 mavlinkCameraCaptureVideoOrPhotos = true
             }
         }
-
+        
         if (mavlinkCameraCaptureVideoOrPhotos) {
             if(_mavlinkCameraInVideoMode) {
                 _mavlinkCamera.toggleVideo()
@@ -143,10 +141,6 @@ Rectangle {
             }
         }
     }
-
-    MouseArea {
-        anchors.fill:   parent
-
 
     Timer {
         id:             simplePhotoCaptureTimer
@@ -187,8 +181,8 @@ Rectangle {
         // using the unified properties/functions.
         Rectangle {
             Layout.alignment:   Qt.AlignHCenter
-            width:              ScreenTools.defaultFontPixelWidth * 11
-            height:             ScreenTools.defaultFontPixelWidth * 10 / 2
+            width:              ScreenTools.defaultFontPixelWidth * 10
+            height:             width / 2
             color:              qgcPal.windowShadeLight
             radius:             height * 0.5
             visible:            _showModeIndicator
@@ -212,13 +206,11 @@ Rectangle {
                     fillMode:           Image.PreserveAspectFit
                     sourceSize.height:  height
                     color:              _modeIndicatorPhotoMode ? qgcPal.text : qgcPal.colorGreen
-
-                }
-
-                MouseArea {
-                    anchors.fill:   parent
-                    enabled:        _switchToVideoModeAllowed
-                    onClicked:      setCameraMode(false)
+                    MouseArea {
+                        anchors.fill:   parent
+                        enabled:        _switchToVideoModeAllowed
+                        onClicked:      setCameraMode(false)
+                    }
                 }
             }
             //-- Photo Mode
@@ -239,13 +231,11 @@ Rectangle {
                     fillMode:           Image.PreserveAspectFit
                     sourceSize.height:  height
                     color:              _modeIndicatorPhotoMode ? qgcPal.colorGreen : qgcPal.text
-
-                }
-
-                MouseArea {
-                    anchors.fill:   parent
-                    enabled:        _switchToPhotoModeAllowed
-                    onClicked:      setCameraMode(true)
+                    MouseArea {
+                        anchors.fill:   parent
+                        enabled:        _switchToPhotoModeAllowed
+                        onClicked:      setCameraMode(true)
+                    }
                 }
             }
         }
@@ -294,6 +284,42 @@ Rectangle {
             }
         }
 
+        // Tracking button
+        Rectangle {
+            Layout.alignment:   Qt.AlignHCenter
+            color:              _mavlinkCamera && _mavlinkCamera.trackingEnabled ? qgcPal.colorRed : qgcPal.windowShadeLight
+            width:              ScreenTools.defaultFontPixelWidth * 6
+            height:             width
+            radius:             width * 0.5
+            border.color:       qgcPal.buttonText
+            border.width:       3
+            visible:            _mavlinkCamera && _mavlinkCamera.hasTracking
+            QGCColoredImage {
+                height:             parent.height * 0.5
+                width:              height
+                anchors.centerIn:   parent
+                source:             "/qmlimages/TrackingIcon.svg"
+                fillMode:           Image.PreserveAspectFit
+                sourceSize.height:  height
+                color:              qgcPal.text
+                MouseArea {
+                    anchors.fill:   parent
+                    onClicked: {
+                        _mavlinkCamera.trackingEnabled = !_mavlinkCamera.trackingEnabled;
+                        if(!_mavlinkCamera.trackingEnabled) {
+                            !_mavlinkCamera.stopTracking()
+                        }
+                    }
+                }
+            }
+        }
+        QGCLabel {
+            Layout.alignment:   Qt.AlignHCenter
+            text:               qsTr("Camera Tracking")
+            font.pointSize:     ScreenTools.defaultFontPointSize
+            visible:            _mavlinkCamera && _mavlinkCamera.hasTracking
+        }
+
         //-- Status Information
         ColumnLayout {
             Layout.alignment:   Qt.AlignHCenter
@@ -334,22 +360,18 @@ Rectangle {
     Component {
         id: settingsDialogComponent
 
-        QGCSidebarDialog {
+        QGCPopupDialog {
             title:      qsTr("Settings")
-            // buttons:    StandardButton.Close
+            buttons:    StandardButton.Close
 
-            contentItem: Component {
             ColumnLayout {
                 spacing: _margins
-
 
                 GridLayout {
                     id:     gridLayout
                     flow:   GridLayout.TopToBottom
                     rows:   dynamicRows + (_mavlinkCamera ? _mavlinkCamera.activeSettings.length : 0)
-                    height: parent.height
 
-                    // Layout.margins: _margins
                     property int dynamicRows: 10
 
                     // First column
@@ -366,7 +388,6 @@ Rectangle {
                     }
 
                     QGCLabel {
-                        id: size_reference
                         text:               qsTr("Thermal View Mode")
                         visible:            _mavlinkCameraHasThermalVideoStream
                         onVisibleChanged:   gridLayout.dynamicRows += visible ? 1 : -1
@@ -378,33 +399,12 @@ Rectangle {
                         onVisibleChanged:   gridLayout.dynamicRows += visible ? 1 : -1
                     }
 
-
-
                     // Mavlink Camera Protocol active settings
                     Repeater {
                         model: _mavlinkCamera ? _mavlinkCamera.activeSettings : []
 
                         QGCLabel {
-                            text: get_text(_mavlinkCamera.getFact(modelData).shortDescription)
-                            width: ScreenTools.defaultFontPixelHeight * 10 // Aumentato per il test
-                            wrapMode: Text.WordWrap
-                            clip: false // Rimosso clipping
-
-                            function get_text(text) {
-                                if (text.indexOf("NUC") !== -1)
-                                    return "NUC Correction";
-
-                                if (text.indexOf("camera simultaneously") !== -1)
-                                    return "Zoom EO/IR together";
-
-                                if (text.indexOf("Upper limit") !== -1)
-                                    return "Upper limit temp. alarm";
-
-                                if (text.indexOf("Lower limit") !== -1)
-                                    return "Lower limit temp. alarm";
-
-                                return text;
-                            }
+                            text: _mavlinkCamera.getFact(modelData).shortDescription
                         }
                     }
 
@@ -446,7 +446,7 @@ Rectangle {
 
                     // Second column
                     QGCComboBox {
-                        // Layout.fillWidth:   true
+                        Layout.fillWidth:   true
                         sizeToContents:     true
                         model:              _mavlinkCameraManager ? _mavlinkCameraManager.cameraLabels : []
                         currentIndex:       _mavlinkCameraManagerCurCameraIndex
@@ -455,7 +455,7 @@ Rectangle {
                     }
 
                     QGCComboBox {
-                        // Layout.fillWidth:   true
+                        Layout.fillWidth:   true
                         sizeToContents:     true
                         model:              _mavlinkCamera ? _mavlinkCamera.streamLabels : []
                         currentIndex:       _mavlinCameraCurStreamIndex
@@ -464,7 +464,7 @@ Rectangle {
                     }
 
                     QGCComboBox {
-                        // Layout.fillWidth:   true
+                        Layout.fillWidth:   true
                         sizeToContents:     true
                         model:              [ qsTr("Off"), qsTr("Blend"), qsTr("Full"), qsTr("Picture In Picture") ]
                         currentIndex:       _mavlinkCamera ? _mavlinkCamera.thermalMode : -1
@@ -473,7 +473,7 @@ Rectangle {
                     }
 
                     QGCSlider {
-                        // Layout.fillWidth:           true
+                        Layout.fillWidth:           true
                         maximumValue:               100
                         minimumValue:               0
                         value:                      _mavlinkCamera ? _mavlinkCamera.thermalOpacity : 0
@@ -497,19 +497,19 @@ Rectangle {
                             property bool   _isEdit:    !_isBool && !_isSlider && _fact.enumStrings.length < 1
 
                             FactComboBox {
-                                // Layout.fillWidth:   true
+                                Layout.fillWidth:   true
                                 sizeToContents:     true
                                 fact:               parent._fact
                                 indexModel:         false
                                 visible:            parent._isCombo
                             }
                             FactTextField {
-                                // Layout.fillWidth:   true
+                                Layout.fillWidth:   true
                                 fact:               parent._fact
                                 visible:            parent._isEdit
                             }
                             QGCSlider {
-                                // Layout.fillWidth:           true
+                                Layout.fillWidth:           true
                                 maximumValue:               parent._fact.max
                                 minimumValue:               parent._fact.min
                                 stepSize:                   parent._fact.increment
@@ -538,7 +538,7 @@ Rectangle {
                     }
 
                     QGCComboBox {
-                        // Layout.fillWidth:   true
+                        Layout.fillWidth:   true
                         sizeToContents:     true
                         model:              [ qsTr("Single"), qsTr("Time Lapse") ]
                         currentIndex:       _mavlinkCamera ? _mavlinkCamera.photoMode : 0
@@ -547,7 +547,7 @@ Rectangle {
                     }
 
                     QGCSlider {
-                        // Layout.fillWidth:           true
+                        Layout.fillWidth:           true
                         maximumValue:               60
                         minimumValue:               1
                         stepSize:                   1
@@ -569,7 +569,7 @@ Rectangle {
                     }
 
                     FactComboBox {
-                        // Layout.fillWidth:   true
+                        Layout.fillWidth:   true
                         sizeToContents:     true
                         fact:               _videoStreamSettings.videoFit
                         indexModel:         false
@@ -577,7 +577,7 @@ Rectangle {
                     }
 
                     QGCButton {
-                        // Layout.fillWidth:   true
+                        Layout.fillWidth:   true
                         text:               qsTr("Reset")
                         visible:            _mavlinkCamera
                         onClicked:          resetPrompt.open()
@@ -595,7 +595,7 @@ Rectangle {
                     }
 
                     QGCButton {
-                        // Layout.fillWidth:   true
+                        Layout.fillWidth:   true
                         text:               qsTr("Format")
                         visible:            _mavlinkCameraStorageSupported
                         onClicked:          formatPrompt.open()
@@ -612,9 +612,7 @@ Rectangle {
                         }
                     }
                 }
-                }
             }
         }
     }
-}
 }
