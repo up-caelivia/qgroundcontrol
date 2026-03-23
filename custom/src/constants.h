@@ -115,11 +115,10 @@ public:
         }
     }
 
-    QVector<QString> factSpeedNames() const { return {"LOIT_SPEED", "PILOT_SPEED_DN", "PILOT_SPEED_UP", "PILOT_Y_RATE"}; }
-    QVector<int> lowSpeed() const { return {260, 50, 100, 30}; }
-    QVector<int> normalSpeed() const { return {500, 100, 150, 45}; }
-    //QVector<int> highSpeed() const { return {1000, 250, 500, 60}; }   // CNES
-    QVector<int> highSpeed() const { return {1000, 150, 250, 60}; }
+    QVector<QString> factSpeedNames() const { return {"LOIT_SPEED", "PILOT_SPEED_DN", "PILOT_SPEED_UP", "PILOT_Y_RATE", "LOIT_ACC_MAX"}; }
+    QVector<int> lowSpeed() const { return {260, 50, 100, 30, 200}; }
+    QVector<int> normalSpeed() const { return {500, 100, 150, 45, 400}; }
+    QVector<int> highSpeed() const { return {1000, 150, 250, 60, 400}; }
 
     //Non superare i 19 m/s per certificazione
 
