@@ -50,12 +50,14 @@ private:
     enum class NTRIPState {
         uninitialised,
         waiting_for_http_response,
+        consuming_http_headers,
         waiting_for_rtcm_header,
         accumulating_rtcm_packet,
     };
 
     void _hardwareConnect(void);
     void _parse(const QByteArray &buffer);
+    QByteArray _dechunk(const QByteArray &data);
 
     QTcpSocket*     _socket =   nullptr;
 
@@ -68,6 +70,13 @@ private:
     bool            _isVRSEnable;
     int             _vrsSendRateMSecs = 3000;
     bool            _ntripForceV1 = false;
+
+    // Chunked transfer encoding
+    bool            _isChunked = false;
+    enum class ChunkState { ReadingSize, ReadingData, ReadingTrailer };
+    ChunkState      _chunkState = ChunkState::ReadingSize;
+    int             _chunkBytesLeft = 0;
+    QByteArray      _chunkSizeBuffer;
 
     // QUrl
     QUrl            _ntripURL;
