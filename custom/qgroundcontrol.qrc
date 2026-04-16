@@ -56,7 +56,6 @@
 		<file alias="MavlinkSettings.qml">../src/ui/preferences/MavlinkSettings.qml</file>
 		<file alias="MicrohardSettings.qml">../src/Microhard/MicrohardSettings.qml</file>
 		<file alias="MissionCommandTreeEditorTestWindow.qml">../src/MissionManager/MissionCommandTreeEditorTestWindow.qml</file>
-		<file alias="MissionSettingsEditor.qml">../src/PlanView/MissionSettingsEditor.qml</file>
 		<file alias="MockLink.qml">../src/ui/preferences/MockLink.qml</file>
 		<file alias="MockLinkSettings.qml">../src/ui/preferences/MockLinkSettings.qml</file>
 		<file alias="MotorComponent.qml">../src/AutoPilotPlugins/Common/MotorComponent.qml</file>
@@ -239,7 +238,6 @@
 		<file alias="SerialSettings.qml">../src/ui/preferences/SerialSettings.qml</file>
 		<file alias="SetupParameterEditor.qml">../src/VehicleSetup/SetupParameterEditor.qml</file>
 		<file alias="SetupView.qml">../src/VehicleSetup/SetupView.qml</file>
-		<file alias="SimpleItemEditor.qml">../src/PlanView/SimpleItemEditor.qml</file>
 		<file alias="StructureScanEditor.qml">../src/PlanView/StructureScanEditor.qml</file>
 		<file alias="SurveyItemEditor.qml">../src/PlanView/SurveyItemEditor.qml</file>
 		<file alias="SyslinkComponent.qml">../src/AutoPilotPlugins/Common/SyslinkComponent.qml</file>
