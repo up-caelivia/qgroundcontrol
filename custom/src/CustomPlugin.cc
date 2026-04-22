@@ -1569,29 +1569,25 @@ void CustomPlugin::_attachTripWatchers(Vehicle* v)
 
         if (!armed) {
             _stopTripTickTimer();
-            _clearTripBaseline(av);
-
-            _tripLocalSec = 0;
-            _lastStatFltSeen = 0;
-            _tripUsingLocalTick = false;
-
-            _tripFlightTimeSec = 0;
-            _tripFlightTimeStr = QStringLiteral("0000:00:00");
-            emit tripFlightTimeChanged();
             return;
         }
+        _clearTripBaseline(av);
 
-        // armed=true
-        // reset tick counters for this flight
         _tripLocalSec = 0;
+        _lastStatFltSeen = 0;
         _tripUsingLocalTick = false;
+
+        _tripFlightTimeSec = 0;
+        _tripFlightTimeStr = QStringLiteral("0000:00:00");
+        emit tripFlightTimeChanged();
+
         _lastStatFltSeen = _statFltTimeFact ? _statFltTimeFact->rawValue().toULongLong() : 0;
 
         if (_statFltTimeFact && _statBootCntFact) {
             const qulonglong flt  = _statFltTimeFact->rawValue().toULongLong();
             const qulonglong boot = _statBootCntFact->rawValue().toULongLong();
             _saveTripBaseline(av, flt, boot);
-        } 
+        }
 
         if (_tripBaselineValid) {
             _startTripTickTimer();

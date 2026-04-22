@@ -78,5 +78,9 @@
 
 <file alias="QGroundControl/FlightDisplay/GuidedActionsController.qml">src/FlightDisplay/GuidedActionsController.qml</file>
 
+<file alias="SimpleItemEditor.qml">src/PlanView/SimpleItemEditor.qml</file>
+
+<file alias="MissionSettingsEditor.qml">src/PlanView/MissionSettingsEditor.qml</file>
+
 
 
