@@ -896,6 +896,9 @@ bool KmlPolygonLoader::checkDronePosition()
     const double pilotUp_m_s      = pilotSpeedUp_cm_s / 100.0;
 
     double nearHorizMeters = bufferSec * loitSpeed_m_s;
+    if (loitSpeed_m_s > 6) {
+        nearHorizMeters = nearHorizMeters*1.2; // 20% extra buffer
+    }
     double nearVertMeters  = bufferSec * pilotUp_m_s;
 
     KmlPolygonObject* violationHit = nullptr;
