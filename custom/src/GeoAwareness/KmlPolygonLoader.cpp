@@ -916,7 +916,7 @@ bool KmlPolygonLoader::checkDronePosition()
         // VIOLATION CHECK:
         // Drone is inside the polygon and above minimum altitude
         // --------------------------------------------------------
-        if (inside && altRel > polygon->hmin()) {
+        if (inside && altRel > polygon->hmin() && altRel < polygon->hmax()) {
             violationHit = polygon;
             break; // violation has priority
         } else if (inside && (altRel < polygon->hmin() || altRel > polygon->hmax())) {
@@ -938,6 +938,9 @@ bool KmlPolygonLoader::checkDronePosition()
         if (altRel < polygon->hmin()) {
             // Drone below minimum altitude
             vertDist = polygon->hmin() - altRel;
+        } else if (altRel > polygon->hmax()) {
+            // Drone above maximum altitude
+            vertDist = altRel - polygon->hmax();
         }
 
         const bool nearVert = (vertDist <= nearVertMeters);
