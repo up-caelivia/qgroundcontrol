@@ -645,55 +645,108 @@ bool KmlPolygonLoader::parseSingleFeatureED318(const QJsonObject& feature) {
     }
 
     // 2. Geometry
-    QList<QGeoCoordinate> coordinates;
     int hmin = 0, hmax = 9999;
 
     QJsonObject geometry = feature.value("geometry").toObject();
-    // Polygon coordinates
-    if (geometry.value("type").toString() == "Polygon") {
-        QJsonArray polygons = geometry.value("coordinates").toArray();
-        for (const auto& poly : polygons) {
-            QJsonArray ring = poly.toArray();
-            for (const auto& coordPair : ring) {
-                QJsonArray coords = coordPair.toArray();
-                if (coords.size() == 2) {
-                    double lon = coords[0].toDouble();
-                    double lat = coords[1].toDouble();
-                    coordinates.append(QGeoCoordinate(lat, lon));
-                }
-            }
-        }
-    }
 
-    // Circle: Point + extent.subType == "Circle" → approximate as polygon
-    if (geometry.value("type").toString() == "Point") {
-        QJsonObject extent = geometry.value("extent").toObject();
-        if (extent.value("subType").toString() == "Circle") {
-            QJsonArray coords = geometry.value("coordinates").toArray();
-            if (coords.size() == 2) {
-                double centerLon = coords[0].toDouble();
-                double centerLat = coords[1].toDouble();
-                double radiusMeters = extent.value("radius").toDouble(50.0);
-                const int numSegments = 36;
-                const double metersPerDegreeLat = 111320.0;
-                double dLat = radiusMeters / metersPerDegreeLat;
-                double dLon = radiusMeters / (metersPerDegreeLat * std::cos(qDegreesToRadians(centerLat)));
-                for (int i = 0; i <= numSegments; ++i) {
-                    double angle = 2.0 * M_PI * i / numSegments;
-                    double lat = centerLat + dLat * std::sin(angle);
-                    double lon = centerLon + dLon * std::cos(angle);
-                    coordinates.append(QGeoCoordinate(lat, lon));
+    // Parses a single geometry object into one or more polygon coordinate lists.
+    // MultiPolygon and GeometryCollection produce multiple entries.
+    std::function<QList<QList<QGeoCoordinate>>(const QJsonObject&)> parseGeometry;
+    parseGeometry = [&](const QJsonObject& geo) -> QList<QList<QGeoCoordinate>> {
+        QList<QList<QGeoCoordinate>> result;
+        const QString geoType = geo.value("type").toString();
+
+        auto coordPairToGeo = [](const QJsonArray& c) -> QGeoCoordinate {
+            return QGeoCoordinate(c[1].toDouble(), c[0].toDouble());
+        };
+
+        if (geoType == "Polygon") {
+            QList<QGeoCoordinate> coords;
+            QJsonArray rings = geo.value("coordinates").toArray();
+            if (!rings.isEmpty()) {
+                for (const auto& cp : rings[0].toArray()) {
+                    QJsonArray c = cp.toArray();
+                    if (c.size() >= 2) coords.append(coordPairToGeo(c));
                 }
             }
+            if (!coords.isEmpty()) result.append(coords);
+
+        } else if (geoType == "Point") {
+            QJsonObject extent = geo.value("extent").toObject();
+            if (extent.value("subType").toString() == "Circle") {
+                QJsonArray c = geo.value("coordinates").toArray();
+                if (c.size() >= 2) {
+                    double centerLon = c[0].toDouble();
+                    double centerLat = c[1].toDouble();
+                    double radiusMeters = extent.value("radius").toDouble(50.0);
+                    const int N = 36;
+                    const double mPerDegLat = 111320.0;
+                    double dLat = radiusMeters / mPerDegLat;
+                    double dLon = radiusMeters / (mPerDegLat * std::cos(qDegreesToRadians(centerLat)));
+                    QList<QGeoCoordinate> coords;
+                    for (int i = 0; i <= N; ++i) {
+                        double angle = 2.0 * M_PI * i / N;
+                        coords.append(QGeoCoordinate(centerLat + dLat * std::sin(angle),
+                                                     centerLon + dLon * std::cos(angle)));
+                    }
+                    result.append(coords);
+                }
+            }
+
+        } else if (geoType == "LineString") {
+            QList<QGeoCoordinate> coords;
+            for (const auto& cp : geo.value("coordinates").toArray()) {
+                QJsonArray c = cp.toArray();
+                if (c.size() >= 2) coords.append(coordPairToGeo(c));
+            }
+            if (coords.size() >= 2 && coords.first() != coords.last())
+                coords.append(coords.first());
+            if (!coords.isEmpty()) result.append(coords);
+
+        } else if (geoType == "MultiLineString") {
+            for (const auto& ls : geo.value("coordinates").toArray()) {
+                QList<QGeoCoordinate> coords;
+                for (const auto& cp : ls.toArray()) {
+                    QJsonArray c = cp.toArray();
+                    if (c.size() >= 2) coords.append(coordPairToGeo(c));
+                }
+                if (coords.size() >= 2 && coords.first() != coords.last())
+                    coords.append(coords.first());
+                if (!coords.isEmpty()) result.append(coords);
+            }
+
+        } else if (geoType == "MultiPolygon") {
+            for (const auto& poly : geo.value("coordinates").toArray()) {
+                QList<QGeoCoordinate> coords;
+                QJsonArray rings = poly.toArray();
+                if (!rings.isEmpty()) {
+                    for (const auto& cp : rings[0].toArray()) {
+                        QJsonArray c = cp.toArray();
+                        if (c.size() >= 2) coords.append(coordPairToGeo(c));
+                    }
+                }
+                if (!coords.isEmpty()) result.append(coords);
+            }
+
+        } else if (geoType == "GeometryCollection") {
+            for (const auto& subGeo : geo.value("geometries").toArray()) {
+                for (const auto& polyCoords : parseGeometry(subGeo.toObject()))
+                    result.append(polyCoords);
+            }
         }
-    }
+        // MultiPoint: no meaningful polygon representation, skip
+
+        return result;
+    };
+
+    QList<QList<QGeoCoordinate>> allPolygons = parseGeometry(geometry);
 
     // Altitude: geometry.layer
     QJsonObject layer = geometry.value("layer").toObject();
     hmin = layer.value("lower").toInt(0);
     hmax = layer.value("upper").toInt(9999);
 
-    // Color logic: come prima
+    // Color logic
     QColor color = Qt::red;
     if (hmin >= 120) {
         color = Qt::green;
@@ -710,23 +763,26 @@ bool KmlPolygonLoader::parseSingleFeatureED318(const QJsonObject& feature) {
 
     QString description = restriction + "\n" + otherReasonInfo + "\n\nREASON:\n" + reason + "\n\nSERVICE:\n" + service + "\n\nAUTHORITY:\n" + authority + "\n\nCONTACT:\n" + contact + "\n" + email;
 
-    if (coordinates.size() > 0) {
-        _polygonObjects.append(new KmlPolygonObject(
-            name,
-            coordinates,
-            color,
-            hmin,
-            hmax,
-            id,
-            description,
-            activationDate,
-            deactivationDate,
-            activationSchedule,
-            this
-        ));
-        return true;
+    bool created = false;
+    for (const auto& coordinates : allPolygons) {
+        if (!coordinates.isEmpty()) {
+            _polygonObjects.append(new KmlPolygonObject(
+                name,
+                coordinates,
+                color,
+                hmin,
+                hmax,
+                id,
+                description,
+                activationDate,
+                deactivationDate,
+                activationSchedule,
+                this
+            ));
+            created = true;
+        }
     }
-    return false;
+    return created;
 }
 
 
