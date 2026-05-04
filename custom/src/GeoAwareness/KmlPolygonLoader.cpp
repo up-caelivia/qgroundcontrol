@@ -14,6 +14,8 @@
 #include <QFile>
 #include <QDomDocument>
 #include <QDebug>
+#include <QtMath>
+#include <cmath>
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -657,6 +659,29 @@ bool KmlPolygonLoader::parseSingleFeatureED318(const QJsonObject& feature) {
                 if (coords.size() == 2) {
                     double lon = coords[0].toDouble();
                     double lat = coords[1].toDouble();
+                    coordinates.append(QGeoCoordinate(lat, lon));
+                }
+            }
+        }
+    }
+
+    // Circle: Point + extent.subType == "Circle" → approximate as polygon
+    if (geometry.value("type").toString() == "Point") {
+        QJsonObject extent = geometry.value("extent").toObject();
+        if (extent.value("subType").toString() == "Circle") {
+            QJsonArray coords = geometry.value("coordinates").toArray();
+            if (coords.size() == 2) {
+                double centerLon = coords[0].toDouble();
+                double centerLat = coords[1].toDouble();
+                double radiusMeters = extent.value("radius").toDouble(50.0);
+                const int numSegments = 36;
+                const double metersPerDegreeLat = 111320.0;
+                double dLat = radiusMeters / metersPerDegreeLat;
+                double dLon = radiusMeters / (metersPerDegreeLat * std::cos(qDegreesToRadians(centerLat)));
+                for (int i = 0; i <= numSegments; ++i) {
+                    double angle = 2.0 * M_PI * i / numSegments;
+                    double lat = centerLat + dLat * std::sin(angle);
+                    double lon = centerLon + dLon * std::cos(angle);
                     coordinates.append(QGeoCoordinate(lat, lon));
                 }
             }
