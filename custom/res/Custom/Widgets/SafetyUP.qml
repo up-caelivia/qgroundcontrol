@@ -222,6 +222,7 @@ SetupPage {
                                     sizeToContents: true
                                     fact:           _fenceAction
                                     allowedValues: [0, 1, 2, 4]
+                                    enabled:        false
                                 }
 
                                 QGCLabel {
