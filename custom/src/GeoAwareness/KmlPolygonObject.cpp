@@ -26,6 +26,17 @@ KmlPolygonObject::KmlPolygonObject(const QString& name,
     , _deactivationDate(deactivationDate)
     , _activationSchedule(activationSchedule)
 {
+    if (!coords.isEmpty()) {
+        _bboxMinLat = _bboxMaxLat = coords[0].latitude();
+        _bboxMinLon = _bboxMaxLon = coords[0].longitude();
+        for (const auto& c : coords) {
+            _cachedPolygon << QPointF(c.longitude(), c.latitude());
+            if (c.latitude()  < _bboxMinLat) _bboxMinLat = c.latitude();
+            if (c.latitude()  > _bboxMaxLat) _bboxMaxLat = c.latitude();
+            if (c.longitude() < _bboxMinLon) _bboxMinLon = c.longitude();
+            if (c.longitude() > _bboxMaxLon) _bboxMaxLon = c.longitude();
+        }
+    }
 }
 
 QVariantList KmlPolygonObject::coordinates() const {
@@ -100,12 +111,8 @@ void KmlPolygonObject::setActivationSchedule(const QString& description) {
 }
 
 bool KmlPolygonObject::contains(const QGeoCoordinate& coordinate) const {
-    QPolygonF polygon;
-    for (const auto& coord : _coordinates) {
-        polygon << QPointF(coord.longitude(), coord.latitude());
-    }
-    QPointF point(coordinate.longitude(), coordinate.latitude());
-    return polygon.containsPoint(point, Qt::OddEvenFill);
+    return _cachedPolygon.containsPoint(
+        QPointF(coordinate.longitude(), coordinate.latitude()), Qt::OddEvenFill);
 }
 
 static double _distancePointSegment(double px, double py,

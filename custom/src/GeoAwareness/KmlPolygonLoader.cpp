@@ -958,7 +958,7 @@ bool KmlPolygonLoader::checkDronePosition()
     auto* pm = vehicle->parameterManager();
 
     double loitSpeed_cm_s = 1000.0;     // default fallback
-    double pilotSpeedUp_cm_s = 500.0;  // default fallback
+    double pilotSpeedUp_cm_s = 100.0;  // default fallback
 
     if (pm) {
 
@@ -988,10 +988,23 @@ bool KmlPolygonLoader::checkDronePosition()
     KmlPolygonObject* violationHit = nullptr;
     KmlPolygonObject* nearHit      = nullptr;
 
+    // Precompute bounding-box expansion in degrees for quick spatial rejection
+    const double metersPerDegLat = 111320.0;
+    const double metersPerDegLon = metersPerDegLat * std::cos(qDegreesToRadians(dronePos.latitude()));
+    const double expandLat = nearHorizMeters / metersPerDegLat;
+    const double expandLon = (metersPerDegLon > 1.0) ? (nearHorizMeters / metersPerDegLon) : expandLat;
+
+    const double droneLat = dronePos.latitude();
+    const double droneLon = dronePos.longitude();
+
     for (QObject* obj : _polygonObjects) {
 
         auto* polygon = qobject_cast<KmlPolygonObject*>(obj);
         if (!polygon)
+            continue;
+
+        // Fast bbox rejection: skip if drone is clearly outside the expanded area
+        if (!polygon->withinExpandedBounds(droneLat, droneLon, expandLat, expandLon))
             continue;
 
         bool inside = polygon->contains(dronePos);
@@ -1012,9 +1025,8 @@ bool KmlPolygonLoader::checkDronePosition()
         // Drone is outside but close to the polygon
         // --------------------------------------------------------
 
-        // Horizontal proximity (distance from polygon edge)
-        const bool nearHoriz =
-            polygon->containsOrNear(dronePos, nearHorizMeters);
+        // Horizontal proximity — reuse 'inside' result to avoid a second contains() call
+        const bool nearHoriz = inside || (polygon->minDistanceToEdges(dronePos) <= nearHorizMeters);
 
         // Vertical distance from altitude band [hmin, hmax]
         double vertDist = 0.0;
@@ -1079,6 +1091,9 @@ bool KmlPolygonLoader::checkDronePosition()
     }
 
     // No active warning or violation
+    if (_selectedPolygonFence != nullptr || _lastAlertType != 0) {
+         qDebug() << "Drone is now outside all zones. Clearing alerts.";
+        }
     _selectedPolygonFence = nullptr;
     _lastAlertType = 0;
 
