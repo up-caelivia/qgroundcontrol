@@ -953,7 +953,8 @@ bool KmlPolygonLoader::checkDronePosition()
     // Note: ArduPilot params are usually in cm/s -> convert to m/s
     // --------------------------------------------------------
 
-    const double bufferSec = 5.0;
+    const double bufferSecHor = 5.5;
+    const double bufferSecVert = 5.0;
 
     auto* pm = vehicle->parameterManager();
 
@@ -976,11 +977,11 @@ bool KmlPolygonLoader::checkDronePosition()
     const double loitSpeed_m_s    = loitSpeed_cm_s / 100.0;
     const double pilotUp_m_s      = pilotSpeedUp_cm_s / 100.0;
 
-    double nearHorizMeters = bufferSec * loitSpeed_m_s;
+    double nearHorizMeters = bufferSecHor * loitSpeed_m_s;
     if (loitSpeed_m_s > 6) {
         nearHorizMeters = nearHorizMeters*1.2; // 20% extra buffer
     }
-    double nearVertMeters  = bufferSec * pilotUp_m_s;
+    double nearVertMeters  = bufferSecVert * pilotUp_m_s;
     if (pilotUp_m_s > 1.5) {
         nearVertMeters = nearVertMeters*1.2; // 20% extra buffer
     }
