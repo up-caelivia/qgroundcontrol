@@ -84,13 +84,13 @@ Rectangle {
                     QGCLabel {
                         id:         flyViewSectionLabel
                         text:       qsTr("Fly View")
-                        visible:    QGroundControl.settingsManager.flyViewSettings.visible
+                        visible:    QGroundControl.settingsManager.flyViewSettings.visible && Constants.developer
                     }
                     Rectangle {
                         Layout.preferredHeight: flyViewCol.height + (_margins * 2)
                         Layout.preferredWidth:  flyViewCol.width + (_margins * 2)
                         color:                  qgcPal.windowShade
-                        visible:                flyViewSectionLabel.visible
+                        visible:                flyViewSectionLabel.visible && Constants.developer
                         Layout.fillWidth:       true
 
                         ColumnLayout {
@@ -301,7 +301,7 @@ Rectangle {
                             GridLayout {
                                 id:         videoGrid
                                 columns:    2
-                                visible:    _videoSettings.visible
+                                visible:    _videoSettings.visible && Constants.developer
 
                                 QGCLabel {
                                     text:               qsTr("Video Settings")
@@ -426,21 +426,26 @@ Rectangle {
                                     text:               qsTr("Video Forward")
                                     Layout.columnSpan:  2
                                     Layout.alignment:   Qt.AlignHCenter
+                                    visible:            Constants.developer
                                 }
 
                                 QGCLabel {
                                     text: qsTr("Enable RTMP Forwarding")
+                                    visible:            Constants.developer
                                 }
                                 FactCheckBox {
                                     fact: _videoSettings.enableRTMPForwarding
+                                    visible:            Constants.developer
                                 }
 
                                 QGCLabel {
                                     text: qsTr("RTMP Server URL")
+                                    visible:            Constants.developer
                                 }
                                 FactTextField {
                                     Layout.preferredWidth: _comboFieldWidth
                                     fact: _videoSettings.serverRTMPUrl
+                                    visible:            Constants.developer
                                 }
                             }
                         }
