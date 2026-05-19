@@ -6,7 +6,6 @@
 #include <QColor>
 #include <QDateTime>
 #include <QDebug>
-#include <QPolygonF>
 
 class KmlPolygonObject : public QObject {
     Q_OBJECT
@@ -69,11 +68,6 @@ public:
     bool containsOrNear(const QGeoCoordinate& coordinate, double thresholdMeters) const;
 
     double minDistanceToEdges(const QGeoCoordinate& point) const;
-
-    bool withinExpandedBounds(double lat, double lon, double expandLat, double expandLon) const {
-        return lat  >= _bboxMinLat - expandLat && lat  <= _bboxMaxLat + expandLat
-            && lon >= _bboxMinLon - expandLon && lon <= _bboxMaxLon + expandLon;
-    }
     
 signals:
     void nameChanged();
@@ -99,8 +93,4 @@ private:
     QDateTime _activationDate;
     QDateTime _deactivationDate;
     QString _activationSchedule;
-
-    QPolygonF _cachedPolygon;
-    double _bboxMinLat = 0, _bboxMaxLat = 0;
-    double _bboxMinLon = 0, _bboxMaxLon = 0;
 };

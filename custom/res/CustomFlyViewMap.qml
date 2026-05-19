@@ -233,9 +233,8 @@ FlightMap {
                     animatedMapRecenter(_root.center, vehicleOffsetCoord)
                 }
             }
-        }
-        if (firstVehiclePositionReceived && _activeVehicleCoordinate.isValid)
             KmlPolygonLoader.checkDronePosition()
+        }
     }
 
     on_ActiveVehicleCoordinateChanged: {
