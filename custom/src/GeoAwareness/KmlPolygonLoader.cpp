@@ -959,7 +959,7 @@ bool KmlPolygonLoader::checkDronePosition()
     auto* pm = vehicle->parameterManager();
 
     double loitSpeed_cm_s = 1000.0;     // default fallback
-    double pilotSpeedUp_cm_s = 500.0;  // default fallback
+    double pilotSpeedUp_cm_s = 100.0;  // default fallback
 
     if (pm) {
 
@@ -1080,6 +1080,9 @@ bool KmlPolygonLoader::checkDronePosition()
     }
 
     // No active warning or violation
+    if (_selectedPolygonFence != nullptr || _lastAlertType != 0) {
+        qDebug() << "Drone is now outside all zones. Clearing alerts.";
+    }
     _selectedPolygonFence = nullptr;
     _lastAlertType = 0;
 
