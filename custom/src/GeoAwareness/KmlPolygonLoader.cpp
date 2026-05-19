@@ -24,6 +24,7 @@
 #include "ParameterManager.h"
 #include "FactSystem.h"
 #include "Fact.h"
+#include "FactGroup.h"
 
 
 
@@ -940,6 +941,26 @@ bool KmlPolygonLoader::checkDronePosition()
     if (!vehicle || !vehicle->coordinate().isValid()) {
         return false;
     }
+
+    // NO_GPS=0, NO_FIX=1: geoawareness unreliable
+    FactGroup* gpsGroup = vehicle->gpsFactGroup();
+    Fact* gpsLockFact = gpsGroup ? gpsGroup->getFact("lock") : nullptr;
+    const int gpsFixType = gpsLockFact ? gpsLockFact->rawValue().toInt() : 0;
+
+    if (gpsFixType <= 1) {
+        if (!_gpsWarningActive) {
+            if (auto* msgHandler = qgcApp()->toolbox()->uasMessageHandler()) {
+                const QString msg =
+                    QStringLiteral("GPS unavailable - geo-awareness may not work correctly");
+
+                msgHandler->handleTextMessage(1, 1, 2, QTime::currentTime().toString("hh:mm:ss.zzz") + " " + msg, QString());
+                qgcApp()->toolbox()->audioOutput()->say("CAUTION : " + msg);
+            }
+            _gpsWarningActive = true;
+        }
+        return false;
+    }
+    _gpsWarningActive = false;
 
     const QGeoCoordinate dronePos = vehicle->coordinate();
     const double altRel = vehicle->altitudeRelative()->rawValue().toDouble();

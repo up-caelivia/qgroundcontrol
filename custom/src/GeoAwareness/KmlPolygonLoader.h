@@ -34,6 +34,7 @@ private:
     QObject* _selectedPolygon = nullptr;
     QObject* _selectedPolygonFence = nullptr;
     int _lastAlertType = 0; // 0=none, 1=near, 2=violation
+    bool _gpsWarningActive = false;
 
     bool loadFromKmlFile(const QString& filePath);
     void parseSwissCyprusKml(const QDomDocument& doc);
