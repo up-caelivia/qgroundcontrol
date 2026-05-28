@@ -21,6 +21,7 @@ public:
     Q_INVOKABLE void removePolygon(QObject* polygon, bool forceUnselect = false);
     Q_INVOKABLE void selectPolygon(QObject* polygon, bool forceSelect = false);
     QObject* selectedPolygon() const;
+    Q_INVOKABLE bool checkGpsStatus();
     Q_INVOKABLE bool checkDronePosition();
     Q_INVOKABLE QList<QObject*> checkPolygonsInPoint(const QGeoCoordinate& clickCoord);
     Q_INVOKABLE bool exportToKmlFile(const QString& filePath);
@@ -34,7 +35,8 @@ private:
     QObject* _selectedPolygon = nullptr;
     QObject* _selectedPolygonFence = nullptr;
     int _lastAlertType = 0; // 0=none, 1=near, 2=violation
-    bool _gpsWarningActive = false;
+    qint64 _gpsErrorStartMs  = 0; // epoch ms when GPS error first detected (0 = GPS ok)
+    qint64 _lastGpsWarningMs = 0; // epoch ms of last warning emitted (0 = never)
 
     bool loadFromKmlFile(const QString& filePath);
     void parseSwissCyprusKml(const QDomDocument& doc);

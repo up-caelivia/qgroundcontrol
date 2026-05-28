@@ -18,6 +18,7 @@
 #include <cmath>
 
 #include <QJsonDocument>
+#include <QDateTime>
 #include <QJsonObject>
 #include <QJsonArray>
 
@@ -935,10 +936,10 @@ QObject* KmlPolygonLoader::selectedPolygon() const {
     return _selectedPolygon;
 }
 
-bool KmlPolygonLoader::checkDronePosition()
+bool KmlPolygonLoader::checkGpsStatus()
 {
     Vehicle* vehicle = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle();
-    if (!vehicle || !vehicle->coordinate().isValid()) {
+    if (!vehicle) {
         return false;
     }
 
@@ -948,19 +949,39 @@ bool KmlPolygonLoader::checkDronePosition()
     const int gpsFixType = gpsLockFact ? gpsLockFact->rawValue().toInt() : 0;
 
     if (gpsFixType <= 1) {
-        if (!_gpsWarningActive) {
+        const qint64 now = QDateTime::currentMSecsSinceEpoch();
+        if (_gpsErrorStartMs == 0)
+            _gpsErrorStartMs = now;
+
+        const bool delayElapsed  = (now - _gpsErrorStartMs) >= 5000;
+        const bool repeatElapsed = (_lastGpsWarningMs == 0) || (now - _lastGpsWarningMs) >= 30000;
+
+        if (delayElapsed && repeatElapsed) {
             if (auto* msgHandler = qgcApp()->toolbox()->uasMessageHandler()) {
                 const QString msg =
                     QStringLiteral("GPS unavailable - geo-awareness may not work correctly");
-
-                msgHandler->handleTextMessage(1, 1, 2, QTime::currentTime().toString("hh:mm:ss.zzz") + " " + msg, QString());
+                if (_lastGpsWarningMs == 0) {
+                    msgHandler->handleTextMessage(1, 1, 2, QTime::currentTime().toString("hh:mm:ss.zzz") + " " + msg, QString());
+                } else {
+                    msgHandler->handleTextMessage(1, 1, 4, QTime::currentTime().toString("hh:mm:ss.zzz") + " " + msg, QString());
+                }
                 qgcApp()->toolbox()->audioOutput()->say("CAUTION : " + msg);
             }
-            _gpsWarningActive = true;
+            _lastGpsWarningMs = now;
         }
         return false;
     }
-    _gpsWarningActive = false;
+    _gpsErrorStartMs  = 0;
+    _lastGpsWarningMs = 0;
+    return true;
+}
+
+bool KmlPolygonLoader::checkDronePosition()
+{
+    Vehicle* vehicle = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle();
+    if (!vehicle || !vehicle->coordinate().isValid()) {
+        return false;
+    }
 
     const QGeoCoordinate dronePos = vehicle->coordinate();
     const double altRel = vehicle->altitudeRelative()->rawValue().toDouble();

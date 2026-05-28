@@ -234,6 +234,8 @@ FlightMap {
                 }
             }
         }
+        if (_activeVehicle)
+            KmlPolygonLoader.checkGpsStatus()
         if (firstVehiclePositionReceived && _activeVehicleCoordinate.isValid)
             KmlPolygonLoader.checkDronePosition()
     }
