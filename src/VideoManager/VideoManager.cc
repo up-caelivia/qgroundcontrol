@@ -552,6 +552,11 @@ VideoManager::_lowLatencyModeChanged()
 void
 VideoManager::_forwardingChanged()
 {
+    const QUrl rtmpUrl(_videoSettings->serverRTMPUrl()->rawValue().toString());
+    const int forwardingPort = rtmpUrl.port(1935);
+    const QString forwardingAddress = QStringLiteral("%1://%2%3").arg(rtmpUrl.scheme(), rtmpUrl.host(), rtmpUrl.path());
+    qCWarning(VideoManagerLog) << "RTMP forwarding setting changed - enabled:" << _videoSettings->enableRTMPForwarding()->rawValue().toBool()
+                                << " address:" << forwardingAddress << " port:" << forwardingPort;
     _restartAllVideos();
 }
 
@@ -862,7 +867,12 @@ VideoManager::_startReceiver(unsigned id)
     // Parametri fissi di forwarding
     QString forwardingUrl = _videoSettings->serverRTMPUrl()->rawValue().toString();
     bool enableForwarding = _videoSettings->enableRTMPForwarding()->rawValue().toBool();
-    
+
+    const QUrl rtmpUrl(forwardingUrl);
+    const int forwardingPort = rtmpUrl.port(1935);
+    const QString forwardingAddress = QStringLiteral("%1://%2%3").arg(rtmpUrl.scheme(), rtmpUrl.host(), rtmpUrl.path());
+    qCWarning(VideoManagerLog) << "RTMP forwarding enabled:" << enableForwarding << " address:" << forwardingAddress << " port:" << forwardingPort;
+
     const QString source = _videoSettings->videoSource()->rawValue().toString();
     const unsigned rtsptimeout = _videoSettings->rtspTimeout()->rawValue().toUInt();
     /* The gstreamer rtsp source will switch to tcp if udp is not available after 5 seconds.

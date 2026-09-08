@@ -32,7 +32,7 @@ QGC_LOGGING_CATEGORY(VideoReceiverLog, "VideoReceiverLog")
 //              |
 //              +-->queue-->_recorderValve[-->_fileSink]
 //              |
-//              +-->queue-->glvmux-->rtmpsink   (forwarding branch)
+//              +-->queue-->h264parse-->flvmux-->rtmpsink   (forwarding branch)
 //
 
 GstVideoReceiver::GstVideoReceiver(QObject* parent)
@@ -111,8 +111,12 @@ void GstVideoReceiver::start(const QString& uri, unsigned timeout, int buffer,
     GstElement* decoderQueue = nullptr;
     GstElement* recorderQueue = nullptr;
     GstElement* forwardQueue = nullptr;
+    GstElement* forwardParse = nullptr;
     GstElement* flvmux = nullptr;
     GstElement* rtmpsink = nullptr;
+    GstElement* forwardAudioSrc = nullptr;
+    GstElement* forwardAudioConvert = nullptr;
+    GstElement* forwardAudioEnc = nullptr;
     GstElement* encoder = nullptr;
     GstElement* payloader = nullptr;
     GstElement* udpsink = nullptr;
@@ -153,18 +157,43 @@ void GstVideoReceiver::start(const QString& uri, unsigned timeout, int buffer,
 
             if (forwardingUrl.startsWith("rtmp://", Qt::CaseInsensitive)) {
                 qCDebug(VideoReceiverLog) << "rtmp forward";
+                forwardParse = gst_element_factory_make("h264parse", nullptr);
                 flvmux = gst_element_factory_make("flvmux", nullptr);
                 rtmpsink = gst_element_factory_make("rtmpsink", nullptr);
 
-                if (!flvmux || !rtmpsink) {
+                if (!forwardParse || !flvmux || !rtmpsink) {
                     qCCritical(VideoReceiverLog) << "RTMP element creation failed";
                     break;
                 }
 
+                g_object_set(forwardParse, "config-interval", -1, nullptr);
                 g_object_set(flvmux, "streamable", TRUE, nullptr);
                 g_object_set(rtmpsink, "location", forwardingUrl.toUtf8().constData(), nullptr);
 
-                gst_bin_add_many(GST_BIN(_pipeline), forwardQueue, flvmux, rtmpsink, nullptr);
+                gst_bin_add_many(GST_BIN(_pipeline), forwardQueue, forwardParse, flvmux, rtmpsink, nullptr);
+
+                forwardAudioSrc = gst_element_factory_make("audiotestsrc", nullptr);
+                forwardAudioConvert = gst_element_factory_make("audioconvert", nullptr);
+                forwardAudioEnc = gst_element_factory_make("voaacenc", nullptr);
+
+                if (forwardAudioSrc && forwardAudioConvert && forwardAudioEnc) {
+                    g_object_set(forwardAudioSrc, "is-live", TRUE, "volume", 0.0, nullptr);
+
+                    gst_bin_add_many(GST_BIN(_pipeline), forwardAudioSrc, forwardAudioConvert, forwardAudioEnc, nullptr);
+
+                    if (!gst_element_link_many(forwardAudioSrc, forwardAudioConvert, forwardAudioEnc, flvmux, nullptr)) {
+                        qCWarning(VideoReceiverLog) << "Unable to link silent audio branch, forwarding video-only";
+                        gst_bin_remove_many(GST_BIN(_pipeline), forwardAudioSrc, forwardAudioConvert, forwardAudioEnc, nullptr);
+                        forwardAudioSrc = forwardAudioConvert = forwardAudioEnc = nullptr;
+                    }
+                } else {
+                    qCWarning(VideoReceiverLog) << "Unable to create silent audio branch elements, forwarding video-only";
+
+                    if (forwardAudioSrc) gst_object_unref(forwardAudioSrc);
+                    if (forwardAudioConvert) gst_object_unref(forwardAudioConvert);
+                    if (forwardAudioEnc) gst_object_unref(forwardAudioEnc);
+                    forwardAudioSrc = forwardAudioConvert = forwardAudioEnc = nullptr;
+                }
             } else if (forwardingUrl.startsWith("udp://", Qt::CaseInsensitive)) {
                 qCDebug(VideoReceiverLog) << "udp forward";
                 encoder = gst_element_factory_make("x264enc", nullptr);
@@ -249,8 +278,8 @@ void GstVideoReceiver::start(const QString& uri, unsigned timeout, int buffer,
         }
 
         if (forwardQueue) {
-            if (flvmux && rtmpsink) {
-                if(!gst_element_link_many(_tee, forwardQueue, flvmux, rtmpsink, nullptr)) {
+            if (forwardParse && flvmux && rtmpsink) {
+                if(!gst_element_link_many(_tee, forwardQueue, forwardParse, flvmux, rtmpsink, nullptr)) {
                     qCCritical(VideoReceiverLog) << "Unable to link RTMP forwarding branch";
                     break;
                 }
