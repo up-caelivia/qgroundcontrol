@@ -101,11 +101,16 @@ LinuxBuild {
             -lgstmpegtsdemux \
             -lgstandroidmedia \
             -lgstopengl \
-            -lgsttcp
+            -lgsttcp \
+            -lgstflv \
+            -lgstrtmp \
+            -lgstaudioconvert \
+            -lgstvoaacenc \
+            -lgstaudiotestsrc
 
         # Rest of GStreamer dependencies
         LIBS += -L$$GST_ROOT/lib \
-            -lgraphene-1.0 -ljpeg -lpng16 \
+            -lgraphene-1.0 -ljpeg -lpng16 -lrtmp \
             -lgstfft-1.0 -lm  \
             -lgstnet-1.0 -lgio-2.0 \
             -lgstphotography-1.0 -lgstgl-1.0 -lEGL \
