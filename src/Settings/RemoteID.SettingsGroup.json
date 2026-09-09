@@ -7,7 +7,7 @@
     "name":         "enable",
     "shortDesc":    "Show Drone ID settings page when enabled",
     "type":         "bool",
-    "default":      false
+    "default":      true
 },
 {
     "name":         "operatorID",

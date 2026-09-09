@@ -4,6 +4,8 @@
 
 <file alias="QGroundControl/Controls/MainToolBar.qml">src/ui/toolbar/MainToolBar.qml</file>
 
+<file alias="QGroundControl/Controls/RemoteIDIndicator.qml">src/ui/toolbar/RemoteIDIndicator.qml</file>
+
 <file alias="QGroundControl/Controls/TransectStyleMapVisuals.qml">src/PlanView/TransectStyleMapVisuals.qml</file>
 
 <file alias="QGroundControl/FlightMap/MissionLineView.qml">src/FlightMap/MapItems/MissionLineView.qml</file>
@@ -24,6 +26,8 @@
 
 <file alias="QGroundControl/Controls/QGCPipOverlay.qml">src/QmlControls/QGCPipOverlay.qml</file>
 
+<file alias="QGroundControl/Controls/QGCSidebarDialog.qml">res/QGCSidebarDialog.qml</file> 
+
 <file alias="QGroundControl/FlightDisplay/FlyView.qml">src/FlightDisplay/FlyView.qml</file>
 
 <file alias="QGroundControl/Controls/FlightModeMenuIndicator.qml">src/ui/toolbar/FlightModeMenuIndicator.qml</file>
@@ -38,6 +42,8 @@
 
 <file alias="GeneralSettings.qml">src/ui/preferences/GeneralSettings.qml</file>
 
+<file alias="RemoteIDSettings.qml">src/ui/preferences/RemoteIDSettings.qml</file>
+
 <file alias="QGroundControl/FlightDisplay/ProximityRadarValues.qml">src/FlightDisplay/ProximityRadarValues.qml</file>
 
 <file alias="QGroundControl/FlightDisplay/FlyViewVideo.qml">src/FlightDisplay/FlyViewVideo.qml</file>
@@ -48,14 +54,33 @@
 
 <file alias="QGroundControl/FactControls/FactTextField.qml">src/FactSystem/FactControls/FactTextField.qml</file>
 
-<file alias="QGroundControl/Controls/ParameterEditor.qml">src/QmlControls/ParameterEditorUP.qml</file>
-
 <file alias="QGroundControl/Controls/QGCComboBox.qml">src/QmlControls/QGCComboBox.qml</file>
 
 <file alias="QGroundControl/Controls/ParameterEditor.qml">src/QmlControls/ParameterEditor.qml</file>
 
 <file alias="NTRIP.SettingsGroup.json">src/Settings/NTRIP.SettingsGroup.json</file>
 
+<file alias="QGroundControl/FactControls/FactComboBox.qml">src/FactSystem/FactControls/FactComboBox.qml</file>
+
+<file alias="QGroundControl/Controls/ToolStripHoverButton.qml">src/QmlControls/ToolStripHoverButton.qml</file>
+
+<file alias="QGroundControl/Controls/SubMenuButton.qml">src/QmlControls/SubMenuButton.qml</file>
+
+<file alias="PlanView.qml">src/PlanView/PlanView.qml</file>
+
+<file alias="QGroundControl/FlightDisplay/VehicleWarnings.qml">src/FlightDisplay/VehicleWarnings.qml</file>
+
+<file alias="PlanView.qml">src/PlanView/PlanView.qml</file>
+
+<file alias="QGroundControl/FlightDisplay/FlyViewMissionCompleteDialog.qml">src/FlightDisplay/FlyViewMissionCompleteDialog.qml</file>
+
+<file alias="QGroundControl/FlightDisplay/FlyViewToolStripActionList.qml">src/FlightDisplay/FlyViewToolStripActionList.qml</file>
+
+<file alias="QGroundControl/FlightDisplay/GuidedActionsController.qml">src/FlightDisplay/GuidedActionsController.qml</file>
+
+<file alias="SimpleItemEditor.qml">src/PlanView/SimpleItemEditor.qml</file>
+
+<file alias="MissionSettingsEditor.qml">src/PlanView/MissionSettingsEditor.qml</file>
 
 
 

@@ -1,0 +1,120 @@
+name: Windows Release
+
+on:
+  push:
+    tags:
+      - 'v*-UP'
+
+defaults:
+  run:
+    shell: cmd
+
+env:
+  SOURCE_DIR: ${{ github.workspace }}
+  QT_VERSION: 5.15.2
+  BUILD_TYPE: ${{ fromJSON('["DailyBuild", "StableBuild"]')[ github.ref_type == 'tag' || contains(github.ref, 'Stable_') ] }}
+
+jobs:
+  build:
+    if: "!contains(github.ref, '-beta')"
+    runs-on: windows-2022
+
+    env:
+      ARTIFACT: QGroundControlUP-installer-${{ github.ref_name }}.exe
+      ARTIFACT_FILENAME: QGroundControlUP-installer.exe
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Get all tags for correct version determination
+        run: git fetch --all --tags -f
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: windows
+          target: desktop
+          arch: win64_msvc2019_64
+          dir: ${{ runner.temp }}
+          modules: qtcharts
+          setup-python: false
+
+      - name: Install NSIS
+        run: choco install nsis -y
+
+      - name: Download JOM
+        uses: suisei-cn/actions-download-file@v1.6.0
+        with:
+          url: http://download.qt.io/official_releases/jom/jom.zip
+          target: ${{ runner.temp }}\
+
+      - name: Unzip JOM
+        working-directory: ${{ runner.temp }}
+        run: 7z x jom.zip -ojom
+
+      - name: Download GStreamer runtime
+        uses: suisei-cn/actions-download-file@v1.6.0
+        with:
+          url: https://s3-us-west-2.amazonaws.com/qgroundcontrol/dependencies/gstreamer-1.0-msvc-x86_64-1.18.1.msi
+          target: ${{ runner.temp }}\
+
+      - name: Download GStreamer devel
+        uses: suisei-cn/actions-download-file@v1.6.0
+        with:
+          url: https://s3-us-west-2.amazonaws.com/qgroundcontrol/dependencies/gstreamer-1.0-devel-msvc-x86_64-1.18.1.msi
+          target: ${{ runner.temp }}\
+
+      - name: Install GStreamer
+        run: |
+          msiexec /i "%RUNNER_TEMP%\gstreamer-1.0-msvc-x86_64-1.18.1.msi" /qn /norestart ADDLOCAL=ALL
+          msiexec /i "%RUNNER_TEMP%\gstreamer-1.0-devel-msvc-x86_64-1.18.1.msi" /qn /norestart ADDLOCAL=ALL
+
+      - name: Create build directory
+        run: mkdir "%RUNNER_TEMP%\shadow_build_dir"
+
+      - name: Copy icon to build dir
+        run: copy "%SOURCE_DIR%\deploy\windows\WindowsQGC.ico" "%RUNNER_TEMP%\shadow_build_dir\"
+
+      - name: Verify installer input files
+        run: |
+          if not exist "%SOURCE_DIR%\deploy\windows\nullsoft_installer.nsi" exit /b 1
+          if not exist "%SOURCE_DIR%\deploy\windows\WindowsQGC.ico" exit /b 1
+          if not exist "%SOURCE_DIR%\deploy\windows\installheader.bmp" exit /b 1
+          if not exist "%SOURCE_DIR%\deploy\windows\driver.msi" (
+            echo Missing file: %SOURCE_DIR%\deploy\windows\driver.msi
+            dir "%SOURCE_DIR%\deploy\windows"
+            exit /b 1
+          )
+
+      - name: Set up Visual Studio shell
+        uses: egor-tensin/vs-shell@v2
+        with:
+          arch: x64
+
+      - name: Build
+        working-directory: ${{ runner.temp }}\shadow_build_dir
+        run: |
+          qmake -r "%SOURCE_DIR%\qgroundcontrol.pro" CONFIG+=installer CONFIG+=${{ env.BUILD_TYPE }}
+          "%RUNNER_TEMP%\jom\jom.exe" -j 8
+
+      - name: List staging dir
+        if: always()
+        run: |
+          if exist "%RUNNER_TEMP%\shadow_build_dir\staging" dir "%RUNNER_TEMP%\shadow_build_dir\staging"
+
+      - name: Save installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT }}
+          path: ${{ runner.temp }}\shadow_build_dir\staging\${{ env.ARTIFACT_FILENAME }}
+
+      - name: Save PDB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: qgroundcontrolUP-${{ github.ref_name }}.pdb
+          path: ${{ runner.temp }}\shadow_build_dir\staging\qgroundcontrolUP.pdb

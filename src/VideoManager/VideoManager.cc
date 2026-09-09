@@ -82,6 +82,8 @@ VideoManager::~VideoManager()
         }
 #endif
     }
+
+    delete _videoStreamControl;
 }
 
 //-----------------------------------------------------------------------------
@@ -102,8 +104,14 @@ VideoManager::setToolbox(QGCToolbox *toolbox)
    connect(_videoSettings->tcpUrl(),        &Fact::rawValueChanged, this, &VideoManager::_tcpUrlChanged);
    connect(_videoSettings->aspectRatio(),   &Fact::rawValueChanged, this, &VideoManager::_aspectRatioChanged);
    connect(_videoSettings->lowLatencyMode(),&Fact::rawValueChanged, this, &VideoManager::_lowLatencyModeChanged);
+   connect(_videoSettings->enableRTMPForwarding(), &Fact::rawValueChanged, this, &VideoManager::_forwardingChanged);
+   connect(_videoSettings->serverRTMPUrl(), &Fact::rawValueChanged, this, &VideoManager::_forwardingChanged);
    MultiVehicleManager *pVehicleMgr = qgcApp()->toolbox()->multiVehicleManager();
    connect(pVehicleMgr, &MultiVehicleManager::activeVehicleChanged, this, &VideoManager::_setActiveVehicle);
+
+   // Create video stream control, for Herelink specific functions, and link it to _restartAllVideos, to restart when HDMI source changes
+   _videoStreamControl = new VideoStreamControl();
+   connect(_videoStreamControl, &VideoStreamControl::videoNeedsReset, this, &VideoManager::_restartAllVideos);
 
 #if defined(QGC_GST_STREAMING)
     GStreamer::blacklist(static_cast<VideoSettings::VideoDecoderOptions>(_videoSettings->forceVideoDecoder()->rawValue().toInt()));
@@ -541,6 +549,18 @@ VideoManager::_lowLatencyModeChanged()
 }
 
 //-----------------------------------------------------------------------------
+void
+VideoManager::_forwardingChanged()
+{
+    const QUrl rtmpUrl(_videoSettings->serverRTMPUrl()->rawValue().toString());
+    const int forwardingPort = rtmpUrl.port(1935);
+    const QString forwardingAddress = QStringLiteral("%1://%2%3").arg(rtmpUrl.scheme(), rtmpUrl.host(), rtmpUrl.path());
+    qCWarning(VideoManagerLog) << "RTMP forwarding setting changed - enabled:" << _videoSettings->enableRTMPForwarding()->rawValue().toBool()
+                                << " address:" << forwardingAddress << " port:" << forwardingPort;
+    _restartAllVideos();
+}
+
+//-----------------------------------------------------------------------------
 bool
 VideoManager::hasVideo()
 {
@@ -567,6 +587,8 @@ VideoManager::isGStreamer()
             videoSource == VideoSettings::videoSourceYuneecMantisG ||
             videoSource == VideoSettings::videoSourceHerelinkAirUnit ||
             videoSource == VideoSettings::videoSourceHerelinkHotspot ||
+            videoSource == VideoSettings::videoSourceSkydroidH12 ||
+            videoSource == VideoSettings::videoSourceSkydroidH16 ||
             autoStreamConfigured();
 #else
     return false;
@@ -747,6 +769,10 @@ VideoManager::_updateSettings(unsigned id)
         settingsChanged |= _updateVideoUri(0, QStringLiteral("rtsp://192.168.0.10:8554/H264Video"));
     else if (source == VideoSettings::videoSourceHerelinkHotspot)
         settingsChanged |= _updateVideoUri(0, QStringLiteral("rtsp://192.168.43.1:8554/fpv_stream"));
+    else if (source == VideoSettings::videoSourceSkydroidH12)
+        settingsChanged |= _updateVideoUri(0, QStringLiteral("rtsp://192.168.144.108:554/stream=0"));
+    else if (source == VideoSettings::videoSourceSkydroidH16)
+        settingsChanged |= _updateVideoUri(0, QStringLiteral("rtsp://192.168.43.1:8554/fpv_stream"));
     else if (source == VideoSettings::videoDisabled || source == VideoSettings::videoSourceNoVideo)
         settingsChanged |= _updateVideoUri(0, "");
     else {
@@ -818,9 +844,8 @@ VideoManager::_restartVideo(unsigned id)
 
     if (_videoStarted[id]) {
         _stopReceiver(id);
-    } else {
-        _startReceiver(id);
     }
+    _startReceiver(id);
 #endif
 }
 
@@ -836,18 +861,29 @@ VideoManager::_restartAllVideos()
 void
 VideoManager::_startReceiver(unsigned id)
 {
+    
+
 #if defined(QGC_GST_STREAMING)
+    // Parametri fissi di forwarding
+    QString forwardingUrl = _videoSettings->serverRTMPUrl()->rawValue().toString();
+    bool enableForwarding = _videoSettings->enableRTMPForwarding()->rawValue().toBool();
+
+    const QUrl rtmpUrl(forwardingUrl);
+    const int forwardingPort = rtmpUrl.port(1935);
+    const QString forwardingAddress = QStringLiteral("%1://%2%3").arg(rtmpUrl.scheme(), rtmpUrl.host(), rtmpUrl.path());
+    qCWarning(VideoManagerLog) << "RTMP forwarding enabled:" << enableForwarding << " address:" << forwardingAddress << " port:" << forwardingPort;
+
     const QString source = _videoSettings->videoSource()->rawValue().toString();
     const unsigned rtsptimeout = _videoSettings->rtspTimeout()->rawValue().toUInt();
     /* The gstreamer rtsp source will switch to tcp if udp is not available after 5 seconds.
-       So we should allow for some negotiation time for rtsp */
-    const unsigned timeout = (source == VideoSettings::videoSourceRTSP ? rtsptimeout : 2 );
+    So we should allow for some negotiation time for rtsp */
+    const unsigned timeout = (source == VideoSettings::videoSourceRTSP ? rtsptimeout : 15 );
 
     if (id > 1) {
         qCDebug(VideoManagerLog) << "Unsupported receiver id" << id;
     } else if (_videoReceiver[id] != nullptr/* && _videoSink[id] != nullptr*/) {
         if (!_videoUri[id].isEmpty()) {
-            _videoReceiver[id]->start(_videoUri[id], timeout, _lowLatencyStreaming[id] ? -1 : 0);
+            _videoReceiver[id]->start(_videoUri[id], timeout, _lowLatencyStreaming[id] ? -1 : 0, enableForwarding, forwardingUrl);
         }
     }
 #else

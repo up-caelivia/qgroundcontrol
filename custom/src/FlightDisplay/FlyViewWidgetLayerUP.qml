@@ -28,6 +28,7 @@ import QGroundControl.ScreenTools   1.0
 import QGroundControl.Vehicle       1.0
 
 import Custom.Widgets 1.0
+import Constants 1.0
 
 
 // This is the ui overlay layer for the widgets/tools for Fly View
@@ -204,7 +205,8 @@ Item {
         anchors.top:            parent.top
         z:                      QGroundControl.zOrderWidgets
         maxHeight:              parent.height - y - parentToolInsets.bottomEdgeLeftInset - _toolsMargin
-        visible:                !QGroundControl.videoManager.fullScreen
+        visible:                CustomPlugin.isSAVenabled ? true : !QGroundControl.videoManager.fullScreen
+    
 
         onDisplayPreFlightChecklist: preFlightChecklistPopup.createObject(mainWindow).open()
 
@@ -269,4 +271,23 @@ Item {
         anchors.bottom:         speedControl.top
         anchors.margins:  _toolsMargin
     }
+
+    SavButtonWidgetUP {
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.topMargin:      _toolsMargin + Screen.height * 0.2
+        anchors.top:            parent.top
+        z:                      QGroundControl.zOrderWidgets
+        maxHeight:              parent.height - y - parentToolInsets.bottomEdgeLeftInset - _toolsMargin
+        visible:                Constants.showSavButtons
+    }   
+
+    AbluoPathWidgetUP {
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.topMargin:      _toolsMargin + Screen.height * 0.2
+        anchors.top:            parent.top
+        z:                      QGroundControl.zOrderWidgets
+        maxHeight:              parent.height - y - parentToolInsets.bottomEdgeLeftInset - _toolsMargin
+        visible:                CustomPlugin.isAbluoMapPlanEnabled
+    }      
+
 }

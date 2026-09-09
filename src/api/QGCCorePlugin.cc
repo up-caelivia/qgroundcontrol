@@ -28,6 +28,8 @@
 #include <QtQml>
 #include <QQmlEngine>
 
+#include "constants.h"
+
 /// @file
 ///     @brief Core Plugin Interface for QGroundControl - Default Implementation
 ///     @author Gus Grubba <gus@auterion.com>
@@ -161,9 +163,6 @@ QVariantList &QGCCorePlugin::settingsPages()
         _p->pConsole = new QmlComponentInfo(tr("Console"),
                                             QUrl::fromUserInput("qrc:/qml/QGroundControl/Controls/AppMessages.qml"));
         _p->settingsList.append(QVariant::fromValue(reinterpret_cast<QmlComponentInfo*>(_p->pConsole)));
-        _p->pHelp = new QmlComponentInfo(tr("Help"),
-                                         QUrl::fromUserInput("qrc:/qml/HelpSettings.qml"));
-        _p->settingsList.append(QVariant::fromValue(reinterpret_cast<QmlComponentInfo*>(_p->pHelp)));
 #if defined(QT_DEBUG)
         //-- These are always present on Debug builds
         _p->pMockLink = new QmlComponentInfo(tr("Mock Link"),
@@ -182,16 +181,22 @@ QVariantList &QGCCorePlugin::settingsPages()
 
 QVariantList& QGCCorePlugin::analyzePages()
 {
+    Constants* constants = Constants::getInstance();
+    
     if (!_p->analyzeList.count()) {
         _p->analyzeList.append(QVariant::fromValue(new QmlComponentInfo(tr("Log Download"),     QUrl::fromUserInput("qrc:/qml/LogDownloadPage.qml"),        QUrl::fromUserInput("qrc:/qmlimages/LogDownloadIcon"))));
 #if !defined(__mobile__)
         _p->analyzeList.append(QVariant::fromValue(new QmlComponentInfo(tr("GeoTag Images"),    QUrl::fromUserInput("qrc:/qml/GeoTagPage.qml"),             QUrl::fromUserInput("qrc:/qmlimages/GeoTagIcon"))));
 #endif
-        _p->analyzeList.append(QVariant::fromValue(new QmlComponentInfo(tr("MAVLink Console"),  QUrl::fromUserInput("qrc:/qml/MavlinkConsolePage.qml"),     QUrl::fromUserInput("qrc:/qmlimages/MavlinkConsoleIcon"))));
+        if (constants->developer()) {
+            _p->analyzeList.append(QVariant::fromValue(new QmlComponentInfo(tr("MAVLink Console"),  QUrl::fromUserInput("qrc:/qml/MavlinkConsolePage.qml"),     QUrl::fromUserInput("qrc:/qmlimages/MavlinkConsoleIcon"))));
+        }
 #if !defined(QGC_DISABLE_MAVLINK_INSPECTOR)
         _p->analyzeList.append(QVariant::fromValue(new QmlComponentInfo(tr("MAVLink Inspector"),QUrl::fromUserInput("qrc:/qml/MAVLinkInspectorPage.qml"),   QUrl::fromUserInput("qrc:/qmlimages/MAVLinkInspector"))));
 #endif
-        _p->analyzeList.append(QVariant::fromValue(new QmlComponentInfo(tr("Vibration"),        QUrl::fromUserInput("qrc:/qml/VibrationPage.qml"),          QUrl::fromUserInput("qrc:/qmlimages/VibrationPageIcon"))));
+        if (constants->developer()) {
+            _p->analyzeList.append(QVariant::fromValue(new QmlComponentInfo(tr("Vibration"),        QUrl::fromUserInput("qrc:/qml/VibrationPage.qml"),          QUrl::fromUserInput("qrc:/qmlimages/VibrationPageIcon"))));
+        }
     }
     return _p->analyzeList;
 }

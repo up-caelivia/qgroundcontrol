@@ -24,6 +24,8 @@ import QGroundControl.Palette               1.0
 import QGroundControl.Controllers           1.0
 import QGroundControl.SettingsManager       1.0
 
+import Constants 1.0
+
 Rectangle {
     id:                 _root
     color:              qgcPal.window
@@ -102,7 +104,7 @@ Rectangle {
                                 id:             useCheckList
                                 text:           qsTr("Use Preflight Checklist")
                                 fact:           _useChecklist
-                                visible:        _useChecklist.visible && QGroundControl.corePlugin.options.preFlightChecklistUrl.toString().length
+                                visible:        _useChecklist.visible && QGroundControl.corePlugin.options.preFlightChecklistUrl.toString().length && Constants.developer
 
                                 property Fact _useChecklist: QGroundControl.settingsManager.appSettings.useChecklist
                             }
@@ -111,7 +113,7 @@ Rectangle {
                                 text:           qsTr("Enforce Preflight Checklist")
                                 fact:           _enforceChecklist
                                 enabled:        QGroundControl.settingsManager.appSettings.useChecklist.value
-                                visible:        useCheckList.visible && _enforceChecklist.visible && QGroundControl.corePlugin.options.preFlightChecklistUrl.toString().length
+                                visible:        useCheckList.visible && _enforceChecklist.visible && QGroundControl.corePlugin.options.preFlightChecklistUrl.toString().length && Constants.developer
 
                                 property Fact _enforceChecklist: QGroundControl.settingsManager.appSettings.enforceChecklist
                             }
@@ -119,7 +121,7 @@ Rectangle {
                             FactCheckBox {
                                 text:       qsTr("Keep Map Centered On Vehicle")
                                 fact:       _keepMapCenteredOnVehicle
-                                visible:    _keepMapCenteredOnVehicle.visible
+                                visible:    _keepMapCenteredOnVehicle.visible && Constants.developer
 
                                 property Fact _keepMapCenteredOnVehicle: QGroundControl.settingsManager.flyViewSettings.keepMapCenteredOnVehicle
                             }
@@ -127,7 +129,7 @@ Rectangle {
                             FactCheckBox {
                                 text:       qsTr("Show Telemetry Log Replay Status Bar")
                                 fact:       _showLogReplayStatusBar
-                                visible:    _showLogReplayStatusBar.visible
+                                visible:    _showLogReplayStatusBar.visible && Constants.developer
 
                                 property Fact _showLogReplayStatusBar: QGroundControl.settingsManager.flyViewSettings.showLogReplayStatusBar
                             }
@@ -137,13 +139,13 @@ Rectangle {
 
                                 FactCheckBox {
                                     text:       qsTr("Virtual Joystick")
-                                    visible:    _virtualJoystick.visible
+                                    visible:    _virtualJoystick.visible && Constants.developer
                                     fact:       _virtualJoystick
                                 }
 
                                 FactCheckBox {
                                     text:       qsTr("Auto-Center Throttle")
-                                    visible:    _virtualJoystickAutoCenterThrottle.visible
+                                    visible:    _virtualJoystickAutoCenterThrottle.visible && Constants.developer
                                     enabled:    _virtualJoystick.rawValue
                                     fact:       _virtualJoystickAutoCenterThrottle
                                 }
@@ -151,7 +153,7 @@ Rectangle {
 
                             FactCheckBox {
                                 text:       qsTr("Use Vertical Instrument Panel")
-                                visible:    _alternateInstrumentPanel.visible
+                                visible:    _alternateInstrumentPanel.visible && Constants.developer
                                 fact:       _alternateInstrumentPanel
 
                                 property Fact _alternateInstrumentPanel: QGroundControl.settingsManager.flyViewSettings.alternateInstrumentPanel
@@ -159,7 +161,7 @@ Rectangle {
 
                             FactCheckBox {
                                 text:       qsTr("Show additional heading indicators on Compass")
-                                visible:    _showAdditionalIndicatorsCompass.visible
+                                visible:    _showAdditionalIndicatorsCompass.visible && Constants.developer
                                 fact:       _showAdditionalIndicatorsCompass
 
                                 property Fact _showAdditionalIndicatorsCompass: QGroundControl.settingsManager.flyViewSettings.showAdditionalIndicatorsCompass
@@ -167,7 +169,7 @@ Rectangle {
 
                             FactCheckBox {
                                 text:       qsTr("Lock Compass Nose-Up")
-                                visible:    _lockNoseUpCompass.visible
+                                visible:    _lockNoseUpCompass.visible && Constants.developer
                                 fact:       _lockNoseUpCompass
 
                                 property Fact _lockNoseUpCompass: QGroundControl.settingsManager.flyViewSettings.lockNoseUpCompass
@@ -175,7 +177,7 @@ Rectangle {
 
                             FactCheckBox {
                                 text:       qsTr("Show simple camera controls (DIGICAM_CONTROL)")
-                                visible:    _showDumbCameraControl.visible
+                                visible:    _showDumbCameraControl.visible && Constants.developer
                                 fact:       _showDumbCameraControl
 
                                 property Fact _showDumbCameraControl: QGroundControl.settingsManager.flyViewSettings.showSimpleCameraControl
@@ -184,13 +186,13 @@ Rectangle {
                             FactCheckBox {
                                 text:       qsTr("Update home position based on device location. This will affect return to home")
                                 fact:       _updateHomePosition
-                                visible:    _updateHomePosition.visible
+                                visible:    _updateHomePosition.visible && Constants.developer
                                 property Fact _updateHomePosition: QGroundControl.settingsManager.flyViewSettings.updateHomePosition
                             }
 
                             FactCheckBox {
                                 text:       qsTr("Enable Custom Actions")
-                                visible:    _enableCustomActions.visible
+                                visible:    _enableCustomActions.visible && Constants.developer
                                 fact:       _enableCustomActions
 
                                 property Fact _enableCustomActions: QGroundControl.settingsManager.flyViewSettings.enableCustomActions
@@ -202,7 +204,7 @@ Rectangle {
                                 id: customActions
 
                                 columns:  2
-                                visible:  QGroundControl.settingsManager.flyViewSettings.enableCustomActions.rawValue
+                                visible:  QGroundControl.settingsManager.flyViewSettings.enableCustomActions.rawValue && Constants.developer
 
                                 onVisibleChanged: {
                                     if (jsonFile.rawValue === "" && ScreenTools.isMobile) {
@@ -259,38 +261,39 @@ Rectangle {
                                     text:               qsTr("Guided Command Settings")
                                     Layout.columnSpan:  2
                                     Layout.alignment:   Qt.AlignHCenter
+                                    visible:            Constants.developer
                                 }
 
                                 QGCLabel {
                                     text:       qsTr("Minimum Altitude")
-                                    visible:    guidedMinAltField.visible
+                                    visible:    guidedMinAltField.visible && Constants.developer
                                 }
                                 FactTextField {
                                     id:                     guidedMinAltField
                                     Layout.preferredWidth:  _valueFieldWidth
-                                    visible:                fact.visible
+                                    visible:                fact.visible && Constants.developer
                                     fact:                   _flyViewSettings.guidedMinimumAltitude
                                 }
 
                                 QGCLabel {
                                     text:       qsTr("Maximum Altitude")
-                                    visible:    guidedMaxAltField.visible
+                                    visible:    guidedMaxAltField.visible && Constants.developer
                                 }
                                 FactTextField {
                                     id:                     guidedMaxAltField
                                     Layout.preferredWidth:  _valueFieldWidth
-                                    visible:                fact.visible
+                                    visible:                fact.visible && Constants.developer
                                     fact:                   _flyViewSettings.guidedMaximumAltitude
                                 }
 
                                 QGCLabel {
                                     text:       qsTr("Go To Location Max Distance")
-                                    visible:    maxGotoDistanceField.visible
+                                    visible:    maxGotoDistanceField.visible && Constants.developer
                                 }
                                 FactTextField {
                                     id:                     maxGotoDistanceField
                                     Layout.preferredWidth:  _valueFieldWidth
-                                    visible:                fact.visible
+                                    visible:                fact.visible && Constants.developer
                                     fact:                  _flyViewSettings.maxGoToLocationDistance
                                 }
                             }
@@ -304,118 +307,140 @@ Rectangle {
                                     text:               qsTr("Video Settings")
                                     Layout.columnSpan:  2
                                     Layout.alignment:   Qt.AlignHCenter
+                                    visible:            Constants.developer
                                 }
 
                                 QGCLabel {
                                     id:         videoSourceLabel
                                     text:       qsTr("Source")
-                                    visible:    !_videoAutoStreamConfig && _videoSettings.videoSource.visible
+                                    visible:    !_videoAutoStreamConfig && _videoSettings.videoSource.visible && Constants.developer
                                 }
                                 FactComboBox {
                                     id:                     videoSource
                                     Layout.preferredWidth:  _comboFieldWidth
                                     indexModel:             false
                                     fact:                   _videoSettings.videoSource
-                                    visible:                videoSourceLabel.visible
+                                    visible:                videoSourceLabel.visible && Constants.developer
                                 }
 
                                 QGCLabel {
                                     id:         udpPortLabel
                                     text:       qsTr("UDP Port")
-                                    visible:    !_videoAutoStreamConfig && (_isUDP264 || _isUDP265 || _isMPEGTS) && _videoSettings.udpPort.visible
+                                    visible:    (!_videoAutoStreamConfig && (_isUDP264 || _isUDP265 || _isMPEGTS) && _videoSettings.udpPort.visible)  && Constants.developer
                                 }
                                 FactTextField {
                                     Layout.preferredWidth:  _comboFieldWidth
                                     fact:                   _videoSettings.udpPort
-                                    visible:                udpPortLabel.visible
+                                    visible:                udpPortLabel.visible && Constants.developer
                                 }
 
                                 QGCLabel {
                                     id:         rtspUrlLabel
                                     text:       qsTr("RTSP URL")
-                                    visible:    !_videoAutoStreamConfig && _isRTSP && _videoSettings.rtspUrl.visible
+                                    visible:    !_videoAutoStreamConfig && _isRTSP && _videoSettings.rtspUrl.visible && Constants.developer
                                 }
                                 FactTextField {
                                     Layout.preferredWidth:  _comboFieldWidth
                                     fact:                   _videoSettings.rtspUrl
-                                    visible:                rtspUrlLabel.visible
+                                    visible:                rtspUrlLabel.visible && Constants.developer
                                 }
 
                                 QGCLabel {
                                     id:         tcpUrlLabel
                                     text:       qsTr("TCP URL")
-                                    visible:    !_videoAutoStreamConfig && _isTCP && _videoSettings.tcpUrl.visible
+                                    visible:    !_videoAutoStreamConfig && _isTCP && _videoSettings.tcpUrl.visible && Constants.developer
                                 }
                                 FactTextField {
                                     Layout.preferredWidth:  _comboFieldWidth
                                     fact:                   _videoSettings.tcpUrl
-                                    visible:                tcpUrlLabel.visible
+                                    visible:                tcpUrlLabel.visible && Constants.developer
                                 }
 
                                 QGCLabel {
                                     text:                   qsTr("Aspect Ratio")
-                                    visible:                !_videoAutoStreamConfig && _isGst && _videoSettings.aspectRatio.visible
+                                    visible:                !_videoAutoStreamConfig && _isGst && _videoSettings.aspectRatio.visible && Constants.developer
                                 }
                                 FactTextField {
                                     Layout.preferredWidth:  _comboFieldWidth
                                     fact:                   _videoSettings.aspectRatio
-                                    visible:                !_videoAutoStreamConfig && _isGst && _videoSettings.aspectRatio.visible
+                                    visible:                !_videoAutoStreamConfig && _isGst && _videoSettings.aspectRatio.visible && Constants.developer
                                 }
 
                                 QGCLabel {
                                     id:         videoFileFormatLabel
                                     text:       qsTr("Record File Format")
-                                    visible:    _showSaveVideoSettings && _videoSettings.recordingFormat.visible
+                                    visible:    _showSaveVideoSettings && _videoSettings.recordingFormat.visible && Constants.developer
                                 }
                                 FactComboBox {
                                     Layout.preferredWidth:  _comboFieldWidth
                                     fact:                   _videoSettings.recordingFormat
-                                    visible:                videoFileFormatLabel.visible
+                                    visible:                videoFileFormatLabel.visible && Constants.developer
                                 }
 
                                 QGCLabel {
                                     id:         maxSavedVideoStorageLabel
                                     text:       qsTr("Max Storage Usage")
-                                    visible:    _showSaveVideoSettings && _videoSettings.maxVideoSize.visible && _videoSettings.enableStorageLimit.value
+                                    visible:    (_showSaveVideoSettings && _videoSettings.maxVideoSize.visible && _videoSettings.enableStorageLimit.value)  && Constants.developer
                                 }
                                 FactTextField {
                                     Layout.preferredWidth:  _comboFieldWidth
                                     fact:                   _videoSettings.maxVideoSize
-                                    visible:                _showSaveVideoSettings && _videoSettings.enableStorageLimit.value && maxSavedVideoStorageLabel.visible
+                                    visible:                (_showSaveVideoSettings && _videoSettings.enableStorageLimit.value && maxSavedVideoStorageLabel.visible)  && Constants.developer
                                 }
 
                                 QGCLabel {
                                     id:         videoDecodeLabel
                                     text:       qsTr("Video decode priority")
-                                    visible:    forceVideoDecoderComboBox.visible
+                                    visible:    forceVideoDecoderComboBox.visible && Constants.developer
                                 }
                                 FactComboBox {
                                     id:                     forceVideoDecoderComboBox
                                     Layout.preferredWidth:  _comboFieldWidth
                                     fact:                   _videoSettings.forceVideoDecoder
-                                    visible:                fact.visible
+                                    visible:                fact.visible && Constants.developer
                                     indexModel:             false
                                 }
 
-                                Item { width: 1; height: 1}
+                                Item { width: 1; height: 1; visible: Constants.developer}
                                 FactCheckBox {
                                     text:       qsTr("Disable When Disarmed")
                                     fact:       _videoSettings.disableWhenDisarmed
-                                    visible:    !_videoAutoStreamConfig && _isGst && fact.visible
+                                    visible:    !_videoAutoStreamConfig && _isGst && fact.visible && Constants.developer
                                 }
 
-                                Item { width: 1; height: 1}
+                                Item { width: 1; height: 1; visible: Constants.developer}
                                 FactCheckBox {
                                     text:       qsTr("Low Latency Mode")
                                     fact:       _videoSettings.lowLatencyMode
-                                    visible:    !_videoAutoStreamConfig && _isGst && fact.visible
+                                    visible:    !_videoAutoStreamConfig && _isGst && fact.visible && Constants.developer
                                 }
 
-                                Item { width: 1; height: 1}
+                                Item { width: 1; height: 1; visible: Constants.developer}
                                 FactCheckBox {
                                     text:       qsTr("Auto-Delete Saved Recordings")
                                     fact:       _videoSettings.enableStorageLimit
-                                    visible:    _showSaveVideoSettings && fact.visible
+                                    visible:    _showSaveVideoSettings && fact.visible && Constants.developer
+                                }
+
+                                QGCLabel {
+                                    text:               qsTr("Video Forward")
+                                    Layout.columnSpan:  2
+                                    Layout.alignment:   Qt.AlignHCenter
+                                }
+
+                                QGCLabel {
+                                    text: qsTr("Enable RTMP Forwarding")
+                                }
+                                FactCheckBox {
+                                    fact: _videoSettings.enableRTMPForwarding
+                                }
+
+                                QGCLabel {
+                                    text: qsTr("RTMP Server URL")
+                                }
+                                FactTextField {
+                                    Layout.preferredWidth: _comboFieldWidth
+                                    fact: _videoSettings.serverRTMPUrl
                                 }
                             }
                         }
@@ -728,7 +753,7 @@ Rectangle {
                                 FactCheckBox {
                                     text:       qsTr("Enable Remote ID")
                                     fact:       _remoteIDEnable
-                                    visible:    _remoteIDEnable.visible
+                                    visible:    false
                                     property Fact _remoteIDEnable: QGroundControl.settingsManager.remoteIDSettings.enable
                                 }
                             }

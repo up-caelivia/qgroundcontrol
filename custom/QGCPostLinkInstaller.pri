@@ -58,9 +58,15 @@ installer {
             QMAKE_POST_LINK += && make apk
             QMAKE_POST_LINK += && cp android-build/build/outputs/apk/debug/android-build-debug.apk package/QGroundControl$${ANDROID_TRUE_BITNESS}.apk
         } else {
-            QMAKE_POST_LINK += && make apk_install_target INSTALL_ROOT=android-build
-            QMAKE_POST_LINK += && androiddeployqt --verbose --input android-QGroundControlUP-deployment-settings.json --output android-build --release --sign $${SOURCE_DIR}/custom/android/android_release.keystore QGCAndroidKeyStore --storepass $$(ANDROID_KEYSTORE_PASSWORD)
-            QMAKE_POST_LINK += && cp android-build/build/outputs/apk/release/android-build-release-signed.apk package/QGroundControlUP$${ANDROID_TRUE_BITNESS}.apk
+            exists($$PWD/create_ABLUO) {
+                QMAKE_POST_LINK += && make apk_install_target INSTALL_ROOT=android-build
+                QMAKE_POST_LINK += && androiddeployqt --verbose --input android-QGroundControlABLUO-deployment-settings.json --output android-build --release --sign $${SOURCE_DIR}/custom/android/android_release.keystore QGCAndroidKeyStore --storepass $$(ANDROID_KEYSTORE_PASSWORD)
+                QMAKE_POST_LINK += && cp android-build/build/outputs/apk/release/android-build-release-signed.apk package/QGroundControlABLUO$${ANDROID_TRUE_BITNESS}.apk
+            } else {
+                QMAKE_POST_LINK += && make apk_install_target INSTALL_ROOT=android-build
+                QMAKE_POST_LINK += && androiddeployqt --verbose --input android-QGroundControlUP-deployment-settings.json --output android-build --release --sign $${SOURCE_DIR}/custom/android/android_release.keystore QGCAndroidKeyStore --storepass $$(ANDROID_KEYSTORE_PASSWORD)
+                QMAKE_POST_LINK += && cp android-build/build/outputs/apk/release/android-build-release-signed.apk package/QGroundControlUP$${ANDROID_TRUE_BITNESS}.apk
+            }
         }
     }
 }

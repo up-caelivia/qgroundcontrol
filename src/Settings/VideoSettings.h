@@ -36,6 +36,10 @@ public:
     DEFINE_SETTINGFACT(disableWhenDisarmed)
     DEFINE_SETTINGFACT(lowLatencyMode)
     DEFINE_SETTINGFACT(forceVideoDecoder)
+    // Herelink HDMI source switching
+    DEFINE_SETTINGFACT(cameraId)
+    DEFINE_SETTINGFACT(enableRTMPForwarding)
+    DEFINE_SETTINGFACT(serverRTMPUrl)
 
     enum VideoDecoderOptions {
         ForceVideoDecoderDefault = 0,
@@ -75,6 +79,8 @@ public:
     static const char* videoSourceYuneecMantisG;
     static const char* videoSourceHerelinkAirUnit;
     static const char* videoSourceHerelinkHotspot;
+    static const char* videoSourceSkydroidH12;
+    static const char* videoSourceSkydroidH16;
 
 signals:
     void streamConfiguredChanged    (bool configured);

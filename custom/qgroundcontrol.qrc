@@ -11,11 +11,10 @@
 		<file alias="ModeIndicator.qml">../src/ui/toolbar/ModeIndicator.qml</file>
 		<file alias="MultiVehicleSelector.qml">../src/ui/toolbar/MultiVehicleSelector.qml</file>
 		<file alias="RCRSSIIndicator.qml">../src/ui/toolbar/RCRSSIIndicator.qml</file>
-		<file alias="RemoteIDIndicator.qml">../src/ui/toolbar/RemoteIDIndicator.qml</file>
-		<file alias="ROIIndicator.qml">../src/ui/toolbar/ROIIndicator.qml</file>
 		<file alias="TelemetryRSSIIndicator.qml">../src/ui/toolbar/TelemetryRSSIIndicator.qml</file>
 		<file alias="VTOLModeIndicator.qml">../src/ui/toolbar/VTOLModeIndicator.qml</file>
 		<file alias="APMSupportForwardingIndicator.qml">../src/ui/toolbar/APMSupportForwardingIndicator.qml</file>
+		<file alias="GimbalIndicator.qml">../src/ui/toolbar/GimbalIndicator.qml</file>
 	</qresource>
 	<qresource prefix="/checklists">
 		<file alias="DefaultChecklist.qml">../src/FlightDisplay/DefaultChecklist.qml</file>
@@ -35,7 +34,6 @@
 		<file alias="BluetoothSettings.qml">../src/ui/preferences/BluetoothSettings.qml</file>
 		<file alias="CorridorScanEditor.qml">../src/PlanView/CorridorScanEditor.qml</file>
 		<file alias="DebugWindow.qml">../src/ui/preferences/DebugWindow.qml</file>
-		<file alias="RemoteIDSettings.qml">../src/ui/preferences/RemoteIDSettings.qml</file>
 		<file alias="ESP8266Component.qml">../src/AutoPilotPlugins/Common/ESP8266Component.qml</file>
 		<file alias="ESP8266ComponentSummary.qml">../src/AutoPilotPlugins/Common/ESP8266ComponentSummary.qml</file>
 		<file alias="ExitWithErrorWindow.qml">../src/ui/ExitWithErrorWindow.qml</file>
@@ -58,7 +56,6 @@
 		<file alias="MavlinkSettings.qml">../src/ui/preferences/MavlinkSettings.qml</file>
 		<file alias="MicrohardSettings.qml">../src/Microhard/MicrohardSettings.qml</file>
 		<file alias="MissionCommandTreeEditorTestWindow.qml">../src/MissionManager/MissionCommandTreeEditorTestWindow.qml</file>
-		<file alias="MissionSettingsEditor.qml">../src/PlanView/MissionSettingsEditor.qml</file>
 		<file alias="MockLink.qml">../src/ui/preferences/MockLink.qml</file>
 		<file alias="MockLinkSettings.qml">../src/ui/preferences/MockLinkSettings.qml</file>
 		<file alias="MotorComponent.qml">../src/AutoPilotPlugins/Common/MotorComponent.qml</file>
@@ -68,7 +65,6 @@
 		<file alias="OfflineMap.qml">../src/QtLocationPlugin/QMLControl/OfflineMap.qml</file>
 		<file alias="PlanToolBar.qml">../src/PlanView/PlanToolBar.qml</file>
 		<file alias="PlanToolBarIndicators.qml">../src/PlanView/PlanToolBarIndicators.qml</file>
-		<file alias="PlanView.qml">../src/PlanView/PlanView.qml</file>
 		<file alias="PreFlightCheckList.qml">../src/FlightDisplay/PreFlightCheckList.qml</file>
 		<file alias="PX4FlowSensor.qml">../src/VehicleSetup/PX4FlowSensor.qml</file>
 		<file alias="QGCInstrumentWidget.qml">../src/FlightMap/Widgets/QGCInstrumentWidget.qml</file>
@@ -163,12 +159,10 @@
 		<file alias="QGroundControl/Controls/SimpleItemMapVisual.qml">../src/PlanView/SimpleItemMapVisual.qml</file>
 		<file alias="QGroundControl/Controls/SliderSwitch.qml">../src/QmlControls/SliderSwitch.qml</file>
 		<file alias="QGroundControl/Controls/StructureScanMapVisual.qml">../src/PlanView/StructureScanMapVisual.qml</file>
-		<file alias="QGroundControl/Controls/SubMenuButton.qml">../src/QmlControls/SubMenuButton.qml</file>
 		<file alias="QGroundControl/Controls/SurveyMapVisual.qml">../src/PlanView/SurveyMapVisual.qml</file>
 		<file alias="QGroundControl/Controls/TerrainStatus.qml">../src/PlanView/TerrainStatus.qml</file>
 		<file alias="QGroundControl/Controls/TakeoffItemMapVisual.qml">../src/PlanView/TakeoffItemMapVisual.qml</file>
 		<file alias="QGroundControl/Controls/ToolStrip.qml">../src/QmlControls/ToolStrip.qml</file>
-		<file alias="QGroundControl/Controls/ToolStripHoverButton.qml">../src/QmlControls/ToolStripHoverButton.qml</file>
 		<file alias="QGroundControl/Controls/TransectStyleComplexItemEditor.qml">../src/PlanView/TransectStyleComplexItemEditor.qml</file>
 		<file alias="QGroundControl/Controls/TransectStyleComplexItemStats.qml">../src/PlanView/TransectStyleComplexItemStats.qml</file>
 		<file alias="QGroundControl/Controls/TransectStyleComplexItemTabBar.qml">../src/PlanView/TransectStyleComplexItemTabBar.qml</file>
@@ -179,7 +173,6 @@
 		<file alias="QGroundControl/FactControls/AltitudeFactTextField.qml">../src/FactSystem/FactControls/AltitudeFactTextField.qml</file>
 		<file alias="QGroundControl/FactControls/FactBitmask.qml">../src/FactSystem/FactControls/FactBitmask.qml</file>
 		<file alias="QGroundControl/FactControls/FactCheckBox.qml">../src/FactSystem/FactControls/FactCheckBox.qml</file>
-		<file alias="QGroundControl/FactControls/FactComboBox.qml">../src/FactSystem/FactControls/FactComboBox.qml</file>
 		<file alias="QGroundControl/FactControls/FactLabel.qml">../src/FactSystem/FactControls/FactLabel.qml</file>
 		<file alias="QGroundControl/FactControls/FactTextFieldGrid.qml">../src/FactSystem/FactControls/FactTextFieldGrid.qml</file>
 		<file alias="QGroundControl/FactControls/FactTextFieldRow.qml">../src/FactSystem/FactControls/FactTextFieldRow.qml</file>
@@ -189,13 +182,11 @@
 		<file alias="QGroundControl/FlightDisplay/FlightDisplayViewVideo.qml">../src/FlightDisplay/FlightDisplayViewVideo.qml</file>
 		<file alias="QGroundControl/FlightDisplay/FlightDisplayViewWidgets.qml">../src/FlightDisplay/FlightDisplayViewWidgets.qml</file>
 		<file alias="QGroundControl/FlightDisplay/FlyViewInstrumentPanel.qml">../src/FlightDisplay/FlyViewInstrumentPanel.qml</file>
-		<file alias="QGroundControl/FlightDisplay/FlyViewMissionCompleteDialog.qml">../src/FlightDisplay/FlyViewMissionCompleteDialog.qml</file>
 		<file alias="QGroundControl/FlightDisplay/FlyViewPreFlightChecklistPopup.qml">../src/FlightDisplay/FlyViewPreFlightChecklistPopup.qml</file>
 		<file alias="QGroundControl/FlightDisplay/FlyViewToolStrip.qml">../src/FlightDisplay/FlyViewToolStrip.qml</file>
-		<file alias="QGroundControl/FlightDisplay/FlyViewToolStripActionList.qml">../src/FlightDisplay/FlyViewToolStripActionList.qml</file>
+		<file alias="QGroundControl/FlightDisplay/OnScreenGimbalController.qml">../src/FlightDisplay/OnScreenGimbalController.qml</file>
 		<file alias="QGroundControl/FlightDisplay/GuidedActionActionList.qml">../src/FlightDisplay/GuidedActionActionList.qml</file>
 		<file alias="QGroundControl/FlightDisplay/GuidedActionConfirm.qml">../src/FlightDisplay/GuidedActionConfirm.qml</file>
-		<file alias="QGroundControl/FlightDisplay/GuidedActionsController.qml">../src/FlightDisplay/GuidedActionsController.qml</file>
 		<file alias="QGroundControl/FlightDisplay/GuidedActionLand.qml">../src/FlightDisplay/GuidedActionLand.qml</file>
 		<file alias="QGroundControl/FlightDisplay/GuidedActionList.qml">../src/FlightDisplay/GuidedActionList.qml</file>
 		<file alias="QGroundControl/FlightDisplay/GuidedActionTakeoff.qml">../src/FlightDisplay/GuidedActionTakeoff.qml</file>
@@ -215,7 +206,6 @@
 		<file alias="QGroundControl/FlightDisplay/ProximityRadarVideoView.qml">../src/FlightDisplay/ProximityRadarVideoView.qml</file>
 		<file alias="QGroundControl/FlightDisplay/TerrainProgress.qml">../src/FlightDisplay/TerrainProgress.qml</file>
 		<file alias="QGroundControl/FlightDisplay/TelemetryValuesBar.qml">../src/FlightDisplay/TelemetryValuesBar.qml</file>
-		<file alias="QGroundControl/FlightDisplay/VehicleWarnings.qml">../src/FlightDisplay/VehicleWarnings.qml</file>
 		<file alias="QGroundControl/FlightDisplay/ObstacleDistanceOverlay.qml">../src/FlightDisplay/ObstacleDistanceOverlay.qml</file>
 		<file alias="QGroundControl/FlightDisplay/ObstacleDistanceOverlayMap.qml">../src/FlightDisplay/ObstacleDistanceOverlayMap.qml</file>
 		<file alias="QGroundControl/FlightDisplay/ObstacleDistanceOverlayVideo.qml">../src/FlightDisplay/ObstacleDistanceOverlayVideo.qml</file>
@@ -248,7 +238,6 @@
 		<file alias="SerialSettings.qml">../src/ui/preferences/SerialSettings.qml</file>
 		<file alias="SetupParameterEditor.qml">../src/VehicleSetup/SetupParameterEditor.qml</file>
 		<file alias="SetupView.qml">../src/VehicleSetup/SetupView.qml</file>
-		<file alias="SimpleItemEditor.qml">../src/PlanView/SimpleItemEditor.qml</file>
 		<file alias="StructureScanEditor.qml">../src/PlanView/StructureScanEditor.qml</file>
 		<file alias="SurveyItemEditor.qml">../src/PlanView/SurveyItemEditor.qml</file>
 		<file alias="SyslinkComponent.qml">../src/AutoPilotPlugins/Common/SyslinkComponent.qml</file>
@@ -322,8 +311,10 @@
 		<file alias="Vehicle/HygrometerFact.json">../src/Vehicle/HygrometerFact.json</file>
 		<file alias="Vehicle/GeneratorFact.json">../src/Vehicle/GeneratorFact.json</file>
 		<file alias="Vehicle/EFIFact.json">../src/Vehicle/EFIFact.json</file>
+		<file alias="Vehicle/GimbalFact.json">../src/Gimbal/GimbalFact.json</file>
 		<file alias="Video.SettingsGroup.json">../src/Settings/Video.SettingsGroup.json</file>
 		<file alias="VTOLLandingPattern.FactMetaData.json">../src/MissionManager/VTOLLandingPattern.FactMetaData.json</file>
+		<file alias="GimbalController.SettingsGroup.json">../src/Settings/GimbalController.SettingsGroup.json</file>
 	</qresource>
 	<qresource prefix="/MockLink">
 		<file alias="APMArduSubMockLink.params">../src/comm/APMArduSubMockLink.params</file>

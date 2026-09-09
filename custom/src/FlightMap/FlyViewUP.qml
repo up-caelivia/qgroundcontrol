@@ -27,6 +27,8 @@ import QGroundControl.Palette       1.0
 import QGroundControl.ScreenTools   1.0
 import QGroundControl.Vehicle       1.0
 
+import Custom.Widgets 1.0
+
 Item {
     id: _root
 
@@ -99,6 +101,55 @@ Item {
         mapControl:         _mapControl
         visible:            !QGroundControl.videoManager.fullScreen
     }
+
+    FlyViewCustomLayerSAV {
+        id:                 customOverlaySAV
+        anchors.fill:       widgetLayer
+        z:                  _fullItemZorder + 2
+        parentToolInsets:   widgetLayer.totalToolInsets
+        mapControl:         _mapControl
+        visible:            CustomPlugin.isSAVenabled && QGroundControl.videoManager.fullScreen
+    }
+
+    Item {
+        id: thirdsGrid
+        anchors.fill: parent
+        visible: QGroundControl.videoManager.fullScreen // oppure la tua variabile che indica full screen
+        z:                  _fullItemZorder + 1
+
+        // Vertical lines
+        Rectangle {
+            x: parent.width / 3
+            width: 1
+            height: parent.height
+            color: "white"
+            opacity: 0.5
+        }
+        Rectangle {
+            x: parent.width * 2/3
+            width: 1
+            height: parent.height
+            color: "white"
+            opacity: 0.5
+        }
+
+        // Horizontal lines
+        Rectangle {
+            y: parent.height / 3
+            height: 1
+            width: parent.width
+            color: "white"
+            opacity: 0.5
+        }
+        Rectangle {
+            y: parent.height * 2/3
+            height: 1
+            width: parent.width
+            color: "white"
+            opacity: 0.5
+        }
+    }
+
 
     // Development tool for visualizing the insets for a paticular layer, enable if needed
     /*

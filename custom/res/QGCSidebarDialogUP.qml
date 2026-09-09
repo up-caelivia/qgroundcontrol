@@ -10,8 +10,9 @@ import QGroundControl.ScreenTools   1.0
 Item {
     id: root
     width: parent.width * 0.4
-    height: parent.height
+    height: parent.height * 0.9
     x: visible ? 0 : -width
+    anchors.bottom: parent.bottom
     visible: false
 
     Behavior on x {
@@ -31,7 +32,7 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        color: _pal.window
+        color: Qt.rgba(_pal.window.r, _pal.window.g, _pal.window.b, 0.9) 
 
         ColumnLayout {
             anchors.fill: parent

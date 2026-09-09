@@ -16,6 +16,8 @@ import QGroundControl.MultiVehicleManager   1.0
 import QGroundControl.ScreenTools           1.0
 import QGroundControl.Palette               1.0
 
+import Constants 1.0
+
 //-------------------------------------------------------------------------
 //-- Flight Time Indicator
 
@@ -57,12 +59,12 @@ Item {
 
 
         QGCLabel {
-            color:                      qgcPal.buttonText
+            color:                      Constants.isABLUOApp ? qgcPal.text : qgcPal.buttonText
             text: "Flight Time: "
         }
 
         QGCLabel {
-            color:                      qgcPal.buttonText
+            color:                      Constants.isABLUOApp ? qgcPal.text : qgcPal.buttonText
             text: "Time Remaining: "
         }
 
@@ -79,8 +81,8 @@ Item {
 
 
         QGCLabel {
-            color:                      qgcPal.buttonText
-            text:  _activeVehicle ?  _activeVehicle.getFact("flightTime").valueString : "--/--"
+            color:  Constants.isABLUOApp ? qgcPal.text : qgcPal.buttonText
+            text:  _activeVehicle ?  CustomPlugin.tripFlightTimeStr : "--/--"
         }
 
         QGCLabel {
@@ -134,8 +136,11 @@ Item {
                         }
                     }
 
-                if(num == 0)
+                if(num == 0) {
+                    if(Constants.isABLUOApp) 
+                        return qgcPal.text
                     return qgcPal.buttonText
+                }
 
                 if (red == num)
                     return qgcPal.colorRed
@@ -143,6 +148,8 @@ Item {
                 if(orange == num || (orange + red == num))
                     return qgcPal.colorOrange
 
+                if(Constants.isABLUOApp) 
+                    return qgcPal.text
                 return qgcPal.buttonText
 
             }

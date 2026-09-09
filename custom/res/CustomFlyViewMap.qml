@@ -23,6 +23,11 @@ import QGroundControl.Palette       1.0
 import QGroundControl.ScreenTools   1.0
 import QGroundControl.Vehicle       1.0
 
+import Custom.Widgets 1.0
+
+import QGroundControl.KML 1.0
+import Custom.GeoAwareness 1.0
+
 FlightMap {
     id:                         _root
     allowGCSLocationCenter:     true
@@ -56,6 +61,7 @@ FlightMap {
     property bool   _disableVehicleTracking:    false
     property bool   _keepVehicleCentered:       pipMode ? true : false
     property bool   _saveZoomLevelSetting:      true
+    property var    _savParamCoords:                    []
 
     function _adjustMapZoomForPipMode() {
         _saveZoomLevelSetting = false
@@ -86,6 +92,12 @@ FlightMap {
     onCenterChanged: {
         QGroundControl.flightMapPosition = center
     }
+    
+    
+    KmlPolygonOverlay {
+        polygonModel: KmlPolygonLoader.polygons
+        showBorder: false
+    }   
 
     // We track whether the user has panned or not to correctly handle automatic map positioning
     Connections {
@@ -95,6 +107,26 @@ FlightMap {
         function onFlickStarted() {     _disableVehicleTracking = true }
         function onPanFinished() {      panRecenterTimer.restart() }
         function onFlickFinished() {    panRecenterTimer.restart() }
+    }
+    
+    Connections {
+        target: CustomPlugin
+        onSavParamCoordinatesChanged: {
+            _savParamCoords = CustomPlugin.savParamCoordinates
+        }
+        onRc6ValueChanged: {
+            if (CustomPlugin.isSAVenabled) {
+                if (CustomPlugin.rc6Value > 1700) {
+                    QGroundControl.videoManager.fullScreen = true
+                } else {
+                    QGroundControl.videoManager.fullScreen = false
+                }
+            }
+        }
+    }
+    
+    SavParamMarkerUP {
+        modelDataList: _savParamCoords
     }
 
     function pointInRect(point, rect) {
@@ -202,6 +234,10 @@ FlightMap {
                 }
             }
         }
+        if (_activeVehicle)
+            KmlPolygonLoader.checkGpsStatus()
+        if (firstVehiclePositionReceived && _activeVehicleCoordinate.isValid)
+            KmlPolygonLoader.checkDronePosition()
     }
 
     on_ActiveVehicleCoordinateChanged: {
@@ -541,6 +577,7 @@ FlightMap {
     // Handle guided mode clicks
     MouseArea {
         anchors.fill: parent
+        visible: !CustomPlugin.isSAVenabled || !CustomPlugin.isSAVexist
 
         Popup {
             id: clickMenu
@@ -651,5 +688,6 @@ FlightMap {
 
         property real centerInset: visible ? parent.height - y : 0
     }
+
 
 }

@@ -2,8 +2,14 @@ message("Adding Custom Plugin")
 
 #-- Version control
 # Build number is automatic
-# Get the latest tag matching the pattern v*-UP
-GIT_TAG = $$system(git describe --tags --abbrev=0 --match "v*-UP")
+
+exists($$PWD/create_ABLUO) {
+    # Get the latest tag matching the pattern v*-ABLUO
+    GIT_TAG = $$system(git describe --tags --abbrev=0 --match "v*-ABLUO")
+} else {
+    # Get the latest tag matching the pattern v*-UP
+    GIT_TAG = $$system(git describe --tags --abbrev=0 --match "v*-UP")
+}
 
 # Get short commit hash
 GIT_HASH = $$system(git rev-parse --short HEAD)
@@ -57,25 +63,73 @@ DEFINES += CUSTOMHEADER=\"\\\"CustomPlugin.h\\\"\"
 DEFINES += CUSTOMCLASS=CustomPlugin
 DEFINES += CUSTOMCORE_PLUGIN=CustomPlugin
 
-TARGET   = QGroundControlUP
-DEFINES += QGC_APPLICATION_NAME='"\\\"QGroundControlUP\\\""'
+exists($$PWD/create_ABLUO) {
+    message(ABLUO VERSION FOUND)
+    TARGET   = QGroundControlABLUO
+    DEFINES += QGC_APPLICATION_NAME='"\\\"QGroundControlABLUO\\\""'
+    QGC_APP_NAME        = "QGroundControlABLUO"
+    QGC_BINARY_NAME     = "QGroundControlABLUO"
+    QGC_APP_DESCRIPTION = "QGroundControl ABLUO"
+   
+    manifest_copy_target.target = $$PWD/android/AndroidManifest.xml
+    manifest_copy_target.commands = \
+        $$QMAKE_COPY $$PWD/android/AndroidManifest_ABLUO.xml $$PWD/android/AndroidManifest.xml
+    PRE_TARGETDEPS += $$manifest_copy_target.target
+    QMAKE_EXTRA_TARGETS += manifest_copy_target
+    message(copy AndroidManifest_ABLUO)
+   
+    images_copy_target.target = $$PWD/android/res
+    images_copy_target.commands = \
+        $$QMAKE_COPY_DIR \"$$PWD/android/res_ABLUO\" \"$$PWD/android/res\"
+    PRE_TARGETDEPS += $$images_copy_target.target
+    QMAKE_EXTRA_TARGETS += images_copy_target
+    message(copy res_ABLUO)
+
+    DEFINES += ABLUO_APP
+
+} else {
+    message(UP VERSION FOUND)
+    TARGET   = QGroundControlUP
+    DEFINES += QGC_APPLICATION_NAME='"\\\"QGroundControlUP\\\""'
+    QGC_APP_NAME        = "QGroundControlUP"
+    QGC_BINARY_NAME     = "QGroundControlUP"
+    QGC_APP_DESCRIPTION = "QGroundControl UP"
+    linux {
+        manifest_copy_target.target = $$PWD/android/AndroidManifest.xml
+        manifest_copy_target.commands = \
+            $$QMAKE_COPY $$PWD/android/AndroidManifest_UP.xml $$PWD/android/AndroidManifest.xml
+        PRE_TARGETDEPS += $$manifest_copy_target.target
+        QMAKE_EXTRA_TARGETS += manifest_copy_target
+        message("copy AndroidManifest_UP")
+   
+        images_copy_target.target = $$PWD/android/res
+        images_copy_target.commands = \
+            $$QMAKE_COPY_DIR $$PWD/android/res_UP $$PWD/android/res
+        PRE_TARGETDEPS += $$images_copy_target.target
+        QMAKE_EXTRA_TARGETS += images_copy_target
+        message("copy res_UP")
+    }
+}
 
 DEFINES += QGC_ORG_NAME=\"\\\"qgroundcontrol.org\\\"\"
 DEFINES += QGC_ORG_DOMAIN=\"\\\"org.qgroundcontrol\\\"\"
 
 
-QGC_APP_NAME        = "QGroundControlUP"
-QGC_BINARY_NAME     = "QGroundControlUP"
 QGC_ORG_NAME        = "UP Caeli Via"
 QGC_ORG_DOMAIN      = "www.up-caelivia.it"
 QGC_ANDROID_PACKAGE = "org.custom.qgroundcontrol"
-QGC_APP_DESCRIPTION = "QGroundControl UP"
 QGC_APP_COPYRIGHT   = "Copyright (C) 2020 QGroundControl Development Team. All rights reserved."
 
 
 # Our own, custom resources
 RESOURCES += \
     $$PWD/custom.qrc
+
+exists($$PWD/create_ABLUO)  {
+    RESOURCES += $$PWD/abluo.qrc
+} else {
+    RESOURCES += $$PWD/up.qrc
+}
 
 QML_IMPORT_PATH += \
    $$PWD/res
@@ -86,14 +140,28 @@ SOURCES += \
     $$PWD/src/CustomToolbox.cpp \
     $$PWD/src/ParseNTRIP.cpp \
     $$PWD/src/constants.cpp \
-    $$PWD/src/CustomAnnouncer.cpp
+    $$PWD/src/CustomAnnouncer.cpp \
+    $$PWD/src/VideoStreamControl.cc \
+    $$PWD/src/GeoAwareness/KmlPolygonObject.cpp \
+    $$PWD/src/GeoAwareness/KmlPolygonLoader.cpp
 
 HEADERS += \
     $$PWD/src/CustomPlugin.h \
     $$PWD/src/CustomToolbox.h \
     $$PWD/src/ParseNTRIP.h \
     $$PWD/src/constants.h \
-    $$PWD/src/CustomAnnouncer.h
+    $$PWD/src/CustomAnnouncer.h \
+    $$PWD/src/VideoStreamControl.h \
+    $$PWD/src/GeoAwareness/KmlPolygonObject.h \
+    $$PWD/src/GeoAwareness/KmlPolygonLoader.h
 
-INCLUDEPATH += \
-    $$PWD/src \
+INCLUDEPATH += $$PWD/src \
+               $$PWD/src/GeoAwareness
+
+# Enable Herelink AirUnit video config
+DEFINES += QGC_HERELINK_AIRUNIT_VIDEO
+
+# ---- MSVC: avoid warning-as-error for lambda capture / QObject::connect on Windows
+win32:msvc {
+    QMAKE_CXXFLAGS += /wd4573
+}

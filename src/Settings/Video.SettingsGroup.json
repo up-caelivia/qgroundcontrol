@@ -138,6 +138,27 @@
     "enumValues":       "0,1,2,3,4,5",
     "default":           0,
     "qgcRebootRequired": true
+},
+{
+    "name":             "cameraId",
+    "shortDesc":        "Camera ID",
+    "longDesc":         "Camera ID used for video streaming.",
+    "type":             "uint32",
+    "default":          0
+},
+{
+    "name":             "enableRTMPForwarding",
+    "shortDesc": "Enable RTMP forwarding",
+    "longDesc":  "If this option is enabled, the video stream is forwarded to the RTMP address",
+    "type":             "bool",
+    "default":     false
+},
+{
+    "name":             "serverRTMPUrl",
+    "shortDesc": "RTMP Url address",
+    "longDesc":  "RTMP url address to forward the video stream",
+    "type":             "string",
+    "default":     ""
 }
 ]
 }

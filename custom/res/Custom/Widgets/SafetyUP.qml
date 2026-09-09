@@ -125,6 +125,12 @@ SetupPage {
                                 fact:   _fenceEnable
                             }
 
+                            QGCLabel {
+                                text: qsTr("Altitude fence is not enabled if GeoFence is disabled")
+                                color: "red"
+                                visible: !enabledCheckBox.checked
+                            }
+                            
                             GridLayout {
                                 columns:    2
                                 enabled:    enabledCheckBox.checked
@@ -132,8 +138,10 @@ SetupPage {
                                 QGCCheckBox {
                                     text:       qsTr("Maximum Altitude")
                                     checked:    _fenceType.rawValue & _maxAltitudeFenceBitMask
+                                    id:         maximumAltitudeCheckBox
 
                                     onClicked: {
+                                        console.log("FENCE_ALT_MAX value:", _fenceAltMax.value, "raw:", _fenceAltMax.rawValue)
                                         if (checked) {
                                             _fenceType.rawValue |= _maxAltitudeFenceBitMask
                                         } else {
@@ -144,6 +152,20 @@ SetupPage {
 
                                 FactTextField {
                                     fact: _fenceAltMax
+                                }
+                                
+                                QGCLabel {
+                                    text: qsTr("Altitude fence is not enabled if Maximum Altitude is disabled")
+                                    color: "red"
+                                    visible: !maximumAltitudeCheckBox.checked && enabledCheckBox.checked
+                                    Layout.columnSpan:      2
+                                }
+
+                                QGCLabel {
+                                    text: qsTr("Warning: the fence altitude is higher than the 120 m EU regulation limit")
+                                    color: "red"
+                                    visible: maximumAltitudeCheckBox.checked && enabledCheckBox.checked && _fenceAltMax.rawValue > 120
+                                    Layout.columnSpan:      2
                                 }
 
                                 QGCCheckBox {
@@ -199,6 +221,8 @@ SetupPage {
                                 FactComboBox {
                                     sizeToContents: true
                                     fact:           _fenceAction
+                                    allowedValues: [0, 1, 2, 4]
+                                    enabled:        false
                                 }
 
                                 QGCLabel {
@@ -237,8 +261,8 @@ SetupPage {
 
                     Rectangle {
                         id:     rtlSettings
-                        width:  landSpeedField.x + landSpeedField.width + _margins
-                        height: landSpeedField.y + landSpeedField.height + _margins
+                        width:  rltAltField.x + rltAltField.width + _margins
+                        height: icon.y + icon.height + _margins
                         color:  ggcPal.windowShade
 
                         Image {
@@ -292,56 +316,6 @@ SetupPage {
                             fact:               _rtlAltFact
                             showUnits:          true
                             enabled:            returnAltRadio.checked
-                        }
-
-                        QGCCheckBox {
-                            id:                 homeLoiterCheckbox
-                            anchors.left:       returnAtCurrentRadio.left
-                            anchors.baseline:   landDelayField.baseline
-                            checked:            _rtlLoitTimeFact.value > 0
-                            text:               qsTr("Loiter above Home for:")
-
-                            onClicked: _rtlLoitTimeFact.value = (checked ? 60 : 0)
-                        }
-
-                        FactTextField {
-                            id:                 landDelayField
-                            anchors.topMargin:  _innerMargin
-                            anchors.left:       rltAltField.left
-                            anchors.top:        rltAltField.bottom
-                            fact:               _rtlLoitTimeFact
-                            showUnits:          true
-                            enabled:            homeLoiterCheckbox.checked === true
-                        }
-
-                        QGCLabel {
-                            anchors.left:       returnAtCurrentRadio.left
-                            anchors.baseline:   rltAltFinalField.baseline
-                            text:               qsTr("Final land stage altitude:")
-                        }
-
-                        FactTextField {
-                            id:                 rltAltFinalField
-                            anchors.topMargin:  _innerMargin
-                            anchors.left:       rltAltField.left
-                            anchors.top:        landDelayField.bottom
-                            fact:               _rtlAltFinalFact
-                            showUnits:          true
-                        }
-
-                        QGCLabel {
-                            anchors.left:       returnAtCurrentRadio.left
-                            anchors.baseline:   landSpeedField.baseline
-                            text:               qsTr("Final land stage descent speed:")
-                        }
-
-                        FactTextField {
-                            id:                 landSpeedField
-                            anchors.topMargin: _innerMargin
-                            anchors.left:       rltAltField.left
-                            anchors.top:        rltAltFinalField.bottom
-                            fact:               _landSpeedFact
-                            showUnits:          true
                         }
                     } // Rectangle - RTL Settings
                 } // Column - RTL Settings

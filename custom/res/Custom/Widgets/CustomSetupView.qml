@@ -342,7 +342,7 @@ Rectangle {
                 visible:            QGroundControl.multiVehicleManager.parameterReadyVehicleAvailable && !Constants.developer
                 text:               qsTr("Calibration")
                 Layout.fillWidth:   true
-                onClicked:          showPanel(this, "CustomCalibrationPage.qml")
+                onClicked:          showPanel(this, "qrc:/qml/APMSensorsComponent.qml")
             }
 
 

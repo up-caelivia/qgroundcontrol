@@ -206,13 +206,13 @@ void NTRIPTCPLink::_readBytes(void) {
     QString line = _socket->readLine();
     qCDebug(NTRIPLog) << "Server responded with " << line;
     if (line.contains("200")) {
-      qCDebug(NTRIPLog) << "Server responded with " << line;
       if (line.contains("SOURCETABLE")) {
         qCDebug(NTRIPLog) << "Server responded with SOURCETABLE, not supported";
         emit error("NTRIP Server responded with SOURCETABLE. Bad mountpoint?");
         _state = NTRIPState::uninitialised;
       } else {
-        _state = NTRIPState::waiting_for_rtcm_header;
+        // Got 200 OK, now consume remaining HTTP headers until empty line
+        _state = NTRIPState::consuming_http_headers;
       }
     } else if (line.contains("401")) {
       qCWarning(NTRIPLog) << "Server responded with " << line;
@@ -220,9 +220,24 @@ void NTRIPTCPLink::_readBytes(void) {
       _state = NTRIPState::uninitialised;
     } else {
       qCWarning(NTRIPLog) << "Server responded with " << line;
-      // TODO: Handle failure. Reconnect?
-      // Just move into parsing mode and hope for now.
-      _state = NTRIPState::waiting_for_rtcm_header;
+      _state = NTRIPState::consuming_http_headers;
+    }
+  }
+
+  if (_state == NTRIPState::consuming_http_headers) {
+    while (_socket->canReadLine()) {
+      QString line = _socket->readLine();
+      qCDebug(NTRIPLog) << "HTTP header: " << line.trimmed();
+      if (line.toLower().contains("transfer-encoding") && line.toLower().contains("chunked")) {
+        _isChunked = true;
+        qCDebug(NTRIPLog) << "Server uses chunked transfer encoding";
+      }
+      if (line == "\r\n" || line == "\n") {
+        // Empty line signals end of HTTP headers, RTCM data starts now
+        qCDebug(NTRIPLog) << "HTTP headers consumed, starting RTCM parsing";
+        _state = NTRIPState::waiting_for_rtcm_header;
+        break;
+      }
     }
   }
 
@@ -233,7 +248,45 @@ void NTRIPTCPLink::_readBytes(void) {
   }
 
   QByteArray bytes = _socket->readAll();
+  if (_isChunked) {
+    bytes = _dechunk(bytes);
+  }
+  qCDebug(NTRIPLog) << "Received" << bytes.size() << "bytes:" << bytes.toHex(' ');
   _parse(bytes);
+}
+
+QByteArray NTRIPTCPLink::_dechunk(const QByteArray &data) {
+  QByteArray result;
+  for (int i = 0; i < data.size(); i++) {
+    uint8_t byte = data[i];
+    switch (_chunkState) {
+      case ChunkState::ReadingSize:
+        if (byte == '\r') break;
+        if (byte == '\n') {
+          bool ok;
+          int size = _chunkSizeBuffer.toInt(&ok, 16);
+          _chunkSizeBuffer.clear();
+          if (!ok || size == 0) return result;
+          _chunkBytesLeft = size;
+          _chunkState = ChunkState::ReadingData;
+        } else {
+          _chunkSizeBuffer.append(static_cast<char>(byte));
+        }
+        break;
+      case ChunkState::ReadingData:
+        result.append(static_cast<char>(byte));
+        if (--_chunkBytesLeft == 0) {
+          _chunkState = ChunkState::ReadingTrailer;
+        }
+        break;
+      case ChunkState::ReadingTrailer:
+        if (byte == '\n') {
+          _chunkState = ChunkState::ReadingSize;
+        }
+        break;
+    }
+  }
+  return result;
 }
 
 void NTRIPTCPLink::_sendNmeaGga() {

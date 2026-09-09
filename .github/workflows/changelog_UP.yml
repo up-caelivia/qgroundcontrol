@@ -1,0 +1,91 @@
+name: Generate Changelog
+
+on:
+  push:
+    branches:
+      - development
+    tags:
+      - 'v*-UP'
+  workflow_dispatch:
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: development
+
+      - name: Generate changelog
+        run: |
+          # Collect all vX.Y.Z-UP tags sorted by version, excluding BETA
+          TAGS=($(git tag --list 'v*.*.*-UP' | grep -iv 'beta' | sort -V))
+          TAG_COUNT=${#TAGS[@]}
+
+          OUTPUT="CHANGELOG.txt"
+          echo "QGroundControl UP - Changelog" > "$OUTPUT"
+          echo "Generated: $(date -u '+%Y-%m-%d %H:%M UTC')" >> "$OUTPUT"
+          echo "============================================" >> "$OUTPUT"
+          echo "" >> "$OUTPUT"
+
+          if [ "$TAG_COUNT" -eq 0 ]; then
+            # No tags at all — show all commits
+            echo "## Changes (no releases tagged yet)" >> "$OUTPUT"
+            echo "" >> "$OUTPUT"
+            git log --no-merges --pretty=format:"  - %s (%ad)" --date=short >> "$OUTPUT"
+            echo "" >> "$OUTPUT"
+          else
+            LATEST_TAG="${TAGS[$TAG_COUNT-1]}"
+
+            # Unreleased commits: from latest tag to HEAD on development
+            UNRELEASED=$(git log "${LATEST_TAG}..HEAD" --no-merges --pretty=format:"  - %s (%ad)" --date=short)
+            if [ -n "$UNRELEASED" ]; then
+              echo "## Unreleased (from ${LATEST_TAG})" >> "$OUTPUT"
+              echo "" >> "$OUTPUT"
+              echo "$UNRELEASED" >> "$OUTPUT"
+              echo "" >> "$OUTPUT"
+              echo "" >> "$OUTPUT"
+            fi
+
+            # Per-tag sections from newest to oldest
+            for (( i=TAG_COUNT-1; i>=0; i-- )); do
+              CURRENT="${TAGS[$i]}"
+              PREV_IDX=$((i-1))
+
+              if [ "$PREV_IDX" -ge 0 ]; then
+                PREV="${TAGS[$PREV_IDX]}"
+                RANGE="${PREV}..${CURRENT}"
+              else
+                RANGE="${CURRENT}"
+              fi
+
+              TAG_DATE=$(git log -1 --format="%ad" --date=short "$CURRENT")
+              echo "## ${CURRENT} (${TAG_DATE})" >> "$OUTPUT"
+              echo "" >> "$OUTPUT"
+
+              if [ "$PREV_IDX" -lt 0 ]; then
+                echo "  - first custom release" >> "$OUTPUT"
+              else
+                COMMITS=$(git log "${PREV}..${CURRENT}" --no-merges --pretty=format:"  - %s (%ad)" --date=short)
+                if [ -n "$COMMITS" ]; then
+                  echo "$COMMITS" >> "$OUTPUT"
+                else
+                  echo "  (no commits)" >> "$OUTPUT"
+                fi
+              fi
+              echo "" >> "$OUTPUT"
+              echo "" >> "$OUTPUT"
+            done
+          fi
+
+          echo "Changelog written to $OUTPUT"
+          cat "$OUTPUT"
+
+      - name: Upload changelog artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CHANGELOG
+          path: CHANGELOG.txt

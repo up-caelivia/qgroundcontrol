@@ -53,7 +53,7 @@ replace ??????? with the keystore password
 
 ```bash
 mkdir -p build-docker 
-docker run -it  --mount type=bind,source="${PWD}",target=/home/user/qgroundcontrol  -e FAST=false  -e ANDROID_KEYSTORE_PASSWORD=?????? qgc-android-docker
+docker run -it  --mount type=bind,source="${PWD}",target=/home/user/qgroundcontrol  -e FAST=false -e CLEAN=true -e ANDROID_KEYSTORE_PASSWORD=?????? qgc-android-docker
 ```
 
 # Use github action
@@ -67,10 +67,10 @@ Run the command on wsl (dot included) from repository folder (qgroundcontrol):
 ### Linux 
 
 ```bash
-ACT=true act -j build -W .github/workflows/linux_release.yml
+ACT=true act -j build -W .github/workflows/linux_release_UP.yml
 ```
 ### Android 
 
 ```bash
-ACT=true act -s ANDROID_KEYSTORE_PASSWORD=?????? -P ubuntu-20.04=catthehacker/ubuntu:act-20.04 -j build -W .github/workflows/android_release.yml
+ACT=true act -s ANDROID_KEYSTORE_PASSWORD=?????? -P ubuntu-22.04=catthehacker/ubuntu:act-22.04 -j build -W .github/workflows/android_release_UP.yml
 ```

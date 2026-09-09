@@ -31,6 +31,8 @@ const char* VideoSettings::videoSourceParrotDiscovery   = QT_TRANSLATE_NOOP("Vid
 const char* VideoSettings::videoSourceYuneecMantisG     = QT_TRANSLATE_NOOP("VideoSettings", "Yuneec Mantis G");
 const char* VideoSettings::videoSourceHerelinkAirUnit   = QT_TRANSLATE_NOOP("VideoSettings", "Herelink AirUnit");
 const char* VideoSettings::videoSourceHerelinkHotspot   = QT_TRANSLATE_NOOP("VideoSettings", "Herelink Hotspot");
+const char* VideoSettings::videoSourceSkydroidH12       = QT_TRANSLATE_NOOP("VideoSettings", "Skydroid H12");
+const char* VideoSettings::videoSourceSkydroidH16       = QT_TRANSLATE_NOOP("VideoSettings", "Skydroid H16");
 
 DECLARE_SETTINGGROUP(Video, "Video")
 {
@@ -56,6 +58,8 @@ DECLARE_SETTINGGROUP(Video, "Video")
 #else
     videoSourceList.append(videoSourceHerelinkHotspot);
 #endif
+videoSourceList.append(videoSourceSkydroidH12);
+videoSourceList.append(videoSourceSkydroidH16);
 
 #ifndef QGC_DISABLE_UVC
     QList<QCameraInfo> cameras = QCameraInfo::availableCameras();
@@ -127,6 +131,10 @@ DECLARE_SETTINGSFACT(VideoSettings, rtspTimeout)
 DECLARE_SETTINGSFACT(VideoSettings, streamEnabled)
 DECLARE_SETTINGSFACT(VideoSettings, disableWhenDisarmed)
 DECLARE_SETTINGSFACT(VideoSettings, lowLatencyMode)
+// Herelink HDMI source switching
+DECLARE_SETTINGSFACT(VideoSettings, cameraId)
+DECLARE_SETTINGSFACT(VideoSettings, enableRTMPForwarding)
+DECLARE_SETTINGSFACT(VideoSettings, serverRTMPUrl)
 
 DECLARE_SETTINGSFACT_NO_FUNC(VideoSettings, videoSource)
 {
@@ -233,6 +241,16 @@ bool VideoSettings::streamConfigured(void)
     //-- If Herelink Hotspot, good to go
     if(vSource == videoSourceHerelinkHotspot) {
         qCDebug(VideoManagerLog) << "Stream configured for Herelink Hotspot";
+        return true;
+    }
+    //-- If Skydroid H12, good to go
+    if(vSource == videoSourceSkydroidH12) {
+        qCDebug(VideoManagerLog) << "Stream configured for Skydroid H12";
+        return true;
+    }
+    //-- If Skydroid H16, good to go
+    if(vSource == videoSourceSkydroidH16) {
+        qCDebug(VideoManagerLog) << "Stream configured for Skydroid H16";
         return true;
     }
     return false;

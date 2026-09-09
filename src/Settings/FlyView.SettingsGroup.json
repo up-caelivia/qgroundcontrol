@@ -15,7 +15,7 @@
     "shortDesc": "Maximum altitude for guided actions altitude slider.",
     "type":             "double",
     "units":            "m",
-    "default":     121.92
+    "default":     120
 },
 {
     "name":             "showLogReplayStatusBar",
@@ -64,7 +64,7 @@
     "shortDesc": "Maximum distance allowed for Go To Location.",
     "type":             "double",
     "units":            "m",
-    "default":     1000,
+    "default":     500,
     "min":              1
 },
 {
