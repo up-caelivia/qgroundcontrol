@@ -46,7 +46,9 @@
                     "--query-driver=/usr/bin/c++,/usr/bin/g++,/usr/lib/ccache/c++,/usr/lib/ccache/g++"
                 ],
                 "cmake.configureOnOpen": false,
-                "qt-qml.qmlls.customExePath": "/opt/QtTools/6.8.0/gcc_64/bin/qmlls"
+                "qt-qml.qmlls.customExePath": "/opt/QtTools/6.8.0/gcc_64/bin/qmlls",
+
+                "remote.autoForwardPorts": false
             }
         }
     }
