@@ -71,8 +71,8 @@ Item {
 
     QGCToolInsets {
         id:                     _toolInsets
-        // rightEdgeTopInset:    _pipOverlay.visible ? _pipOverlay.x + _pipOverlay.width : 0
-        // topEdgeRightInset:    _pipOverlay.visible ? parent.height - _pipOverlay.y : 0
+        rightEdgeTopInset:      _pipOverlay.visible ? parent.width - _pipOverlay.x : 0
+        topEdgeRightInset:      _pipOverlay.visible ? _pipOverlay.y + _pipOverlay.height : 0
     }
 
 
@@ -86,7 +86,6 @@ Item {
         // anchors.right:          guidedValueSlider.visible ? guidedValueSlider.left : parent.right
         z:                      _fullItemZorder + 1
 
-
         parentToolInsets:       _toolInsets
         mapControl:             _mapControl
         visible:                !QGroundControl.videoManager.fullScreen
@@ -98,7 +97,6 @@ Item {
         anchors.fill:       widgetLayer
         z:                  _fullItemZorder + 2
         parentToolInsets:   widgetLayer.totalToolInsets
-        mapControl:         _mapControl
         visible:            !QGroundControl.videoManager.fullScreen
     }
 
