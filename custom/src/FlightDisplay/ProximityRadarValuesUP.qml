@@ -25,7 +25,8 @@ QtObject {
     property real   rotationYaw225Value:    _distanceSensors ? _distanceSensors.rotationYaw225.value : NaN
     property real   rotationYaw270Value:    _distanceSensors ? _distanceSensors.rotationYaw270.value : NaN
     property real   rotationYaw315Value:    _distanceSensors ? _distanceSensors.rotationYaw315.value : NaN
-    property real   rotationPitch270Value:  _distanceSensors ? _distanceSensors.rotationPitch270.value : NaN
+    // The value on the radar needs to be in meters
+    property real   rotationPitch270Value:  _distanceSensors ? _distanceSensors.rotationPitch270.rawValue : NaN
     property real   maxDistance:            _distanceSensors ? _distanceSensors.maxDistance.value : NaN
 
     property string rotationNoneValueString:    _distanceSensors ? _distanceSensors.rotationNone.valueString : _noValueStr

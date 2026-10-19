@@ -50,33 +50,39 @@ Rectangle {
 
 
     function setModality() {
-        for( var j = 0; j < Constants.factSpeedNames.length; j++) {
-            _controller.object.searchText = Constants.factSpeedNames[j];
-            for( var i = 0; i < _controller.object.parameters.rowCount(); i++ ) {
-                var fact = _controller.object.parameters.get(i)
-                if ( fact.name == Constants.factSpeedNames[j])  {
-                    if(_isLowSpeed) {
-                        fact.value = Constants.lowSpeed[j]
-                    }
-                    else {
-                        if(_isHighSpeed){
-                            fact.value = Constants.highSpeed[j]
-                        } else {
-                            fact.value = Constants.normalSpeed[j]   
-                        }
-                    }
-                    fact.valueChanged(fact.value)
-                    break
-                }
+        if (!QGroundControl.multiVehicleManager.parameterReadyVehicleAvailable ||
+            !_activeVehicle ||
+            !_controller ||
+            !_controller.object) {
+            return
+        }
+
+        var controller = _controller.object
+
+        for (var j = 0; j < Constants.factSpeedNames.length; j++) {
+            var fact = controller.getParameterFact(-1, Constants.factSpeedNames[j], false)
+            if (!fact) {
+                continue
+            }
+
+            if (_isLowSpeed) {
+                fact.value = Constants.lowSpeed[j]
+            } else if (_isHighSpeed) {
+                fact.value = Constants.highSpeed[j]
+            } else {
+                fact.value = Constants.normalSpeed[j]
             }
         }
-         _controller.object.parametersChanged()
     }
 
     onVisibleChanged: {
-        if (visible)
-            setModality()
-    }
+        if (!visible) {
+            _isHighSpeed = false
+            _isLowSpeed = false
+            speedMessageClearTimer.stop()
+            CustomPlugin.speedMessage = ""
+            }
+        }
 
     onModalityChanged: {
         if(modality != "Loiter" && _isLowSpeed) {
@@ -226,8 +232,6 @@ Rectangle {
                 anchors.fill:   parent
                 onClicked: {
                     _isLowSpeed = ! _isLowSpeed
-                    console.log(CustomPlugin.Info)
-                    console.log(CustomPlugin.Warning)
                     if (!_isLowSpeed) {
                         CustomPlugin.sendLogMessage("Low speed mode disabled")
                         CustomPlugin.speedMessage = "Low speed mode disabled"

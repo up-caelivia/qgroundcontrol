@@ -13,6 +13,7 @@ import QtQuick          2.12
 
 import QGroundControl               1.0
 import QGroundControl.Controls      1.0
+import QGroundControl.Controllers   1.0
 import QGroundControl.Palette       1.0
 import QGroundControl.ScreenTools   1.0
 import QGroundControl.FactSystem    1.0
@@ -28,6 +29,7 @@ Item {
     property var totalToolInsets: _totalToolInsets    // The insets updated for the custom overlay additions
 
     property var    _activeVehicle:         QGroundControl.multiVehicleManager.activeVehicle
+    property var    _multiVehicleManager:   QGroundControl.multiVehicleManager
     property real   _toolsMargin:           ScreenTools.defaultFontPixelWidth * 0.75
 
     property bool selector: false
@@ -92,30 +94,46 @@ Item {
         }
     }
 
-   Timer {
-       id: timer
-       interval: 5000 // 5000 ms = 5 seconds
-       running: _activeVehicle
-       repeat: false
-       onTriggered: {
-           loadDynamicObject()
-       }
-   }
-
-    function loadDynamicObject() {
-        var object  = Qt.createQmlObject(` import QGroundControl.Controllers   1.0;
-                                            ParameterEditorController {
-                                                 id: controller
-                                             }`, _controller)
-        _controller.object = object
-        selector = true
-
+    Component {
+        id: speedControllerComponent
+        ParameterEditorController {}
     }
 
-   Item {
-           id: _controller
-           property var object
-   }
+    Item {
+        id: _controller
+        property var object: null
+    }
+
+    function clearSpeedController() {
+        selector = false
+
+        var oldController = _controller.object
+        _controller.object = null
+
+        if (oldController) {
+            oldController.destroy()
+        }
+    }
+
+    function createSpeedController() {
+        if (!_multiVehicleManager.activeVehicleAvailable ||
+            !_multiVehicleManager.parameterReadyVehicleAvailable ||
+            !_multiVehicleManager.activeVehicle ||
+            _controller.object) {
+            return
+        }
+
+        var controller = speedControllerComponent.createObject(_controller)
+        if (!controller) {
+            console.warn("Could not create speed selector controller")
+            return
+        }
+        _controller.object = controller
+        selector = true
+    }
+
+    // Handle a vehicle connected before this layer loads.
+    Component.onCompleted: createSpeedController()
 
     QGCToolInsets {
         id:                     _totalToolInsets
@@ -125,7 +143,7 @@ Item {
         // leftEdgeBottomInset:    parentToolInsets.leftEdgeBottomInset
         leftEdgeBottomInset: Math.max(
                                     parentToolInsets.leftEdgeBottomInset,
-                                    speedControl.visible ? speedControl.x + speedControl.width : 0 
+                                    speedControl.visible ? speedControl.x + speedControl.width : 0
         )
         rightEdgeTopInset:      parentToolInsets.rightEdgeTopInset
         rightEdgeCenterInset:   parentToolInsets.rightEdgeCenterInset
@@ -159,6 +177,24 @@ Item {
         anchors.bottomMargin: _toolsMargin + parentToolInsets.bottomEdgeLeftInset
         _controller: _controller
         visible: selector
+    }
+
+    Connections {
+        target: _multiVehicleManager
+
+        function onActiveVehicleAvailableChanged(available) {
+            if (!available) {
+                root.clearSpeedController()
+            }
+        }
+
+        function onParameterReadyVehicleAvailableChanged(ready) {
+            if (ready) {
+                root.createSpeedController()
+            } else {
+                root.clearSpeedController()
+            }
+        }
     }
 
     Item {
