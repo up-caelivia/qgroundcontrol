@@ -291,9 +291,9 @@ QQmlApplicationEngine* CustomPlugin::createQmlApplicationEngine(QObject* parent)
 
     qmlRegisterSingletonType<KmlPolygonLoader>("QGroundControl.KML", 1, 0, "KmlPolygonLoader", kmlPolygonLoader_singletontype_provider);
 
-    #ifdef QT_DEBUG     // start with a custom connection only in debug build!
+/*     #ifdef QT_DEBUG     // start with a custom connection only in debug build!
         MockLink::startAPMArduCopterMockLink(false);
-    #endif
+    #endif */
 
     return qmlEngine;
 }

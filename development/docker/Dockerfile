@@ -4,7 +4,7 @@ FROM ubuntu:20.04 AS qgc-build
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG QT_VERSION=5.15.2
-ARG QML_TOOLING_QT_VERSION=6.8.0
+ARG QML_TOOLING_QT_VERSION=6.8.3
 
 ENV TZ=Etc/UTC
 ENV QT_VERSION=${QT_VERSION}
@@ -73,6 +73,8 @@ RUN apt-get update \
         python3 \
         python3-dev \
         python3-pip \
+        python3.9 \
+        python3.9-venv \
         rsync \
         speech-dispatcher \
         websockify \
@@ -83,11 +85,14 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # QGC needs Qt private headers, so distribution Qt packages are insufficient.
-RUN python3 -m pip install --no-cache-dir "aqtinstall==3.1.18" \
-    && aqt install-qt linux desktop "${QT_VERSION}" gcc_64 \
+# aqtinstall 3.1.19 supports Qt 6.8.1+ and requires Python 3.9; keep it isolated
+# from Ubuntu 20.04's system Python, which remains available to the project.
+RUN python3.9 -m venv /opt/aqt-venv \
+    && /opt/aqt-venv/bin/pip install --no-cache-dir "aqtinstall==3.1.19" \
+    && /opt/aqt-venv/bin/aqt install-qt linux desktop "${QT_VERSION}" gcc_64 \
         -O "${QT_PATH}" \
         -m qtcharts \
-    && aqt install-qt linux desktop "${QML_TOOLING_QT_VERSION}" linux_gcc_64 \
+    && /opt/aqt-venv/bin/aqt install-qt linux desktop "${QML_TOOLING_QT_VERSION}" linux_gcc_64 \
         -O /opt/QtTools \
         -m qtlanguageserver \
     && rm -rf /root/.cache

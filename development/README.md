@@ -75,7 +75,7 @@ Windows 11 includes WSLg, but this configuration uses VcXsrv for graphical displ
 - Access to Docker Desktop from the Ubuntu terminal through the enabled WSL integration.
 - The paths `/mnt/wslg` and `/mnt/wslg/.X11-unix` present in WSL. The current devcontainer configuration still references these paths as bind mounts, including when VcXsrv is used for display.
 
-The workflow was verified on Ubuntu 26.04.1 LTS, x86-64. QGC uses a separate Ubuntu 20.04 container image. Its compiler, Qt 5.15.2 application libraries, Qt 6.8.0 QML tooling, clangd, and debugging tools are installed by the Dockerfile.
+The container workflow targets Ubuntu 26.04.1 LTS hosts on x86-64. QGC uses a separate Ubuntu 20.04 container image. Its compiler, Qt 5.15.2 application libraries, Qt 6.8.3 QML tooling, clangd, and debugging tools are installed by the Dockerfile.
 
 #### ArduPilot SITL
 
@@ -272,7 +272,7 @@ Both workflows use a MAVProxy TCP listener and the same QGC settings. MAVProxy s
 | TCP `5760` | ArduCopter SITL to MAVProxy, within WSL |
 | TCP `5777` | MAVProxy to QGC, for the selected vehicle source |
 
-QGC makes an outgoing connection to MAVProxy. No additional Docker TCP port publishing is needed for this workflow. The existing Docker UDP mapping `14560:14551/udp` is separate from the TCP connection used here.
+QGC makes an outgoing connection to MAVProxy. No additional Docker TCP port publishing is needed for this workflow. The Docker UDP mapping `14560:14551/udp` is not used by the current development workflow; its purpose and use remain future work, including when the macOS workflow is developed and validated.
 
 #### SITL
 
