@@ -12,8 +12,9 @@ Rectangle {
     property var    vehicle: null
     property real   padding: ScreenTools.defaultFontPixelWidth
     property real   cellWidth: ScreenTools.defaultFontPixelWidth * 8
+    property real   cellFontScale: 1.0
     // The containing layer scales the complete cockpit group to fit the view.
-    property real   instrumentDiameter: ScreenTools.defaultFontPixelWidth * 24
+    property real   instrumentDiameter: ScreenTools.defaultFontPixelWidth * 25
 
     readonly property var forwardRangeFact: vehicle ? vehicle.distanceSensors.rotationNone : null
 
@@ -39,8 +40,8 @@ Rectangle {
         return ("" + Math.round(vehicle.heading.rawValue)).slice(-3) + "°"
     }
 
-    implicitWidth: padding * 3 + cellWidth * 2 + ScreenTools.defaultFontPixelWidth * 0.75 + instrumentDiameter
-    implicitHeight: padding * 2 + Math.max(instrumentColumn.implicitHeight, readings.implicitHeight)
+    implicitWidth: padding * 2 + cockpitRow.implicitWidth
+    implicitHeight: padding * 2 + cockpitRow.implicitHeight
 
     width: implicitWidth
     height: implicitHeight
@@ -58,6 +59,7 @@ Rectangle {
     }
 
     RowLayout {
+        id: cockpitRow
         anchors.fill: parent
         anchors.margins: root.padding
         spacing: ScreenTools.defaultFontPixelWidth * 0.75
@@ -68,8 +70,11 @@ Rectangle {
             rowSpacing: ScreenTools.defaultFontPixelHeight * 0.6
             columnSpacing: ScreenTools.defaultFontPixelWidth * 0.85
 
-            Layout.preferredWidth: root.cellWidth * 2 + columnSpacing
+            Layout.minimumWidth: root.cellWidth * 2 + columnSpacing
+            Layout.preferredWidth: Layout.minimumWidth
+            Layout.maximumWidth: Layout.minimumWidth
             Layout.alignment: Qt.AlignVCenter
+            Layout.fillWidth: false
 
             CockpitCellUP {
                 Layout.preferredWidth: root.cellWidth
@@ -77,6 +82,7 @@ Rectangle {
                 value: root.formatFact(root.vehicle ? root.vehicle.altitudeRelative : null, 1)
                 prominent: true
                 colSpan: 2
+                fontScale: root.cellFontScale
             }
 
             CockpitCellUP {
@@ -85,6 +91,7 @@ Rectangle {
                 value: root.formatFact(root.vehicle ? root.vehicle.groundSpeed : null, 1)
                 prominent: true
                 colSpan: 2
+                fontScale: root.cellFontScale
             }
 
             CockpitCellUP {
@@ -93,6 +100,7 @@ Rectangle {
                 value: root.formatFact(root.vehicle ? root.vehicle.climbRate : null, 1)
                 prominent: !forwardRangeCell.visible
                 colSpan: forwardRangeCell.visible ? 1 : 2
+                fontScale: root.cellFontScale
             }
 
             // TODO: move this value near the toolbar
@@ -112,20 +120,24 @@ Rectangle {
                           : root.forwardRange < 10 ? qgcPal.colorOrange
                           : qgcPal.text
                 visible: value !== "—"
+                fontScale: root.cellFontScale
             }
         }
 
         ColumnLayout {
             id: instrumentColumn
 
+            Layout.minimumWidth: root.instrumentDiameter
             Layout.preferredWidth: root.instrumentDiameter
+            Layout.maximumWidth: root.instrumentDiameter
             Layout.alignment: Qt.AlignVCenter
+            Layout.fillWidth: false
 
             QGCLabel {
                 text: root.headingText() 
                 color: qgcPal.text
                 font.family: ScreenTools.demiboldFontFamily
-                font.pointSize: ScreenTools.mediumFontPointSize
+                font.pointSize: ScreenTools.mediumFontPointSize * root.cellFontScale
                 Layout.alignment: Qt.AlignHCenter
                 style: Text.Outline
                 styleColor: qgcPal.window
@@ -149,7 +161,7 @@ Rectangle {
                 CustomAttitudeWidget {
                     id: attitude
                     anchors.centerIn: compass
-                    size: root.instrumentDiameter * 0.58
+                    size: root.instrumentDiameter * 0.54
                     vehicle: root.vehicle
                     showHeading: false
                     z: 1

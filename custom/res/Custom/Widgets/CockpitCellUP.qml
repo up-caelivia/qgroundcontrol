@@ -15,6 +15,7 @@ ColumnLayout {
     property color valueColor: qgcPal.text
     property bool prominent: false
     property int colSpan: 1
+    property real fontScale: 1.0
 
     spacing: 0
     Layout.columnSpan: root.colSpan
@@ -31,7 +32,7 @@ ColumnLayout {
         color: qgcPal.text
         opacity: 0.85
         font.family: ScreenTools.demiboldFontFamily
-        font.pointSize: ScreenTools.smallFontPointSize
+        font.pointSize: ScreenTools.smallFontPointSize * root.fontScale
         style: Text.Outline
         styleColor: qgcPal.window
         Layout.fillWidth: true
@@ -42,7 +43,9 @@ ColumnLayout {
         text: root.value
         color: root.valueColor
         font.family: ScreenTools.demiboldFontFamily
-        font.pointSize: root.prominent ? ScreenTools.largeFontPointSize : ScreenTools.mediumFontPointSize
+        font.pointSize: (root.prominent
+                        ? ScreenTools.largeFontPointSize
+                        : ScreenTools.mediumFontPointSize) * root.fontScale
         style: Text.Outline
         styleColor: qgcPal.window
         Layout.fillWidth: true

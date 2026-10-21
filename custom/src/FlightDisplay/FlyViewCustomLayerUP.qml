@@ -32,6 +32,9 @@ Item {
     property var    _multiVehicleManager:   QGroundControl.multiVehicleManager
     property real   _toolsMargin:           ScreenTools.defaultFontPixelWidth * 0.75
 
+    readonly property real uiScale:
+        ScreenTools.defaultFontPointSize / ScreenTools.platformFontPointSize
+
     property bool selector: false
 
     readonly property real cockpitLeftClearance: Math.max(
@@ -39,10 +42,7 @@ Item {
         speedControl.visible ? speedControl.x + speedControl.width : 0
     )
 
-    readonly property real cockpitRightClearance: Math.max(
-        parentToolInsets.rightEdgeBottomInset,
-        parentToolInsets.rightEdgeCenterInset
-    )
+    readonly property real cockpitRightClearance: parentToolInsets.rightEdgeBottomInset
 
     readonly property real cockpitBottomClearance: Math.max(
         parentToolInsets.bottomEdgeRightInset,
@@ -200,9 +200,18 @@ Item {
     Item {
         id: cockpitGroup
 
-        property real fitScale: width > 0 && height > 0
-                                ? Math.min(1, root.cockpitAvailableWidth / width, root.cockpitAvailableHeight / height)
-                                : 1
+        readonly property real maximumWidth: root.width * 0.38 * root.uiScale
+        readonly property real maximumHeight: root.height * 0.32 * root.uiScale
+
+        readonly property real fitScale: width > 0 && height > 0
+            ? Math.min(
+                1,
+                maximumWidth / width,
+                maximumHeight / height,
+                root.cockpitAvailableWidth / width,
+                root.cockpitAvailableHeight / height
+            )
+            : 1
 
         width: cockpitPanel.width + (radarWidget.visible ? _toolsMargin + radarWidget.width : 0)
         height: Math.max(
@@ -211,19 +220,21 @@ Item {
         )
         scale: fitScale
         transformOrigin: Item.TopLeft
-        // TODO: manage better the resize and movement of items on smaller screens
-/* 
         x: root.width - root.cockpitRightClearance - _toolsMargin - width * fitScale
         y: root.height - root.cockpitBottomClearance - _toolsMargin - height * fitScale
- */
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
 
         CockpitPanelUP {
             id: cockpitPanel
             anchors.left: parent.left
             anchors.bottom: parent.bottom
             vehicle: _activeVehicle
+            cellFontScale: Math.max(
+                1.3,
+                Math.min(
+                    1.6,
+                    720 / Math.max(1, root.height)
+                )
+            )
         }
 
         CustomRadarWidget {
