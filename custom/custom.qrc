@@ -48,8 +48,8 @@
         <file alias="Custom/Widgets/AbluoPathWidgetUP.qml">res/Custom/Widgets/AbluoPathWidgetUP.qml</file>
 		<file alias="Custom/Widgets/AwarenessInfoHeader.qml">res/Custom/Widgets/AwarenessInfoHeader.qml</file>
 		<file alias="Custom/Widgets/AwarenessInfoViewer.qml">res/Custom/Widgets/AwarenessInfoViewer.qml</file>
-        <file alias="Custom/Widgets/CustomCockpitCell.qml">res/Custom/Widgets/CustomCockpitCell.qml</file>
-        <file alias="Custom/Widgets/CustomCockpitPanel.qml">res/Custom/Widgets/CustomCockpitPanel.qml</file>
+        <file alias="Custom/Widgets/CockpitCellUP.qml">res/Custom/Widgets/CockpitCellUP.qml</file>
+        <file alias="Custom/Widgets/CockpitPanelUP.qml">res/Custom/Widgets/CockpitPanelUP.qml</file>
     </qresource>
     <qresource prefix="/Custom/Constants">
         <file alias="Custom/Constants/Constants.qml">res/Custom/Constants/Constants.qml</file>

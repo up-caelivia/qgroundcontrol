@@ -219,7 +219,7 @@ Item {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
 
-        CustomCockpitPanel {
+        CockpitPanelUP {
             id: cockpitPanel
             anchors.left: parent.left
             anchors.bottom: parent.bottom

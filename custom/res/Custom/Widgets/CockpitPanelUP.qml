@@ -71,7 +71,7 @@ Rectangle {
             Layout.preferredWidth: root.cellWidth * 2 + columnSpacing
             Layout.alignment: Qt.AlignVCenter
 
-            CustomCockpitCell {
+            CockpitCellUP {
                 Layout.preferredWidth: root.cellWidth
                 label: "ALT"
                 value: root.formatFact(root.vehicle ? root.vehicle.altitudeRelative : null, 1)
@@ -79,7 +79,7 @@ Rectangle {
                 colSpan: 2
             }
 
-            CustomCockpitCell {
+            CockpitCellUP {
                 Layout.preferredWidth: root.cellWidth
                 label: "GS"
                 value: root.formatFact(root.vehicle ? root.vehicle.groundSpeed : null, 1)
@@ -87,7 +87,7 @@ Rectangle {
                 colSpan: 2
             }
 
-            CustomCockpitCell {
+            CockpitCellUP {
                 Layout.preferredWidth: root.cellWidth
                 label: "V/S"
                 value: root.formatFact(root.vehicle ? root.vehicle.climbRate : null, 1)
@@ -96,13 +96,13 @@ Rectangle {
             }
 
             // TODO: move this value near the toolbar
-            /* CustomCockpitCell {
+            /* CockpitCellUP {
                 Layout.preferredWidth: root.cellWidth
                 label: "HOME"
                 value: root.formatFact(root.vehicle ? root.vehicle.distanceToHome : null, 0)
             } */
 
-            CustomCockpitCell {
+            CockpitCellUP {
                 id: forwardRangeCell
                 Layout.preferredWidth: root.cellWidth
                 label: "FWD"
