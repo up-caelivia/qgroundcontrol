@@ -117,9 +117,7 @@ void QGCLoggingCategoryRegister::setFilterRulesFromSettings(const QString& comma
     // Logging from GStreamer library itself controlled by gstreamer debug levels is always turned on
     filterRules += filterRuleFormat.arg("GStreamerAPILog");
 
-    filterRules += "qt.qml.connections=false\n";
-    filterRules += "VideoManagerLog.warning=false\n";
-    filterRules += "VideoReceiverLog.critical=false\n";
+    filterRules += "qt.qml.connections=false";
 
     qDebug() << "Filter rules" << filterRules;
     QLoggingCategory::setFilterRules(filterRules);
