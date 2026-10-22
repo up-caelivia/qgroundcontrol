@@ -200,8 +200,21 @@ Item {
     Item {
         id: cockpitGroup
 
-        readonly property real maximumWidth: root.width * 0.38 * root.uiScale
-        readonly property real maximumHeight: root.height * 0.32 * root.uiScale
+        readonly property real widthFraction: 0.38
+        readonly property real heightFraction: 0.32
+        readonly property real minimumCellFontScale: 1.3
+        readonly property real maximumCellFontScale: 1.6
+        readonly property real referenceViewHeight: 720
+
+        readonly property real maximumWidth: root.width * widthFraction * root.uiScale
+        readonly property real maximumHeight: root.height * heightFraction * root.uiScale
+        readonly property real cellFontScale: Math.max(
+            minimumCellFontScale,
+            Math.min(
+                maximumCellFontScale,
+                referenceViewHeight / Math.max(1, root.height)
+            )
+        )
 
         readonly property real fitScale: width > 0 && height > 0
             ? Math.min(
@@ -228,13 +241,7 @@ Item {
             anchors.left: parent.left
             anchors.bottom: parent.bottom
             vehicle: _activeVehicle
-            cellFontScale: Math.max(
-                1.3,
-                Math.min(
-                    1.6,
-                    720 / Math.max(1, root.height)
-                )
-            )
+            cellFontScale: cockpitGroup.cellFontScale
         }
 
         CustomRadarWidget {

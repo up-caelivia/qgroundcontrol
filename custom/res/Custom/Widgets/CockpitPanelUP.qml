@@ -13,8 +13,21 @@ Rectangle {
     property real   padding: ScreenTools.defaultFontPixelWidth
     property real   cellWidth: ScreenTools.defaultFontPixelWidth * 8
     property real   cellFontScale: 1.0
-    // The containing layer scales the complete cockpit group to fit the view.
-    property real   instrumentDiameter: ScreenTools.defaultFontPixelWidth * 25
+    // Adapt the dimension of the external dial to the UI scaling dimensions
+    TextMetrics {
+        id: referenceFontMetrics
+        text: "X"
+        font.family: ScreenTools.normalFontFamily
+        font.pointSize: ScreenTools.platformFontPointSize
+    }
+
+    readonly property real referenceFontPixelWidth:
+        Math.round(referenceFontMetrics.advanceWidth / 2.0) * 2
+
+    property real instrumentDiameter:
+        referenceFontPixelWidth * 25
+        * ScreenTools.defaultFontPointSize
+        / ScreenTools.platformFontPointSize
 
     readonly property var forwardRangeFact: vehicle ? vehicle.distanceSensors.rotationNone : null
 
