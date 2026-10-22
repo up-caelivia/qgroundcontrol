@@ -182,8 +182,8 @@ Rectangle {
 
                 Canvas {
                     id: headingMarker
-                    width: 12
-                    height: 8
+                    width: 14
+                    height: 10
                     visible: root.vehicle !== null 
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.top: parent.top
