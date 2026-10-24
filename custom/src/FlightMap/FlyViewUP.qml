@@ -97,6 +97,7 @@ Item {
         anchors.fill:       widgetLayer
         z:                  _fullItemZorder + 2
         parentToolInsets:   widgetLayer.totalToolInsets
+        vehicle:            QGroundControl.multiVehicleManager.activeVehicleAvailable ? _root._activeVehicle : null
         visible:            !QGroundControl.videoManager.fullScreen
     }
 

@@ -21,6 +21,7 @@ import QGroundControl.FlightMap     1.0
 import QGroundControl.FlightDisplay 1.0
 import Custom.Widgets 1.0
 import CustomAnnouncer 1.0
+import Custom.Controllers 1.0
 
 Item {
     id: root
@@ -28,14 +29,11 @@ Item {
     property var parentToolInsets                       // These insets tell you what screen real estate is available for positioning the controls in your overlay
     property var totalToolInsets: _totalToolInsets    // The insets updated for the custom overlay additions
 
-    property var    _activeVehicle:         QGroundControl.multiVehicleManager.activeVehicle
-    property var    _multiVehicleManager:   QGroundControl.multiVehicleManager
+    property var vehicle: null
     property real   _toolsMargin:           ScreenTools.defaultFontPixelWidth * 0.75
 
     readonly property real uiScale:
         ScreenTools.defaultFontPointSize / ScreenTools.platformFontPointSize
-
-    property bool selector: false
 
     readonly property real cockpitLeftClearance: Math.max(
         parentToolInsets.leftEdgeBottomInset,
@@ -64,15 +62,15 @@ Item {
 
     Rectangle {
 
-        property double value: _activeVehicle ? (isNaN(_activeVehicle.altitudeRelative.value) ? 0.0 : _activeVehicle.altitudeRelative.value) : 0.0
+        property double value: root.vehicle ? (isNaN(root.vehicle.altitudeRelative.value) ? 0.0 : root.vehicle.altitudeRelative.value) : 0.0
         property bool above120: false
 
         onValueChanged: {
 
-            if (_activeVehicle == null || _activeVehicle.altitudeRelative == null)
+            if (root.vehicle == null || root.vehicle.altitudeRelative == null)
                 return;
 
-            if ((value > 120 && _activeVehicle.altitudeRelative.units == "m") || ( value > 393.7 && _activeVehicle.altitudeRelative.units == "ft")) {
+            if ((value > 120 && root.vehicle.altitudeRelative.units == "m") || ( value > 393.7 && root.vehicle.altitudeRelative.units == "ft")) {
 
                 if(!above120) {
                     showCriticalVehicleMessage("WARNING : Above 120m")
@@ -93,47 +91,6 @@ Item {
             }
         }
     }
-
-    Component {
-        id: speedControllerComponent
-        ParameterEditorController {}
-    }
-
-    Item {
-        id: _controller
-        property var object: null
-    }
-
-    function clearSpeedController() {
-        selector = false
-
-        var oldController = _controller.object
-        _controller.object = null
-
-        if (oldController) {
-            oldController.destroy()
-        }
-    }
-
-    function createSpeedController() {
-        if (!_multiVehicleManager.activeVehicleAvailable ||
-            !_multiVehicleManager.parameterReadyVehicleAvailable ||
-            !_multiVehicleManager.activeVehicle ||
-            _controller.object) {
-            return
-        }
-
-        var controller = speedControllerComponent.createObject(_controller)
-        if (!controller) {
-            console.warn("Could not create speed selector controller")
-            return
-        }
-        _controller.object = controller
-        selector = true
-    }
-
-    // Handle a vehicle connected before this layer loads.
-    Component.onCompleted: createSpeedController()
 
     QGCToolInsets {
         id:                     _totalToolInsets
@@ -169,32 +126,19 @@ Item {
         )
     }
 
+    SpeedSelectorController {
+        id: speedController
+        vehicle: root.vehicle
+    }
+
     CustomSpeedSelector {
         id: speedControl
         anchors.left: parent.left
         anchors.leftMargin: _toolsMargin + parentToolInsets.leftEdgeBottomInset
         anchors.bottom: parent.bottom
         anchors.bottomMargin: _toolsMargin + parentToolInsets.bottomEdgeLeftInset
-        _controller: _controller
-        visible: selector
-    }
-
-    Connections {
-        target: _multiVehicleManager
-
-        function onActiveVehicleAvailableChanged(available) {
-            if (!available) {
-                root.clearSpeedController()
-            }
-        }
-
-        function onParameterReadyVehicleAvailableChanged(ready) {
-            if (ready) {
-                root.createSpeedController()
-            } else {
-                root.clearSpeedController()
-            }
-        }
+        controller: speedController
+        visible: speedController.ready
     }
 
     Item {
@@ -240,7 +184,7 @@ Item {
             id: cockpitPanel
             anchors.left: parent.left
             anchors.bottom: parent.bottom
-            vehicle: _activeVehicle
+            vehicle: root.vehicle
             cellFontScale: cockpitGroup.cellFontScale
         }
 

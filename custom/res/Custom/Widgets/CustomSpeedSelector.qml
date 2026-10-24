@@ -22,6 +22,7 @@ import QGroundControl.FactSystem        1.0
 import QGroundControl.FactControls      1.0
 
 import Constants  1.0
+import Custom.Controllers 1.0
 
 
 Rectangle {
@@ -31,12 +32,15 @@ Rectangle {
     color:      Qt.rgba(qgcPal.window.r, qgcPal.window.g, qgcPal.window.b, 0.5)
     radius:     _margins
 
+    property var controller: null
+    readonly property var vehicle: controller ? controller.vehicle : null
+    property var modality: vehicle ? vehicle.flightMode : ""
+
+    enabled: controller ? controller.ready : false
+
     property real   _margins:                                   ScreenTools.defaultFontPixelHeight / 2
-    property var    _activeVehicle:                             QGroundControl.multiVehicleManager.activeVehicle
     property bool   _isHighSpeed:                    false
     property bool   _isLowSpeed:                     false
-    property var _controller
-    property var modality: _activeVehicle ? _activeVehicle.flightMode : ""
 
     Timer {
         id: speedMessageClearTimer
@@ -50,29 +54,16 @@ Rectangle {
 
 
     function setModality() {
-        if (!QGroundControl.multiVehicleManager.parameterReadyVehicleAvailable ||
-            !_activeVehicle ||
-            !_controller ||
-            !_controller.object) {
-            return
+        if (!controller || !controller.ready) {
+            return false
         }
-
-        var controller = _controller.object
-
-        for (var j = 0; j < Constants.factSpeedNames.length; j++) {
-            var fact = controller.getParameterFact(-1, Constants.factSpeedNames[j], false)
-            if (!fact) {
-                continue
-            }
-
-            if (_isLowSpeed) {
-                fact.value = Constants.lowSpeed[j]
-            } else if (_isHighSpeed) {
-                fact.value = Constants.highSpeed[j]
-            } else {
-                fact.value = Constants.normalSpeed[j]
-            }
+        if (_isLowSpeed && modality !== "Loiter") {
+            return false
         }
+        var mode = _isLowSpeed ? SpeedSelectorController.LowSpeed
+            : _isHighSpeed ? SpeedSelectorController.HighSpeed
+            : SpeedSelectorController.NormalSpeed
+        return controller.requestSpeedMode(mode)
     }
 
     onVisibleChanged: {
@@ -91,8 +82,13 @@ Rectangle {
             speedMessageClearTimer.stop()
         }
         if(modality == "Loiter" && _isLowSpeed) {
-            CustomPlugin.sendLogMessage("Low speed mode activated")
-            CustomPlugin.speedMessage = "Low speed mode activated"
+            if (setModality()) {
+                CustomPlugin.sendLogMessage("Low speed mode activated")
+                CustomPlugin.speedMessage = "Low speed mode activated"
+            } else {
+                CustomPlugin.sendLogMessage("Could not apply low speed settings", "", "Warning")
+                CustomPlugin.speedMessage = "Could not apply low speed settings"
+            }
             speedMessageClearTimer.stop()
         }
     }
@@ -144,11 +140,18 @@ Rectangle {
                     anchors.fill:   parent
                     enabled:        !_isLowSpeed
                     onClicked:      {
+                        var wasHighSpeed = _isHighSpeed
                         _isHighSpeed = false
+                        if (!setModality()) {
+                            _isHighSpeed = wasHighSpeed
+                            CustomPlugin.sendLogMessage("Could not apply normal speed settings", "", "Warning")
+                            CustomPlugin.speedMessage = "Could not apply normal speed settings"
+                            speedMessageClearTimer.restart()
+                            return
+                        }
                         CustomPlugin.sendLogMessage("Normal speed mode enabled")
                         CustomPlugin.speedMessage = "Normal Speed mode enabled"
                         speedMessageClearTimer.restart()
-                        setModality()
                     }
                 }
             }
@@ -183,11 +186,18 @@ Rectangle {
 
                     onClicked:      {
 
+                        var wasHighSpeed = _isHighSpeed
                         _isHighSpeed = true
+                        if (!setModality()) {
+                            _isHighSpeed = wasHighSpeed
+                            CustomPlugin.sendLogMessage("Could not apply high speed settings", "", "Warning")
+                            CustomPlugin.speedMessage = "Could not apply high speed settings"
+                            speedMessageClearTimer.restart()
+                            return
+                        }
                         CustomPlugin.sendLogMessage("High speed mode enabled")
                         CustomPlugin.speedMessage = "High Speed mode enabled"
                         speedMessageClearTimer.restart()
-                        setModality()
 
                     }
                 }
@@ -231,23 +241,36 @@ Rectangle {
             MouseArea {
                 anchors.fill:   parent
                 onClicked: {
+                    var wasLowSpeed = _isLowSpeed
                     _isLowSpeed = ! _isLowSpeed
                     if (!_isLowSpeed) {
+                        if (!setModality()) {
+                            _isLowSpeed = wasLowSpeed
+                            CustomPlugin.sendLogMessage("Could not restore speed settings", "", "Warning")
+                            CustomPlugin.speedMessage = "Could not restore speed settings"
+                            speedMessageClearTimer.restart()
+                            return
+                        }
                         CustomPlugin.sendLogMessage("Low speed mode disabled")
                         CustomPlugin.speedMessage = "Low speed mode disabled"
                         speedMessageClearTimer.restart()
-                        setModality()
                         return
                     }
                     if(modality != "Loiter") {
                         CustomPlugin.sendLogMessage("Low speed mode not available", "", "Warning")
                         CustomPlugin.speedMessage = "Low speed mode not available"
                     } else {
+                        if (!setModality()) {
+                            _isLowSpeed = wasLowSpeed
+                            CustomPlugin.sendLogMessage("Could not apply low speed settings", "", "Warning")
+                            CustomPlugin.speedMessage = "Could not apply low speed settings"
+                            speedMessageClearTimer.restart()
+                            return
+                        }
                         CustomPlugin.sendLogMessage("Low speed mode activated")
                         CustomPlugin.speedMessage = "Low speed mode activated"
                     }
                     speedMessageClearTimer.stop()
-                    setModality()
                 }
             }
         }

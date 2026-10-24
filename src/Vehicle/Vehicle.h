@@ -897,6 +897,7 @@ public:
 
     /// Vehicle is about to be deleted
     void prepareDelete();
+    bool isBeingDeleted() const { return _beingDeleted; }
 
     /// Delete gimbal controller, handy for RequestMessageTest.cc, otherwise gimbal controller message requests will mess with this test
     void deleteGimbalController();
@@ -1031,6 +1032,8 @@ signals:
     void initialConnectComplete         ();
 
     void sensorsParametersResetAck      (bool success);
+
+    void aboutToBeDeleted               ();
 
 private slots:
     void _mavlinkMessageReceived            (LinkInterface* link, mavlink_message_t message);
@@ -1509,6 +1512,8 @@ private:
     // We use this to limit above terrain altitude queries based on distance and altitude change
     QGeoCoordinate              _altitudeAboveTerrLastCoord;
     float                       _altitudeAboveTerrLastRelAlt = qQNaN();
+
+    bool _beingDeleted = false;
 };
 
 Q_DECLARE_METATYPE(Vehicle::MavCmdResultFailureCode_t)
