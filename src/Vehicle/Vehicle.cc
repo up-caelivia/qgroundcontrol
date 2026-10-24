@@ -524,6 +524,12 @@ Vehicle::~Vehicle()
 
 void Vehicle::prepareDelete()
 {
+    // Emmission of the signal when the vehicle gets deleted
+    if (!_beingDeleted) {
+        _beingDeleted = true;
+        emit aboutToBeDeleted();
+    }
+
     if(_cameraManager) {
         // because of _cameraManager QML bindings check for nullptr won't work in the binding pipeline
         // the dangling pointer access will cause a runtime fault

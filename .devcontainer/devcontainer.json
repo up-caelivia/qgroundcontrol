@@ -1,0 +1,70 @@
+{
+    "name": "QGC UP DevContainer",
+    "build": {
+        "dockerfile": "../development/docker/Dockerfile",
+        "context": ".."
+    },
+    "workspaceFolder": "/workspaces/qgroundcontrol",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/qgroundcontrol,type=bind",
+    "remoteUser": "qgc",
+    "overrideCommand": false,
+    "init": true,
+    "containerEnv": {
+        "DISPLAY": "host.docker.internal:0.0",
+        "PULSE_SERVER": "${localEnv:PULSE_SERVER}",
+        "QT_QPA_PLATFORM": "xcb",
+        "XDG_RUNTIME_DIR": "/tmp/runtime-qgc"
+    },
+    "mounts": [
+        "source=qgc-v44-build,target=/workspace-build,type=volume",
+        "source=qgc-v44-ccache,target=/ccache,type=volume",
+        "source=qgc-v44-home,target=/home/qgc,type=volume",
+        "source=/mnt/wslg/.X11-unix,target=/tmp/.X11-unix,type=bind,readonly",
+        "source=/mnt/wslg,target=/mnt/wslg,type=bind,readonly"
+    ],
+    "runArgs": [
+        "--platform=linux/amd64",
+        "--publish=14560:14551/udp"
+    ],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "llvm-vs-code-extensions.vscode-clangd",
+                "ms-vscode.cpptools",
+                "ms-vscode.cmake-tools",
+                "theqtcompany.qt-core",
+                "theqtcompany.qt-qml",
+                "ms-azuretools.vscode-docker"
+            ],
+            "settings": {
+                "C_Cpp.intelliSenseEngine": "disabled",
+                "clangd.path": "/usr/bin/clangd",
+                "clangd.arguments": [
+                    "--background-index",
+                    "--completion-style=detailed",
+                    "--compile-commands-dir=/workspace-build/cmake-index",
+                    "--query-driver=/usr/bin/c++,/usr/bin/g++,/usr/lib/ccache/c++,/usr/lib/ccache/g++"
+                ],
+                
+                "cmake.configureOnOpen": false,
+                "cmake.generator": "Ninja",
+                "cmake.buildDirectory": "/workspace-build/cmake-index",
+                "cmake.configureSettings": {
+                    "CMAKE_BUILD_TYPE": "Debug",
+                    "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                    "BUILD_TESTING": "ON",
+                    "CMAKE_PREFIX_PATH": "/opt/Qt/5.15.2/gcc_64"
+                },
+
+                "qt-qml.qmlls.customExePath": "/opt/QtTools/6.8.3/gcc_64/bin/qmlls",
+                "qt-qml.qmlls.additionalImportPaths": [
+                    "/opt/Qt/5.15.2/gcc_64/qml",
+                    "/workspaces/qgroundcontrol/src/QmlControls",
+                    "/workspaces/qgroundcontrol/custom/res"
+                ],
+
+                "remote.autoForwardPorts": false
+            }
+        }
+    }
+}

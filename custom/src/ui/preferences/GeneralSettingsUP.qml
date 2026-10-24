@@ -66,6 +66,15 @@ Rectangle {
 
     readonly property real _internalWidthRatio: 0.8
 
+    function adjustUIScale(direction) {
+        var step = ScreenTools.platformFontPointSize * 0.10
+        var nextValue = _appFontPointSize.value + direction * step
+
+        _appFontPointSize.value = Math.max(
+            _appFontPointSize.min,
+            Math.min(_appFontPointSize.max, nextValue))
+    }
+
         QGCFlickable {
             clip:               true
             anchors.fill:       parent
@@ -649,11 +658,7 @@ Rectangle {
                                             height:                 baseFontEdit.height * 1.5
                                             text:                   "-"
                                             anchors.verticalCenter: parent.verticalCenter
-                                            onClicked: {
-                                                if (_appFontPointSize.value > _appFontPointSize.min) {
-                                                    _appFontPointSize.value = _appFontPointSize.value - 1
-                                                }
-                                            }
+                                            onClicked: adjustUIScale(-1)
                                         }
                                         QGCLabel {
                                             id:                     baseFontEdit
@@ -671,11 +676,7 @@ Rectangle {
                                             height:                 baseFontEdit.height * 1.5
                                             text:                   "+"
                                             anchors.verticalCenter: parent.verticalCenter
-                                            onClicked: {
-                                                if (_appFontPointSize.value < _appFontPointSize.max) {
-                                                    _appFontPointSize.value = _appFontPointSize.value + 1
-                                                }
-                                            }
+                                            onClicked: adjustUIScale(1)
                                         }
                                     }
                                 }

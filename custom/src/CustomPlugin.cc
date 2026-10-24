@@ -13,6 +13,7 @@
 #include "MockLink.h"
 
 #include "CustomPlugin.h"
+#include "SpeedController/SpeedSelectorController.h"
 #include "qcoreapplication.h"
 #include "SettingsManager.h"
 
@@ -290,6 +291,8 @@ QQmlApplicationEngine* CustomPlugin::createQmlApplicationEngine(QObject* parent)
     qmlEngine->rootContext()->setContextProperty("CustomPlugin", this);
 
     qmlRegisterSingletonType<KmlPolygonLoader>("QGroundControl.KML", 1, 0, "KmlPolygonLoader", kmlPolygonLoader_singletontype_provider);
+
+    qmlRegisterType<SpeedSelectorController>("Custom.Controllers", 1, 0, "SpeedSelectorController");
 
     #ifdef QT_DEBUG     // start with a custom connection only in debug build!
         MockLink::startAPMArduCopterMockLink(false);

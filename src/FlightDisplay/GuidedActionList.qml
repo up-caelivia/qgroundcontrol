@@ -21,8 +21,8 @@ import QGroundControl.Palette       1.0
 /// Dialog showing list of available guided actions
 Rectangle {
     id:         _root
-    width:      actionColumn.width  + (_margins * 4)
-    height:     actionColumn.height + (_margins * 4)
+    width:      actionColumn.implicitWidth  + (_margins * 4)
+    height:     actionColumn.implicitHeight + (_margins * 4)
     radius:     _margins / 2
     color:      qgcPal.window
     opacity:    0.9

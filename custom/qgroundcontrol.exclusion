@@ -4,7 +4,7 @@
 
 <file alias="QGroundControl/Controls/MainToolBar.qml">src/ui/toolbar/MainToolBar.qml</file>
 
-<file alias="QGroundControl/Controls/RemoteIDIndicator.qml">src/ui/toolbar/RemoteIDIndicator.qml</file>
+<file alias="RemoteIDIndicator.qml">src/ui/toolbar/RemoteIDIndicator.qml</file>
 
 <file alias="QGroundControl/Controls/TransectStyleMapVisuals.qml">src/PlanView/TransectStyleMapVisuals.qml</file>
 

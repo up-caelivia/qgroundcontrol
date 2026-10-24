@@ -10,11 +10,10 @@
  */
 
 import QtQuick          2.12
-import QtQuick.Controls 2.4
-import QtQuick.Layouts  1.11
 
 import QGroundControl               1.0
 import QGroundControl.Controls      1.0
+import QGroundControl.Controllers   1.0
 import QGroundControl.Palette       1.0
 import QGroundControl.ScreenTools   1.0
 import QGroundControl.FactSystem    1.0
@@ -22,28 +21,39 @@ import QGroundControl.FlightMap     1.0
 import QGroundControl.FlightDisplay 1.0
 import Custom.Widgets 1.0
 import CustomAnnouncer 1.0
+import Custom.Controllers 1.0
 
 Item {
+    id: root
+
     property var parentToolInsets                       // These insets tell you what screen real estate is available for positioning the controls in your overlay
-    property var totalToolInsets:   _totalToolInsets    // The insets updated for the custom overlay additions
-    property var mapControl
+    property var totalToolInsets: _totalToolInsets    // The insets updated for the custom overlay additions
 
-    readonly property string noGPS:         qsTr("NO GPS")
-    readonly property real   indicatorValueWidth:   ScreenTools.defaultFontPixelWidth * 7
-
-    property var    _activeVehicle:         QGroundControl.multiVehicleManager.activeVehicle
-    property real   _indicatorDiameter:     ScreenTools.defaultFontPixelWidth * 18
-    property real   _indicatorsHeight:      ScreenTools.defaultFontPixelHeight
-    property var    _sepColor:              qgcPal.globalTheme === QGCPalette.Light ? Qt.rgba(0,0,0,0.5) : Qt.rgba(1,1,1,0.5)
-    property color  _indicatorsColor:       qgcPal.text
-    property bool   _isVehicleGps:          _activeVehicle ? _activeVehicle.gps.count.rawValue > 1 && _activeVehicle.gps.hdop.rawValue < 1.4 : false
-    property string _altitude:              _activeVehicle ? (isNaN(_activeVehicle.altitudeRelative.value) ? "0.0" : _activeVehicle.altitudeRelative.value.toFixed(1)) + ' ' + _activeVehicle.altitudeRelative.units : "--/--"
-    property string _distanceStr:           isNaN(_distance) ? "0" : _distance.toFixed(0) + ' ' + QGroundControl.unitsConversion.appSettingsHorizontalDistanceUnitsString
-    property real   _heading:               _activeVehicle   ? _activeVehicle.heading.rawValue : 0
-    property real   _distance:              _activeVehicle ? _activeVehicle.distanceToHome.rawValue : 0
-    property string _messageTitle:          ""
-    property string _messageText:           ""
+    property var vehicle: null
     property real   _toolsMargin:           ScreenTools.defaultFontPixelWidth * 0.75
+
+    readonly property real uiScale:
+        ScreenTools.defaultFontPointSize / ScreenTools.platformFontPointSize
+
+    readonly property real cockpitLeftClearance: Math.max(
+        parentToolInsets.leftEdgeBottomInset,
+        speedControl.visible ? speedControl.x + speedControl.width : 0
+    )
+
+    readonly property real cockpitRightClearance: parentToolInsets.rightEdgeBottomInset
+
+    readonly property real cockpitBottomClearance: Math.max(
+        parentToolInsets.bottomEdgeRightInset,
+        parentToolInsets.bottomEdgeCenterInset
+    )
+
+    readonly property real cockpitAvailableWidth: Math.max(
+        0, width - cockpitLeftClearance - cockpitRightClearance - 2 * _toolsMargin
+    )
+
+    readonly property real cockpitAvailableHeight: Math.max(
+        0, height - parentToolInsets.topEdgeRightInset - cockpitBottomClearance - 2 * _toolsMargin
+    )
 
     function showCriticalVehicleMessage(message) {
         mainWindow.closeCriticalVehicleMessage()
@@ -52,15 +62,15 @@ Item {
 
     Rectangle {
 
-        property double value: _activeVehicle ? (isNaN(_activeVehicle.altitudeRelative.value) ? 0.0 : _activeVehicle.altitudeRelative.value) : 0.0
+        property double value: root.vehicle ? (isNaN(root.vehicle.altitudeRelative.value) ? 0.0 : root.vehicle.altitudeRelative.value) : 0.0
         property bool above120: false
 
         onValueChanged: {
 
-            if (_activeVehicle == null || _activeVehicle.altitudeRelative == null)
+            if (root.vehicle == null || root.vehicle.altitudeRelative == null)
                 return;
 
-            if ((value > 120 && _activeVehicle.altitudeRelative.units == "m") || ( value > 393.7 && _activeVehicle.altitudeRelative.units == "ft")) {
+            if ((value > 120 && root.vehicle.altitudeRelative.units == "m") || ( value > 393.7 && root.vehicle.altitudeRelative.units == "ft")) {
 
                 if(!above120) {
                     showCriticalVehicleMessage("WARNING : Above 120m")
@@ -82,310 +92,109 @@ Item {
         }
     }
 
-
     QGCToolInsets {
         id:                     _totalToolInsets
         leftEdgeTopInset:       parentToolInsets.leftEdgeTopInset
         //leftEdgeCenterInset:    exampleRectangle.leftEdgeCenterInset
-        leftEdgeBottomInset:    parentToolInsets.leftEdgeBottomInset
+        leftEdgeCenterInset: parentToolInsets.leftEdgeCenterInset
+        // leftEdgeBottomInset:    parentToolInsets.leftEdgeBottomInset
+        leftEdgeBottomInset: Math.max(
+                                    parentToolInsets.leftEdgeBottomInset,
+                                    speedControl.visible ? speedControl.x + speedControl.width : 0
+        )
         rightEdgeTopInset:      parentToolInsets.rightEdgeTopInset
         rightEdgeCenterInset:   parentToolInsets.rightEdgeCenterInset
         //rightEdgeBottomInset:   parent.width - compassBackground.x
+        rightEdgeBottomInset:   Math.max(
+            parentToolInsets.rightEdgeBottomInset,
+            parent.width - cockpitGroup.x
+        )
         topEdgeLeftInset:       parentToolInsets.topEdgeLeftInset
         //topEdgeCenterInset:     compassArrowIndicator.y + compassArrowIndicator.height
+        topEdgeCenterInset: parentToolInsets.topEdgeCenterInset
         topEdgeRightInset:      parentToolInsets.topEdgeRightInset
-        bottomEdgeLeftInset:    parentToolInsets.bottomEdgeLeftInset
+        // bottomEdgeLeftInset:    parentToolInsets.bottomEdgeLeftInset
+        bottomEdgeLeftInset: Math.max(
+                                    parentToolInsets.bottomEdgeLeftInset,
+                                    speedControl.visible ? parent.height - speedControl.y : 0
+        )
         bottomEdgeCenterInset:  parentToolInsets.bottomEdgeCenterInset
-        bottomEdgeRightInset:   parent.height - attitudeIndicator.y
+        // bottomEdgeRightInset:   parent.height - attitudeIndicator.y
+        bottomEdgeRightInset:   Math.max(
+            parentToolInsets.bottomEdgeRightInset,
+            parent.height - cockpitGroup.y
+        )
     }
 
-
-    ProximityRadarValues {
-        id:                     proximityValues
-        vehicle:                _activeVehicle
+    SpeedSelectorController {
+        id: speedController
+        vehicle: root.vehicle
     }
 
-    // TOP BOX !
-    Rectangle {
-        anchors.horizontalCenter: attitudeIndicator.horizontalCenter
-        anchors.bottom: attitudeIndicator.top
-        anchors.bottomMargin: ScreenTools.defaultFontPixelHeight * 0.1
-        visible: proximityValues.telemetryAvailable && !isNaN(proximityValues.rotationNoneValue)
-
-        width: attitudeIndicator.width * 0.6
-        height: attitudeIndicator.height * 0.3
-        radius: ScreenTools.defaultFontPixelHeight
-        color: qgcPal.window
-
-        GridLayout {
-            columnSpacing: ScreenTools.defaultFontPixelWidth * 0.3
-            rowSpacing: ScreenTools.defaultFontPixelHeight * 0.3
-            columns: 2
-
-            property real _indicatorsHeight: ScreenTools.defaultFontPixelHeight
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.horizontalCenter: parent.horizontalCenter
-
-
-            QGCColoredImage {
-                height: _indicatorsHeight
-                width: height
-                source: "/custom/img/vertical_speed.svg"
-                fillMode: Image.PreserveAspectFit
-                sourceSize.height: height
-                Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
-                color: qgcPal.text
-            }
-
-            QGCLabel {
-                id: distanceLabel
-                text: "  " + distance.toFixed(1) + " m"
-                font.pointSize: ScreenTools.mediumFontPointSize
-                Layout.fillWidth: true
-                Layout.minimumWidth: indicatorValueWidth
-                Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
-
-                property real distance: proximityValues.rotationNoneValue
-
-
-                property color normalColor: {
-                    if (distance < 10)
-                        return "orange"
-                    return _indicatorsColor
-                }
-
-                color: normalColor // Default color setting based on distance
-
-                SequentialAnimation on color {
-                    id: pulseAnimation
-                    loops: Animation.Infinite
-                    ColorAnimation {
-                        from: "white"
-                        to: "red"
-                        duration: 200
-                    }
-                    ColorAnimation {
-                        from: "red"
-                        to: "white"
-                        duration: 200
-                    }
-                }
-
-                Component.onCompleted: {
-                    // Start or stop the animation based on the initial distance
-                    pulseAnimation.running = distance < 5
-                }
-
-                onDistanceChanged: {
-                    // Restart animation when distance changes
-                    pulseAnimation.running = distance < 5
-                    if (distance < 5) {
-                        color = "white"
-                    } else {
-                        color = normalColor
-                    }
-                }
-            }
-        }
+    CustomSpeedSelector {
+        id: speedControl
+        anchors.left: parent.left
+        anchors.leftMargin: _toolsMargin + parentToolInsets.leftEdgeBottomInset
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: _toolsMargin + parentToolInsets.bottomEdgeLeftInset
+        controller: speedController
+        visible: speedController.ready
     }
 
-    // UPPER LEFT BOX !
-    Rectangle {
-        anchors.horizontalCenter: left_box.horizontalCenter
-        anchors.bottom:           left_box.top
-        anchors.rightMargin:  ScreenTools.defaultFontPixelHeight * 0.4  // -attitudeIndicator.width / 3
-        anchors.bottomMargin:   ScreenTools.defaultFontPixelHeight * 0.1  // -attitudeIndicator.width / 3
+    Item {
+        id: cockpitGroup
 
+        readonly property real widthFraction: 0.38
+        readonly property real heightFraction: 0.32
+        readonly property real minimumCellFontScale: 1.3
+        readonly property real maximumCellFontScale: 1.6
+        readonly property real referenceViewHeight: 720
 
+        readonly property real maximumWidth: root.width * widthFraction * root.uiScale
+        readonly property real maximumHeight: root.height * heightFraction * root.uiScale
+        readonly property real cellFontScale: Math.max(
+            minimumCellFontScale,
+            Math.min(
+                maximumCellFontScale,
+                referenceViewHeight / Math.max(1, root.height)
+            )
+        )
 
-        width:  attitudeIndicator.width*0.6
-        height: attitudeIndicator.height * 0.3
-        radius:                 ScreenTools.defaultFontPixelHeight
-        color:                  qgcPal.window
+        readonly property real fitScale: width > 0 && height > 0
+            ? Math.min(
+                1,
+                maximumWidth / width,
+                maximumHeight / height,
+                root.cockpitAvailableWidth / width,
+                root.cockpitAvailableHeight / height
+            )
+            : 1
 
-        GridLayout {
-                    columnSpacing:          ScreenTools.defaultFontPixelWidth  * 0.5
-                    rowSpacing:             ScreenTools.defaultFontPixelHeight * 0.3
-                    columns:                2
+        width: cockpitPanel.width + (radarWidget.visible ? _toolsMargin + radarWidget.width : 0)
+        height: Math.max(
+            cockpitPanel.height,
+            radarWidget.visible ? radarWidget.height + _toolsMargin : 0
+        )
+        scale: fitScale
+        transformOrigin: Item.TopLeft
+        x: root.width - root.cockpitRightClearance - _toolsMargin - width * fitScale
+        y: root.height - root.cockpitBottomClearance - _toolsMargin - height * fitScale
 
-            property real   _indicatorsHeight:      ScreenTools.defaultFontPixelHeight
-            //anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.horizontalCenter: parent.horizontalCenter
-            //anchors.rightMargin: 12
-
-            QGCColoredImage {
-                height:                 _indicatorsHeight
-                width:                  height
-                source:                "/custom/img/distance.svg"
-                fillMode:               Image.PreserveAspectFit
-                sourceSize.height:      height
-                Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
-                color:                  qgcPal.text
-            }
-
-            QGCLabel {
-                text:                   _activeVehicle && !isNaN(_activeVehicle.distanceToHome.value) ? (('  0000' + _activeVehicle.distanceToHome.value.toFixed(0)).slice(-4) + ' ' + _activeVehicle.distanceToHome.units) : "   --/--"
-                color:                  _indicatorsColor
-                font.pointSize:         ScreenTools.mediumFontPointSize
-                Layout.fillWidth:       true
-                Layout.minimumWidth:    indicatorValueWidth
-                Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
-
-            }
-        }
-    }
-
-    // LEFT BOX !
-    Rectangle {
-            id: left_box
-            anchors.right:          attitudeIndicator.left
-            anchors.bottom : attitudeIndicator.bottom
-            anchors.rightMargin:  ScreenTools.defaultFontPixelHeight * 0.4  // -attitudeIndicator.width / 3
-            width:  attitudeIndicator.width*0.6
-            height: attitudeIndicator.height * 0.65
-            radius:                 ScreenTools.defaultFontPixelHeight
-            color:                  qgcPal.window
-
-
-            QGCColoredImage {
-                source: "/custom/img/altitude.svg"
-                fillMode: Image.PreserveAspectFit
-                sourceSize.height: parent.height
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top: parent.top
-                color: qgcPal.text
-                height:                 _indicatorsHeight * 1.3
-                width:                  height
-                anchors.topMargin: ScreenTools.defaultFontPixelHeight * 0.5
-            }
-
-            QGCLabel {
-                text:                   _altitude
-                color:                  _indicatorsColor
-                font.pointSize:         ScreenTools.largeFontPointSize * 1.4
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.bottom: parent.bottom
-                font.weight: Font.Bold
-                anchors.bottomMargin: ScreenTools.defaultFontPixelHeight * 0.1
-
-            }
-    }
-
-    // UPPER RIGHT BOX !
-    Rectangle {
-        anchors.horizontalCenter: right_box.horizontalCenter
-        anchors.bottom:           right_box.top
-        anchors.rightMargin:  ScreenTools.defaultFontPixelHeight * 0.4  // -attitudeIndicator.width / 3
-        anchors.bottomMargin:   ScreenTools.defaultFontPixelHeight * 0.1  // -attitudeIndicator.width / 3
-
-
-
-        width:  attitudeIndicator.width*0.6
-        height: attitudeIndicator.height * 0.3
-        radius:                 ScreenTools.defaultFontPixelHeight
-        color:                  qgcPal.window
-
-        GridLayout {
-                    columnSpacing:          ScreenTools.defaultFontPixelWidth  * 0.5
-                    rowSpacing:             ScreenTools.defaultFontPixelHeight * 0.3
-                    columns:                2
-
-            property real   _indicatorsHeight:      ScreenTools.defaultFontPixelHeight
-            //anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.horizontalCenter: parent.horizontalCenter
-            //anchors.rightMargin: 12
-
-            QGCColoredImage {
-                height:                 _indicatorsHeight * 1.5
-                width:                  height
-                source:                "/custom/img/MovimentoY.svg"
-                fillMode:               Image.PreserveAspectFit
-                sourceSize.height:      height
-                Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
-                color:                  qgcPal.text
-            }
-
-            QGCLabel {
-                text:                  _activeVehicle ? "  "+_activeVehicle.climbRate.value.toFixed(1) + ' ' + _activeVehicle.climbRate.units : "   --/--"
-                color:                  _indicatorsColor
-                font.pointSize:         ScreenTools.mediumFontPointSize
-                Layout.fillWidth:       true
-                Layout.minimumWidth:    indicatorValueWidth
-                Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
-
-            }
-        }
-    }
-
-    // RIGHT BOX!
-    Rectangle {
-        id: right_box
-        anchors.left:          attitudeIndicator.right
-        anchors.bottom : attitudeIndicator.bottom
-        anchors.leftMargin:  ScreenTools.defaultFontPixelHeight * 0.4  // -attitudeIndicator.width / 3
-        width:  attitudeIndicator.width*0.6
-        height: attitudeIndicator.height * 0.65
-        radius:                 ScreenTools.defaultFontPixelHeight
-        color:                  qgcPal.window
-
-        QGCColoredImage {
-            source: "/custom/img/MovimentoZ.svg"
-            fillMode: Image.PreserveAspectFit
-            sourceSize.height: parent.height
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: parent.top
-            color: qgcPal.text
-            height:                 _indicatorsHeight * 2.5
-            width:                  height
-            // anchors.topMargin: ScreenTools.defaultFontPixelHeight * 0.5
-        }
-
-
-        QGCLabel {
-            text:                   _activeVehicle ? _activeVehicle.groundSpeed.value.toFixed(1) + ' ' + _activeVehicle.groundSpeed.units : "--/--"
-            color:                  _indicatorsColor
-            font.pointSize:         ScreenTools.largeFontPointSize * 1.4
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: parent.bottom
-            font.weight: Font.Bold
-            anchors.bottomMargin: ScreenTools.defaultFontPixelHeight * 0.1
-
-        }
-    }
-
-    // NAVIGATION BOX!
-    Rectangle {
-        id:                     attitudeIndicator
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottomMargin:   _toolsMargin + parentToolInsets.bottomEdgeRightInset
-        anchors.rightMargin:    _toolsMargin
-        anchors.bottom:         parent.bottom
-       // height:                 ScreenTools.defaultFontPixelHeight * 10
-        height: parent.height / 4
-        width:                  height * 1.98
-        radius:                 height * 0.5
-        color:                  qgcPal.window   //qgcPal.windowShade
-
-        CustomAttitudeWidget {
-            id:                 attitude
-            anchors.leftMargin: 10
-            size:               parent.height * 0.90
-            vehicle:            _activeVehicle
-            showHeading:        false
+        CockpitPanelUP {
+            id: cockpitPanel
             anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.bottom: parent.bottom
+            vehicle: root.vehicle
+            cellFontScale: cockpitGroup.cellFontScale
         }
 
-        CustomCompassWidget {
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.rightMargin: 10
-            size: parent.height * 0.90
-            vehicle: globals.activeVehicle
+        CustomRadarWidget {
+            id: radarWidget
+            anchors.left: cockpitPanel.right
+            anchors.leftMargin: _toolsMargin
+            anchors.verticalCenter: cockpitPanel.verticalCenter
+            anchors.bottomMargin: _toolsMargin
         }
-
     }
 
 }

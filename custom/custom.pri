@@ -143,7 +143,8 @@ SOURCES += \
     $$PWD/src/CustomAnnouncer.cpp \
     $$PWD/src/VideoStreamControl.cc \
     $$PWD/src/GeoAwareness/KmlPolygonObject.cpp \
-    $$PWD/src/GeoAwareness/KmlPolygonLoader.cpp
+    $$PWD/src/GeoAwareness/KmlPolygonLoader.cpp \
+    $$PWD/src/SpeedController/SpeedSelectorController.cpp
 
 HEADERS += \
     $$PWD/src/CustomPlugin.h \
@@ -153,7 +154,8 @@ HEADERS += \
     $$PWD/src/CustomAnnouncer.h \
     $$PWD/src/VideoStreamControl.h \
     $$PWD/src/GeoAwareness/KmlPolygonObject.h \
-    $$PWD/src/GeoAwareness/KmlPolygonLoader.h
+    $$PWD/src/GeoAwareness/KmlPolygonLoader.h \
+    $$PWD/src/SpeedController/SpeedSelectorController.h
 
 INCLUDEPATH += $$PWD/src \
                $$PWD/src/GeoAwareness

@@ -6,6 +6,7 @@
  * COPYING.md in the root of the source code directory.
  *
  ****************************************************************************/
+#include <QtMath>
 
 #include "VehicleDistanceSensorFactGroup.h"
 #include "Vehicle.h"
@@ -38,18 +39,31 @@ VehicleDistanceSensorFactGroup::VehicleDistanceSensorFactGroup(QObject* parent)
     , _minDistanceFact      (0, _minDistanceFactName,       FactMetaData::valueTypeDouble)
     , _maxDistanceFact      (0, _maxDistanceFactName,       FactMetaData::valueTypeDouble)
 {
+    // Unreported sensor directions have no measurement yet.
     _addFact(&_rotationNoneFact,        _rotationNoneFactName);
+    _rotationNoneFact.setRawValue(qQNaN());
     _addFact(&_rotationYaw45Fact,       _rotationYaw45FactName);
+    _rotationYaw45Fact.setRawValue(qQNaN());
     _addFact(&_rotationYaw90Fact,       _rotationYaw90FactName);
+    _rotationYaw90Fact.setRawValue(qQNaN());
     _addFact(&_rotationYaw135Fact,      _rotationYaw135FactName);
+    _rotationYaw135Fact.setRawValue(qQNaN());
     _addFact(&_rotationYaw180Fact,      _rotationYaw180FactName);
+    _rotationYaw180Fact.setRawValue(qQNaN());
     _addFact(&_rotationYaw225Fact,      _rotationYaw225FactName);
+    _rotationYaw225Fact.setRawValue(qQNaN());
     _addFact(&_rotationYaw270Fact,      _rotationYaw270FactName);
+    _rotationYaw270Fact.setRawValue(qQNaN());
     _addFact(&_rotationYaw315Fact,      _rotationYaw315FactName);
+    _rotationYaw315Fact.setRawValue(qQNaN());
     _addFact(&_rotationPitch90Fact,     _rotationPitch90FactName);
+    _rotationPitch90Fact.setRawValue(qQNaN());
     _addFact(&_rotationPitch270Fact,    _rotationPitch270FactName);
+    _rotationPitch270Fact.setRawValue(qQNaN());
     _addFact(&_minDistanceFact,         _minDistanceFactName);
+    _minDistanceFact.setRawValue(qQNaN());
     _addFact(&_maxDistanceFact,         _maxDistanceFactName);
+    _maxDistanceFact.setRawValue(qQNaN());
 }
 
 void VehicleDistanceSensorFactGroup::handleMessage(Vehicle* /* vehicle */, mavlink_message_t& message)
@@ -89,5 +103,6 @@ void VehicleDistanceSensorFactGroup::handleMessage(Vehicle* /* vehicle */, mavli
     }
 
     maxDistance()->setRawValue(distanceSensor.max_distance / 100.0);
+    minDistance()->setRawValue(distanceSensor.min_distance / 100.0);
     _setTelemetryAvailable(true);
 }

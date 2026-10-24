@@ -67,8 +67,8 @@
         <file alias="APMParameterFactMetaData.Sub.3.6.xml">../../../../src/FirmwarePlugin/APM/ArduPilot-Parameter-Repository/Sub-3.6/apm.pdef.xml</file>
         <file alias="APMParameterFactMetaData.Sub.4.0.xml">../../../../src/FirmwarePlugin/APM/ArduPilot-Parameter-Repository/Sub-4.0/apm.pdef.xml</file>
         <file alias="APMParameterFactMetaData.Sub.4.1.xml">../../../../src/FirmwarePlugin/APM/ArduPilot-Parameter-Repository/Sub-4.1/apm.pdef.xml</file>
-        <file alias="Copter.OfflineEditing.">../../../../src/FirmwarePlugin/APM/Copter3.6.OfflineEditing.params</file>
-        <file alias="Plane.OfflineEditing.">../../../../src/FirmwarePlugin/APM/Plane3.9.OfflineEditing.params</file>
-        <file alias="Rover.OfflineEditing.">../../../../src/FirmwarePlugin/APM/Rover3.5.OfflineEditing.params</file>
+        <file alias="Copter.OfflineEditing.params">../../../../src/FirmwarePlugin/APM/Copter3.6.OfflineEditing.params</file>
+        <file alias="Plane.OfflineEditing.params">../../../../src/FirmwarePlugin/APM/Plane3.9.OfflineEditing.params</file>
+        <file alias="Rover.OfflineEditing.params">../../../../src/FirmwarePlugin/APM/Rover3.5.OfflineEditing.params</file>
     </qresource>
 </RCC>
