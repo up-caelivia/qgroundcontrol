@@ -19,8 +19,10 @@ import QGroundControl.Palette 1.0
 Item {
     id:                     _root
     Layout.preferredWidth:  rowLayout.width
+    Layout.leftMargin:         ScreenTools.defaultFontPixelWidth
+    Layout.rightMargin:         ScreenTools.defaultFontPixelWidth
 
-    property real fontPointSize: ScreenTools.largeFontPointSize
+    property real fontPointSize: ScreenTools.mediumFontPointSize
     property var activeVehicle: QGroundControl.multiVehicleManager.activeVehicle
 
     Component {
