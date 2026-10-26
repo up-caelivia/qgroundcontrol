@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-### Isntall Docker
+### Install Docker
 
 Follow th guide: https://docs.docker.com/engine/install/ubuntu/
 

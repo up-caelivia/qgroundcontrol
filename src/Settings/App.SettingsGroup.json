@@ -149,7 +149,7 @@
     "name":                 "appFontPointSize",
     "shortDesc":     "Application font size",
     "longDesc":      "The point size for the default font used.",
-    "type":                 "uint32",
+    "type":                 "double",
     "units":                "pt",
     "min":                  6,
     "max":                  48,

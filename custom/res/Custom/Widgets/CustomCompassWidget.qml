@@ -30,6 +30,8 @@ Item {
 
     property real size:     _defaultSize
     property var  vehicle:  null
+    property bool showCenterPointer: true
+    property bool showHeadingReadout: true
 
     property var  _activeVehicle:       QGroundControl.multiVehicleManager.activeVehicle
     property real _defaultSize:         ScreenTools.defaultFontPixelHeight * (10)
@@ -134,6 +136,7 @@ Item {
 
         Image {
             id:                 pointer
+            visible:            root.showCenterPointer
             width:              size * 1.2 //* 0.35
             source:             vehicle ? "/qmlimages/compassInstrumentArrow.svg" : ""
             mipmap:             true
@@ -165,6 +168,7 @@ Item {
 
 
         Rectangle {
+            visible:            root.showHeadingReadout
             //anchors.centerIn:   parent
             width:              size * 0.35
             height:             size * 0.2

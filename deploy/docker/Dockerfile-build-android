@@ -7,32 +7,31 @@ ARG NDK_VERSION=r21d
 ARG NDK_VERSION_NUM=21.3.6528147
 ARG OPENSSL_VERSION=1.0.2r
 ARG QT_VERSION=5.15.2
-ARG SDK_BUILD_TOOLS=29.0.2
-ARG SDK_PACKAGES="tools platform-tools"
-ARG SDK_PLATFORM=android-29
+ARG SDK_BUILD_TOOLS=33.0.2
+ARG SDK_PACKAGES="platform-tools"
+ARG SDK_PLATFORM=android-33
 
 ENV \
     ANDROID_HOME=/opt/android-sdk \
-    ANDROID_NDK_ARCH=arch-arm64 \
-    ANDROID_NDK_EABI=llvm \
     ANDROID_NDK_HOST=linux-x86_64 \
-    ANDROID_NDK_TOOLCHAIN_PREFIX=aarch64-linux-android \
-    CLANG_TARGET=aarch64-linux-android \
     DEBIAN_FRONTEND=noninteractive \
     QMAKESPEC=android-clang \
     QT_PATH=/opt/qt \
     QT_PLATFORM=android
 
+# Matches the env CI sets (see android_release_UP.yml): only the SDK/NDK
+# roots. The native NDK target API level and compileSdk level are picked
+# automatically by qmake and are kept independent of each other - do not
+# override them manually here (NDK r21d's own platform level caps out well
+# below android-33, but that only limits native code, not compileSdk/Java).
 ENV \
     ANDROID_SDK_ROOT=${ANDROID_HOME} \
-    ANDROID_NDK_PLATFORM=${SDK_PLATFORM} \
-    ANDROID_NDK_ROOT=${ANDROID_HOME}/ndk/${NDK_VERSION_NUM} \
-    ANDROID_NDK_TOOLS_PREFIX=${ANDROID_NDK_TOOLCHAIN_PREFIX}
+    ANDROID_NDK_ROOT=${ANDROID_HOME}/ndk/${NDK_VERSION_NUM}
 
-# Percorsi aggiornati per LLVM
 ENV \
-    ANDROID_NDK_TOOLCHAIN=${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/${ANDROID_NDK_HOST} \
-    ANDROID_DEV=${ANDROID_NDK_ROOT}/platforms/${ANDROID_NDK_PLATFORM}/${ANDROID_NDK_ARCH}/usr \
+    ANDROID_NDK_TOOLCHAIN=${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/${ANDROID_NDK_HOST}
+
+ENV \
     PATH=${QT_PATH}/${QT_VERSION}/${QT_PLATFORM}/bin:${ANDROID_NDK_TOOLCHAIN}/bin:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools:${PATH}
 
 # Install updates & requirements:
@@ -109,15 +108,6 @@ RUN mkdir -p /tmp/qt && \
     find "${QT_PATH}" -mindepth 1 -maxdepth 1 ! -name "${QT_VERSION}" -exec echo 'Cleaning Qt SDK: {}' \; -exec rm -r '{}' \; && \
     rm -rf /tmp/qt /root/.cache
 
-# Imposta i compilatori LLVM
-ENV \
-    CC=${ANDROID_NDK_TOOLCHAIN}/bin/clang \
-    CXX=${ANDROID_NDK_TOOLCHAIN}/bin/clang++ \
-    AS=${ANDROID_NDK_TOOLCHAIN}/bin/llvm-as \
-    AR=${ANDROID_NDK_TOOLCHAIN}/bin/llvm-ar \
-    LD=${ANDROID_NDK_TOOLCHAIN}/bin/ld.lld \
-    STRIP=${ANDROID_NDK_TOOLCHAIN}/bin/llvm-strip 
-    
 # Create SDK directory
 RUN mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools
 # Download and install the Android command-line tools

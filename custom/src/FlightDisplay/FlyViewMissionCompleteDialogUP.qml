@@ -33,7 +33,7 @@ Item {
     property bool _vehicleWasArmed:                 false
     property bool _vehicleInMissionFlightMode:      _activeVehicle ? (_activeVehicle.flightMode === _activeVehicle.missionFlightMode) : false
     property bool _vehicleWasInMissionFlightMode:   false
-    property bool _showMissionCompleteDialog:       _vehicleWasArmed && !CustomPlugin.isSAVenabled && _vehicleWasInMissionFlightMode  
+    property bool _showMissionCompleteDialog:       _vehicleWasArmed && !CustomPlugin.isSAVenabled && _vehicleWasInMissionFlightMode &&
                                                     (missionController.containsItems || geoFenceController.containsItems || rallyPointController.containsItems ||
                                                      (_activeVehicle ? _activeVehicle.cameraTriggerPoints.count !== 0 : false))
 

@@ -15,5 +15,5 @@ SavButtonWidgetUP     1.0     SavButtonWidgetUP.qml
 AbluoPathWidgetUP    1.0     AbluoPathWidgetUP.qml
 AwarenessInfoHeader 1.0     AwarenessInfoHeader.qml
 AwarenessInfoViewer 1.0     AwarenessInfoViewer.qml
-
-
+CockpitCellUP 1.0 CockpitCellUP.qml
+CockpitPanelUP 1.0 CockpitPanelUP.qml

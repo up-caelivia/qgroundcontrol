@@ -8,14 +8,10 @@
  ****************************************************************************/
 
 import QtQuick                  2.12
-import QtQuick.Controls         2.4
-import QtQuick.Dialogs          1.3
-import QtQuick.Layouts          1.12
 
 import QtLocation               5.3
 import QtPositioning            5.3
 import QtQuick.Window           2.2
-import QtQml.Models             2.1
 
 import QGroundControl               1.0
 import QGroundControl.Controls      1.0
@@ -52,9 +48,6 @@ Item {
     property real   _rightPanelWidth:       ScreenTools.defaultFontPixelWidth * 30
     property alias  _gripperMenu:           gripperOptions
 
-    property bool loaded: false
-    property bool selector: false
-
 
     function showCriticalVehicleMessage(message) {
         mainWindow.closeCriticalVehicleMessage()
@@ -62,47 +55,43 @@ Item {
     }
 
 
-   Timer {
-       id: timer
-       interval: 5000 // 5000 ms = 5 seconds
-       running: _activeVehicle
-       repeat: false
-       onTriggered: {
-           loaded = true
-           loadDynamicObject()
-       }
-   }
-
-    function loadDynamicObject() {
-        var object  = Qt.createQmlObject(' import QGroundControl.Controllers   1.0;
-                                            ParameterEditorController {
-                                                 id: controller
-                                             }', _controller)
-        _controller.object = object
-        selector = true
-
-    }
-
-   Item {
-           id: _controller
-           property var object
-   }
-
-
     QGCToolInsets {
         id:                     _totalToolInsets
         leftEdgeTopInset:       toolStrip.leftEdgeTopInset
         leftEdgeCenterInset:    parentToolInsets.leftEdgeCenterInset
-        leftEdgeBottomInset:    virtualJoystickMultiTouch.visible ? virtualJoystickMultiTouch.leftEdgeBottomInset : parentToolInsets.leftEdgeBottomInset
-        rightEdgeTopInset:      instrumentPanel.rightEdgeTopInset
-        // rightEdgeCenterInset:   (telemetryPanel.rightEdgeCenterInset > photoVideoControl.rightEdgeCenterInset) ? telemetryPanel.rightEdgeCenterInset : photoVideoControl.rightEdgeCenterInset
-        rightEdgeBottomInset:   virtualJoystickMultiTouch.visible ? virtualJoystickMultiTouch.rightEdgeBottomInset : parentToolInsets.rightEdgeBottomInset
+        // leftEdgeBottomInset:    virtualJoystickMultiTouch.visible ? virtualJoystickMultiTouch.leftEdgeBottomInset : parentToolInsets.leftEdgeBottomInset
+        leftEdgeBottomInset: Math.max(
+            parentToolInsets.leftEdgeBottomInset,
+            virtualJoystickMultiTouch.visible ? virtualJoystickMultiTouch.leftEdgeBottomInset : 0
+        )
+        rightEdgeTopInset:      Math.max(parentToolInsets.rightEdgeTopInset, instrumentPanel.rightEdgeTopInset)
+        rightEdgeCenterInset:   Math.max(parentToolInsets.rightEdgeCenterInset, photoVideoControl.rightEdgeCenterInset)
+        rightEdgeBottomInset:   Math.max(
+            parentToolInsets.rightEdgeBottomInset,
+            virtualJoystickMultiTouch.visible ? virtualJoystickMultiTouch.rightEdgeBottomInset : 0
+        )
+/*         rightEdgeBottomInset: Math.max(
+            virtualJoystickMultiTouch.visible ? virtualJoystickMultiTouch.rightEdgeBottomInset : parentToolInsets.rightEdgeBottomInset, 
+            radarWidget.visible ? parent.height - radarWidget.y : 0,            
+            speedControl.visible ? parent.height - speedControl.y : 0,            
+        ) */
         topEdgeLeftInset:       toolStrip.topEdgeLeftInset
         topEdgeCenterInset:     mapScale.topEdgeCenterInset
-        topEdgeRightInset:      instrumentPanel.topEdgeRightInset
-        bottomEdgeLeftInset:    virtualJoystickMultiTouch.visible ? virtualJoystickMultiTouch.bottomEdgeLeftInset : parentToolInsets.bottomEdgeLeftInset
+        topEdgeRightInset:      Math.max(parentToolInsets.topEdgeRightInset, instrumentPanel.topEdgeRightInset)
+        bottomEdgeLeftInset: Math.max(
+            parentToolInsets.bottomEdgeLeftInset,
+            virtualJoystickMultiTouch.visible ? virtualJoystickMultiTouch.bottomEdgeLeftInset : 0
+        )
         //bottomEdgeCenterInset:  telemetryPanel.bottomEdgeCenterInset
-        bottomEdgeRightInset:   virtualJoystickMultiTouch.visible ? virtualJoystickMultiTouch.bottomEdgeRightInset : parentToolInsets.bottomEdgeRightInset
+        bottomEdgeRightInset:   Math.max(
+            parentToolInsets.bottomEdgeRightInset,
+            virtualJoystickMultiTouch.visible ? virtualJoystickMultiTouch.bottomEdgeRightInset : 0
+        )
+/*         bottomEdgeRightInset: Math.max(
+            virtualJoystickMultiTouch.visible ? virtualJoystickMultiTouch.bottomEdgeRightInset : parentToolInsets.bottomEdgeRightInset, 
+            radarWidget.visible ? parent.width - radarWidget.x : 0,            
+            speedControl.visible ? parent.width - speedControl.x : 0,            
+        ) */
     }
 
 
@@ -246,30 +235,11 @@ Item {
         id:                     photoVideoControl
         anchors.margins:  _toolsMargin
         anchors.topMargin:    _toolsMargin
-        anchors.left:          parent.left
+        anchors.right: parent.right
         // width:                  _rightPanelWidth * 0.8
-        anchors.bottom:            parent.bottom
+        anchors.verticalCenter: parent.verticalCenter
 
         property real rightEdgeCenterInset: visible ? parent.width - x : 0
-    }
-
-    CustomSpeedSelector {
-        id:                     speedControl
-        anchors.margins:  _toolsMargin
-        anchors.topMargin:    _toolsMargin
-        anchors.right:          parent.right
-        anchors.bottom:            parent.bottom
-        _controller: _controller
-        visible: selector
-
-    }
-
-    CustomRadarWidget{
-
-        anchors.right:          parent.right
-        // width:                  _rightPanelWidth * 0.7
-        anchors.bottom:         speedControl.top
-        anchors.margins:  _toolsMargin
     }
 
     SavButtonWidgetUP {
