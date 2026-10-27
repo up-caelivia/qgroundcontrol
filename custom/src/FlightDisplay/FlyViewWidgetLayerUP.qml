@@ -104,6 +104,7 @@ Item {
     Row {
         id:                 multiVehiclePanelSelector
         anchors.margins:    _toolsMargin
+        anchors.topMargin:  _toolsMargin + parentToolInsets.topEdgeRightInset
         anchors.top:        parent.top
         anchors.right:      parent.right
         width:              _rightPanelWidth

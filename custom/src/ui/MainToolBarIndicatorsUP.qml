@@ -12,7 +12,10 @@ import QtQuick 2.12
 import QGroundControl               1.0
 import QGroundControl.ScreenTools   1.0
 import QGroundControl.Palette       1.0
+import QGroundControl.Controls      1.0
+
 import Custom.Widgets               1.0
+import Custom.Controls              1.0
 
 //-------------------------------------------------------------------------
 //-- Toolbar Indicators
@@ -27,11 +30,10 @@ Item {
     property real _toolIndicatorMargins:    ScreenTools.defaultFontPixelHeight * 0.66
     property var _indicators:               _activeVehicle ? _activeVehicle.toolIndicators : []
 
-    // Variable defined in order to split the list on a specified index (assume that the developer knows where he want to split it)
-    // TODO: find a better solution
-    readonly property int _splitIndex:      1
-    property var _leftIndicators: _indicators.slice(0, _splitIndex)
-    property var _rightIndicators: _indicators.slice(_splitIndex)
+    // Number of leading vehicle indicators assigned to the left group.
+    readonly property int _leftIndicatorCount: 1
+    property var _leftIndicators: _indicators.slice(0, _leftIndicatorCount)
+    property var _rightIndicators: _indicators.slice(_leftIndicatorCount)
 
 
     QGCPalette { id: qgcPal }
@@ -63,7 +65,7 @@ Item {
             anchors.top: parent.top
             anchors.bottom: parent.bottom
             source: modelData
-            visible: item.showIndicator
+            visible: item ? item.showIndicator : false
 
             Rectangle {
                 anchors.fill: parent
@@ -100,7 +102,7 @@ Item {
         id:                 leftIndicatorRow
         anchors.top:        parent.top
         anchors.bottom:     parent.bottom
-        anchors.left:      parent.left
+        anchors.left:       parent.left
         anchors.margins:    _toolIndicatorMargins
         spacing:            ScreenTools.defaultFontPixelWidth * 1.5
 
@@ -131,6 +133,18 @@ Item {
             }
         }
 
+        VerticalSeparator {
+            referenceHeight: leftIndicatorRow.height
+            separatorSpacing: ScreenTools.defaultFontPixelWidth / 2
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        MainStatusIndicator {
+            height: parent.height
+            width: implicitWidth
+            anchors.verticalCenter: parent.verticalCenter
+            // visible:                currentToolbar === flyViewToolbar
+        }
 
         // TODO: remove from here
         FlightTimeWidget {

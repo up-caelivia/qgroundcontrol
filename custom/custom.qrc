@@ -60,6 +60,10 @@
         <file alias="Custom/GeoAwareness/qmldir">res/Custom/GeoAwareness/qmldir</file>
         <file alias="Custom/GeoAwareness/KmlPolygonOverlay.qml">res/Custom/GeoAwareness/KmlPolygonOverlay.qml</file>
     </qresource>
+    <qresource prefix="/Custom/Controls">
+        <file alias="qmldir">res/Custom/Controls/qmldir</file>
+        <file alias="VerticalSeparator.qml">res/Custom/Controls/VerticalSeparator.qml</file>
+    </qresource>
     <qresource prefix="/qml">
         <file alias="CustomSetupView.qml">res/Custom/Widgets/CustomSetupView.qml</file>
         <file alias="QGroundControl/FlightMap/FlightMap.qml">src/FlightMap/FlightMapUP.qml</file>

@@ -17,6 +17,8 @@ import QGroundControl.ScreenTools           1.0
 import QGroundControl.Palette               1.0
 import QGroundControl.FactSystem            1.0
 
+import Custom.Controls 1.0
+
 RowLayout {
     id:         _root
     spacing:    0
@@ -40,9 +42,9 @@ RowLayout {
             radius: ScreenTools.defaultFontPixelHeight * 0.35
             color: statusMouseArea.containsMouse
                     ? Qt.rgba(
-                        qgcPal.r,
-                        qgcPal.g,
-                        qgcPal.b,
+                        qgcPal.text.r,
+                        qgcPal.text.g,
+                        qgcPal.text.b,
                         0.14
                     ) : "transparent"
             Behavior on color {
@@ -159,27 +161,15 @@ RowLayout {
                 }
             }
 
-            // Graphical arrow - supported on herelink
-            Canvas {
-                id: graphicalArrow 
-                property real _baseDimension: ScreenTools.defaultFontPointSize
-                property bool _isMobile: ScreenTools.isMobile 
-                width: _isMobile ? _baseDimension * 1.3 : _baseDimension * 0.7
-                height: _isMobile ? _baseDimension * 1.1 : _baseDimension * 0.6
-                Layout.alignment: Qt.AlignVCenter
-                visible: _activeVehicle
+            QGCColoredImage {
+                source: "/res/DropArrow.svg"
+                color: qgcPal.text
 
-                onPaint: {
-                    var ctx = getContext("2d");
-                    ctx.clearRect(0, 0, width, height);
-                    ctx.fillStyle = qgcPal.text;
-                    ctx.beginPath();
-                    ctx.moveTo(0, 0);
-                    ctx.lineTo(width, 0);
-                    ctx.lineTo(width / 2, height);
-                    ctx.closePath();
-                    ctx.fill();
-                }
+                Layout.preferredWidth: ScreenTools.defaultFontPixelHeight * 0.45
+                Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 0.60
+                Layout.alignment: Qt.AlignVCenter
+
+                visible: _activeVehicle !== null
             }
         }
 
@@ -198,21 +188,10 @@ RowLayout {
         }
     }
 
-    // Separator
-    Rectangle {
-        Layout.preferredWidth: 1
-        Layout.preferredHeight: _root.height * 0.6
-        Layout.alignment: Qt.AlignVCenter
-        Layout.leftMargin: _spacing
-        Layout.rightMargin: _spacing
+    VerticalSeparator {
+        referenceHeight: _root.height
+        separatorSpacing: _spacing
         visible: flightModeMenu.visible
-
-        color: Qt.rgba(
-            qgcPal.text.r,
-            qgcPal.text.g,
-            qgcPal.text.b,
-            0.3
-        )
     }
 
     FlightModeMenuIndicator {

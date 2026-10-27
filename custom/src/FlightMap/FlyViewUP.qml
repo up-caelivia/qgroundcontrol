@@ -72,13 +72,13 @@ Item {
 
     QGCToolInsets {
         id:                     _toolInsets
-        readonly property real _sliderRightInsets: guidedValueSlider.visible 
+        readonly property real _sliderRightInset: guidedValueSlider.visible 
                                                     ? _root.width - guidedValueSlider.x
                                                     : 0
 
-        rightEdgeTopInset:      Math.max(_sliderRightInsets, _pipOverlay.visible ? _root.width - _pipOverlay.x : 0) 
-        rightEdgeCenterInset:   _sliderRightInsets
-        rightEdgeBottomInset:   _sliderRightInsets
+        rightEdgeTopInset:      Math.max(_sliderRightInset, _pipOverlay.visible ? _root.width - _pipOverlay.x : 0) 
+        rightEdgeCenterInset:   _sliderRightInset
+        rightEdgeBottomInset:   _sliderRightInset
         
         topEdgeRightInset:      _pipOverlay.visible ? _pipOverlay.y + _pipOverlay.height : 0
     }
@@ -100,9 +100,9 @@ Item {
         bottomEdgeCenterInset: baseInsets.bottomEdgeCenterInset
         bottomEdgeRightInset: baseInsets.bottomEdgeRightInset
 
-        topEdgeLeftInset: baseInsets.topEdgeLeftInset + (_mainWindowIsMap ? _root.toolBarOverlay : 0)
-        topEdgeCenterInset: baseInsets.topEdgeCenterInset + (_mainWindowIsMap ? _root.toolBarOverlay : 0)
-        topEdgeRightInset: baseInsets.topEdgeRightInset + (_mainWindowIsMap ? _root.toolBarOverlay : 0)
+        topEdgeLeftInset: baseInsets.topEdgeLeftInset + _root.toolBarOverlay
+        topEdgeCenterInset: baseInsets.topEdgeCenterInset + _root.toolBarOverlay
+        topEdgeRightInset: baseInsets.topEdgeRightInset + _root.toolBarOverlay
     }
 
 
@@ -254,12 +254,13 @@ Item {
         anchors.top:            parent.top
         anchors.right:          parent.right
         anchors.margins:        _toolsMargin
-        anchors.rightMargin:    _toolsMargin + _toolInsets._sliderRightInsets
+        anchors.rightMargin:    _toolsMargin + _toolInsets._sliderRightInset
         item1IsFullSettingsKey: "MainFlyWindowIsMap"
         item1:                  hasVideo ? videoControl : mapControl
         item2:                  hasVideo ? mapControl : null
         fullZOrder:             _fullItemZorder
         pipZOrder:              _pipItemZorder
+        
 
         // show:                   !QGroundControl.videoManager.fullScreen &&
         //                             (videoControl.pipState.state === videoControl.pipState.pipState || mapControl.pipState.state === mapControl.pipState.pipState)

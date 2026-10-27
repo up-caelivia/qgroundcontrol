@@ -11,7 +11,6 @@ import QtQuick          2.12
 import QtQuick.Controls 2.4
 import QtQuick.Layouts  1.11
 import QtQuick.Dialogs  1.3
-import QtGraphicalEffects 1.15
 
 import QGroundControl                       1.0
 import QGroundControl.Controls              1.0
@@ -78,11 +77,6 @@ Rectangle {
             icon.source:            "/res/QGCLogoFull"
             logo:                   true
             onClicked:              mainWindow.showToolSelectDialog()
-        }
-
-        MainStatusIndicator {
-            Layout.preferredHeight: viewButtonRow.height
-            visible:                currentToolbar === flyViewToolbar
         }
 
         QGCButton {
