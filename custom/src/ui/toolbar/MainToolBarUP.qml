@@ -24,10 +24,13 @@ import Custom.Widgets 1.0
 
 Rectangle {
     id:     _root
-    // TODO: change the color with the commented one after enlarging the view size
-    // color:  currentToolbar === flyViewToolbar ? "transparent" : qgcPal.toolbarBackground
-    color: qgcPal.toolbarBackground
-
+    color:  currentToolbar === flyViewToolbar
+            ? Qt.rgba(
+                qgcPal.toolbarBackground.r,
+                qgcPal.toolbarBackground.g,
+                qgcPal.toolbarBackground.b,
+                0.65
+            ) : qgcPal.toolbarBackground
 
     property int currentToolbar: flyViewToolbar
 

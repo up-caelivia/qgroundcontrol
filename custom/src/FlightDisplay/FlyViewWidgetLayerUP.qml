@@ -234,7 +234,7 @@ Item {
     PhotoVideoControl {
         id:                     photoVideoControl
         anchors.margins:  _toolsMargin
-        anchors.topMargin:    _toolsMargin
+        anchors.rightMargin: _toolsMargin + parentToolInsets.rightEdgeCenterInset
         anchors.right: parent.right
         // width:                  _rightPanelWidth * 0.8
         anchors.verticalCenter: parent.verticalCenter

@@ -71,8 +71,8 @@ RowLayout {
                 border.width: 1
                 border.color: Qt.rgba(
                     qgcPal.text.r,
+                    qgcPal.text.g,
                     qgcPal.text.b,
-                    qgcPal.text.a,
                     0.35
                 )
             }
@@ -157,15 +157,29 @@ RowLayout {
                         return mainStatusLabel._disconnectedText
                     }
                 }
-
             }
 
-            QGCLabel {
+            // Graphical arrow - supported on herelink
+            Canvas {
+                id: graphicalArrow 
+                property real _baseDimension: ScreenTools.defaultFontPointSize
+                property bool _isMobile: ScreenTools.isMobile 
+                width: _isMobile ? _baseDimension * 1.3 : _baseDimension * 0.7
+                height: _isMobile ? _baseDimension * 1.1 : _baseDimension * 0.6
                 Layout.alignment: Qt.AlignVCenter
-                text: "\u25BE"
-                opacity: 0.7
-                font.pointSize: ScreenTools.defaultFontPointSize
                 visible: _activeVehicle
+
+                onPaint: {
+                    var ctx = getContext("2d");
+                    ctx.clearRect(0, 0, width, height);
+                    ctx.fillStyle = qgcPal.text;
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(width, 0);
+                    ctx.lineTo(width / 2, height);
+                    ctx.closePath();
+                    ctx.fill();
+                }
             }
         }
 

@@ -22,7 +22,7 @@ Item {
     Layout.leftMargin:         ScreenTools.defaultFontPixelWidth
     Layout.rightMargin:         ScreenTools.defaultFontPixelWidth
 
-    property real fontPointSize: ScreenTools.mediumFontPointSize
+    property real fontPointSize: ScreenTools.defaultFontPointSize
     property var activeVehicle: QGroundControl.multiVehicleManager.activeVehicle
 
     Component {
