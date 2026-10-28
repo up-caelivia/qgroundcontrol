@@ -74,7 +74,7 @@ Item {
                 radius: ScreenTools.defaultFontPixelHeight * 0.35
                 z: -1
 
-                color: hoverArea.containsMouse
+                color: hoverArea.containsMouse || pressHandler.pressed
                         ? Qt.rgba(
                             qgcPal.text.r,
                             qgcPal.text.g,
@@ -94,6 +94,11 @@ Item {
                 hoverEnabled: !ScreenTools.isMobile
                 acceptedButtons: Qt.NoButton
             }
+
+            TapHandler {
+                id: pressHandler
+                gesturePolicy: TapHandler.DragThreshold
+            }
         }
     }
 
@@ -109,12 +114,7 @@ Item {
         Repeater {
             id:     appRepeater
             model:  QGroundControl.corePlugin.toolBarIndicators
-            Loader {
-                anchors.top:        parent.top
-                anchors.bottom:     parent.bottom
-                source:             modelData
-                visible:            item.showIndicator
-            }
+            delegate: indicatorDelegate
         }
 
         Repeater {
@@ -125,12 +125,7 @@ Item {
 
         Repeater {
             model: _activeVehicle ? _activeVehicle.modeIndicators : []
-            Loader {
-                anchors.top:        parent.top
-                anchors.bottom:     parent.bottom
-                source:             modelData
-                visible:            item.showIndicator
-            }
+            delegate: indicatorDelegate
         }
 
         VerticalSeparator {

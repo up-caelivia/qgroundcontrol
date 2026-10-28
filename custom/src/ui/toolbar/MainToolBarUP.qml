@@ -11,6 +11,7 @@ import QtQuick          2.12
 import QtQuick.Controls 2.4
 import QtQuick.Layouts  1.11
 import QtQuick.Dialogs  1.3
+import QtGraphicalEffects 1.0
 
 import QGroundControl                       1.0
 import QGroundControl.Controls              1.0
@@ -41,6 +42,28 @@ Rectangle {
     property bool   _communicationLost: _activeVehicle ? _activeVehicle.vehicleLinkManager.communicationLost : false
     property color  _mainStatusBGColor: qgcPal.brandingPurple
     property real   _toolbarMargin:     ScreenTools.defaultFontPixelWidth
+    property real   _toolbarBottomRadius: ScreenTools.defaultFontPixelWidth * 1.3
+
+    layer.enabled: currentToolbar === flyViewToolbar 
+    layer.effect: OpacityMask {
+        maskSource: Item {
+            width: _root.width
+            height: _root.height
+            visible: false 
+            clip: true
+
+            Rectangle {
+                width: parent.width
+                height: parent.height + radius
+
+                radius: _root._toolbarBottomRadius
+                y: -radius
+
+                color: "red"
+                antialiasing: true
+            }
+        }
+    }
 
     function dropMessageIndicatorTool() {
         if (currentToolbar === flyViewToolbar) {
@@ -73,10 +96,28 @@ Rectangle {
 
         QGCToolBarButton {
             id:                     currentButton
-            Layout.preferredHeight: viewButtonRow.height
             icon.source:            "/res/QGCLogoFull"
             logo:                   true
             onClicked:              mainWindow.showToolSelectDialog()
+            hoverEnabled:           !ScreenTools.isMobile
+            background: Rectangle {
+                anchors.topMargin: -(_toolbarMargin + ScreenTools.defaultFontPixelWidth * 0.35)
+                anchors.bottomMargin: -(_toolbarMargin + ScreenTools.defaultFontPixelWidth * 0.35)
+                radius: ScreenTools.defaultFontPixelHeight * 0.35
+                color: currentButton.checked
+                    ? qgcPal.buttonHighlight
+                    : currentButton.hovered || currentButton.pressed 
+                        ? Qt.rgba(
+                            qgcPal.text.r,
+                            qgcPal.text.g,
+                            qgcPal.text.b,
+                            0.1
+                        ) : "transparent"
+
+                Behavior on color {
+                    ColorAnimation { duration: 100 }
+                }
+            }
         }
 
         QGCButton {
