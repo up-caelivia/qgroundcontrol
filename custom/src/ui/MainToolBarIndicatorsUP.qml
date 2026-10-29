@@ -27,6 +27,7 @@ Item {
                     ScreenTools.defaultFontPixelWidth * 1.5
 
     property var  _activeVehicle:           QGroundControl.multiVehicleManager.activeVehicle
+    readonly property bool _communicationLost: _activeVehicle ? _activeVehicle.vehicleLinkManager.communicationLost : false
     property real _toolIndicatorMargins:    ScreenTools.defaultFontPixelHeight * 0.66
     property var _indicators:               _activeVehicle ? _activeVehicle.toolIndicators : []
 
@@ -65,16 +66,16 @@ Item {
             anchors.top: parent.top
             anchors.bottom: parent.bottom
             source: modelData
-            visible: item ? item.showIndicator : false
+            visible: !indicatorArea._communicationLost && (item ? item.showIndicator : false)
 
             Rectangle {
                 anchors.fill: parent
                 anchors.margins: -(ScreenTools.defaultFontPixelWidth * 0.35)
 
                 radius: ScreenTools.defaultFontPixelHeight * 0.35
-                z: -1
+                z: 1
 
-                color: hoverArea.containsMouse || pressHandler.pressed
+                color: hoverHandler.hovered || pressHandler.pressed
                         ? Qt.rgba(
                             qgcPal.text.r,
                             qgcPal.text.g,
@@ -86,13 +87,8 @@ Item {
                 }
             }
 
-            MouseArea {
-                id: hoverArea
-                anchors.fill: parent
-                z: 2
-
-                hoverEnabled: !ScreenTools.isMobile
-                acceptedButtons: Qt.NoButton
+            HoverHandler {
+                id: hoverHandler
             }
 
             TapHandler {
@@ -132,6 +128,7 @@ Item {
             referenceHeight: leftIndicatorRow.height
             separatorSpacing: ScreenTools.defaultFontPixelWidth / 2
             anchors.verticalCenter: parent.verticalCenter
+            visible: !indicatorArea._communicationLost
         }
 
         MainStatusIndicator {
@@ -148,6 +145,7 @@ Item {
             anchors.bottom:     parent.bottom
             visible:            _activeVehicle
         }
+
     }
 
     // Right side indicators

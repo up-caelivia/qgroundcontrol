@@ -24,12 +24,14 @@ RowLayout {
     spacing:    0
 
     property var    _activeVehicle:     QGroundControl.multiVehicleManager.activeVehicle
+    readonly property bool _communicationLost: _activeVehicle ? _activeVehicle.vehicleLinkManager.communicationLost : false
     property var    _vehicleInAir:      _activeVehicle ? _activeVehicle.flying || _activeVehicle.landing : false
     property bool   _vtolInFWDFlight:   _activeVehicle ? _activeVehicle.vtolInFwdFlight : false
     property bool   _armed:             _activeVehicle ? _activeVehicle.armed : false
     property real   _margins:           ScreenTools.defaultFontPixelWidth
     property real   _spacing:           ScreenTools.defaultFontPixelWidth / 2
     property bool   _healthAndArmingChecksSupported: _activeVehicle ? _activeVehicle.healthAndArmingCheckReport.supported : false
+    readonly property bool   _statusClickable:   !!_activeVehicle && !_communicationLost
 
 
     Item {
@@ -40,7 +42,7 @@ RowLayout {
         Rectangle {
             anchors.fill: parent
             radius: ScreenTools.defaultFontPixelHeight * 0.35
-            color: statusMouseArea.containsMouse
+            color: _root._statusClickable && (statusMouseArea.containsMouse || statusMouseArea.pressed)
                     ? Qt.rgba(
                         qgcPal.text.r,
                         qgcPal.text.g,
@@ -56,8 +58,8 @@ RowLayout {
             id: statusContent
         
             anchors.fill: parent
-            anchors.leftMargin: _spacing
-            anchors.rightMargin: _spacing
+/*             anchors.leftMargin: _spacing
+            anchors.rightMargin: _spacing */
             spacing: _spacing
 
             Rectangle {
@@ -169,7 +171,7 @@ RowLayout {
                 Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 0.60
                 Layout.alignment: Qt.AlignVCenter
 
-                visible: _activeVehicle !== null
+                visible: _root._statusClickable
             }
         }
 
@@ -177,7 +179,7 @@ RowLayout {
             id: statusMouseArea
 
             anchors.fill: parent
-            enabled: _activeVehicle
+            enabled: _root._statusClickable
             hoverEnabled: !ScreenTools.isMobile
             onClicked: {
                 mainWindow.showIndicatorPopup(
@@ -188,16 +190,16 @@ RowLayout {
         }
     }
 
-    VerticalSeparator {
-        referenceHeight: _root.height
-        separatorSpacing: _spacing
-        visible: flightModeMenu.visible
+    // Separator
+    Item {
+        Layout.preferredWidth:  ScreenTools.defaultFontPixelWidth * ScreenTools.largeFontPointRatio * 1.5
+        height:                 1
     }
 
     FlightModeMenuIndicator {
         id:                     flightModeMenu
         Layout.preferredHeight: _root.height
-        visible:                _activeVehicle
+        visible:                _root._statusClickable
     }
 
     // Separator

@@ -116,7 +116,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         anchors.left:           gpsIcon.right
         // anchors.leftMargin:
-        leftPadding: ScreenTools.defaultFontPixelHeight
+        leftPadding: ScreenTools.defaultFontPixelWidth * 0.5
         spacing: ScreenTools.defaultFontPixelHeight * 0.1
 
         QGCLabel {

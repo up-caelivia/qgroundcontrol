@@ -139,7 +139,7 @@ Rectangle {
         contentWidth:           indicatorLoader.x + indicatorLoader.width
         flickableDirection:     Flickable.HorizontalFlick
 
-        anchors.leftMargin:     _toolbarMargin
+        anchors.leftMargin:     currentToolbar === flyViewToolbar ? _toolbarMargin * 0.5 : _toolbarMargin
         anchors.rightMargin:    _toolbarMargin
         anchors.bottomMargin:   1
         clip: true
