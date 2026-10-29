@@ -180,26 +180,23 @@ Rectangle {
                     z: 1
                 }
 
-                Canvas {
+                QGCColoredImage {
                     id: headingMarker
-                    width: 14
-                    height: 10
-                    visible: root.vehicle !== null 
+
+/*                     width: 14
+                    height: 20 */
+                    width: ScreenTools.defaultFontPointSize
+                    height: ScreenTools.defaultFontPointSize * 1.5
+
+                    source: "/res/DropArrow.svg"
+                    fillMode: Image.Stretch
+                    color: qgcPal.text
+
+                    visible: root.vehicle !== null
+
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.top: parent.top
                     anchors.topMargin: -height / 2
-
-                    onPaint: {
-                        var ctx = getContext("2d");
-                        ctx.clearRect(0, 0, width, height);
-                        ctx.fillStyle = qgcPal.text;
-                        ctx.beginPath();
-                        ctx.moveTo(0, 0);
-                        ctx.lineTo(width, 0);
-                        ctx.lineTo(width / 2, height);
-                        ctx.closePath();
-                        ctx.fill();
-                    }
                 }
             }
         }

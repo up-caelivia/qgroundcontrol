@@ -430,6 +430,7 @@ ApplicationWindow {
     FlyView {
         id:             flightView
         anchors.fill:   parent
+        toolBarOverlay: toolbar.visible ? toolbar.height : 0
     }
 
     PlanView {

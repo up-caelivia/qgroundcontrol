@@ -104,6 +104,7 @@ Item {
     Row {
         id:                 multiVehiclePanelSelector
         anchors.margins:    _toolsMargin
+        anchors.topMargin:  _toolsMargin + parentToolInsets.topEdgeRightInset
         anchors.top:        parent.top
         anchors.right:      parent.right
         width:              _rightPanelWidth
@@ -234,7 +235,7 @@ Item {
     PhotoVideoControl {
         id:                     photoVideoControl
         anchors.margins:  _toolsMargin
-        anchors.topMargin:    _toolsMargin
+        anchors.rightMargin: _toolsMargin + parentToolInsets.rightEdgeCenterInset
         anchors.right: parent.right
         // width:                  _rightPanelWidth * 0.8
         anchors.verticalCenter: parent.verticalCenter

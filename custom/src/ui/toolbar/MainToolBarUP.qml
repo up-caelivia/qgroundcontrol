@@ -11,6 +11,7 @@ import QtQuick          2.12
 import QtQuick.Controls 2.4
 import QtQuick.Layouts  1.11
 import QtQuick.Dialogs  1.3
+import QtGraphicalEffects 1.0
 
 import QGroundControl                       1.0
 import QGroundControl.Controls              1.0
@@ -23,8 +24,13 @@ import Custom.Widgets 1.0
 
 Rectangle {
     id:     _root
-    color:  qgcPal.toolbarBackground
-
+    color:  currentToolbar === flyViewToolbar
+            ? Qt.rgba(
+                qgcPal.toolbarBackground.r,
+                qgcPal.toolbarBackground.g,
+                qgcPal.toolbarBackground.b,
+                0.65
+            ) : qgcPal.toolbarBackground
 
     property int currentToolbar: flyViewToolbar
 
@@ -35,6 +41,29 @@ Rectangle {
     property var    _activeVehicle:     QGroundControl.multiVehicleManager.activeVehicle
     property bool   _communicationLost: _activeVehicle ? _activeVehicle.vehicleLinkManager.communicationLost : false
     property color  _mainStatusBGColor: qgcPal.brandingPurple
+    property real   _toolbarMargin:     ScreenTools.defaultFontPixelWidth
+    property real   _toolbarBottomRadius: ScreenTools.defaultFontPixelWidth * 1.3
+
+    layer.enabled: currentToolbar === flyViewToolbar 
+    layer.effect: OpacityMask {
+        maskSource: Item {
+            width: _root.width
+            height: _root.height
+            visible: false 
+            clip: true
+
+            Rectangle {
+                width: parent.width
+                height: parent.height + radius
+
+                radius: _root._toolbarBottomRadius
+                y: -radius
+
+                color: "red"
+                antialiasing: true
+            }
+        }
+    }
 
     function dropMessageIndicatorTool() {
         if (currentToolbar === flyViewToolbar) {
@@ -57,64 +86,77 @@ Rectangle {
 
     RowLayout {
         id:                     viewButtonRow
-        anchors.bottomMargin:   1
         anchors.top:            parent.top
         anchors.bottom:         parent.bottom
+        anchors.left:           parent.left
+        anchors.leftMargin:     _toolbarMargin
+        anchors.bottomMargin:   1
+
         spacing:                ScreenTools.defaultFontPixelWidth / 2
 
         QGCToolBarButton {
             id:                     currentButton
-            Layout.preferredHeight: viewButtonRow.height
             icon.source:            "/res/QGCLogoFull"
             logo:                   true
             onClicked:              mainWindow.showToolSelectDialog()
-        }
+            hoverEnabled:           !ScreenTools.isMobile
+            background: Rectangle {
+                anchors.topMargin: -(_toolbarMargin + ScreenTools.defaultFontPixelWidth * 0.35)
+                anchors.bottomMargin: -(_toolbarMargin + ScreenTools.defaultFontPixelWidth * 0.35)
+                radius: ScreenTools.defaultFontPixelHeight * 0.35
+                color: currentButton.checked
+                    ? qgcPal.buttonHighlight
+                    : currentButton.hovered || currentButton.pressed 
+                        ? Qt.rgba(
+                            qgcPal.text.r,
+                            qgcPal.text.g,
+                            qgcPal.text.b,
+                            0.1
+                        ) : "transparent"
 
-        // MainStatusIndicator {
-        //     Layout.preferredHeight: viewButtonRow.height
-        //     visible:                currentToolbar === flyViewToolbar
-        //     anchors.right: parent.right
-        // }
+                Behavior on color {
+                    ColorAnimation { duration: 100 }
+                }
+            }
+        }
 
         QGCButton {
             id:                 disconnectButton
             text:               qsTr("Disconnect")
             onClicked:          _activeVehicle.closeVehicle()
             visible:            _activeVehicle && _communicationLost && currentToolbar === flyViewToolbar
+            backRadius:         ScreenTools.defaultFontPixelWidth * 3
         }
     }
 
     // buttons scrollable list
     QGCFlickable {
         id:                     toolsFlickable
-        anchors.leftMargin:     ScreenTools.defaultFontPixelWidth * ScreenTools.largeFontPointRatio * 1.5
         anchors.left:           viewButtonRow.right
-        anchors.bottomMargin:   1
         anchors.top:            parent.top
         anchors.bottom:         parent.bottom
         anchors.right:          parent.right
         contentWidth:           indicatorLoader.x + indicatorLoader.width
         flickableDirection:     Flickable.HorizontalFlick
 
+        anchors.leftMargin:     currentToolbar === flyViewToolbar ? _toolbarMargin * 0.5 : _toolbarMargin
+        anchors.rightMargin:    _toolbarMargin
+        anchors.bottomMargin:   1
+        clip: true
+
         Loader {
             id:                 indicatorLoader
             anchors.left:       parent.left
             anchors.top:        parent.top
             anchors.bottom:     parent.bottom
-            source:             currentToolbar === flyViewToolbar ?
-                                    "qrc:/toolbar/MainToolBarIndicators.qml" :
-                                    (currentToolbar == planViewToolbar ? "qrc:/qml/PlanToolBarIndicators.qml" : "")
+
+            width: Math.max(toolsFlickable.width, item ? item.implicitWidth : 0)
+
+            source:             currentToolbar === flyViewToolbar
+                                    ? "qrc:/toolbar/MainToolBarIndicators.qml"
+                                    : (currentToolbar == planViewToolbar ? "qrc:/qml/PlanToolBarIndicators.qml" : "")
         }
-
     }
-
-    MainStatusIndicator {
-        id: mainIndicator
-        x: parent.width - width - ScreenTools.defaultFontPixelWidth * 2
-        anchors.verticalCenter: parent.verticalCenter
-        visible:                currentToolbar === flyViewToolbar
-    }
-
 
     // Small parameter download progress bar
     Rectangle {

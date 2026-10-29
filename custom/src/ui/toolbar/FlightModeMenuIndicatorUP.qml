@@ -7,7 +7,7 @@
  *
  ****************************************************************************/
 
-import QtQuick 2.11
+import QtQuick 2.12
 import QtQuick.Layouts 1.11
 
 import QGroundControl 1.0
@@ -19,8 +19,10 @@ import QGroundControl.Palette 1.0
 Item {
     id:                     _root
     Layout.preferredWidth:  rowLayout.width
+    Layout.leftMargin:         ScreenTools.defaultFontPixelWidth
+    Layout.rightMargin:         ScreenTools.defaultFontPixelWidth
 
-    property real fontPointSize: ScreenTools.largeFontPointSize
+    property real fontPointSize: ScreenTools.defaultFontPointSize
     property var activeVehicle: QGroundControl.multiVehicleManager.activeVehicle
 
     Component {

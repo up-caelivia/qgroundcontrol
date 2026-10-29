@@ -55,7 +55,7 @@ Item {
         id:                     primaryLinkSelector
         anchors.verticalCenter: parent.verticalCenter
         text:                   _activeVehicle ? _activeVehicle.vehicleLinkManager.primaryLinkName : ""
-        font.pointSize:         ScreenTools.mediumFontPointSize
+        font.pointSize:         ScreenTools.defaultFontPointSize
         color:                  qgcPal.buttonText
 
         MouseArea {

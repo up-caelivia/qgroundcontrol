@@ -35,6 +35,7 @@ Item {
     // These should only be used by MainRootWindow
     property var planController:    _planController
     property var guidedController:  _guidedController
+    property real toolBarOverlay:   0
 
     PlanMasterController {
         id:                     _planController
@@ -71,8 +72,37 @@ Item {
 
     QGCToolInsets {
         id:                     _toolInsets
-        rightEdgeTopInset:      _pipOverlay.visible ? parent.width - _pipOverlay.x : 0
+        readonly property real _sliderRightInset: guidedValueSlider.visible 
+                                                    ? _root.width - guidedValueSlider.x
+                                                    : 0
+
+        rightEdgeTopInset:      Math.max(_sliderRightInset, _pipOverlay.visible ? _root.width - _pipOverlay.x : 0) 
+        rightEdgeCenterInset:   _sliderRightInset
+        rightEdgeBottomInset:   _sliderRightInset
+        
         topEdgeRightInset:      _pipOverlay.visible ? _pipOverlay.y + _pipOverlay.height : 0
+    }
+
+    QGCToolInsets {
+        id: mapToolInsets 
+        
+        readonly property var baseInsets: customOverlay.totalToolInsets
+
+        leftEdgeTopInset: baseInsets.leftEdgeTopInset
+        leftEdgeCenterInset: baseInsets.leftEdgeCenterInset
+        leftEdgeBottomInset: baseInsets.leftEdgeBottomInset
+        
+        rightEdgeTopInset: baseInsets.rightEdgeTopInset
+        rightEdgeCenterInset: baseInsets.rightEdgeCenterInset
+        rightEdgeBottomInset: baseInsets.rightEdgeBottomInset
+
+        bottomEdgeLeftInset: baseInsets.bottomEdgeLeftInset
+        bottomEdgeCenterInset: baseInsets.bottomEdgeCenterInset
+        bottomEdgeRightInset: baseInsets.bottomEdgeRightInset
+
+        topEdgeLeftInset: baseInsets.topEdgeLeftInset + _root.toolBarOverlay
+        topEdgeCenterInset: baseInsets.topEdgeCenterInset + _root.toolBarOverlay
+        topEdgeRightInset: baseInsets.topEdgeRightInset + _root.toolBarOverlay
     }
 
 
@@ -82,10 +112,8 @@ Item {
         anchors.bottom:         parent.bottom
         anchors.left:           parent.left
         anchors.right:           parent.right
-
         // anchors.right:          guidedValueSlider.visible ? guidedValueSlider.left : parent.right
         z:                      _fullItemZorder + 1
-
         parentToolInsets:       _toolInsets
         mapControl:             _mapControl
         visible:                !QGroundControl.videoManager.fullScreen
@@ -209,12 +237,14 @@ Item {
         planMasterController:   _planController
         rightPanelWidth:        ScreenTools.defaultFontPixelHeight * 9
         pipMode:                !_mainWindowIsMap
-        toolInsets:             customOverlay.totalToolInsets
+        toolInsets:             _mainWindowIsMap ? mapToolInsets : customOverlay.totalToolInsets
         mapName:                "FlightDisplayView"
+        anchors.topMargin:       pipState.state === pipState.fullState ?  -_root.toolBarOverlay: 0
     }
 
     FlyViewVideo {
-        id: videoControl
+        id:                     videoControl
+        anchors.topMargin:      pipState.state === pipState.fullState ?  -_root.toolBarOverlay: 0
     }
 
     property var hasVideo: QGroundControl.videoManager.hasVideo ? true : false
@@ -223,21 +253,16 @@ Item {
         id:                     _pipOverlay
         anchors.top:            parent.top
         anchors.right:          parent.right
-
-        // anchors.bottom:            parent.bottom
-        // anchors.left:          parent.left
-
-
         anchors.margins:        _toolsMargin
+        anchors.rightMargin:    _toolsMargin + _toolInsets._sliderRightInset
         item1IsFullSettingsKey: "MainFlyWindowIsMap"
         item1:                  hasVideo ? videoControl : mapControl
         item2:                  hasVideo ? mapControl : null
         fullZOrder:             _fullItemZorder
         pipZOrder:              _pipItemZorder
+        
 
         // show:                   !QGroundControl.videoManager.fullScreen &&
         //                             (videoControl.pipState.state === videoControl.pipState.pipState || mapControl.pipState.state === mapControl.pipState.pipState)
     }
-
-
 }
