@@ -28,14 +28,6 @@ import QGroundControl.ScreenToolsController 1.0
 Item {
     id: _screenTools
 
-    // Reference to the sizing controller
-    property var sizingController: null
-
-    property bool _fontSizingInitialized: false
-    property real _legacyPlatformFontPointSize: 10
-
-    readonly property bool usingSizingController: isAndroid && sizingController !== null && sizingController.valid
-
     //-- The point and pixel font size values are computed at runtime
 
     property real defaultFontPointSize:     10
@@ -115,41 +107,18 @@ Item {
     readonly property string normalFontFamily:      ScreenToolsController.normalFontFamily
     readonly property string demiboldFontFamily:    ScreenToolsController.boldFontFamily
     readonly property string fixedFontFamily:       ScreenToolsController.fixedFontFamily
-
+    /* This mostly works but for some reason, reflowWidths() in SetupView doesn't change size.
+       I've disabled (in release builds) until I figure out why. Changes require a restart for now.
+    */
     Connections {
         target: QGroundControl.settingsManager.appSettings.appFontPointSize
-
         function onValueChanged() {
-            _screenTools._updateFontSizing()
+            _setBasePointSize(QGroundControl.settingsManager.appSettings.appFontPointSize.value)
         }
     }
 
-    Connections {
-        target: _screenTools.sizingController
-
-        function onSizingChanged() {
-            _screenTools._updateFontSizing()
-        }
-    }
-
-    // Reacts to the creation of the biding
-    onSizingControllerChanged: _updateFontSizing()
-    // Changes of physical density
-    onRealPixelDensityChanged: _updateFontSizing()
-
-    function _updateFontSizing() {
-        if (!_fontSizingInitialized) {
-            return
-        }
-
-        if (usingSizingController) {
-            platformFontPointSize = sizingController.baselinePointSize
-            _setBasePointSize(sizingController.effectivePointSize)
-        } else {
-            platformFontPointSize = _legacyPlatformFontPointSize
-            _setBasePointSize(
-                QGroundControl.settingsManager.appSettings.appFontPointSize.value)
-        }
+    onRealPixelDensityChanged: {
+        _setBasePointSize(defaultFontPointSize)
     }
 
     function printScreenStats() {
@@ -220,7 +189,6 @@ Item {
             }
             //-- See if we are using a custom size
             var _appFontPointSizeFact = QGroundControl.settingsManager.appSettings.appFontPointSize
-            _legacyPlatformFontPointSize = platformFontPointSize
             var baseSize = _appFontPointSizeFact.value
             //-- Sanity check
             if(baseSize < _appFontPointSizeFact.min || baseSize > _appFontPointSizeFact.max) {
@@ -228,8 +196,7 @@ Item {
                 _appFontPointSizeFact.value = baseSize
             }
             //-- Set size saved in settings
-            _fontSizingInitialized = true
-            _screenTools._updateFontSizing();
+            _screenTools._setBasePointSize(baseSize);
         }
     }
 }
