@@ -112,6 +112,7 @@
     </qresource>
     <qresource prefix="/json">
         <file alias="NTRIP.SettingsGroup.json">src/Settings/NTRIP.SettingsGroup.json</file>
+        <file alias="UISizing.SettingsGroup.json">src/Settings/UISizing.SettingsGroup.json</file>
     </qresource>
     <qresource prefix="/res">
 		<file alias="Enable_white.svg">res/Images/Enable_white.svg</file>

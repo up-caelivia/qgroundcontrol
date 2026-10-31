@@ -25,6 +25,7 @@ import QGroundControl.Controllers           1.0
 import QGroundControl.SettingsManager       1.0
 
 import Constants 1.0
+import Custom.Settings 1.0
 
 Rectangle {
     id:                 _root
@@ -34,6 +35,7 @@ Rectangle {
 
     property Fact _savePath:                            QGroundControl.settingsManager.appSettings.savePath
     property Fact _appFontPointSize:                    QGroundControl.settingsManager.appSettings.appFontPointSize
+    property Fact _uiScaleFact:                         ScreenTools.usingSizingController ? UISizingSettings.userScalePercent : _appFontPointSize
     property Fact _userBrandImageIndoor:                QGroundControl.settingsManager.brandImageSettings.userBrandImageIndoor
     property Fact _userBrandImageOutdoor:               QGroundControl.settingsManager.brandImageSettings.userBrandImageOutdoor
     property Fact _virtualJoystick:                     QGroundControl.settingsManager.appSettings.virtualJoystick
@@ -67,12 +69,13 @@ Rectangle {
     readonly property real _internalWidthRatio: 0.8
 
     function adjustUIScale(direction) {
-        var step = ScreenTools.platformFontPointSize * 0.10
-        var nextValue = _appFontPointSize.value + direction * step
+        var step = ScreenTools.usingSizingController ? 10 : ScreenTools.platformFontPointSize * 0.10
+        var next = _uiScaleFact.value + (direction * step)
 
-        _appFontPointSize.value = Math.max(
-            _appFontPointSize.min,
-            Math.min(_appFontPointSize.max, nextValue))
+        _uiScaleFact.value = Math.max(
+            _uiScaleFact.min,
+            Math.min(_uiScaleFact.max, next)
+        )
     }
 
         QGCFlickable {
@@ -648,7 +651,7 @@ Rectangle {
                                 Item {
                                     width:                          _comboFieldWidth
                                     height:                         baseFontEdit.height * 1.5
-                                    visible:                        _appFontPointSize.visible
+                                    visible:                        _uiScaleFact.visible
                                     Layout.alignment:               Qt.AlignVCenter
                                     Row {
                                         spacing:                    ScreenTools.defaultFontPixelWidth
@@ -663,7 +666,9 @@ Rectangle {
                                         QGCLabel {
                                             id:                     baseFontEdit
                                             width:                  ScreenTools.defaultFontPixelWidth * 6
-                                            text:                   (QGroundControl.settingsManager.appSettings.appFontPointSize.value / ScreenTools.platformFontPointSize * 100).toFixed(0) + "%"
+                                            text:                   ScreenTools.usingSizingController
+                                                                        ?  _uiScaleFact.value.toFixed(0) + "%"
+                                                                        : (_uiScaleFact.value / ScreenTools.platformFontPointSize * 100).toFixed(0) + "%"
                                             horizontalAlignment:    Text.AlignHCenter
                                             anchors.verticalCenter: parent.verticalCenter
                                         }
@@ -678,6 +683,68 @@ Rectangle {
                                             anchors.verticalCenter: parent.verticalCenter
                                             onClicked: adjustUIScale(1)
                                         }
+                                    }
+                                }
+
+                                QGCLabel {
+                                    text: qsTr("UI reference")
+                                    visible: ScreenTools.isAndroid
+                                }
+
+                                QGCButton {
+                                    text: qsTr("Save current 100% reference")
+                                    visible: ScreenTools.isAndroid
+
+                                    enabled: ScreenTools.platformFontPointSize > 0
+                                            && Math.abs(
+                                                ScreenTools.defaultFontPointSize
+                                                / ScreenTools.platformFontPointSize - 1.0) < 0.001
+
+                                    onClicked: {
+                                        text = mainWindow.saveUISizingReference()
+                                                ? qsTr("Reference saved")
+                                                : qsTr("Reference unavailable")
+                                    }
+                                }
+
+                                QGCLabel {
+                                    text: qsTr("Saved UI reference")
+                                    visible: ScreenTools.isAndroid
+                                }
+
+                                QGCLabel {
+                                    visible: ScreenTools.isAndroid
+                                    Layout.preferredWidth: _comboFieldWidth
+                                    wrapMode: Text.WordWrap
+
+                                    text: qsTr("%1 × %2\n%3 DPI\n%4 pt")
+                                        .arg(UISizingSettings.referenceViewportWidth.value)
+                                        .arg(UISizingSettings.referenceViewportHeight.value)
+                                        .arg(UISizingSettings.referenceLogicalDpi.value)
+                                        .arg(UISizingSettings.referenceFontPointSize.value)
+                                }
+
+                                QGCLabel {
+                                    text: qsTr("Calculated font size")
+                                    visible: ScreenTools.isAndroid
+                                }
+
+                                QGCLabel {
+                                    visible: ScreenTools.isAndroid
+                                    Layout.preferredWidth: _comboFieldWidth
+                                    wrapMode: Text.WordWrap
+
+                                    text: {
+                                        var controller = ScreenTools.sizingController
+
+                                        if (!controller || !controller.valid) {
+                                            return qsTr("Reference incomplete")
+                                        }
+
+                                        return qsTr("Baseline: %1 pt\nCalculated: %2 pt\nIn use: %3 pt")
+                                            .arg(controller.baselinePointSize.toFixed(2))
+                                            .arg(controller.effectivePointSize.toFixed(2))
+                                            .arg(ScreenTools.defaultFontPointSize.toFixed(2))
                                     }
                                 }
                             }

@@ -14,6 +14,8 @@
 
 #include "CustomPlugin.h"
 #include "SpeedController/SpeedSelectorController.h"
+#include "QmlControls/UISizingController.h"
+#include "Settings/UISizingSettings.h"
 #include "qcoreapplication.h"
 #include "SettingsManager.h"
 
@@ -288,12 +290,20 @@ QQmlApplicationEngine* CustomPlugin::createQmlApplicationEngine(QObject* parent)
     qmlEngine->addImportPath("qrc:/");
 
     qmlRegisterSingletonType<Constants>("Constants", 1, 0, "Constants", Constants::constants_singleton_provider);
+    qmlRegisterSingletonType<UISizingSettings>(
+        "Custom.Settings",
+        1, 0,
+        "UISizingSettings",
+        [](QQmlEngine* engine, QJSEngine*) -> QObject* {
+            return new UISizingSettings(engine);
+        });
 
     qmlEngine->rootContext()->setContextProperty("CustomPlugin", this);
 
     qmlRegisterSingletonType<KmlPolygonLoader>("QGroundControl.KML", 1, 0, "KmlPolygonLoader", kmlPolygonLoader_singletontype_provider);
 
     qmlRegisterType<SpeedSelectorController>("Custom.Controllers", 1, 0, "SpeedSelectorController");
+    qmlRegisterType<UISizingController>("Custom.Controllers", 1, 0, "UISizingController");
 
     #ifdef QT_DEBUG     // start with a custom connection only in debug build!
         MockLink::startAPMArduCopterMockLink(false);

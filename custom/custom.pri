@@ -144,7 +144,11 @@ SOURCES += \
     $$PWD/src/VideoStreamControl.cc \
     $$PWD/src/GeoAwareness/KmlPolygonObject.cpp \
     $$PWD/src/GeoAwareness/KmlPolygonLoader.cpp \
-    $$PWD/src/SpeedController/SpeedSelectorController.cpp
+    $$PWD/src/SpeedController/SpeedSelectorController.cpp \
+    $$PWD/src/QmlControls/DisplayMetricsAdapter.cpp \
+    $$PWD/src/QmlControls/UISizingController.cpp \
+    $$PWD/src/QmlControls/UISizingPolicy.cpp \
+    $$PWD/src/Settings/UISizingSettings.cpp
 
 HEADERS += \
     $$PWD/src/CustomPlugin.h \
@@ -155,7 +159,11 @@ HEADERS += \
     $$PWD/src/VideoStreamControl.h \
     $$PWD/src/GeoAwareness/KmlPolygonObject.h \
     $$PWD/src/GeoAwareness/KmlPolygonLoader.h \
-    $$PWD/src/SpeedController/SpeedSelectorController.h
+    $$PWD/src/SpeedController/SpeedSelectorController.h \
+    $$PWD/src/QmlControls/DisplayMetricsAdapter.h \
+    $$PWD/src/QmlControls/UISizingController.h \
+    $$PWD/src/QmlControls/UISizingPolicy.h \
+    $$PWD/src/Settings/UISizingSettings.h
 
 INCLUDEPATH += $$PWD/src \
                $$PWD/src/GeoAwareness
