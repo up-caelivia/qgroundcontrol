@@ -48,6 +48,7 @@ ApplicationWindow {
         id: uiSizingController
 
         window: mainWindow
+        // TBD: for the moment kept for Android, which is the main use case
         enabled: ScreenTools.isAndroid
 
         referenceViewportSize: Qt.size(
@@ -66,23 +67,6 @@ ApplicationWindow {
         target: ScreenTools
         property: "sizingController"
         value: uiSizingController
-    }
-
-    function saveUISizingReference() {
-        if (!ScreenTools.isAndroid) {
-            return false
-        }
-        var metrics = uiSizingController.currentDisplayMetrics()
-
-        if (metrics.viewportWidth === undefined) {
-            return false
-        }
-
-        return UISizingSettings.saveReference(
-            metrics.viewportWidth,
-            metrics.viewportHeight,
-            metrics.logicalDpi,
-            ScreenTools.defaultFontPointSize)
     }
 
     QtObject {

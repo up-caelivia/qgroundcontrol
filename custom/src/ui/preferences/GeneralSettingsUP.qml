@@ -645,7 +645,7 @@ Rectangle {
                                 }
                                 QGCLabel {
                                     text:                           qsTr("UI Scaling")
-                                    visible:                        _appFontPointSize.visible
+                                    visible:                        _uiScaleFact.visible
                                     Layout.alignment:               Qt.AlignVCenter
                                 }
                                 Item {
@@ -683,68 +683,6 @@ Rectangle {
                                             anchors.verticalCenter: parent.verticalCenter
                                             onClicked: adjustUIScale(1)
                                         }
-                                    }
-                                }
-
-                                QGCLabel {
-                                    text: qsTr("UI reference")
-                                    visible: ScreenTools.isAndroid
-                                }
-
-                                QGCButton {
-                                    text: qsTr("Save current 100% reference")
-                                    visible: ScreenTools.isAndroid
-
-                                    enabled: ScreenTools.platformFontPointSize > 0
-                                            && Math.abs(
-                                                ScreenTools.defaultFontPointSize
-                                                / ScreenTools.platformFontPointSize - 1.0) < 0.001
-
-                                    onClicked: {
-                                        text = mainWindow.saveUISizingReference()
-                                                ? qsTr("Reference saved")
-                                                : qsTr("Reference unavailable")
-                                    }
-                                }
-
-                                QGCLabel {
-                                    text: qsTr("Saved UI reference")
-                                    visible: ScreenTools.isAndroid
-                                }
-
-                                QGCLabel {
-                                    visible: ScreenTools.isAndroid
-                                    Layout.preferredWidth: _comboFieldWidth
-                                    wrapMode: Text.WordWrap
-
-                                    text: qsTr("%1 × %2\n%3 DPI\n%4 pt")
-                                        .arg(UISizingSettings.referenceViewportWidth.value)
-                                        .arg(UISizingSettings.referenceViewportHeight.value)
-                                        .arg(UISizingSettings.referenceLogicalDpi.value)
-                                        .arg(UISizingSettings.referenceFontPointSize.value)
-                                }
-
-                                QGCLabel {
-                                    text: qsTr("Calculated font size")
-                                    visible: ScreenTools.isAndroid
-                                }
-
-                                QGCLabel {
-                                    visible: ScreenTools.isAndroid
-                                    Layout.preferredWidth: _comboFieldWidth
-                                    wrapMode: Text.WordWrap
-
-                                    text: {
-                                        var controller = ScreenTools.sizingController
-
-                                        if (!controller || !controller.valid) {
-                                            return qsTr("Reference incomplete")
-                                        }
-
-                                        return qsTr("Baseline: %1 pt\nCalculated: %2 pt\nIn use: %3 pt")
-                                            .arg(controller.baselinePointSize.toFixed(2))
-                                            .arg(controller.effectivePointSize.toFixed(2))
-                                            .arg(ScreenTools.defaultFontPointSize.toFixed(2))
                                     }
                                 }
                             }

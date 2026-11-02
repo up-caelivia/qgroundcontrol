@@ -56,8 +56,6 @@ class UISizingController : public QObject
 public:
     explicit UISizingController(QObject* parent = nullptr);
 
-    Q_INVOKABLE QVariantMap currentDisplayMetrics() const;
-
     QQuickWindow* window() const; 
     void setWindow(QQuickWindow* window);
 

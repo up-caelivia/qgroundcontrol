@@ -1,5 +1,4 @@
 #include "UISizingController.h"
-#include "qstringliteral.h"
 
 UISizingController::UISizingController(QObject* parent)
     : QObject(parent)
@@ -89,7 +88,6 @@ void UISizingController::setReferenceLogicalDpi(qreal dpi)
     return UISizingController::_setNumber(_reference.logicalDpi, dpi);
 }
 
-
 void UISizingController::setReferenceFontPointSize(qreal pointSize)
 {
     return UISizingController::_setNumber(_reference.fontPointSize, pointSize);
@@ -173,17 +171,4 @@ void UISizingController::_publishResult(const UISizingPolicy::Result& result)
     _result = result;
 
     emit sizingChanged();
-}
-
-QVariantMap UISizingController::currentDisplayMetrics() const
-{
-    if (!_displayMetrics.isValid()) {
-        return {};
-    }
-
-    return {
-        {QStringLiteral("viewportWidth"), _displayMetrics.viewportWidth()},
-        {QStringLiteral("viewportHeight"), _displayMetrics.viewportHeight()},
-        {QStringLiteral("logicalDpi"), _displayMetrics.logicalDpi()},
-    };
 }

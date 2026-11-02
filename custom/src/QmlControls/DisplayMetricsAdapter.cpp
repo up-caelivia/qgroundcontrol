@@ -1,10 +1,4 @@
 #include "DisplayMetricsAdapter.h"
-#include "qglobal.h"
-#include "qobject.h"
-#include "qobjectdefs.h"
-#include "qquickwindow.h"
-#include "qscreen.h"
-#include "qwindow.h"
 
 #include <cmath>
 
@@ -22,7 +16,6 @@ DisplayMetricsAdapter::DisplayMetricsAdapter(QObject* parent)
 {
 }
 
-
 DisplayMetricsAdapter::~DisplayMetricsAdapter() 
 {
     _disconnectConnections(_windowConnections); 
@@ -39,7 +32,7 @@ void DisplayMetricsAdapter::setWindow(QQuickWindow *window)
     if (_window.data() == window) {
         return;
     }
-    
+ 
     _disconnectConnections(_windowConnections);
     _window = window;
 

@@ -10,6 +10,7 @@
 import QtQuick          2.3
 import QtQuick.Window   2.2
 import QtQuick.Controls 1.2
+import QtQuick.Layouts  1.2
 
 import QGroundControl               1.0
 import QGroundControl.Palette       1.0
@@ -52,30 +53,11 @@ Rectangle {
         flickableDirection: Flickable.VerticalFlick
         clip:               true
 
-        Column {
+        ColumnLayout {
             id:         buttonColumn
-            width:      _maxButtonWidth
+            width:      implicitWidth 
+            height:     implicitHeight
             spacing:    _defaultTextHeight / 2
-
-            property real _maxButtonWidth: 0
-
-            Component.onCompleted: reflowWidths()
-
-            // I don't know why this does not work
-            Connections {
-                target:         QGroundControl.settingsManager.appSettings.appFontPointSize
-                onValueChanged: buttonColumn.reflowWidths()
-            }
-
-            function reflowWidths() {
-                buttonColumn._maxButtonWidth = 0
-                for (var i = 0; i < children.length; i++) {
-                    buttonColumn._maxButtonWidth = Math.max(buttonColumn._maxButtonWidth, children[i].width)
-                }
-                for (var j = 0; j < children.length; j++) {
-                    children[j].width = buttonColumn._maxButtonWidth
-                }
-            }
 
             Repeater {
                 id:     buttonRepeater
@@ -85,6 +67,9 @@ Rectangle {
 
                 SubMenuButton {
                     id:                 subMenu
+
+                    Layout.fillWidth:   true
+
                     imageResource:      modelData.icon
                     setupIndicator:     false
                     exclusiveGroup:     setupButtonGroup

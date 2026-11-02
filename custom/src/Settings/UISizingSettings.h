@@ -1,7 +1,6 @@
 #pragma once
 
 #include "SettingsGroup.h"
-#include "qobjectdefs.h"
 
 class UISizingSettings : public SettingsGroup
 {
@@ -20,11 +19,4 @@ public:
     DEFINE_SETTINGFACT(maximumFontPixelSize)
 
     DEFINE_SETTINGFACT(userScalePercent)
-
-    Q_INVOKABLE bool saveReference(
-        double viewportWidth,
-        double viewportHeight,
-        double logicalDpi,
-        double fontPointSize
-    );
 };
