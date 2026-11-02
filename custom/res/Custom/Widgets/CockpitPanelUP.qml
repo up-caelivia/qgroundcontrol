@@ -183,10 +183,8 @@ Rectangle {
                 QGCColoredImage {
                     id: headingMarker
 
-/*                     width: 14
-                    height: 20 */
-                    width: ScreenTools.defaultFontPointSize
-                    height: ScreenTools.defaultFontPointSize * 1.5
+                    width: ScreenTools.defaultFontPixelWidth * 1.5
+                    height: width * 1.8
 
                     source: "/res/DropArrow.svg"
                     fillMode: Image.Stretch
