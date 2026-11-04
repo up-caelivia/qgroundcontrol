@@ -103,6 +103,7 @@
         <file alias="QGroundControl/FlightDisplay/FlyViewMissionCompleteDialog.qml">src/FlightDisplay/FlyViewMissionCompleteDialogUP.qml</file>
         <file alias="QGroundControl/FlightDisplay/FlyViewToolStripActionList.qml">src/FlightDisplay/FlyViewToolStripActionListUP.qml</file>
 		<file alias="QGroundControl/FlightDisplay/GuidedActionsController.qml">src/FlightDisplay/GuidedActionsControllerUP.qml</file>
+        <file alias="QGroundControl/ScreenTools/ScreenTools.qml">src/QmlControls/ScreenToolsUP.qml</file>
     </qresource>
     <qresource prefix="/toolbar">
         <file alias="GPSIndicator.qml">src/ui/toolbar/GPSIndicatorUP.qml</file>
@@ -112,6 +113,7 @@
     </qresource>
     <qresource prefix="/json">
         <file alias="NTRIP.SettingsGroup.json">src/Settings/NTRIP.SettingsGroup.json</file>
+        <file alias="UISizing.SettingsGroup.json">src/Settings/UISizing.SettingsGroup.json</file>
     </qresource>
     <qresource prefix="/res">
 		<file alias="Enable_white.svg">res/Images/Enable_white.svg</file>

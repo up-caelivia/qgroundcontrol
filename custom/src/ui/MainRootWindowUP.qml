@@ -20,6 +20,9 @@ import QGroundControl.ScreenTools   1.0
 import QGroundControl.FlightDisplay 1.0
 import QGroundControl.FlightMap     1.0
 
+import Custom.Controllers 1.0
+import Custom.Settings 1.0
+
 /// @brief Native QML top level window
 /// All properties defined here are visible to all QML pages.
 ApplicationWindow {
@@ -39,6 +42,31 @@ ApplicationWindow {
 
         // Start the sequence of first run prompt(s)
         firstRunPromptManager.nextPrompt()
+    }
+
+    UISizingController {
+        id: uiSizingController
+
+        window: mainWindow
+        // TBD: for the moment kept for Android, which is the main use case
+        enabled: ScreenTools.isAndroid
+
+        referenceViewportSize: Qt.size(
+            UISizingSettings.referenceViewportWidth.value,
+            UISizingSettings.referenceViewportHeight.value)
+        referenceLogicalDpi: UISizingSettings.referenceLogicalDpi.value
+        referenceFontPointSize: UISizingSettings.referenceFontPointSize.value
+
+        minimumFontPixelSize: UISizingSettings.minimumFontPixelSize.value
+        maximumFontPixelSize: UISizingSettings.maximumFontPixelSize.value
+
+        userScalePercent: UISizingSettings.userScalePercent.value
+    }
+
+    Binding {
+        target: ScreenTools
+        property: "sizingController"
+        value: uiSizingController
     }
 
     QtObject {

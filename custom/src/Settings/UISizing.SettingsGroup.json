@@ -1,0 +1,67 @@
+{
+    "version": 1,
+    "fileType": "FactMetaData",
+    "QGC.MetaData.Facts":
+[
+{
+    "name": "referenceViewportWidth",
+    "shortDesc": "Reference window width",
+    "longDesc": "Reference application window width in Qt coordinates",
+    "type": "double",
+    "units": "px",
+    "min": 0,
+    "default": 1920
+},
+{
+    "name": "referenceViewportHeight",
+    "shortDesc": "Reference window height",
+    "longDesc": "Reference application window height in Qt coordinates",
+    "type": "double",
+    "units": "px",
+    "min": 0,
+    "default": 1080
+},
+{
+    "name": "referenceLogicalDpi",
+    "shortDesc": "Reference logical DPI",
+    "type": "double",
+    "units": "dpi",
+    "min": 0,
+    "default": 189
+},
+{
+    "name": "referenceFontPointSize",
+    "shortDesc": "Reference font point size",
+    "longDesc": "Baseline font point size on the reference controller at 100% scale",
+    "type": "double",
+    "units": "pt",
+    "min": 0,
+    "default": 11
+},
+{
+    "name": "minimumFontPixelSize",
+    "shortDesc": "Minimum nominal font pixel size",
+    "type": "double",
+    "units": "px",
+    "min": 0,
+    "default": 14.4375
+},
+{
+    "name": "maximumFontPixelSize",
+    "shortDesc": "Maximum nominal font pixel size",
+    "type": "double",
+    "units": "px",
+    "min": 0,
+    "default": 57.75
+},
+{
+    "name": "userScalePercent",
+    "shortDesc": "UI scaling",
+    "type": "double",
+    "units": "%",
+    "min": 50,
+    "max": 200,
+    "default": 100
+}
+]
+}

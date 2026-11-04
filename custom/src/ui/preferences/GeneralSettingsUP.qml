@@ -25,6 +25,7 @@ import QGroundControl.Controllers           1.0
 import QGroundControl.SettingsManager       1.0
 
 import Constants 1.0
+import Custom.Settings 1.0
 
 Rectangle {
     id:                 _root
@@ -34,6 +35,7 @@ Rectangle {
 
     property Fact _savePath:                            QGroundControl.settingsManager.appSettings.savePath
     property Fact _appFontPointSize:                    QGroundControl.settingsManager.appSettings.appFontPointSize
+    property Fact _uiScaleFact:                         ScreenTools.usingSizingController ? UISizingSettings.userScalePercent : _appFontPointSize
     property Fact _userBrandImageIndoor:                QGroundControl.settingsManager.brandImageSettings.userBrandImageIndoor
     property Fact _userBrandImageOutdoor:               QGroundControl.settingsManager.brandImageSettings.userBrandImageOutdoor
     property Fact _virtualJoystick:                     QGroundControl.settingsManager.appSettings.virtualJoystick
@@ -67,12 +69,13 @@ Rectangle {
     readonly property real _internalWidthRatio: 0.8
 
     function adjustUIScale(direction) {
-        var step = ScreenTools.platformFontPointSize * 0.10
-        var nextValue = _appFontPointSize.value + direction * step
+        var step = ScreenTools.usingSizingController ? 10 : ScreenTools.platformFontPointSize * 0.10
+        var next = _uiScaleFact.value + (direction * step)
 
-        _appFontPointSize.value = Math.max(
-            _appFontPointSize.min,
-            Math.min(_appFontPointSize.max, nextValue))
+        _uiScaleFact.value = Math.max(
+            _uiScaleFact.min,
+            Math.min(_uiScaleFact.max, next)
+        )
     }
 
         QGCFlickable {
@@ -642,13 +645,13 @@ Rectangle {
                                 }
                                 QGCLabel {
                                     text:                           qsTr("UI Scaling")
-                                    visible:                        _appFontPointSize.visible
+                                    visible:                        _uiScaleFact.visible
                                     Layout.alignment:               Qt.AlignVCenter
                                 }
                                 Item {
                                     width:                          _comboFieldWidth
                                     height:                         baseFontEdit.height * 1.5
-                                    visible:                        _appFontPointSize.visible
+                                    visible:                        _uiScaleFact.visible
                                     Layout.alignment:               Qt.AlignVCenter
                                     Row {
                                         spacing:                    ScreenTools.defaultFontPixelWidth
@@ -663,7 +666,9 @@ Rectangle {
                                         QGCLabel {
                                             id:                     baseFontEdit
                                             width:                  ScreenTools.defaultFontPixelWidth * 6
-                                            text:                   (QGroundControl.settingsManager.appSettings.appFontPointSize.value / ScreenTools.platformFontPointSize * 100).toFixed(0) + "%"
+                                            text:                   ScreenTools.usingSizingController
+                                                                        ?  _uiScaleFact.value.toFixed(0) + "%"
+                                                                        : (_uiScaleFact.value / ScreenTools.platformFontPointSize * 100).toFixed(0) + "%"
                                             horizontalAlignment:    Text.AlignHCenter
                                             anchors.verticalCenter: parent.verticalCenter
                                         }
