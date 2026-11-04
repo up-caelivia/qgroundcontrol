@@ -19,6 +19,7 @@ import QGroundControl.ScreenTools   1.0
 import QGroundControl.FactSystem    1.0
 import QGroundControl.FlightMap     1.0
 import QGroundControl.FlightDisplay 1.0
+
 import Custom.Widgets 1.0
 import CustomAnnouncer 1.0
 import Custom.Controllers 1.0
@@ -30,7 +31,8 @@ Item {
     property var totalToolInsets: _totalToolInsets    // The insets updated for the custom overlay additions
 
     property var vehicle: null
-    property real   _toolsMargin:           ScreenTools.defaultFontPixelWidth * 0.75
+    property real _toolsMargin: ScreenTools.defaultFontPixelWidth * 0.75
+    property bool showInstrumentPanel: true
 
     readonly property real uiScale:
         ScreenTools.defaultFontPointSize / ScreenTools.platformFontPointSize
@@ -93,37 +95,31 @@ Item {
     }
 
     QGCToolInsets {
-        id:                     _totalToolInsets
+        id: _totalToolInsets
         leftEdgeTopInset:       parentToolInsets.leftEdgeTopInset
-        //leftEdgeCenterInset:    exampleRectangle.leftEdgeCenterInset
-        leftEdgeCenterInset: parentToolInsets.leftEdgeCenterInset
-        // leftEdgeBottomInset:    parentToolInsets.leftEdgeBottomInset
-        leftEdgeBottomInset: Math.max(
+        leftEdgeCenterInset:    parentToolInsets.leftEdgeCenterInset
+        leftEdgeBottomInset:    Math.max(
                                     parentToolInsets.leftEdgeBottomInset,
                                     speedControl.visible ? speedControl.x + speedControl.width : 0
         )
         rightEdgeTopInset:      parentToolInsets.rightEdgeTopInset
         rightEdgeCenterInset:   parentToolInsets.rightEdgeCenterInset
-        //rightEdgeBottomInset:   parent.width - compassBackground.x
         rightEdgeBottomInset:   Math.max(
             parentToolInsets.rightEdgeBottomInset,
-            parent.width - cockpitGroup.x
+            cockpitGroup.visible ? parent.width - cockpitGroup.x : 0
         )
         topEdgeLeftInset:       parentToolInsets.topEdgeLeftInset
-        //topEdgeCenterInset:     compassArrowIndicator.y + compassArrowIndicator.height
-        topEdgeCenterInset: parentToolInsets.topEdgeCenterInset
+        topEdgeCenterInset:     parentToolInsets.topEdgeCenterInset
         topEdgeRightInset:      parentToolInsets.topEdgeRightInset
-        // bottomEdgeLeftInset:    parentToolInsets.bottomEdgeLeftInset
-        bottomEdgeLeftInset: Math.max(
+        bottomEdgeLeftInset:    Math.max(
                                     parentToolInsets.bottomEdgeLeftInset,
                                     speedControl.visible ? parent.height - speedControl.y : 0
         )
         bottomEdgeCenterInset:  parentToolInsets.bottomEdgeCenterInset
-        // bottomEdgeRightInset:   parent.height - attitudeIndicator.y
         bottomEdgeRightInset:   Math.max(
-            parentToolInsets.bottomEdgeRightInset,
-            parent.height - cockpitGroup.y
-        )
+                                    parentToolInsets.bottomEdgeRightInset,
+                                    cockpitGroup.visible ? parent.height - cockpitGroup.y : 0
+                                )
     }
 
     SpeedSelectorController {
@@ -134,7 +130,7 @@ Item {
     CustomSpeedSelector {
         id: speedControl
         anchors.left: parent.left
-        anchors.leftMargin: _toolsMargin + parentToolInsets.leftEdgeBottomInset
+        anchors.leftMargin: _toolsMargin
         anchors.bottom: parent.bottom
         anchors.bottomMargin: _toolsMargin + parentToolInsets.bottomEdgeLeftInset
         controller: speedController
@@ -179,6 +175,7 @@ Item {
         transformOrigin: Item.TopLeft
         x: root.width - root.cockpitRightClearance - _toolsMargin - width * fitScale
         y: root.height - root.cockpitBottomClearance - _toolsMargin - height * fitScale
+        visible: root.showInstrumentPanel
 
         CockpitPanelUP {
             id: cockpitPanel

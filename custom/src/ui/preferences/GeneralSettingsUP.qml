@@ -146,6 +146,7 @@ Rectangle {
                                 property Fact _showLogReplayStatusBar: QGroundControl.settingsManager.flyViewSettings.showLogReplayStatusBar
                             }
 
+                            /* TBD: for the moment this is an unwanted functionality, commented for future development
                             RowLayout {
                                 spacing: ScreenTools.defaultFontPixelWidth
 
@@ -162,6 +163,7 @@ Rectangle {
                                     fact:       _virtualJoystickAutoCenterThrottle
                                 }
                             }
+                            */
 
                             FactCheckBox {
                                 text:       qsTr("Use Vertical Instrument Panel")

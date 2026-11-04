@@ -20,7 +20,7 @@ Item {
     width:      _pipSize
     height:     _pipSize * (9/16)
     z:          pipZOrder + 1
-    visible:    item2 && item2.pipState !== item2.pipState.window && show
+    visible:    show && _pipOrWindowItem && _pipOrWindowItem.pipState.state !== _pipOrWindowItem.pipState.windowState
 
     property var    item1:                  null    // Required
     property var    item2:                  null    // Optional, may come and go
@@ -28,6 +28,8 @@ Item {
     property real   fullZOrder:             0       // zOrder for items in full mode
     property real   pipZOrder:              1       // zOrder for items in pip mode
     property bool   show:                   true
+    readonly property real occupiedWidth: visible ? (_isExpanded ? width : hidePIP.width) + ScreenTools.defaultFontPointSize : 0
+    readonly property real occupiedHeight: visible ? (_isExpanded ? height : hidePIP.height) + ScreenTools.defaultFontPointSize : 0
 
     readonly property string _pipExpandedSettingsKey: "IsPIPVisible"
 
@@ -127,8 +129,8 @@ Item {
     MouseArea {
         id:             pipResize
 
-        anchors.left:   parent.left
-        anchors.bottom: parent.bottom
+        anchors.right:   parent.right
+        anchors.top: parent.top
 
         height:         ScreenTools.minTouchPixels
         width:          ScreenTools.minTouchPixels
@@ -140,8 +142,8 @@ Item {
 
         // When we push the mouse button down, we un-anchor the mouse area to prevent a resizing loop
         onPressed: {
-            pipResize.anchors.bottom = undefined // Top doesn't seem to 'detach'
-            pipResize.anchors.left = undefined // This one works right, which is what we really need
+            pipResize.anchors.top = undefined // Tleftop doesn't seem to 'detach'
+            pipResize.anchors.right = undefined // This one works right, which is what we really need
 
             var positionInWindow = mapToItem(window.contentItem, mouse.x, mouse.y)
 
@@ -152,8 +154,8 @@ Item {
 
         // When we let go of the mouse button, we re-anchor the mouse area in the correct position
         onReleased: {
-            pipResize.anchors.bottom = _root.bottom
-            pipResize.anchors.left = _root.left
+            pipResize.anchors.top = _root.top
+            pipResize.anchors.right = _root.right
         }
 
         // Drag
@@ -162,10 +164,10 @@ Item {
 
                 var parentWidth = _root.parent.width
                 var positionInWindow = mapToItem(window.contentItem, mouse.x, mouse.y)
-                var newWidth = pipResize.initialWidth - (positionInWindow.x - pipResize.initialX)
+                var newWidth = pipResize.initialWidth + (positionInWindow.x - pipResize.initialX)
 
                 if (newWidth < parentWidth * _maxSize && newWidth > parentWidth * _minSize) {
-                        _pipSize = newWidth;
+                    _pipSize = newWidth;
                 }
             }
         }
@@ -177,9 +179,8 @@ Item {
         fillMode:       Image.PreserveAspectFit
         mipmap: true
 
-        anchors.left:   parent.left
-        anchors.bottom: parent.bottom
-        rotation: 180
+        anchors.right:   parent.right
+        anchors.top: parent.top
 
         visible:        _isExpanded && (ScreenTools.isMobile || pipMouseArea.containsMouse)
         height:         ScreenTools.defaultFontPixelHeight * 2.5
@@ -225,54 +226,52 @@ Item {
         }
     }
 
-    Image {
-        id:             hidePIP
-        source:         "/qmlimages/pipHide.svg"
-        mipmap:         true
-        fillMode:       Image.PreserveAspectFit
-
-        rotation: 180
-
-        anchors.right:  parent.right
-        anchors.top:    parent.top
-
-        visible:        _isExpanded && (ScreenTools.isMobile || pipMouseArea.containsMouse)
-        height:         ScreenTools.defaultFontPixelHeight * 2.5
-        width:          ScreenTools.defaultFontPixelHeight * 2.5
-        sourceSize.height:  height
-        MouseArea {
-            anchors.fill:   parent
-            onClicked:      _root._setPipIsExpanded(false)
-        }
-    }
-
     Rectangle {
-        id:                     showPip
-        // anchors.left :          parent.left
-        // anchors.bottom:         parent.bottom
+        id: hidePIP
 
-        rotation: 180
-        anchors.right:  parent.right
-        anchors.top:    parent.top
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
 
         height:                 ScreenTools.defaultFontPixelHeight * 2
         width:                  ScreenTools.defaultFontPixelHeight * 2
         radius:                 ScreenTools.defaultFontPixelHeight / 3
-        visible:                !_isExpanded
-        color:                  _fullItem.pipState.isDark ? Qt.rgba(0,0,0,0.75) : Qt.rgba(0,0,0,0.5)
+        visible: !_isExpanded
+        color: _fullItem.pipState.isDark ? Qt.rgba(0,0,0,0.75) : Qt.rgba(0,0,0,0.5)
+
         Image {
-            width:              parent.width  * 0.75
-            height:             parent.height * 0.75
-            sourceSize.height:  height
-            source:             "/res/buttonRight.svg"
-            mipmap:             true
-            fillMode:           Image.PreserveAspectFit
-            anchors.verticalCenter:     parent.verticalCenter
-            anchors.horizontalCenter:   parent.horizontalCenter
+            width: parent.width  * 0.75
+            height: parent.height * 0.75
+            sourceSize.height: height
+            source: "/res/buttonRight.svg"
+            mipmap: true
+            fillMode: Image.PreserveAspectFit
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.horizontalCenter: parent.horizontalCenter
         }
+
         MouseArea {
             anchors.fill:   parent
             onClicked:      _root._setPipIsExpanded(true)
+        }
+    }
+
+    Image {
+        id: showPip
+        source: "/qmlimages/pipHide.svg"
+        mipmap: true
+        fillMode: Image.PreserveAspectFit
+
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
+
+        visible: _isExpanded && (ScreenTools.isMobile || pipMouseArea.containsMouse)
+        height: ScreenTools.defaultFontPixelHeight * 2.5
+        width: ScreenTools.defaultFontPixelHeight * 2.5
+        sourceSize.height: height
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: _root._setPipIsExpanded(false)
         }
     }
 }

@@ -8,14 +8,10 @@
  ****************************************************************************/
 
 import QtQuick                  2.12
-import QtQuick.Controls         2.4
-import QtQuick.Dialogs          1.3
-import QtQuick.Layouts          1.12
 
 import QtLocation               5.3
 import QtPositioning            5.3
 import QtQuick.Window           2.2
-import QtQml.Models             2.1
 
 import QGroundControl               1.0
 import QGroundControl.Controllers   1.0
@@ -76,11 +72,13 @@ Item {
                                                     ? _root.width - guidedValueSlider.x
                                                     : 0
 
-        rightEdgeTopInset:      Math.max(_sliderRightInset, _pipOverlay.visible ? _root.width - _pipOverlay.x : 0) 
+        rightEdgeTopInset:      _sliderRightInset
         rightEdgeCenterInset:   _sliderRightInset
         rightEdgeBottomInset:   _sliderRightInset
-        
-        topEdgeRightInset:      _pipOverlay.visible ? _pipOverlay.y + _pipOverlay.height : 0
+
+        leftEdgeBottomInset:    _pipOverlay.visible ? _pipOverlay.x + _pipOverlay.occupiedWidth : 0 
+
+        bottomEdgeLeftInset:    _pipOverlay.visible ? _pipOverlay.occupiedHeight : 0 
     }
 
     QGCToolInsets {
@@ -111,8 +109,7 @@ Item {
         anchors.top:            parent.top
         anchors.bottom:         parent.bottom
         anchors.left:           parent.left
-        anchors.right:           parent.right
-        // anchors.right:          guidedValueSlider.visible ? guidedValueSlider.left : parent.right
+        anchors.right:          parent.right
         z:                      _fullItemZorder + 1
         parentToolInsets:       _toolInsets
         mapControl:             _mapControl
@@ -121,12 +118,13 @@ Item {
 
 
     FlyViewCustomLayer {
-        id:                 customOverlay
-        anchors.fill:       widgetLayer
-        z:                  _fullItemZorder + 2
-        parentToolInsets:   widgetLayer.totalToolInsets
-        vehicle:            QGroundControl.multiVehicleManager.activeVehicleAvailable ? _root._activeVehicle : null
-        visible:            !QGroundControl.videoManager.fullScreen
+        id:                     customOverlay
+        anchors.fill:           widgetLayer
+        z:                      _fullItemZorder + 2
+        parentToolInsets:       widgetLayer.totalToolInsets
+        vehicle:                QGroundControl.multiVehicleManager.activeVehicleAvailable ? _root._activeVehicle : null
+        visible:                !QGroundControl.videoManager.fullScreen
+        showInstrumentPanel:    widgetLayer.instrumentPanelVisible 
     }
 
     FlyViewCustomLayerSAV {
@@ -251,10 +249,9 @@ Item {
 
     QGCPipOverlay {
         id:                     _pipOverlay
-        anchors.top:            parent.top
-        anchors.right:          parent.right
+        anchors.bottom:         parent.bottom
+        anchors.left:           parent.left
         anchors.margins:        _toolsMargin
-        anchors.rightMargin:    _toolsMargin + _toolInsets._sliderRightInset
         item1IsFullSettingsKey: "MainFlyWindowIsMap"
         item1:                  hasVideo ? videoControl : mapControl
         item2:                  hasVideo ? mapControl : null

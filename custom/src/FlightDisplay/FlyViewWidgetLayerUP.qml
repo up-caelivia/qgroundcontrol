@@ -35,6 +35,7 @@ Item {
     property var    parentToolInsets
     property var    totalToolInsets:        _totalToolInsets
     property var    mapControl
+    readonly property bool instrumentPanelVisible: QGroundControl.corePlugin.options.flyView.showInstrumentPanel && multiVehiclePanelSelector.showSingleVehiclePanel
 
     property var    _activeVehicle:         QGroundControl.multiVehicleManager.activeVehicle
     property var    _planMasterController:  globals.planMasterControllerFlyView
@@ -57,41 +58,21 @@ Item {
 
     QGCToolInsets {
         id:                     _totalToolInsets
+
         leftEdgeTopInset:       toolStrip.leftEdgeTopInset
         leftEdgeCenterInset:    parentToolInsets.leftEdgeCenterInset
-        // leftEdgeBottomInset:    virtualJoystickMultiTouch.visible ? virtualJoystickMultiTouch.leftEdgeBottomInset : parentToolInsets.leftEdgeBottomInset
-        leftEdgeBottomInset: Math.max(
-            parentToolInsets.leftEdgeBottomInset,
-            virtualJoystickMultiTouch.visible ? virtualJoystickMultiTouch.leftEdgeBottomInset : 0
-        )
-        rightEdgeTopInset:      Math.max(parentToolInsets.rightEdgeTopInset, instrumentPanel.rightEdgeTopInset)
+        leftEdgeBottomInset:    parentToolInsets.leftEdgeBottomInset
+
+        rightEdgeTopInset:      parentToolInsets.rightEdgeTopInset
         rightEdgeCenterInset:   Math.max(parentToolInsets.rightEdgeCenterInset, photoVideoControl.rightEdgeCenterInset)
-        rightEdgeBottomInset:   Math.max(
-            parentToolInsets.rightEdgeBottomInset,
-            virtualJoystickMultiTouch.visible ? virtualJoystickMultiTouch.rightEdgeBottomInset : 0
-        )
-/*         rightEdgeBottomInset: Math.max(
-            virtualJoystickMultiTouch.visible ? virtualJoystickMultiTouch.rightEdgeBottomInset : parentToolInsets.rightEdgeBottomInset, 
-            radarWidget.visible ? parent.height - radarWidget.y : 0,            
-            speedControl.visible ? parent.height - speedControl.y : 0,            
-        ) */
+        rightEdgeBottomInset:   parentToolInsets.rightEdgeBottomInset
+
         topEdgeLeftInset:       toolStrip.topEdgeLeftInset
         topEdgeCenterInset:     mapScale.topEdgeCenterInset
-        topEdgeRightInset:      Math.max(parentToolInsets.topEdgeRightInset, instrumentPanel.topEdgeRightInset)
-        bottomEdgeLeftInset: Math.max(
-            parentToolInsets.bottomEdgeLeftInset,
-            virtualJoystickMultiTouch.visible ? virtualJoystickMultiTouch.bottomEdgeLeftInset : 0
-        )
-        //bottomEdgeCenterInset:  telemetryPanel.bottomEdgeCenterInset
-        bottomEdgeRightInset:   Math.max(
-            parentToolInsets.bottomEdgeRightInset,
-            virtualJoystickMultiTouch.visible ? virtualJoystickMultiTouch.bottomEdgeRightInset : 0
-        )
-/*         bottomEdgeRightInset: Math.max(
-            virtualJoystickMultiTouch.visible ? virtualJoystickMultiTouch.bottomEdgeRightInset : parentToolInsets.bottomEdgeRightInset, 
-            radarWidget.visible ? parent.width - radarWidget.x : 0,            
-            speedControl.visible ? parent.width - speedControl.x : 0,            
-        ) */
+        topEdgeRightInset:      parentToolInsets.topEdgeRightInset
+
+        bottomEdgeLeftInset:    parentToolInsets.bottomEdgeLeftInset
+        bottomEdgeRightInset:   parentToolInsets.bottomEdgeRightInset
     }
 
 
@@ -147,22 +128,8 @@ Item {
         guidedValueSlider:          _guidedValueSlider
     }
 
-    FlyViewInstrumentPanel {
-        id:                         instrumentPanel
-        anchors.margins:            _toolsMargin
-        anchors.top:                multiVehiclePanelSelector.visible ? multiVehiclePanelSelector.bottom : parent.top
-        anchors.right:              parent.right
-        width:                      _rightPanelWidth
-        spacing:                    _toolsMargin
-        visible:                    QGroundControl.corePlugin.options.flyView.showInstrumentPanel && multiVehiclePanelSelector.showSingleVehiclePanel
-        availableHeight:            parent.height - y - _toolsMargin
-
-        property real rightEdgeTopInset: visible ? parent.width - x : 0
-        property real topEdgeRightInset: visible ? y + height : 0
-    }
-
-
     //-- Virtual Joystick
+    /* TBD: for the moment this is an unwanted functionality, commented for future development
     Loader {
         id:                         virtualJoystickMultiTouch
         z:                          QGroundControl.zOrderTopMost + 1
@@ -170,7 +137,7 @@ Item {
         height:                     Math.min(parent.height * 0.25, ScreenTools.defaultFontPixelWidth * 16)
         visible:                    _virtualJoystickEnabled && !QGroundControl.videoManager.fullScreen && !(_activeVehicle ? _activeVehicle.usingHighLatencyLink : false)
         anchors.bottom:             parent.bottom
-        anchors.bottomMargin:       parentToolInsets.leftEdgeBottomInset + ScreenTools.defaultFontPixelHeight * 2
+        anchors.bottomMargin:       parentToolInsets.bottomEdgeLeftInset + ScreenTools.defaultFontPixelHeight * 2
         anchors.horizontalCenter:   parent.horizontalCenter
         source:                     "qrc:/qml/VirtualJoystick.qml"
         active:                     _virtualJoystickEnabled && !(_activeVehicle ? _activeVehicle.usingHighLatencyLink : false)
@@ -186,6 +153,7 @@ Item {
         property real leftEdgeBottomInset: visible ? bottomEdgeLeftInset + width/18 - ScreenTools.defaultFontPixelHeight*2 : 0
         property real rightEdgeBottomInset: visible ? bottomEdgeRightInset + width/18 - ScreenTools.defaultFontPixelHeight*2 : 0
     }
+*/
 
     FlyViewToolStrip {
         id:                     toolStrip
