@@ -9,6 +9,8 @@
 
 import QtQuick                      2.12
 import QtQuick.Window               2.12
+import QtQml                        2.15
+import QtGraphicalEffects           1.0
 
 import QGroundControl               1.0
 import QGroundControl.ScreenTools   1.0
@@ -17,8 +19,8 @@ import QGroundControl.Palette       1.0
 
 Item {
     id:         _root
-    width:      _pipSize
-    height:     _pipSize * (9/16)
+    width:      Math.max(_minimumPipWidth, Math.min(_pipSize, _maximumPipWidth))
+    height:     width * (9/16)
     z:          pipZOrder + 1
     visible:    show && _pipOrWindowItem && _pipOrWindowItem.pipState.state !== _pipOrWindowItem.pipState.windowState
 
@@ -28,6 +30,8 @@ Item {
     property real   fullZOrder:             0       // zOrder for items in full mode
     property real   pipZOrder:              1       // zOrder for items in pip mode
     property bool   show:                   true
+    property real   topInset:               0       // Reserved height in parent coordinates
+    property real   cornerRadius:           ScreenTools.defaultFontPixelWidth * 1.5
     readonly property real occupiedWidth: visible ? (_isExpanded ? width : hidePIP.width) + ScreenTools.defaultFontPointSize : 0
     readonly property real occupiedHeight: visible ? (_isExpanded ? height : hidePIP.height) + ScreenTools.defaultFontPointSize : 0
 
@@ -38,13 +42,70 @@ Item {
     property alias  _windowContentItem: window.contentItem
     property bool   _isExpanded:        true
     property real   _pipSize:           parent.width * 0.3
-    property real   _maxSize:           0.75                // Percentage of parent control size
-    property real   _minSize:           0.10
-    property bool   _componentComplete: false
+    property real   _maxSize:           0.5
+    property real   _minSize:           0.1
+    readonly property real _maximumPipWidth: Math.max(0, Math.min(
+        parent.width * _maxSize,
+        parent.width - anchors.leftMargin - anchors.rightMargin,
+        (parent.height - topInset - anchors.bottomMargin) * (16/9)
+    ))
+    readonly property real _minimumPipWidth: Math.min(
+        parent.width * _minSize,
+        _maximumPipWidth
+    )
+    property real maximumIconSize: ScreenTools.defaultFontPixelHeight * 2.5
+    readonly property real preferredSize: Math.min(
+        _root.height * 0.30,
+        maximumIconSize
+    )
+
+    readonly property var _pipLayer: _pipOrWindowItem ? _pipOrWindowItem.layer : null
+    readonly property bool _roundPipContent: show && _isExpanded && !!_pipOrWindowItem &&
+                                            _pipOrWindowItem.pipState.state === _pipOrWindowItem.pipState.pipState
+
+    Component {
+        id: pipMaskEffect
+
+        OpacityMask {
+            id: pipOpacityMask
+
+            maskSource: Rectangle {
+                width: pipOpacityMask.width
+                height: pipOpacityMask.height
+                radius: _root.cornerRadius
+                color: "white"
+                antialiasing: true
+                visible: false
+            }
+        }
+    }
+
+    Binding {
+        target: _root._pipLayer
+        property: "effect"
+        value: pipMaskEffect
+        when: _root._roundPipContent
+        restoreMode: Binding.RestoreBindingOrValue
+    }
+
+    Binding {
+        target: _root._pipLayer
+        property: "smooth"
+        value: true
+        when: _root._roundPipContent
+        restoreMode: Binding.RestoreBindingOrValue
+    }
+
+    Binding {
+        target: _root._pipLayer
+        property: "enabled"
+        value: true
+        when: _root._roundPipContent
+        restoreMode: Binding.RestoreBindingOrValue
+    }
 
     Component.onCompleted: {
         _initForItems()
-        _componentComplete = true
     }
 
     onShowChanged: {
@@ -162,63 +223,46 @@ Item {
         onPositionChanged: {
             if (pipResize.pressed) {
 
-                var parentWidth = _root.parent.width
                 var positionInWindow = mapToItem(window.contentItem, mouse.x, mouse.y)
                 var newWidth = pipResize.initialWidth + (positionInWindow.x - pipResize.initialX)
 
-                if (newWidth < parentWidth * _maxSize && newWidth > parentWidth * _minSize) {
-                    _pipSize = newWidth;
-                }
+                _pipSize = Math.max(_minimumPipWidth, Math.min(newWidth, _maximumPipWidth))
             }
         }
     }
 
     // Resize icon
     Image {
-        source:         "/qmlimages/pipResize.svg"
-        fillMode:       Image.PreserveAspectFit
+        source: "/qmlimages/pipResize.svg"
+        fillMode: Image.PreserveAspectFit
         mipmap: true
 
-        anchors.right:   parent.right
+        height: preferredSize
+        width: preferredSize
+        sourceSize.height: height
+        sourceSize.width: width
+
+        anchors.right: parent.right
         anchors.top: parent.top
 
-        visible:        _isExpanded && (ScreenTools.isMobile || pipMouseArea.containsMouse)
-        height:         ScreenTools.defaultFontPixelHeight * 2.5
-        width:          ScreenTools.defaultFontPixelHeight * 2.5
-        sourceSize.height:  height
-    }
-
-    // Check min/max constraints on pip size when when parent is resized
-    Connections {
-        target: _root.parent
-
-        function onWidthChanged() {
-            if (!_componentComplete) {
-                // Wait until first time setup is done
-                return
-            }
-            var parentWidth = _root.parent.width
-            if (_root.width > parentWidth * _maxSize) {
-                _pipSize = parentWidth * _maxSize
-            } else if (_root.width < parentWidth * _minSize) {
-                _pipSize = parentWidth * _minSize
-            }
-        }
+        visible: _isExpanded && (ScreenTools.isMobile || pipMouseArea.containsMouse)
     }
 
     // Pip to Window
     Image {
-        id:             popupPIP
         source:         "/qmlimages/PiP.svg"
         mipmap:         true
         fillMode:       Image.PreserveAspectFit
+
+        height: preferredSize
+        width: preferredSize
+        sourceSize.height: height
+        sourceSize.width: width
+
         anchors.left:   parent.left
         anchors.top:    parent.top
 
         visible:        _isExpanded && !ScreenTools.isMobile && pipMouseArea.containsMouse
-        height:         ScreenTools.defaultFontPixelHeight * 2.5
-        width:          ScreenTools.defaultFontPixelHeight * 2.5
-        sourceSize.height:  height
 
         MouseArea {
             anchors.fill:   parent
@@ -256,18 +300,19 @@ Item {
     }
 
     Image {
-        id: showPip
         source: "/qmlimages/pipHide.svg"
         mipmap: true
         fillMode: Image.PreserveAspectFit
+
+        height: preferredSize
+        width: preferredSize
+        sourceSize.height: height
+        sourceSize.width: width
 
         anchors.left: parent.left
         anchors.bottom: parent.bottom
 
         visible: _isExpanded && (ScreenTools.isMobile || pipMouseArea.containsMouse)
-        height: ScreenTools.defaultFontPixelHeight * 2.5
-        width: ScreenTools.defaultFontPixelHeight * 2.5
-        sourceSize.height: height
 
         MouseArea {
             anchors.fill: parent

@@ -235,7 +235,7 @@ Item {
         planMasterController:   _planController
         rightPanelWidth:        ScreenTools.defaultFontPixelHeight * 9
         pipMode:                !_mainWindowIsMap
-        toolInsets:             _mainWindowIsMap ? mapToolInsets : customOverlay.totalToolInsets
+        toolInsets:             _mainWindowIsMap ? mapToolInsets : null
         mapName:                "FlightDisplayView"
         anchors.topMargin:       pipState.state === pipState.fullState ?  -_root.toolBarOverlay: 0
     }
@@ -257,9 +257,6 @@ Item {
         item2:                  hasVideo ? mapControl : null
         fullZOrder:             _fullItemZorder
         pipZOrder:              _pipItemZorder
-        
-
-        // show:                   !QGroundControl.videoManager.fullScreen &&
-        //                             (videoControl.pipState.state === videoControl.pipState.pipState || mapControl.pipState.state === mapControl.pipState.pipState)
+        topInset:               widgetLayer.totalToolInsets.topEdgeCenterInset
     }
 }

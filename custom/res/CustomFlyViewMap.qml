@@ -46,7 +46,7 @@ FlightMap {
     property var    rightPanelWidth
     property var    planMasterController
     property bool   pipMode:                    false   // true: map is shown in a small pip mode
-    property var    toolInsets                          // Insets for the center viewport area
+    property var    toolInsets:                null    // Optional insets for the center viewport area
 
     property var    _activeVehicle:             QGroundControl.multiVehicleManager.activeVehicle
     property var    _planMasterController:      planMasterController
@@ -161,6 +161,10 @@ FlightMap {
     // returns the rectangle formed by the four center insets
     // used for checking if vehicle is under ui, and as a target for recentering the view
     function _insetCenterRect() {
+        if (!toolInsets) {
+            return Qt.rect(0, 0, _root.width, _root.height)
+        }
+
         return Qt.rect(toolInsets.leftEdgeCenterInset,
                        toolInsets.topEdgeCenterInset,
                        _root.width - toolInsets.leftEdgeCenterInset - toolInsets.rightEdgeCenterInset,
@@ -194,6 +198,10 @@ FlightMap {
         // If we are outside the center inset rectangle, recenter
         if(!pointInRect(vehiclePoint, centerRect)){
             return true
+        }
+
+        if (!toolInsets) {
+            return false
         }
 
         // if we are inside the center inset rectangle
