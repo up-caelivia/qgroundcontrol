@@ -104,6 +104,7 @@
         <file alias="QGroundControl/FlightDisplay/FlyViewToolStripActionList.qml">src/FlightDisplay/FlyViewToolStripActionListUP.qml</file>
 		<file alias="QGroundControl/FlightDisplay/GuidedActionsController.qml">src/FlightDisplay/GuidedActionsControllerUP.qml</file>
         <file alias="QGroundControl/ScreenTools/ScreenTools.qml">src/QmlControls/ScreenToolsUP.qml</file>
+        <file alias="QGroundControl/FlightMap/MapScale.qml">src/FlightMap/MapScaleUP.qml</file>
     </qresource>
     <qresource prefix="/toolbar">
         <file alias="GPSIndicator.qml">src/ui/toolbar/GPSIndicatorUP.qml</file>
@@ -125,4 +126,7 @@
 		<file alias="Lifeguard.svg">res/Images/Lifeguard.svg</file>
 		<file alias="facade.svg">res/Images/facade.svg</file>
 	</qresource>
+    <qresource prefix="/js">
+        <file alias="MapScaleMath.js">src/FlightMap/MapScaleMath.js</file>
+    </qresource>
 </RCC>

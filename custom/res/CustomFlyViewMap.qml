@@ -688,14 +688,10 @@ FlightMap {
     MapScale {
         id:                 mapScale
         anchors.margins:    _toolsMargin
-        anchors.left:       parent.left
+        anchors.right:      parent.right
         anchors.top:        parent.top
         mapControl:         _root
-        buttonsOnLeft:      true
+        buttonsOnLeft:      false
         visible:            !ScreenTools.isTinyScreen && QGroundControl.corePlugin.options.flyView.showMapScale && mapControl.pipState.state === mapControl.pipState.windowState
-
-        property real centerInset: visible ? parent.height - y : 0
     }
-
-
 }

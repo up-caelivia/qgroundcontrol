@@ -63,14 +63,18 @@ Item {
         leftEdgeCenterInset:    parentToolInsets.leftEdgeCenterInset
         leftEdgeBottomInset:    parentToolInsets.leftEdgeBottomInset
 
-        rightEdgeTopInset:      parentToolInsets.rightEdgeTopInset
+        rightEdgeTopInset:      Math.max(
+                                    parentToolInsets.rightEdgeTopInset,
+                                    mapScale.rightEdgeTopInset,
+                                    multiVehiclePanelSelector.rightEdgeTopInset,
+                                    multiVehicleList.rightEdgeTopInset
+                                )
         rightEdgeCenterInset:   Math.max(parentToolInsets.rightEdgeCenterInset, photoVideoControl.rightEdgeCenterInset)
         rightEdgeBottomInset:   parentToolInsets.rightEdgeBottomInset
 
         topEdgeLeftInset:       toolStrip.topEdgeLeftInset
         topEdgeCenterInset:     Math.max(
                                     parentToolInsets.topEdgeCenterInset,
-                                    mapScale.topEdgeCenterInset,
                                     flightTimePanel.visible
                                         ? flightTimePanel.y + flightTimePanel.height + _toolsMargin
                                         : 0,
@@ -78,7 +82,12 @@ Item {
                                         ? guidedActionConfirm.y + guidedActionConfirm.height + _toolsMargin
                                         : 0
                                 )
-        topEdgeRightInset:      parentToolInsets.topEdgeRightInset
+        topEdgeRightInset:      Math.max(
+                                    parentToolInsets.topEdgeRightInset,
+                                    mapScale.topEdgeRightInset,
+                                    multiVehiclePanelSelector.topEdgeRightInset,
+                                    multiVehicleList.topEdgeRightInset
+                                )
 
         bottomEdgeLeftInset:    parentToolInsets.bottomEdgeLeftInset
         bottomEdgeRightInset:   parentToolInsets.bottomEdgeRightInset
@@ -94,7 +103,7 @@ Item {
     Row {
         id:                 multiVehiclePanelSelector
         anchors.margins:    _toolsMargin
-        anchors.topMargin:  _toolsMargin + parentToolInsets.topEdgeRightInset
+        anchors.topMargin:  _toolsMargin + Math.max(parentToolInsets.topEdgeRightInset, mapScale.topEdgeRightInset)
         anchors.top:        parent.top
         anchors.right:      parent.right
         width:              _rightPanelWidth
@@ -102,6 +111,8 @@ Item {
         visible:            QGroundControl.multiVehicleManager.vehicles.count > 1 && QGroundControl.corePlugin.options.flyView.showMultiVehicleList
 
         property bool showSingleVehiclePanel:  !visible || singleVehicleRadio.checked
+        property real topEdgeRightInset: visible ? y + height : 0
+        property real rightEdgeTopInset: visible ? parent.width - x : 0
 
         QGCMapPalette { id: mapPal; lightColors: true }
 
@@ -119,12 +130,17 @@ Item {
     }
 
     MultiVehicleList {
-        anchors.topMargin:    _toolsMargin
+        id: multiVehicleList
+
+        anchors.topMargin:  _toolsMargin
         anchors.top:        multiVehiclePanelSelector.bottom
         anchors.right:      parent.right
         width:              _rightPanelWidth
         height:             parent.height - y - _toolsMargin
         visible:            !multiVehiclePanelSelector.showSingleVehiclePanel
+
+        property real topEdgeRightInset: visible ? y + height : 0
+        property real rightEdgeTopInset: visible ? _root.width - x : 0
     }
 
 
@@ -209,13 +225,14 @@ Item {
     MapScale {
         id:                 mapScale
         anchors.margins:    _toolsMargin
-        anchors.left:       toolStrip.right
+        anchors.right:      parent.right
         anchors.top:        parent.top
         mapControl:         _mapControl
         buttonsOnLeft:      false
         visible:            !ScreenTools.isTinyScreen && QGroundControl.corePlugin.options.flyView.showMapScale && mapControl.pipState.state === mapControl.pipState.fullState
 
-        property real topEdgeCenterInset: visible ? y + height : 0
+        property real rightEdgeTopInset: visible ? parent.width - mapScale.x : 0
+        property real topEdgeRightInset: visible ? y + height : 0
     }
 
 
@@ -230,7 +247,6 @@ Item {
         anchors.margins:  _toolsMargin
         anchors.rightMargin: _toolsMargin + parentToolInsets.rightEdgeCenterInset
         anchors.right: parent.right
-        // width:                  _rightPanelWidth * 0.8
         anchors.verticalCenter: parent.verticalCenter
 
         property real rightEdgeCenterInset: visible ? parent.width - x : 0
