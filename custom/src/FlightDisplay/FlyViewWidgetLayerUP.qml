@@ -68,7 +68,16 @@ Item {
         rightEdgeBottomInset:   parentToolInsets.rightEdgeBottomInset
 
         topEdgeLeftInset:       toolStrip.topEdgeLeftInset
-        topEdgeCenterInset:     mapScale.topEdgeCenterInset
+        topEdgeCenterInset:     Math.max(
+                                    parentToolInsets.topEdgeCenterInset,
+                                    mapScale.topEdgeCenterInset,
+                                    flightTimePanel.visible
+                                        ? flightTimePanel.y + flightTimePanel.height + _toolsMargin
+                                        : 0,
+                                    guidedActionConfirm.visible
+                                        ? guidedActionConfirm.y + guidedActionConfirm.height + _toolsMargin
+                                        : 0
+                                )
         topEdgeRightInset:      parentToolInsets.topEdgeRightInset
 
         bottomEdgeLeftInset:    parentToolInsets.bottomEdgeLeftInset
@@ -119,7 +128,23 @@ Item {
     }
 
 
+    FlightTimeWidget {
+        id: flightTimePanel
+
+        anchors.top: parent.top
+        anchors.topMargin: parentToolInsets.topEdgeCenterInset + _toolsMargin
+        anchors.horizontalCenter: parent.horizontalCenter
+
+        vehicle: _root._activeVehicle
+        flightTimeSeconds: vehicle ? CustomPlugin.tripFlightTimeSec : NaN
+
+        visible: !!vehicle
+                 && multiVehiclePanelSelector.showSingleVehiclePanel
+                 && !guidedActionConfirm.visible
+    }
+
     GuidedActionConfirm {
+        id: guidedActionConfirm
         anchors.margins:            _toolsMargin
         anchors.top:                parent.top
         anchors.horizontalCenter:   parent.horizontalCenter

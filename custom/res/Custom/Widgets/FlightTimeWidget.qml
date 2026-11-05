@@ -10,157 +10,151 @@
 import QtQuick          2.11
 import QtQuick.Layouts  1.11
 
-import QGroundControl                       1.0
-import QGroundControl.Controls              1.0
-import QGroundControl.MultiVehicleManager   1.0
-import QGroundControl.ScreenTools           1.0
-import QGroundControl.Palette               1.0
+import QGroundControl.Controls      1.0
+import QGroundControl.Palette       1.0
+import QGroundControl.ScreenTools   1.0
 
-import Constants 1.0
+import Custom.Controllers 1.0
 
-//-------------------------------------------------------------------------
-//-- Flight Time Indicator
+Rectangle {
+    id: _root
 
-Item {
-    id:             _root
-    width:          (ftValuesColumn.x + ftValuesColumn.width) * 1.1
-    property var _activeVehicle: QGroundControl.multiVehicleManager.activeVehicle
+    property var vehicle: null
+    property double flightTimeSeconds: NaN
 
-    function secondsToHHMMSS(timeS) {
-        var sec_num = parseInt(timeS, 10);
-        var hours   = Math.floor(sec_num / 3600);
-        var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
-        var seconds = sec_num - (hours * 3600) - (minutes * 60);
-        if (hours   < 10) {hours   = "0"+hours;}
-        if (minutes < 10) {minutes = "0"+minutes;}
-        if (seconds < 10) {seconds = "0"+seconds;}
-        return hours+":"+ minutes+':'+seconds;
+    readonly property real _padding: ScreenTools.defaultFontPixelWidth
+    readonly property real _sectionWidth: Math.max(
+        timeMetrics.advanceWidth,
+        flightTimeLabel.implicitWidth,
+        flightTimeValue.implicitWidth,
+        remainingTimeLabel.implicitWidth,
+        remainingTimeValue.implicitWidth
+    )
+
+    implicitWidth: contentRow.implicitWidth + 2 * _padding
+    implicitHeight: contentRow.implicitHeight + 2 * _padding
+
+    radius: ScreenTools.defaultFontPixelWidth / 2
+    color: Qt.rgba(qgcPal.window.r, qgcPal.window.g, qgcPal.window.b, 0.65)
+
+    QGCPalette {
+        id: qgcPal
     }
 
-
-    QGCColoredImage {
-        id:                 ftIcon
-        width:              height
-        anchors.top:        parent.top
-        anchors.bottom:     parent.bottom
-        // anchors.topMargin: 7
-        // anchors.bottomMargin: 7
-        source:             "/InstrumentValueIcons/timer.svg"
-        fillMode:           Image.PreserveAspectFit
-        sourceSize.height:  height
-        opacity:            (_activeVehicle && _activeVehicle.getFact("flightTime").value > 0) ? 1 : 0.5
+    BatteryTimeController {
+        id: batteryTimeController
+        vehicle: _root.vehicle
     }
 
-    Column {
-        id:                     names
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.left:           ftIcon.right
-        leftPadding: 10
-
-
-        QGCLabel {
-            color:                      Constants.isABLUOApp ? qgcPal.text : qgcPal.buttonText
-            text: "Flight Time: "
-        }
-
-        QGCLabel {
-            color:                      Constants.isABLUOApp ? qgcPal.text : qgcPal.buttonText
-            text: "Time Remaining: "
-        }
-
-
-
+    TextMetrics {
+        id: timeMetrics
+        font.family: ScreenTools.fixedFontFamily
+        font.pointSize: ScreenTools.defaultFontPointSize
+        text: "00:00:00"
     }
 
+    RowLayout {
+        id: contentRow
 
-    Column {
-        id:                     ftValuesColumn
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.left:           names.right
-        leftPadding: 5
+        anchors.fill: parent
+        anchors.margins: _root._padding
+        spacing: ScreenTools.defaultFontPixelWidth
 
+        ColumnLayout {
+            Layout.alignment: Qt.AlignVCenter
+            Layout.minimumWidth: _root._sectionWidth
+            Layout.preferredWidth: _root._sectionWidth
+            Layout.fillWidth: true
+            spacing: ScreenTools.defaultFontPixelHeight / 4
 
-        QGCLabel {
-            color:  Constants.isABLUOApp ? qgcPal.text : qgcPal.buttonText
-            text:  _activeVehicle ?  CustomPlugin.tripFlightTimeStr : "--/--"
-        }
+            QGCLabel {
+                id: flightTimeLabel
 
-        QGCLabel {
-            color:                      getBatteryColor()
-            text: _activeVehicle ? getTimeRemaningEstimate() : "--/--"
+                Layout.fillWidth: true
+                horizontalAlignment: Text.AlignHCenter
 
-
-            function getTimeRemaningEstimate() {
-
-                var time_remaining_tot = 0;
-                var i = 0;
-
-                for (var battery in _activeVehicle.batteries)
-                    if( !isNaN(battery.timeRemaining) ) {
-
-                        time_remaining_tot += battery.timeRemaining.rawValue;
-                        i++;
-
-                    }
-
-                if (i==0)
-                    return "--/--";
-
-                return _root.secondsToHHMMSS(time_remaining/i);
+                text: qsTr("Flight time")
+                font.pointSize: ScreenTools.smallFontPointSize
+                color: qgcPal.text
             }
 
+            QGCLabel {
+                id: flightTimeValue
 
-            function getBatteryColor() {
+                Layout.fillWidth: true
+                horizontalAlignment: Text.AlignHCenter
 
-                if(!_activeVehicle)
-                    return qgcPal.buttonText
-
-                var orange = 0;
-                var red = 0;
-                var num = 0;
-
-                for (var battery in _activeVehicle.batteries)
-                    if( !isNaN(battery.chargeState) ) {
-
-                        num++;
-                        switch (battery.chargeState.rawValue) {
-                        case MAVLink.MAV_BATTERY_CHARGE_STATE_LOW:
-                            orange++;
-                            break;
-                        case MAVLink.MAV_BATTERY_CHARGE_STATE_CRITICAL:
-                        case MAVLink.MAV_BATTERY_CHARGE_STATE_EMERGENCY:
-                        case MAVLink.MAV_BATTERY_CHARGE_STATE_FAILED:
-                        case MAVLink.MAV_BATTERY_CHARGE_STATE_UNHEALTHY:
-                            red++;
-                            break;
-                        }
-                    }
-
-                if(num == 0) {
-                    if(Constants.isABLUOApp) 
-                        return qgcPal.text
-                    return qgcPal.buttonText
-                }
-
-                if (red == num)
-                    return qgcPal.colorRed
-
-                if(orange == num || (orange + red == num))
-                    return qgcPal.colorOrange
-
-                if(Constants.isABLUOApp) 
-                    return qgcPal.text
-                return qgcPal.buttonText
-
+                text: _root._formatDuration(_root.flightTimeSeconds)
+                font.family: ScreenTools.fixedFontFamily
+                color: qgcPal.text
             }
-
-
         }
 
+        QGCColoredImage {
+            Layout.preferredWidth: ScreenTools.defaultFontPixelHeight * 1.5
+            Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
 
+            source: "/InstrumentValueIcons/timer.svg"
+            fillMode: Image.PreserveAspectFit
+            color: qgcPal.text
+        }
 
+        ColumnLayout {
+            Layout.alignment: Qt.AlignVCenter
+            Layout.minimumWidth: _root._sectionWidth
+            Layout.preferredWidth: _root._sectionWidth
+            Layout.fillWidth: true
+            spacing: ScreenTools.defaultFontPixelHeight / 4
+
+            QGCLabel {
+                id: remainingTimeLabel
+
+                Layout.fillWidth: true
+                horizontalAlignment: Text.AlignHCenter
+
+                text: qsTr("Time remaining")
+                font.pointSize: ScreenTools.smallFontPointSize
+                color: qgcPal.text
+            }
+
+            QGCLabel {
+                id: remainingTimeValue
+
+                Layout.fillWidth: true
+                horizontalAlignment: Text.AlignHCenter
+
+                text: batteryTimeController.remainingTimeAvailable
+                      ? _root._formatDuration(batteryTimeController.remainingSeconds)
+                      : "--:--:--"
+                font.family: ScreenTools.fixedFontFamily
+                color: _root._statusColor(batteryTimeController.status)
+            }
+        }
     }
 
+    function _formatDuration(seconds) {
+        if (!isFinite(seconds) || seconds < 0) {
+            return "--:--:--"
+        }
 
+        var totalSeconds = Math.floor(seconds)
+        var hours = Math.floor(totalSeconds / 3600)
+        var minutes = Math.floor(totalSeconds / 60) % 60
+        var remainingSeconds = totalSeconds % 60
 
+        return (hours < 10 ? "0" + hours : hours)
+                + ":" + ("0" + minutes).slice(-2)
+                + ":" + ("0" + remainingSeconds).slice(-2)
+    }
+
+    function _statusColor(status) {
+        switch (status) {
+        case BatteryTimeController.Low:
+            return qgcPal.colorOrange
+        case BatteryTimeController.Critical:
+            return qgcPal.colorRed
+        default:
+            return qgcPal.text
+        }
+    }
 }
