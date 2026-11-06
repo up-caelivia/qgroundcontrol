@@ -8,7 +8,6 @@
  ****************************************************************************/
 
 import QtQuick          2.3
-import QtQuick.Controls 1.2
 
 import QGroundControl                   1.0
 import QGroundControl.Controls          1.0
@@ -22,16 +21,14 @@ Item {
     width:  buttonsOnLeft || !_zoomButtonsVisible ? rightEnd.x + rightEnd.width : zoomDownButton.x + zoomDownButton.width
     height: rightEnd.y + rightEnd.height
 
-    property var    mapControl                      ///< Map control for which this scale control is being used
+    property var    mapControl
     property bool   terrainButtonVisible:   false
     property alias  terrainButtonChecked:   terrainButton.checked
     property bool   zoomButtonsVisible:     true
-    property bool   buttonsOnLeft:          true    ///< Buttons to left/right of scale bar
+    property bool   buttonsOnLeft:          true
 
     signal terrainButtonClicked
 
-    property var    _scaleLengthsMeters:    [5, 10, 25, 50, 100, 150, 250, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000]
-    property var    _scaleLengthsFeet:      [10, 25, 50, 100, 250, 500, 1000, 2000, 3000, 4000, 5280, 5280*2, 5280*5, 5280*10, 5280*25, 5280*50, 5280*100, 5280*250, 5280*500, 5280*1000]
     property bool   _zoomButtonsVisible:    zoomButtonsVisible && !ScreenTools.isMobile
     property var    _color:                 mapControl.isSatelliteMap ? "white" : "black"
 
