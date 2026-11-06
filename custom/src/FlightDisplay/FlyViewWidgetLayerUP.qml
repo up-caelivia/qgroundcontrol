@@ -31,7 +31,6 @@ import Constants 1.0
 Item {
     id: _root
 
-
     property var    parentToolInsets
     property var    totalToolInsets:        _totalToolInsets
     property var    mapControl
@@ -227,9 +226,10 @@ Item {
         anchors.margins:    _toolsMargin
         anchors.right:      parent.right
         anchors.top:        parent.top
-        mapControl:         _mapControl
+        mapControl:         _root.mapControl
         buttonsOnLeft:      false
         visible:            !ScreenTools.isTinyScreen && QGroundControl.corePlugin.options.flyView.showMapScale && mapControl.pipState.state === mapControl.pipState.fullState
+        navigationController: _root.mapControl ? _root.mapControl.navigationController : null
 
         property real rightEdgeTopInset: visible ? parent.width - mapScale.x : 0
         property real topEdgeRightInset: visible ? y + height : 0

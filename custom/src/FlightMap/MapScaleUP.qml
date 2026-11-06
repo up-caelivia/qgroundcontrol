@@ -18,25 +18,31 @@ import "qrc:/js/MapScaleMath.js" as MapScale
 
 Item {
     id:     scale
-    width:  buttonsOnLeft || !_zoomButtonsVisible ? rightEnd.x + rightEnd.width : zoomDownButton.x + zoomDownButton.width
+    width:  buttonsOnLeft ? rightEnd.x + rightEnd.width
+                         : centerButton.visible ? centerButton.x + centerButton.width
+                         : _zoomButtonsVisible ? zoomDownButton.x + zoomDownButton.width
+                         : terrainButtonVisible ? terrainButton.x + terrainButton.width
+                         : rightEnd.x + rightEnd.width
     height: rightEnd.y + rightEnd.height
 
     property var    mapControl
+    property var    navigationController: null
     property bool   terrainButtonVisible:   false
     property alias  terrainButtonChecked:   terrainButton.checked
     property bool   zoomButtonsVisible:     true
     property bool   buttonsOnLeft:          true
 
-    signal terrainButtonClicked
-
     property bool   _zoomButtonsVisible:    zoomButtonsVisible && !ScreenTools.isMobile
     property var    _color:                 mapControl.isSatelliteMap ? "white" : "black"
 
+    signal terrainButtonClicked()
+
     Connections {
-        target:             mapControl
+        target: scale.mapControl
         function onWidthChanged() {     scaleTimer.restart() }
         function onHeightChanged() {    scaleTimer.restart() }
         function onZoomLevelChanged() { scaleTimer.restart() }
+        function onCenterChanged() {    scaleTimer.restart() }
     }
 
     Timer {
@@ -49,7 +55,7 @@ Item {
 
     QGCMapLabel {
         id:                 scaleText
-        map:                mapControl
+        map:                scale.mapControl
         font.family:        ScreenTools.demiboldFontFamily
         anchors.left:       parent.left
         anchors.right:      rightEnd.right
@@ -60,13 +66,14 @@ Item {
     Rectangle {
         id:                 leftEnd
         anchors.top:        scaleText.bottom
-        anchors.leftMargin: buttonsOnLeft && (_zoomButtonsVisible || terrainButtonVisible) ? ScreenTools.defaultFontPixelWidth / 2 : 0
-        anchors.left:       buttonsOnLeft ?
-                                (_zoomButtonsVisible ? zoomDownButton.right : (terrainButtonVisible ? terrainButton.right : parent.left)) :
-                                parent.left
+        anchors.leftMargin: scale.buttonsOnLeft && (centerButton.visible || scale._zoomButtonsVisible || scale.terrainButtonVisible) ? ScreenTools.defaultFontPixelWidth / 2 : 0
+        anchors.left:       !scale.buttonsOnLeft ? parent.left
+                                : centerButton.visible ? centerButton.right
+                                : scale._zoomButtonsVisible ? zoomDownButton.right
+                                : scale.terrainButtonVisible ? terrainButton.right : parent.left
         width:              2
         height:             ScreenTools.defaultFontPixelHeight
-        color:              _color
+        color:              scale._color
     }
 
     Rectangle {
@@ -75,7 +82,7 @@ Item {
         anchors.bottom:     leftEnd.bottom
         anchors.left:       leftEnd.right
         height:             2
-        color:              _color
+        color:              scale._color
     }
 
     Rectangle {
@@ -84,20 +91,21 @@ Item {
         anchors.left:       centerLine.right
         width:              2
         height:             ScreenTools.defaultFontPixelHeight
-        color:              _color
+        color:              scale._color
     }
 
     QGCButton {
         id:                 terrainButton
         anchors.top:        scaleText.top
         anchors.bottom:     rightEnd.bottom
-        anchors.leftMargin: buttonsOnLeft ? 0 : ScreenTools.defaultFontPixelWidth / 2
-        anchors.left:       buttonsOnLeft ? parent.left : rightEnd.right
+        anchors.leftMargin: scale.buttonsOnLeft ? 0 : ScreenTools.defaultFontPixelWidth / 2
+        anchors.left:       scale.buttonsOnLeft ? parent.left : rightEnd.right
         text:               qsTr("T")
         width:              height
         opacity:            0.75
-        visible:            terrainButtonVisible
-        onClicked:          terrainButtonClicked()
+        visible:            scale.terrainButtonVisible
+        onClicked:          scale.terrainButtonClicked()
+        backRadius:         ScreenTools.defaultFontPointSize * 1.2
     }
 
     QGCButton {
@@ -109,8 +117,9 @@ Item {
         text:               qsTr("+")
         width:              height
         opacity:            0.75
-        visible:            _zoomButtonsVisible
-        onClicked:          mapControl.zoomLevel += 0.5
+        visible:            scale._zoomButtonsVisible
+        onClicked:          scale.mapControl.zoomLevel += 0.5
+        backRadius:         ScreenTools.defaultFontPointSize * 1.2
     }
 
     QGCButton {
@@ -122,8 +131,25 @@ Item {
         text:               qsTr("-")
         width:              height
         opacity:            0.75
-        visible:            _zoomButtonsVisible
-        onClicked:          mapControl.zoomLevel -= 0.5
+        visible:            scale._zoomButtonsVisible
+        onClicked:          scale.mapControl.zoomLevel -= 0.5
+        backRadius:         ScreenTools.defaultFontPointSize * 1.2
+    }
+
+    QGCButton {
+        id:                 centerButton
+        anchors.top:        scaleText.top
+        anchors.bottom:     rightEnd.bottom
+        anchors.leftMargin: scale.buttonsOnLeft && !scale._zoomButtonsVisible && !terrainButton.visible ? 0 : ScreenTools.defaultFontPixelWidth / 2
+        anchors.left:       scale._zoomButtonsVisible ? zoomDownButton.right
+                                : terrainButton.visible ? terrainButton.right : terrainButton.left
+        width:              height
+        opacity:            0.75
+        visible:            !!scale.navigationController && scale.navigationController.canCenterOnVehicle
+        iconSource:         "/qmlimages/MapCenter.svg"
+        iconCentered:       true
+        onClicked:          scale.navigationController.centerOnVehicle()
+        backRadius:         ScreenTools.defaultFontPointSize * 1.2
     }
 
     Component.onCompleted: {

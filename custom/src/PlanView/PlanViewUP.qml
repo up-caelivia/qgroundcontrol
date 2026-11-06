@@ -28,6 +28,7 @@ import QGroundControl.ShapeFileHelper   1.0
 import QGroundControl.KML 1.0
 import Custom.GeoAwareness 1.0
 import Custom.Widgets 1.0
+import Custom.Controllers 1.0
 
 import QtQuick.Controls 2.4 as Controls2
 
@@ -114,6 +115,13 @@ Item {
             KmlPolygonLoader.exportToKmlFile(file.toString().replace("file://", ""))
             close()
         }
+    }
+
+    MapNavigationController {
+        id: planNavigationController
+        mapControl: editorMap
+        vehicle: QGroundControl.multiVehicleManager.activeVehicle
+        trackingEnabled: false
     }
 
     MapFitFunctions {
@@ -1007,6 +1015,7 @@ Item {
             anchors.bottom:         terrainStatus.visible ? terrainStatus.top : parent.bottom
             anchors.left:           toolStrip.y + toolStrip.height + _toolsMargin > mapScale.y ? toolStrip.right: parent.left
             mapControl:             editorMap
+            navigationController:   planNavigationController
             buttonsOnLeft:          true
             terrainButtonVisible:   _editingLayer === _layerMission
             terrainButtonChecked:   terrainStatus.visible

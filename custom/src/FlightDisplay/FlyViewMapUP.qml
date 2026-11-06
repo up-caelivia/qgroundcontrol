@@ -24,6 +24,7 @@ import QGroundControl.ScreenTools   1.0
 import QGroundControl.Vehicle       1.0
 
 import Custom.Widgets 1.0
+import Custom.Controllers 1.0
 
 import QGroundControl.KML 1.0
 import Custom.GeoAwareness 1.0
@@ -31,7 +32,7 @@ import Custom.GeoAwareness 1.0
 FlightMap {
     id:                         _root
     allowGCSLocationCenter:     true
-    allowVehicleLocationCenter: !_keepVehicleCentered
+    allowVehicleLocationCenter: !pipMode
     planView:                   false
     zoomLevel:                  QGroundControl.flightMapZoom
     center:                     QGroundControl.flightMapPosition
@@ -58,10 +59,39 @@ FlightMap {
     property var    _flyViewSettings:           QGroundControl.settingsManager.flyViewSettings
     property bool   _keepMapCenteredOnVehicle:  _flyViewSettings.keepMapCenteredOnVehicle.rawValue
 
-    property bool   _disableVehicleTracking:    false
-    property bool   _keepVehicleCentered:       pipMode ? true : false
     property bool   _saveZoomLevelSetting:      true
     property var    _savParamCoords:                    []
+
+    property alias navigationController: navController
+
+    MapNavigationController {
+        id: navController
+        trackingEnabled: true
+        mapControl: _root
+        vehicle: _root._activeVehicle
+        toolInsets: _root.toolInsets
+        keepMapCenteredOnVehicle: _root._keepMapCenteredOnVehicle
+        pipMode: _root.pipMode
+    }
+
+    Timer {
+        interval: 500
+        running: true
+        repeat: true
+
+        onTriggered: {
+            if (navController.recentering) {
+                return
+            }
+
+            if (_activeVehicle) {
+                KmlPolygonLoader.checkGpsStatus()
+            }
+            if (firstVehiclePositionReceived && _activeVehicleCoordinate.isValid) {
+                KmlPolygonLoader.checkDronePosition()
+            }
+        }
+    }
 
     function _adjustMapZoomForPipMode() {
         _saveZoomLevelSetting = false
@@ -99,16 +129,6 @@ FlightMap {
         showBorder: false
     }   
 
-    // We track whether the user has panned or not to correctly handle automatic map positioning
-    Connections {
-        target: gesture
-
-        function onPanStarted() {       _disableVehicleTracking = true }
-        function onFlickStarted() {     _disableVehicleTracking = true }
-        function onPanFinished() {      panRecenterTimer.restart() }
-        function onFlickFinished() {    panRecenterTimer.restart() }
-    }
-    
     Connections {
         target: CustomPlugin
         onSavParamCoordinatesChanged: {
@@ -127,148 +147,6 @@ FlightMap {
     
     SavParamMarkerUP {
         modelDataList: _savParamCoords
-    }
-
-    function pointInRect(point, rect) {
-        return point.x > rect.x &&
-                point.x < rect.x + rect.width &&
-                point.y > rect.y &&
-                point.y < rect.y + rect.height;
-    }
-
-    property real _animatedLatitudeStart
-    property real _animatedLatitudeStop
-    property real _animatedLongitudeStart
-    property real _animatedLongitudeStop
-    property real animatedLatitude
-    property real animatedLongitude
-
-    onAnimatedLatitudeChanged: _root.center = QtPositioning.coordinate(animatedLatitude, animatedLongitude)
-    onAnimatedLongitudeChanged: _root.center = QtPositioning.coordinate(animatedLatitude, animatedLongitude)
-
-    NumberAnimation on animatedLatitude { id: animateLat; from: _animatedLatitudeStart; to: _animatedLatitudeStop; duration: 1000 }
-    NumberAnimation on animatedLongitude { id: animateLong; from: _animatedLongitudeStart; to: _animatedLongitudeStop; duration: 1000 }
-
-    function animatedMapRecenter(fromCoord, toCoord) {
-        _animatedLatitudeStart = fromCoord.latitude
-        _animatedLongitudeStart = fromCoord.longitude
-        _animatedLatitudeStop = toCoord.latitude
-        _animatedLongitudeStop = toCoord.longitude
-        animateLat.start()
-        animateLong.start()
-    }
-
-    // returns the rectangle formed by the four center insets
-    // used for checking if vehicle is under ui, and as a target for recentering the view
-    function _insetCenterRect() {
-        if (!toolInsets) {
-            return Qt.rect(0, 0, _root.width, _root.height)
-        }
-
-        return Qt.rect(toolInsets.leftEdgeCenterInset,
-                       toolInsets.topEdgeCenterInset,
-                       _root.width - toolInsets.leftEdgeCenterInset - toolInsets.rightEdgeCenterInset,
-                       _root.height - toolInsets.topEdgeCenterInset - toolInsets.bottomEdgeCenterInset)
-    }
-
-    // returns the four rectangles formed by the 8 corner insets
-    // used for detecting if the vehicle has flown under the instrument panel, virtual joystick etc
-    function _insetCornerRects() {
-        var rects = {
-        "topleft":      Qt.rect(0,0,
-                               toolInsets.leftEdgeTopInset,
-                               toolInsets.topEdgeLeftInset),
-        "topright":     Qt.rect(_root.width-toolInsets.rightEdgeTopInset,0,
-                               toolInsets.rightEdgeTopInset,
-                               toolInsets.topEdgeRightInset),
-        "bottomleft":   Qt.rect(0,_root.height-toolInsets.bottomEdgeLeftInset,
-                               toolInsets.leftEdgeBottomInset,
-                               toolInsets.bottomEdgeLeftInset),
-        "bottomright":  Qt.rect(_root.width-toolInsets.rightEdgeBottomInset,_root.height-toolInsets.bottomEdgeRightInset,
-                               toolInsets.rightEdgeBottomInset,
-                               toolInsets.bottomEdgeRightInset)}
-        return rects
-    }
-
-    function recenterNeeded() {
-        var vehiclePoint = _root.fromCoordinate(_activeVehicleCoordinate, false /* clipToViewport */)
-        var centerRect = _insetCenterRect()
-        //return !pointInRect(vehiclePoint,insetRect)
-
-        // If we are outside the center inset rectangle, recenter
-        if(!pointInRect(vehiclePoint, centerRect)){
-            return true
-        }
-
-        if (!toolInsets) {
-            return false
-        }
-
-        // if we are inside the center inset rectangle
-        // then additionally check if we are underneath one of the corner inset rectangles
-        var cornerRects = _insetCornerRects()
-        if(pointInRect(vehiclePoint, cornerRects["topleft"])){
-            return true
-        } else if(pointInRect(vehiclePoint, cornerRects["topright"])){
-            return true
-        } else if(pointInRect(vehiclePoint, cornerRects["bottomleft"])){
-            return true
-        } else if(pointInRect(vehiclePoint, cornerRects["bottomright"])){
-            return true
-        }
-
-        // if we are inside the center inset rectangle, and not under any corner elements
-        return false
-    }
-
-    function updateMapToVehiclePosition() {
-        if (animateLat.running || animateLong.running) {
-            return
-        }
-        // We let FlightMap handle first vehicle position
-        if (!_keepMapCenteredOnVehicle && firstVehiclePositionReceived && _activeVehicleCoordinate.isValid && !_disableVehicleTracking) {
-            if (_keepVehicleCentered) {
-                _root.center = _activeVehicleCoordinate
-            } else {
-                if (firstVehiclePositionReceived && recenterNeeded()) {
-                    // Move the map such that the vehicle is centered within the inset area
-                    var vehiclePoint = _root.fromCoordinate(_activeVehicleCoordinate, false /* clipToViewport */)
-                    var centerInsetRect = _insetCenterRect()
-                    var centerInsetPoint = Qt.point(centerInsetRect.x + centerInsetRect.width / 2, centerInsetRect.y + centerInsetRect.height / 2)
-                    var centerOffset = Qt.point((_root.width / 2) - centerInsetPoint.x, (_root.height / 2) - centerInsetPoint.y)
-                    var vehicleOffsetPoint = Qt.point(vehiclePoint.x + centerOffset.x, vehiclePoint.y + centerOffset.y)
-                    var vehicleOffsetCoord = _root.toCoordinate(vehicleOffsetPoint, false /* clipToViewport */)
-                    animatedMapRecenter(_root.center, vehicleOffsetCoord)
-                }
-            }
-        }
-        if (_activeVehicle)
-            KmlPolygonLoader.checkGpsStatus()
-        if (firstVehiclePositionReceived && _activeVehicleCoordinate.isValid)
-            KmlPolygonLoader.checkDronePosition()
-    }
-
-    on_ActiveVehicleCoordinateChanged: {
-        if (_keepMapCenteredOnVehicle && _activeVehicleCoordinate.isValid && !_disableVehicleTracking) {
-            _root.center = _activeVehicleCoordinate
-        }
-    }
-
-    Timer {
-        id:         panRecenterTimer
-        interval:   10000
-        running:    false
-        onTriggered: {
-            _disableVehicleTracking = false
-            updateMapToVehiclePosition()
-        }
-    }
-
-    Timer {
-        interval:       500
-        running:        true
-        repeat:         true
-        onTriggered:    updateMapToVehiclePosition()
     }
 
     QGCMapPalette { id: mapPal; lightColors: isSatelliteMap }
@@ -693,5 +571,6 @@ FlightMap {
         mapControl:         _root
         buttonsOnLeft:      false
         visible:            !ScreenTools.isTinyScreen && QGroundControl.corePlugin.options.flyView.showMapScale && mapControl.pipState.state === mapControl.pipState.windowState
+        navigationController: _root.navigationController
     }
 }

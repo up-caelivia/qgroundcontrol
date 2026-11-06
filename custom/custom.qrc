@@ -64,6 +64,10 @@
         <file alias="qmldir">res/Custom/Controls/qmldir</file>
         <file alias="VerticalSeparator.qml">res/Custom/Controls/VerticalSeparator.qml</file>
     </qresource>
+    <qresource prefix="/Custom/Controllers">
+        <file alias="qmldir">res/Custom/Controllers/qmldir</file>
+        <file alias="MapNavigationController.qml">res/Custom/Controllers/MapNavigationController.qml</file>
+    </qresource>
     <qresource prefix="/qml">
         <file alias="CustomSetupView.qml">res/Custom/Widgets/CustomSetupView.qml</file>
         <file alias="QGroundControl/FlightMap/FlightMap.qml">src/FlightMap/FlightMapUP.qml</file>
@@ -87,7 +91,7 @@
         <file alias="QGroundControl/FlightDisplay/FlyView.qml">src/FlightMap/FlyViewUP.qml</file>
         <file alias="MainRootWindow.qml">src/ui/MainRootWindowUP.qml</file>
         <file alias="QGroundControl/FlightMap/PhotoVideoControl.qml">src/FlightMap/Widgets/PhotoVideoControlUP.qml</file>   
-        <file alias="QGroundControl/FlightDisplay/FlyViewMap.qml">res/CustomFlyViewMap.qml</file>
+        <file alias="QGroundControl/FlightDisplay/FlyViewMap.qml">src/FlightDisplay/FlyViewMapUP.qml</file>
         <file alias="QGroundControl/FlightDisplay/ProximityRadarValues.qml">src/FlightDisplay/ProximityRadarValuesUP.qml</file>   
         <file alias="QGroundControl/FlightDisplay/FlyViewVideo.qml">src/FlightDisplay/FlyViewVideoUP.qml</file> 
 		<file alias="QGroundControl/Controls/QGCComboBox.qml">src/QmlControls/QGCComboBoxUP.qml</file>
