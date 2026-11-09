@@ -580,7 +580,7 @@ ApplicationWindow {
 
     Popup {
         id:                 criticalVehicleMessagePopup
-        y:                  ScreenTools.defaultFontPixelHeight
+        y:                  ScreenTools.defaultFontPixelHeight + (flightView.visible ? flightView._widgetLayer.totalToolInsets.topEdgeCenterInset : 0)
         x:                  Math.round((mainWindow.width - width) * 0.5)
         width:              mainWindow.width  * 0.55
         height:             criticalVehicleMessageText.contentHeight + ScreenTools.defaultFontPixelHeight * 2

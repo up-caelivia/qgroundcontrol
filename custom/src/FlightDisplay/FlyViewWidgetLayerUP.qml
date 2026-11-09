@@ -24,6 +24,7 @@ import QGroundControl.ScreenTools   1.0
 import QGroundControl.Vehicle       1.0
 
 import Custom.Widgets 1.0
+import Custom.Controllers 1.0
 import Constants 1.0
 
 
@@ -34,6 +35,8 @@ Item {
     property var    parentToolInsets
     property var    totalToolInsets:        _totalToolInsets
     property var    mapControl
+    property real   cockpitCenterY
+    property real   cockpitHeight
     readonly property bool instrumentPanelVisible: QGroundControl.corePlugin.options.flyView.showInstrumentPanel && multiVehiclePanelSelector.showSingleVehiclePanel
 
     property var    _activeVehicle:         QGroundControl.multiVehicleManager.activeVehicle
@@ -47,6 +50,18 @@ Item {
     property rect   _centerViewport:        Qt.rect(0, 0, width, height)
     property real   _rightPanelWidth:       ScreenTools.defaultFontPixelWidth * 30
     property alias  _gripperMenu:           gripperOptions
+
+    readonly property real rightControlWidth: Math.max(
+        ScreenTools.minTouchPixels,
+        ScreenTools.defaultFontPixelWidth * 7,
+        ScreenTools.defaultFontPixelHeight * 2
+    )
+
+    readonly property real _rightControlMargin:
+        _toolsMargin + Math.max(
+            parentToolInsets.rightEdgeCenterInset,
+            parentToolInsets.rightEdgeBottomInset
+        )
 
 
     function showCriticalVehicleMessage(message) {
@@ -68,8 +83,18 @@ Item {
                                     multiVehiclePanelSelector.rightEdgeTopInset,
                                     multiVehicleList.rightEdgeTopInset
                                 )
-        rightEdgeCenterInset:   Math.max(parentToolInsets.rightEdgeCenterInset, photoVideoControl.rightEdgeCenterInset)
-        rightEdgeBottomInset:   parentToolInsets.rightEdgeBottomInset
+        rightEdgeCenterInset: Math.max(
+            parentToolInsets.rightEdgeCenterInset,
+            photoVideoControl.visible
+                ? _root._rightControlMargin + photoVideoControl.occupiedWidth
+                : 0
+        )
+        rightEdgeBottomInset: Math.max(
+            parentToolInsets.rightEdgeBottomInset,
+            speedControl.visible && speedControl.enabled
+                ? _root._rightControlMargin + _root.rightControlWidth
+                : 0
+        )
 
         topEdgeLeftInset:       toolStrip.topEdgeLeftInset
         topEdgeCenterInset:     Math.max(
@@ -89,7 +114,11 @@ Item {
                                 )
 
         bottomEdgeLeftInset:    parentToolInsets.bottomEdgeLeftInset
-        bottomEdgeRightInset:   parentToolInsets.bottomEdgeRightInset
+        bottomEdgeRightInset: Math.max(
+            parentToolInsets.bottomEdgeRightInset,
+            speedControl.visible && speedControl.enabled
+                ? _root.height - speedControl.y : 0
+        )
     }
 
 
@@ -242,14 +271,52 @@ Item {
         }
     }
 
-    PhotoVideoControl {
-        id:                     photoVideoControl
-        anchors.margins:  _toolsMargin
-        anchors.rightMargin: _toolsMargin + parentToolInsets.rightEdgeCenterInset
-        anchors.right: parent.right
-        anchors.verticalCenter: parent.verticalCenter
+    SpeedSelectorController {
+        id: speedController
 
-        property real rightEdgeCenterInset: visible ? parent.width - x : 0
+        vehicle: QGroundControl.multiVehicleManager.activeVehicleAvailable
+            ? _root._activeVehicle : null
+    }
+
+    SpeedSelector {
+        id: speedControl
+
+        anchors.right: parent.right
+        anchors.rightMargin: _root._rightControlMargin
+
+        height: _root.cockpitHeight * (ScreenTools.isMobile ? 1 : 0.75)
+        y: _root.cockpitCenterY - height / 2
+
+        controller: speedController
+
+        visible: speedController.ready
+            && multiVehiclePanelSelector.showSingleVehiclePanel
+    }
+
+    PhotoVideoControl {
+        id: photoVideoControl
+
+        anchors.right: parent.right
+        anchors.rightMargin: _root._rightControlMargin
+        buttonSize: _root.rightControlWidth
+
+        readonly property real _availableTop: _toolsMargin + Math.max(
+            _totalToolInsets.topEdgeRightInset,
+            parentToolInsets.topEdgeCenterInset
+        )
+
+        readonly property real _availableBottom: speedControl.visible && speedControl.enabled
+            ? speedControl.y - _toolsMargin
+            : _root.height - parentToolInsets.bottomEdgeRightInset - _toolsMargin
+
+        readonly property real _availableHeight:
+            Math.max(0, _availableBottom - _availableTop)
+
+        readonly property real _desiredY:
+            mainWindow.height / 2 - mainWindow.contentItem.y - height / 2
+
+        height: Math.min(implicitHeight, _availableHeight)
+        y: Math.max(_availableTop, Math.min(_desiredY, _availableBottom - height))
     }
 
     SavButtonWidgetUP {

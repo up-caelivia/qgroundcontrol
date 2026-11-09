@@ -36,7 +36,7 @@
         <file alias="Custom/Widgets/CustomAttitudeWidget.qml">res/Custom/Widgets/CustomAttitudeWidget.qml</file>
         <file alias="Custom/Widgets/CustomCompassWidget.qml">res/Custom/Widgets/CustomCompassWidget.qml</file>
         <file alias="Custom/Widgets/FlightTimeWidget.qml">res/Custom/Widgets/FlightTimeWidget.qml</file>
-        <file alias="Custom/Widgets/CustomSpeedSelector.qml">res/Custom/Widgets/CustomSpeedSelector.qml</file>
+        <file alias="Custom/Widgets/SpeedSelector.qml">res/Custom/Widgets/SpeedSelector.qml</file>
         <file alias="Custom/Widgets/Safety.qml">res/Custom/Widgets/SafetyUP.qml</file>
         <file alias="Custom/Widgets/SafetyFull.qml">res/Custom/Widgets/SafetyFullUP.qml</file>
         <file alias="Custom/Widgets/CustomRadarWidget.qml">res/Custom/Widgets/CustomRadarWidget.qml</file>

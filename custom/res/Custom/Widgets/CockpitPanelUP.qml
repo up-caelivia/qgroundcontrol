@@ -61,11 +61,7 @@ Rectangle {
     height: implicitHeight
 
     radius: ScreenTools.defaultFontPixelWidth
-    color: Qt.rgba(
-        qgcPal.windowShade.r,
-        qgcPal.windowShade.g,
-        qgcPal.windowShade.b,
-        0.05)
+    color: "transparent"
 
     QGCPalette {
         id: qgcPal

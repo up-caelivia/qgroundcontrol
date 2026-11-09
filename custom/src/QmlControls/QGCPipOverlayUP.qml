@@ -32,12 +32,33 @@ Item {
     property bool   show:                   true
     property real   topInset:               0       // Reserved height in parent coordinates
     property real   cornerRadius:           ScreenTools.defaultFontPixelWidth * 1.5
-    readonly property real occupiedWidth: visible ? (_isExpanded ? width : hidePIP.width) + ScreenTools.defaultFontPointSize : 0
-    readonly property real occupiedHeight: visible ? (_isExpanded ? height : hidePIP.height) + ScreenTools.defaultFontPointSize : 0
+    property real   leftInset:              0       // Expanded left margin, independent of the slide
+    readonly property real _handleSize: Math.max(
+        ScreenTools.minTouchPixels, ScreenTools.defaultFontPixelHeight * 2
+    )
+    readonly property real _handleGap: ScreenTools.defaultFontPixelWidth * 0.5
+
+    property bool _animationReady: false
+    property real _revealProgress: _isExpanded ? 1 : 0
+    readonly property real collapseOffset: (1 - _revealProgress) * (width + _handleGap)
+
+    // Width is measured from the expanded left inset, not the sliding overlay's x.
+    readonly property real occupiedWidth: visible
+        ? (width + _handleGap) * _revealProgress + _handleSize : 0
+    readonly property real occupiedHeight: visible
+        ? Math.max(_handleSize, _revealProgress > 0 ? height : 0) + anchors.bottomMargin
+        : 0
+
+    Behavior on _revealProgress {
+        enabled: _root._animationReady
+        NumberAnimation {
+            duration: 150
+            easing.type: Easing.InOutQuad
+        }
+    }
 
     readonly property string _pipExpandedSettingsKey: "IsPIPVisible"
 
-    property var    _fullItem
     property var    _pipOrWindowItem
     property alias  _windowContentItem: window.contentItem
     property bool   _isExpanded:        true
@@ -46,7 +67,7 @@ Item {
     property real   _minSize:           0.1
     readonly property real _maximumPipWidth: Math.max(0, Math.min(
         parent.width * _maxSize,
-        parent.width - anchors.leftMargin - anchors.rightMargin,
+        parent.width - leftInset - anchors.rightMargin - _handleGap - _handleSize,
         (parent.height - topInset - anchors.bottomMargin) * (16/9)
     ))
     readonly property real _minimumPipWidth: Math.min(
@@ -60,8 +81,26 @@ Item {
     )
 
     readonly property var _pipLayer: _pipOrWindowItem ? _pipOrWindowItem.layer : null
-    readonly property bool _roundPipContent: show && _isExpanded && !!_pipOrWindowItem &&
-                                            _pipOrWindowItem.pipState.state === _pipOrWindowItem.pipState.pipState
+    readonly property bool _hasPipContent: !!_pipOrWindowItem
+        && _pipOrWindowItem.pipState.state === _pipOrWindowItem.pipState.pipState
+    readonly property bool _roundPipContent: show && _revealProgress > 0 && _hasPipContent
+
+    // Restore both properties when this item becomes the full view or a window.
+    Binding {
+        target: _root._pipOrWindowItem
+        property: "opacity"
+        value: _root._revealProgress
+        when: _root._hasPipContent
+        restoreMode: Binding.RestoreBindingOrValue
+    }
+
+    Binding {
+        target: _root._pipOrWindowItem
+        property: "visible"
+        value: _root.show && _root._revealProgress > 0
+        when: _root._hasPipContent
+        restoreMode: Binding.RestoreBindingOrValue
+    }
 
     Component {
         id: pipMaskEffect
@@ -106,12 +145,7 @@ Item {
 
     Component.onCompleted: {
         _initForItems()
-    }
-
-    onShowChanged: {
-        if (_pipOrWindowItem && _pipOrWindowItem.pipState.state !== _pipOrWindowItem.pipState.windowState) {
-            _pipOrWindowItem.visible = show
-        }
+        _animationReady = true
     }
 
     onItem2Changed: _initForItems()
@@ -127,11 +161,9 @@ Item {
         if (item1 && item2) {
             item1.pipState.state = item1IsFull ? item1.pipState.fullState : item1.pipState.pipState
             item2.pipState.state = item1IsFull ? item2.pipState.pipState : item2.pipState.fullState
-            _fullItem = item1IsFull ? item1 : item2
             _pipOrWindowItem = item1IsFull ? item2 : item1
         } else {
             item1.pipState.state = item1.pipState.fullState
-            _fullItem = item1
             _pipOrWindowItem = null
             item1.visible = true
         }
@@ -139,29 +171,16 @@ Item {
     }
 
     function _swapPip() {
-        var item1IsFull = false
-        if (item1.pipState.state === item1.pipState.fullState) {
-            item1.pipState.state = item1.pipState.pipState
-            item2.pipState.state = item2.pipState.fullState
-            _fullItem = item2
-            _pipOrWindowItem = item1
-            item1IsFull = false
-        } else {
-            item1.pipState.state = item1.pipState.fullState
-            item2.pipState.state = item2.pipState.pipState
-            _fullItem = item1
-            _pipOrWindowItem = item2
-            item1IsFull = true
-        }
+        var item1IsFull = item1.pipState.state !== item1.pipState.fullState
+        item1.pipState.state = item1IsFull ? item1.pipState.fullState : item1.pipState.pipState
+        item2.pipState.state = item1IsFull ? item2.pipState.pipState : item2.pipState.fullState
+        _pipOrWindowItem = item1IsFull ? item2 : item1
         QGroundControl.saveBoolGlobalSetting(item1IsFullSettingsKey, item1IsFull)
     }
 
     function _setPipIsExpanded(isExpanded) {
         QGroundControl.saveBoolGlobalSetting(_pipExpandedSettingsKey, isExpanded)
         _isExpanded = isExpanded
-        if (_pipOrWindowItem) {
-            _pipOrWindowItem.visible = isExpanded
-        }
     }
 
     Window {
@@ -172,7 +191,6 @@ Item {
             item.pipState.windowAboutToClose()
             item.pipState.state = item.pipState.windowClosingState
             item.pipState.state = item.pipState.pipState
-            item.visible = _root.show
         }
     }
 
@@ -189,6 +207,7 @@ Item {
     // // MouseArea to drag in order to resize the PiP area
     MouseArea {
         id:             pipResize
+        enabled:        _root._isExpanded
 
         anchors.right:   parent.right
         anchors.top: parent.top
@@ -198,7 +217,6 @@ Item {
 
         property real initialX:     0
         property real initialWidth: 0
-        property bool allowLess: false
 
 
         // When we push the mouse button down, we un-anchor the mouse area to prevent a resizing loop
@@ -245,7 +263,8 @@ Item {
         anchors.right: parent.right
         anchors.top: parent.top
 
-        visible: _isExpanded && (ScreenTools.isMobile || pipMouseArea.containsMouse)
+        opacity: _root._revealProgress
+        visible: _root._revealProgress > 0 && (ScreenTools.isMobile || pipMouseArea.containsMouse)
     }
 
     // Pip to Window
@@ -262,7 +281,9 @@ Item {
         anchors.left:   parent.left
         anchors.top:    parent.top
 
-        visible:        _isExpanded && !ScreenTools.isMobile && pipMouseArea.containsMouse
+        opacity:        _root._revealProgress
+        enabled:        _root._isExpanded
+        visible:        _root._revealProgress > 0 && !ScreenTools.isMobile && pipMouseArea.containsMouse
 
         MouseArea {
             anchors.fill:   parent
@@ -270,53 +291,32 @@ Item {
         }
     }
 
-    Rectangle {
-        id: hidePIP
-
-        anchors.left: parent.left
-        anchors.bottom: parent.bottom
-
-        height:                 ScreenTools.defaultFontPixelHeight * 2
-        width:                  ScreenTools.defaultFontPixelHeight * 2
-        radius:                 ScreenTools.defaultFontPixelHeight / 3
-        visible: !_isExpanded
-        color: _fullItem.pipState.isDark ? Qt.rgba(0,0,0,0.75) : Qt.rgba(0,0,0,0.5)
-
-        Image {
-            width: parent.width  * 0.75
-            height: parent.height * 0.75
-            sourceSize.height: height
-            source: "/res/buttonRight.svg"
-            mipmap: true
-            fillMode: Image.PreserveAspectFit
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.horizontalCenter: parent.horizontalCenter
-        }
-
-        MouseArea {
-            anchors.fill:   parent
-            onClicked:      _root._setPipIsExpanded(true)
-        }
+    QGCMapPalette {
+        id: pipPalette
+        lightColors: true
     }
 
-    Image {
-        source: "/qmlimages/pipHide.svg"
-        mipmap: true
-        fillMode: Image.PreserveAspectFit
+    // Follow the PiP's trailing edge until the handle reaches the left inset.
+    Item {
+        id: collapseHandle
 
-        height: preferredSize
-        width: preferredSize
-        sourceSize.height: height
-        sourceSize.width: width
-
-        anchors.left: parent.left
+        x: _root.width + _root._handleGap
         anchors.bottom: parent.bottom
+        width: _root._handleSize
+        height: width
 
-        visible: _isExpanded && (ScreenTools.isMobile || pipMouseArea.containsMouse)
+        QGCColoredImage {
+            anchors.centerIn: parent
+            width: parent.width * 0.48
+            height: width
+            source: "/res/buttonRight.svg"
+            color: pipPalette.text
+            rotation: 180 * _root._revealProgress
+        }
 
         MouseArea {
             anchors.fill: parent
-            onClicked: _root._setPipIsExpanded(false)
+            onClicked: _root._setPipIsExpanded(!_root._isExpanded)
         }
     }
 }

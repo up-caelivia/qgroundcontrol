@@ -22,7 +22,6 @@ import QGroundControl.FlightDisplay 1.0
 
 import Custom.Widgets 1.0
 import CustomAnnouncer 1.0
-import Custom.Controllers 1.0
 
 Item {
     id: root
@@ -33,19 +32,23 @@ Item {
     property var vehicle: null
     property real _toolsMargin: ScreenTools.defaultFontPixelWidth * 0.75
     property bool showInstrumentPanel: true
+    property real cockpitBottomInset: parentToolInsets.bottomEdgeRightInset
+
+    readonly property real cockpitHeight: cockpitPanel.height * cockpitGroup.fitScale
+    readonly property real cockpitCenterY:
+        cockpitGroup.y
+        + (cockpitPanel.y + cockpitPanel.height / 2) * cockpitGroup.fitScale
 
     readonly property real uiScale:
         ScreenTools.defaultFontPointSize / ScreenTools.platformFontPointSize
 
-    readonly property real cockpitLeftClearance: Math.max(
-        parentToolInsets.leftEdgeBottomInset,
-        speedControl.visible ? speedControl.x + speedControl.width : 0
-    )
+    readonly property real cockpitLeftClearance:
+        parentToolInsets.leftEdgeBottomInset
 
     readonly property real cockpitRightClearance: parentToolInsets.rightEdgeBottomInset
 
     readonly property real cockpitBottomClearance: Math.max(
-        parentToolInsets.bottomEdgeRightInset,
+        cockpitBottomInset,
         parentToolInsets.bottomEdgeCenterInset
     )
 
@@ -98,10 +101,7 @@ Item {
         id: _totalToolInsets
         leftEdgeTopInset:       parentToolInsets.leftEdgeTopInset
         leftEdgeCenterInset:    parentToolInsets.leftEdgeCenterInset
-        leftEdgeBottomInset:    Math.max(
-                                    parentToolInsets.leftEdgeBottomInset,
-                                    speedControl.visible ? speedControl.x + speedControl.width : 0
-        )
+        leftEdgeBottomInset:    parentToolInsets.leftEdgeBottomInset
         rightEdgeTopInset:      parentToolInsets.rightEdgeTopInset
         rightEdgeCenterInset:   parentToolInsets.rightEdgeCenterInset
         rightEdgeBottomInset:   Math.max(
@@ -111,30 +111,12 @@ Item {
         topEdgeLeftInset:       parentToolInsets.topEdgeLeftInset
         topEdgeCenterInset:     parentToolInsets.topEdgeCenterInset
         topEdgeRightInset:      parentToolInsets.topEdgeRightInset
-        bottomEdgeLeftInset:    Math.max(
-                                    parentToolInsets.bottomEdgeLeftInset,
-                                    speedControl.visible ? parent.height - speedControl.y : 0
-        )
+        bottomEdgeLeftInset:    parentToolInsets.bottomEdgeLeftInset
         bottomEdgeCenterInset:  parentToolInsets.bottomEdgeCenterInset
         bottomEdgeRightInset:   Math.max(
                                     parentToolInsets.bottomEdgeRightInset,
                                     cockpitGroup.visible ? parent.height - cockpitGroup.y : 0
                                 )
-    }
-
-    SpeedSelectorController {
-        id: speedController
-        vehicle: root.vehicle
-    }
-
-    CustomSpeedSelector {
-        id: speedControl
-        anchors.left: parent.left
-        anchors.leftMargin: _toolsMargin
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: _toolsMargin + parentToolInsets.bottomEdgeLeftInset
-        controller: speedController
-        visible: speedController.ready
     }
 
     Item {

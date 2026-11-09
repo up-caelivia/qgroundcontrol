@@ -76,7 +76,7 @@ Item {
         rightEdgeCenterInset:   _sliderRightInset
         rightEdgeBottomInset:   _sliderRightInset
 
-        leftEdgeBottomInset:    _pipOverlay.visible ? _pipOverlay.x + _pipOverlay.occupiedWidth : 0 
+        leftEdgeBottomInset:    _pipOverlay.visible ? _pipOverlay.leftInset + _pipOverlay.occupiedWidth : 0
 
         bottomEdgeLeftInset:    _pipOverlay.visible ? _pipOverlay.occupiedHeight : 0 
     }
@@ -112,6 +112,8 @@ Item {
         anchors.right:          parent.right
         z:                      _fullItemZorder + 1
         parentToolInsets:       _toolInsets
+        cockpitCenterY:         customOverlay.cockpitCenterY
+        cockpitHeight:          customOverlay.cockpitHeight
         mapControl:             _mapControl
         visible:                !QGroundControl.videoManager.fullScreen
     }
@@ -122,6 +124,8 @@ Item {
         anchors.fill:           widgetLayer
         z:                      _fullItemZorder + 2
         parentToolInsets:       widgetLayer.totalToolInsets
+        // The cockpit sits beside the speed column, using the original bottom inset.
+        cockpitBottomInset:     _toolInsets.bottomEdgeRightInset
         vehicle:                QGroundControl.multiVehicleManager.activeVehicleAvailable ? _root._activeVehicle : null
         visible:                !QGroundControl.videoManager.fullScreen
         showInstrumentPanel:    widgetLayer.instrumentPanelVisible 
@@ -252,6 +256,8 @@ Item {
         anchors.bottom:         parent.bottom
         anchors.left:           parent.left
         anchors.margins:        _toolsMargin
+        anchors.leftMargin:     _toolsMargin - _pipOverlay.collapseOffset
+        leftInset:              _toolsMargin
         item1IsFullSettingsKey: "MainFlyWindowIsMap"
         item1:                  hasVideo ? videoControl : mapControl
         item2:                  hasVideo ? mapControl : null
