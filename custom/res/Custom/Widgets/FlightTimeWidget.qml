@@ -23,13 +23,13 @@ Rectangle {
     property double flightTimeSeconds: NaN
 
     readonly property real _padding: ScreenTools.defaultFontPixelWidth
-    readonly property real _sectionWidth: Math.max(
+    readonly property real _sectionWidth: Math.ceil(Math.max(
         timeMetrics.advanceWidth,
-        flightTimeLabel.implicitWidth,
-        flightTimeValue.implicitWidth,
-        remainingTimeLabel.implicitWidth,
-        remainingTimeValue.implicitWidth
-    )
+        flightTimeLabel.contentWidth,
+        flightTimeValue.contentWidth,
+        remainingTimeLabel.contentWidth,
+        remainingTimeValue.contentWidth
+    ))
 
     implicitWidth: contentRow.implicitWidth + 2 * _padding
     implicitHeight: contentRow.implicitHeight + 2 * _padding
@@ -112,7 +112,7 @@ Rectangle {
                 Layout.fillWidth: true
                 horizontalAlignment: Text.AlignHCenter
 
-                text: qsTr("Time remaining")
+                text: qsTr("Remaining")
                 font.pointSize: ScreenTools.smallFontPointSize
                 color: qgcPal.text
             }

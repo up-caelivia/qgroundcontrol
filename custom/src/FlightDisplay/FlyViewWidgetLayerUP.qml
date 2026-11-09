@@ -142,7 +142,6 @@ Item {
         property real rightEdgeTopInset: visible ? _root.width - x : 0
     }
 
-
     FlightTimeWidget {
         id: flightTimePanel
 
@@ -154,8 +153,9 @@ Item {
         flightTimeSeconds: vehicle ? CustomPlugin.tripFlightTimeSec : NaN
 
         visible: !!vehicle
-                 && multiVehiclePanelSelector.showSingleVehiclePanel
-                 && !guidedActionConfirm.visible
+                    && !vehicle.vehicleLinkManager.communicationLost
+                    && multiVehiclePanelSelector.showSingleVehiclePanel
+                    && !guidedActionConfirm.visible
     }
 
     GuidedActionConfirm {
