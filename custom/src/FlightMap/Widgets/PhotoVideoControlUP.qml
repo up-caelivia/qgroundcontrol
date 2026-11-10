@@ -8,9 +8,7 @@
  ****************************************************************************/
 
 import QtQuick                  2.12
-import QtPositioning            5.2
 import QtQuick.Layouts          1.2
-import QtQuick.Controls         1.4
 import QtQuick.Dialogs          1.2
 import QtGraphicalEffects       1.0
 
@@ -73,10 +71,9 @@ Item {
     // The following properties relate to a simple video stream
     property var    _videoStreamSettings:                       QGroundControl.settingsManager.videoSettings
     property var    _videoStreamManager:                        QGroundControl.videoManager
-    property bool   _videoStreamIsStreaming:                    _videoStreamManager.streaming
     property bool   _simplePhotoCaptureIsIdle:             true
     property bool   _videoStreamRecording:                      _videoStreamManager.recording
-    property bool   _videoStreamCanShoot:                       _videoStreamIsStreaming
+    property bool   _videoStreamCanShoot:                       _videoStreamManager.streaming
     property bool   _videoStreamIsShootingInCurrentMode:        _videoStreamInPhotoMode ? !_simplePhotoCaptureIsIdle : _videoStreamRecording
     property bool   _videoStreamInPhotoMode:                    false
 
@@ -84,7 +81,13 @@ Item {
     property var    _mavlinkCameraManager:                      _activeVehicle ? _activeVehicle.cameraManager : null
     property int    _mavlinkCameraManagerCurCameraIndex:        _mavlinkCameraManager ? _mavlinkCameraManager.currentCamera : -1
     property bool   _noMavlinkCameras:                          _mavlinkCameraManager ? _mavlinkCameraManager.cameras.count === 0 : true
-    property var    _mavlinkCamera:                             !_noMavlinkCameras ? (_mavlinkCameraManager.cameras.get(_mavlinkCameraManagerCurCameraIndex) && _mavlinkCameraManager.cameras.get(_mavlinkCameraManagerCurCameraIndex).paramComplete ? _mavlinkCameraManager.cameras.get(_mavlinkCameraManagerCurCameraIndex) : null) : null
+    property var    _mavlinkCamera: {
+        if (!_noMavlinkCameras) {
+            var camera = _mavlinkCameraManager.cameras.get(_mavlinkCameraManagerCurCameraIndex)
+            return camera && camera.paramComplete ? camera : null
+        }
+        return null
+    }
     property bool   _multipleMavlinkCameras:                    _mavlinkCameraManager ? _mavlinkCameraManager.cameras.count > 1 : false
     property bool   _multipleMavlinkCameraStreams:              _mavlinkCamera ? _mavlinkCamera.streamLabels.length > 1 : false
     property int    _mavlinCameraCurStreamIndex:                _mavlinkCamera ? _mavlinkCamera.currentStream : -1
