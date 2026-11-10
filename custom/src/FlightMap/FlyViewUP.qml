@@ -9,21 +9,11 @@
 
 import QtQuick                  2.12
 
-import QtLocation               5.3
-import QtPositioning            5.3
-import QtQuick.Window           2.2
-
 import QGroundControl               1.0
 import QGroundControl.Controllers   1.0
 import QGroundControl.Controls      1.0
-import QGroundControl.FactSystem    1.0
 import QGroundControl.FlightDisplay 1.0
-import QGroundControl.FlightMap     1.0
-import QGroundControl.Palette       1.0
 import QGroundControl.ScreenTools   1.0
-import QGroundControl.Vehicle       1.0
-
-import Custom.Widgets 1.0
 
 Item {
     id: _root
@@ -43,28 +33,14 @@ Item {
     property bool   _isFullWindowItemDark:  _mainWindowIsMap ? mapControl.isSatelliteMap : true
     property var    _activeVehicle:         QGroundControl.multiVehicleManager.activeVehicle
     property var    _missionController:     _planController.missionController
-    property var    _geoFenceController:    _planController.geoFenceController
-    property var    _rallyPointController:  _planController.rallyPointController
     property real   _margins:               ScreenTools.defaultFontPixelWidth / 2
     property var    _guidedController:      guidedActionsController
-    property var    _guidedActionList:      guidedActionList
     property var    _guidedValueSlider:     guidedValueSlider
     property var    _widgetLayer:           widgetLayer
     property real   _toolsMargin:           ScreenTools.defaultFontPixelWidth * 0.75
-    property rect   _centerViewport:        Qt.rect(0, 0, width, height)
-    property real   _rightPanelWidth:       ScreenTools.defaultFontPixelWidth * 30
     property var    _mapControl:            mapControl
 
     property real   _fullItemZorder:    0
-    property real   _pipItemZorder:     QGroundControl.zOrderWidgets
-
-    function _calcCenterViewPort() {
-        var newToolInset = Qt.rect(0, 0, width, height)
-        toolstrip.adjustToolInset(newToolInset)
-        if (QGroundControl.corePlugin.options.instrumentWidget) {
-            flightDisplayViewWidgets.adjustToolInset(newToolInset)
-        }
-    }
 
     QGCToolInsets {
         id:                     _toolInsets
@@ -106,10 +82,7 @@ Item {
 
     FlyViewWidgetLayer {
         id:                     widgetLayer
-        anchors.top:            parent.top
-        anchors.bottom:         parent.bottom
-        anchors.left:           parent.left
-        anchors.right:          parent.right
+        anchors.fill:           parent
         z:                      _fullItemZorder + 1
         parentToolInsets:       _toolInsets
         cockpitCenterY:         customOverlay.cockpitCenterY
@@ -124,7 +97,6 @@ Item {
         anchors.fill:           widgetLayer
         z:                      _fullItemZorder + 2
         parentToolInsets:       widgetLayer.totalToolInsets
-        // The cockpit sits beside the speed column, using the original bottom inset.
         cockpitBottomInset:     _toolInsets.bottomEdgeRightInset
         vehicle:                QGroundControl.multiVehicleManager.activeVehicleAvailable ? _root._activeVehicle : null
         visible:                !QGroundControl.videoManager.fullScreen
@@ -197,8 +169,8 @@ Item {
     GuidedActionsController {
         id:                 guidedActionsController
         missionController:  _missionController
-        actionList:         _guidedActionList
-        guidedValueSlider:     _guidedValueSlider
+        actionList:         guidedActionList
+        guidedValueSlider:  _guidedValueSlider
     }
 
     /*GuidedActionConfirm {
@@ -249,7 +221,7 @@ Item {
         anchors.topMargin:      pipState.state === pipState.fullState ?  -_root.toolBarOverlay: 0
     }
 
-    property var hasVideo: QGroundControl.videoManager.hasVideo ? true : false
+    readonly property bool hasVideo: QGroundControl.videoManager.hasVideo
 
     QGCPipOverlay {
         id:                     _pipOverlay
@@ -262,7 +234,7 @@ Item {
         item1:                  hasVideo ? videoControl : mapControl
         item2:                  hasVideo ? mapControl : null
         fullZOrder:             _fullItemZorder
-        pipZOrder:              _pipItemZorder
+        pipZOrder:              QGroundControl.zOrderWidgets
         topInset:               widgetLayer.totalToolInsets.topEdgeCenterInset
     }
 }
