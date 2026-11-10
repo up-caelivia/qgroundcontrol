@@ -11,6 +11,8 @@
         <file alias="alert.svg">res/Images/alert.svg</file>
         <file alias="MovimentoY.svg">res/Images/MovimentoY.svg</file>
         <file alias="MovimentoZ.svg">res/Images/MovimentoZ.svg</file>
+        <file alias="buttonMap.svg">res/Images/buttonMap.svg</file>
+        <file alias="buttonCamera.svg">res/Images/buttonCamera.svg</file>
     </qresource>
     <qresource prefix="/qmlimages">
         <file alias="vehicleArrowOpaque.svg">res/Images/Puntatore1.svg</file>

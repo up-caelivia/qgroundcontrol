@@ -207,11 +207,12 @@ Item {
 
         QGCColoredImage {
             anchors.centerIn: parent
-            width: root.buttonSize * 0.48
+            width: Math.min(collapseHandle.width, collapseHandle.height)
+                   * (root._revealProgress === 0 ? 0.78 : 0.58)
             height: width
-            source: "/res/buttonRight.svg"
+            source: root._revealProgress === 0 ? "/custom/img/buttonCamera.svg" : "/res/buttonRight.svg"
             color: overlayPal.text
-            rotation: 180 * (1 - root._revealProgress)
+            rotation: root._revealProgress === 0 ? 0 : 180 * (1 - root._revealProgress)
         }
 
         QGCLabel {

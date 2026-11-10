@@ -307,9 +307,10 @@ Item {
 
         QGCColoredImage {
             anchors.centerIn: parent
-            width: parent.width * 0.48
+            width: Math.min(collapseHandle.width, collapseHandle.height)
+                   * (_root._revealProgress === 0 ? 0.78 : 0.58)
             height: width
-            source: "/res/buttonRight.svg"
+            source: _root._revealProgress === 0 ? "/custom/img/buttonMap.svg" : "/res/buttonRight.svg"
             color: pipPalette.text
             rotation: 180 * _root._revealProgress
         }

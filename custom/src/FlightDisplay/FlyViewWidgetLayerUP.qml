@@ -297,7 +297,7 @@ Item {
 
         height: Math.min(
             implicitHeight,
-            Math.max(0, _availableBottom, _availableTop)
+            Math.max(0, _availableBottom - _availableTop)
         )
         y: Math.max(
             _availableTop,
