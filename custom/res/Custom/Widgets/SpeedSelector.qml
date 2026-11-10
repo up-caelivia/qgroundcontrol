@@ -34,9 +34,9 @@ Rectangle {
         Math.round((dragArea.thumbY - dragArea.minimumY) / buttonSize) : _selectedIndex
 
     readonly property var _modes: [
-        { label: qsTr("High"), mode: SpeedSelectorController.HighSpeed },
-        { label: qsTr("Normal"), mode: SpeedSelectorController.NormalSpeed },
-        { label: qsTr("Low"), mode: SpeedSelectorController.LowSpeed },
+        { label: qsTr("H"), mode: SpeedSelectorController.HighSpeed },
+        { label: qsTr("N"), mode: SpeedSelectorController.NormalSpeed },
+        { label: qsTr("L"), mode: SpeedSelectorController.LowSpeed },
     ]
 
     readonly property bool _lowUnavailable: _previewIndex === 2 && modality !== "Loiter"
@@ -185,7 +185,7 @@ Rectangle {
 
                     fontSizeMode: Text.Fit
                     minimumPointSize: Math.min(6, ScreenTools.smallFontPointSize)
-                    font.pointSize: ScreenTools.smallFontPointSize
+                    font.pointSize: ScreenTools.defaultFontPointSize
                     font.weight: index === root._previewIndex ? Font.DemiBold : Font.Normal
 
                     color: index === root._previewIndex ?

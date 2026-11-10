@@ -276,6 +276,8 @@ Item {
         controller: speedController
 
         visible: speedController.ready
+            && vehicle
+            && !vehicle.vehicleLinkManager.communicationLost
             && multiVehiclePanelSelector.showSingleVehiclePanel
     }
 
