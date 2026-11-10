@@ -8,27 +8,20 @@
  ****************************************************************************/
 
 import QtQuick                  2.12
-
-import QtLocation               5.3
-import QtPositioning            5.3
 import QtQuick.Window           2.2
 
 import QGroundControl               1.0
 import QGroundControl.Controls      1.0
-import QGroundControl.Controllers   1.0
-import QGroundControl.FactSystem    1.0
 import QGroundControl.FlightDisplay 1.0
 import QGroundControl.FlightMap     1.0
 import QGroundControl.Palette       1.0
 import QGroundControl.ScreenTools   1.0
-import QGroundControl.Vehicle       1.0
 
 import Custom.Widgets 1.0
 import Custom.Controllers 1.0
 import Constants 1.0
 
 
-// This is the ui overlay layer for the widgets/tools for Fly View
 Item {
     id: _root
 
@@ -45,9 +38,7 @@ Item {
     property var    _geoFenceController:    _planMasterController.geoFenceController
     property var    _rallyPointController:  _planMasterController.rallyPointController
     property var    _guidedController:      globals.guidedControllerFlyView
-    property real   _margins:               ScreenTools.defaultFontPixelWidth / 2
     property real   _toolsMargin:           ScreenTools.defaultFontPixelWidth * 0.75
-    property rect   _centerViewport:        Qt.rect(0, 0, width, height)
     property real   _rightPanelWidth:       ScreenTools.defaultFontPixelWidth * 30
     property alias  _gripperMenu:           gripperOptions
 
@@ -62,12 +53,6 @@ Item {
             parentToolInsets.rightEdgeCenterInset,
             parentToolInsets.rightEdgeBottomInset
         )
-
-
-    function showCriticalVehicleMessage(message) {
-        mainWindow.closeCriticalVehicleMessage()
-        mainWindow.showCriticalVehicleMessage(message)
-    }
 
 
     QGCToolInsets {
@@ -119,6 +104,7 @@ Item {
             speedControl.visible && speedControl.enabled
                 ? _root.height - speedControl.y : 0
         )
+        bottomEdgeCenterInset: parentToolInsets.bottomEdgeCenterInset
     }
 
 
@@ -222,7 +208,7 @@ Item {
         property real leftEdgeBottomInset: visible ? bottomEdgeLeftInset + width/18 - ScreenTools.defaultFontPixelHeight*2 : 0
         property real rightEdgeBottomInset: visible ? bottomEdgeRightInset + width/18 - ScreenTools.defaultFontPixelHeight*2 : 0
     }
-*/
+    */
 
     FlyViewToolStrip {
         id:                     toolStrip
@@ -232,7 +218,7 @@ Item {
         anchors.top:            parent.top
         z:                      QGroundControl.zOrderWidgets
         maxHeight:              parent.height - y - parentToolInsets.bottomEdgeLeftInset - _toolsMargin
-        visible:                CustomPlugin.isSAVenabled ? true : !QGroundControl.videoManager.fullScreen
+        visible:                CustomPlugin.isSAVenabled || !QGroundControl.videoManager.fullScreen
     
 
         onDisplayPreFlightChecklist: preFlightChecklistPopup.createObject(mainWindow).open()
@@ -309,14 +295,17 @@ Item {
             ? speedControl.y - _toolsMargin
             : _root.height - parentToolInsets.bottomEdgeRightInset - _toolsMargin
 
-        readonly property real _availableHeight:
-            Math.max(0, _availableBottom - _availableTop)
-
-        readonly property real _desiredY:
-            mainWindow.height / 2 - mainWindow.contentItem.y - height / 2
-
-        height: Math.min(implicitHeight, _availableHeight)
-        y: Math.max(_availableTop, Math.min(_desiredY, _availableBottom - height))
+        height: Math.min(
+            implicitHeight,
+            Math.max(0, _availableBottom, _availableTop)
+        )
+        y: Math.max(
+            _availableTop,
+            Math.min(
+                mainWindow.height / 2 - mainWindow.contentItem.y - height / 2,
+                _availableBottom - height
+            )
+        )
     }
 
     SavButtonWidgetUP {

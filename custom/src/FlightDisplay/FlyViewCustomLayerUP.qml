@@ -11,14 +11,8 @@
 
 import QtQuick          2.12
 
-import QGroundControl               1.0
 import QGroundControl.Controls      1.0
-import QGroundControl.Controllers   1.0
-import QGroundControl.Palette       1.0
 import QGroundControl.ScreenTools   1.0
-import QGroundControl.FactSystem    1.0
-import QGroundControl.FlightMap     1.0
-import QGroundControl.FlightDisplay 1.0
 
 import Custom.Widgets 1.0
 import CustomAnnouncer 1.0
@@ -65,34 +59,25 @@ Item {
         mainWindow.showCriticalVehicleMessage(message)
     }
 
-    Rectangle {
-
+    QtObject {
         property double value: root.vehicle ? (isNaN(root.vehicle.altitudeRelative.value) ? 0.0 : root.vehicle.altitudeRelative.value) : 0.0
         property bool above120: false
 
         onValueChanged: {
-
             if (root.vehicle == null || root.vehicle.altitudeRelative == null)
                 return;
-
             if ((value > 120 && root.vehicle.altitudeRelative.units == "m") || ( value > 393.7 && root.vehicle.altitudeRelative.units == "ft")) {
-
                 if(!above120) {
                     showCriticalVehicleMessage("WARNING : Above 120m")
                     console.log("INFO: Vehicle above 120m");
                     CustomAnnouncer.announceAltitude();
                 }
-
                 above120 = true
-
             } else {
-
                 if(above120 && mainWindow.getCriticalVehicleMessage() == "WARNING : Above 120m") {
                     mainWindow.closeCriticalVehicleMessage()
                 }
-
                 above120 = false
-
             }
         }
     }
