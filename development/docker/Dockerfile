@@ -99,6 +99,14 @@ RUN python3.9 -m venv /opt/aqt-venv \
 
 RUN locale-gen en_US.UTF-8
 
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x -o /tmp/nodesource_setup.sh \
+    && bash /tmp/nodesource_setup.sh \
+    && apt-get install -y --no-install-recommends nodejs \
+    && node --version \
+    && npm --version \
+    && rm -f /tmp/nodesource_setup.sh \
+    && rm -rf /var/lib/apt/lists/*
+
 FROM qgc-build AS qgc-gui
 
 ARG USERNAME=qgc
