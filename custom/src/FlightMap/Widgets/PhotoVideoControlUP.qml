@@ -57,7 +57,10 @@ Item {
     width: implicitWidth
     clip: true
 
-    visible:    (_mavlinkCamera || _anyVideoStreamAvailable || _simpleCameraAvailable) && multiVehiclePanelSelector.showSingleVehiclePanel
+    visible:    _activeVehicle &&
+                !_activeVehicle.vehicleLinkManager.communicationLost &&
+                (!!_mavlinkCamera || _videoStreamManager.streaming) &&
+                multiVehiclePanelSelector.showSingleVehiclePanel
 
     property real   _margins:                                   ScreenTools.defaultFontPixelHeight / 2
     property var    _activeVehicle:                             QGroundControl.multiVehicleManager.activeVehicle
