@@ -12,10 +12,21 @@ Item {
     property bool keepMapCenteredOnVehicle: false
     property bool pipMode: false
     property bool _disableVehicleTracking: false
+    readonly property bool isVehicleCentered: {
+        if (!canCenterOnVehicle) {
+            return false
+        }
+
+        var vehiclePoint = mapControl.fromCoordinate(_vehicleCoordinate, false)
+        var centerPoint = mapControl.fromCoordinate(mapControl.center, false)
+        var tollerance = 0.15
+        return  Math.abs(vehiclePoint.x - centerPoint.x) <= mapControl.width * 0.05 &&
+                Math.abs(vehiclePoint.y - centerPoint.y) <= mapControl.height * 0.05
+    }
 
     readonly property bool canCenterOnVehicle: !!vehicle && !!mapControl && vehicle.coordinate.isValid
-    readonly property var _vehicleCoordinate: vehicle ? vehicle.coordinate : QtPositioning.coordinate()
     readonly property bool recentering: animateLat.running || animateLong.running
+    readonly property var _vehicleCoordinate: vehicle ? vehicle.coordinate : QtPositioning.coordinate()
 
     onTrackingEnabledChanged: {
         if (!trackingEnabled) {

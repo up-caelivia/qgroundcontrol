@@ -10,6 +10,7 @@
 
 /// @file
 ///     @author Don Gagne <don@thegagnes.com>
+///     @author Francesco Marcon <frmarcon04@gmail.com>
 
 #include "ArduCopterFirmwarePlugin.h"
 #include "QGCApplication.h"
@@ -49,6 +50,9 @@ APMCopterMode::APMCopterMode(uint32_t mode, bool settable) :
         { AUTOROTATE,   "AutoRotate" },
         { AUTO_RTL,     "AutoRTL" },
         { TURTLE,       "Turtle" },
+
+        // Custom mode - Exyn mode
+        { EXYN,         "NEXYS" },
     });
 }
 
@@ -81,6 +85,9 @@ ArduCopterFirmwarePlugin::ArduCopterFirmwarePlugin(void)
         APMCopterMode(APMCopterMode::AUTOROTATE,    true),
         APMCopterMode(APMCopterMode::AUTO_RTL,      true),
         APMCopterMode(APMCopterMode::TURTLE,        true),
+
+        // Custom mode - Exyn mode
+        APMCopterMode(APMCopterMode::EXYN,          false),
     });
 
     if (!_remapParamNameIntialized) {

@@ -145,7 +145,10 @@ Item {
                                 : terrainButton.visible ? terrainButton.right : terrainButton.left
         width:              height
         opacity:            0.75
-        visible:            !!scale.navigationController && scale.navigationController.canCenterOnVehicle
+        visible:            !!scale.navigationController &&
+                            scale.navigationController.canCenterOnVehicle &&
+                            !scale.navigationController.isVehicleCentered &&
+                            !scale.navigationController.recentering
         iconSource:         "/qmlimages/MapCenter.svg"
         iconCentered:       true
         onClicked:          scale.navigationController.centerOnVehicle()

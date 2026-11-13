@@ -10,6 +10,7 @@
 
 /// @file
 ///     @author Don Gagne <don@thegagnes.com>
+///     @author Francesco Marcon <frmarcon04@gmail.com>
 
 #ifndef ArduCopterFirmwarePlugin_H
 #define ArduCopterFirmwarePlugin_H
@@ -49,6 +50,9 @@ public:
         AUTOROTATE  = 26,
         AUTO_RTL    = 27,
         TURTLE      = 28,
+
+        // Custom mode - EXYN mode
+        EXYN        = 100,
     };
 
     APMCopterMode(uint32_t mode, bool settable);
