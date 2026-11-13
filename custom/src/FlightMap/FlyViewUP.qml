@@ -231,8 +231,10 @@ Item {
         anchors.leftMargin:     _toolsMargin - _pipOverlay.collapseOffset
         leftInset:              _toolsMargin
         item1IsFullSettingsKey: "MainFlyWindowIsMap"
-        item1:                  hasVideo ? videoControl : mapControl
-        item2:                  hasVideo ? mapControl : null
+        item1:                  mapControl
+        item2:                  hasVideo ? videoControl : null
+        show:                   QGroundControl.videoManager.streaming
+        enabled:                show
         fullZOrder:             _fullItemZorder
         pipZOrder:              QGroundControl.zOrderWidgets
         topInset:               widgetLayer.totalToolInsets.topEdgeCenterInset

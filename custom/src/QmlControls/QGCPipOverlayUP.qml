@@ -144,6 +144,7 @@ Item {
     }
 
     Component.onCompleted: {
+        QGroundControl.saveBoolGlobalSetting(item1IsFullSettingsKey, true)
         _initForItems()
         _animationReady = true
     }
@@ -217,7 +218,6 @@ Item {
 
         property real initialX:     0
         property real initialWidth: 0
-
 
         // When we push the mouse button down, we un-anchor the mouse area to prevent a resizing loop
         onPressed: {
