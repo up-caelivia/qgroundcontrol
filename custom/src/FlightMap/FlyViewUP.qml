@@ -233,7 +233,9 @@ Item {
         item1IsFullSettingsKey: "MainFlyWindowIsMap"
         item1:                  mapControl
         item2:                  hasVideo ? videoControl : null
-        show:                   QGroundControl.videoManager.streaming
+        show:                   _root._activeVehicle
+                                && !_root._activeVehicle.vehicleLinkManager.communicationLost
+                                && QGroundControl.videoManager.streaming
         enabled:                show
         fullZOrder:             _fullItemZorder
         pipZOrder:              QGroundControl.zOrderWidgets

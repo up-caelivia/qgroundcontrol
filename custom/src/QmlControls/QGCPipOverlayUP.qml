@@ -151,6 +151,14 @@ Item {
 
     onItem2Changed: _initForItems()
 
+    onShowChanged: {
+        if (!show && item1 && item2
+                && item1.pipState.state === item1.pipState.pipState
+                && item2.pipState.state === item2.pipState.fullState) {
+            _swapPip()
+        }
+    }
+
     function showWindow() {
         window.width = _root.width
         window.height = _root.height
