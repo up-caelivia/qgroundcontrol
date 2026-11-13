@@ -22,6 +22,7 @@ Button {
     property real   heightFactor:   0.5
     property real   fontWeight:     Font.Normal // default for qml Text
     property string iconSource
+    property bool   iconCentered:   false
 
     property alias wrapMode:            text.wrapMode
     property alias horizontalAlignment: text.horizontalAlignment
@@ -58,10 +59,16 @@ Button {
             color:                  text.color
             fillMode:               Image.PreserveAspectFit
             sourceSize.height:      height
-            anchors.left:           control.iconLeft ? parent.left : undefined
-            anchors.leftMargin:     control.iconLeft ? ScreenTools.defaultFontPixelWidth : undefined
-            anchors.right:          !control.iconLeft ? parent.right : undefined
-            anchors.rightMargin:    !control.iconLeft ? ScreenTools.defaultFontPixelWidth : undefined
+            anchors.left: !control.iconCentered && control.iconLeft
+                        ? parent.left : undefined
+            anchors.right: !control.iconCentered && !control.iconLeft
+                        ? parent.right : undefined
+            anchors.leftMargin: control.iconCentered
+                                ? 0 : ScreenTools.defaultFontPixelWidth
+            anchors.rightMargin: control.iconCentered
+                                ? 0 : ScreenTools.defaultFontPixelWidth
+            anchors.horizontalCenter: control.iconCentered
+                                    ? parent.horizontalCenter : undefined
             anchors.verticalCenter: parent.verticalCenter
         }
 

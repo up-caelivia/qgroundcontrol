@@ -83,3 +83,5 @@
 <file alias="MissionSettingsEditor.qml">src/PlanView/MissionSettingsEditor.qml</file>
 
 <file alias="QGroundControl/ScreenTools/ScreenTools.qml">src/QmlControls/ScreenTools.qml</file>
+
+<file alias="QGroundControl/FlightMap/MapScale.qml">src/FlightMap/MapScale.qml</file>

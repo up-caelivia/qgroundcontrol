@@ -11,6 +11,8 @@
         <file alias="alert.svg">res/Images/alert.svg</file>
         <file alias="MovimentoY.svg">res/Images/MovimentoY.svg</file>
         <file alias="MovimentoZ.svg">res/Images/MovimentoZ.svg</file>
+        <file alias="buttonMap.svg">res/Images/buttonMap.svg</file>
+        <file alias="buttonCamera.svg">res/Images/buttonCamera.svg</file>
     </qresource>
     <qresource prefix="/qmlimages">
         <file alias="vehicleArrowOpaque.svg">res/Images/Puntatore1.svg</file>
@@ -36,7 +38,7 @@
         <file alias="Custom/Widgets/CustomAttitudeWidget.qml">res/Custom/Widgets/CustomAttitudeWidget.qml</file>
         <file alias="Custom/Widgets/CustomCompassWidget.qml">res/Custom/Widgets/CustomCompassWidget.qml</file>
         <file alias="Custom/Widgets/FlightTimeWidget.qml">res/Custom/Widgets/FlightTimeWidget.qml</file>
-        <file alias="Custom/Widgets/CustomSpeedSelector.qml">res/Custom/Widgets/CustomSpeedSelector.qml</file>
+        <file alias="Custom/Widgets/SpeedSelector.qml">res/Custom/Widgets/SpeedSelector.qml</file>
         <file alias="Custom/Widgets/Safety.qml">res/Custom/Widgets/SafetyUP.qml</file>
         <file alias="Custom/Widgets/SafetyFull.qml">res/Custom/Widgets/SafetyFullUP.qml</file>
         <file alias="Custom/Widgets/CustomRadarWidget.qml">res/Custom/Widgets/CustomRadarWidget.qml</file>
@@ -64,6 +66,10 @@
         <file alias="qmldir">res/Custom/Controls/qmldir</file>
         <file alias="VerticalSeparator.qml">res/Custom/Controls/VerticalSeparator.qml</file>
     </qresource>
+    <qresource prefix="/Custom/Controllers">
+        <file alias="qmldir">res/Custom/Controllers/qmldir</file>
+        <file alias="MapNavigationController.qml">res/Custom/Controllers/MapNavigationController.qml</file>
+    </qresource>
     <qresource prefix="/qml">
         <file alias="CustomSetupView.qml">res/Custom/Widgets/CustomSetupView.qml</file>
         <file alias="QGroundControl/FlightMap/FlightMap.qml">src/FlightMap/FlightMapUP.qml</file>
@@ -87,7 +93,7 @@
         <file alias="QGroundControl/FlightDisplay/FlyView.qml">src/FlightMap/FlyViewUP.qml</file>
         <file alias="MainRootWindow.qml">src/ui/MainRootWindowUP.qml</file>
         <file alias="QGroundControl/FlightMap/PhotoVideoControl.qml">src/FlightMap/Widgets/PhotoVideoControlUP.qml</file>   
-        <file alias="QGroundControl/FlightDisplay/FlyViewMap.qml">res/CustomFlyViewMap.qml</file>
+        <file alias="QGroundControl/FlightDisplay/FlyViewMap.qml">src/FlightDisplay/FlyViewMapUP.qml</file>
         <file alias="QGroundControl/FlightDisplay/ProximityRadarValues.qml">src/FlightDisplay/ProximityRadarValuesUP.qml</file>   
         <file alias="QGroundControl/FlightDisplay/FlyViewVideo.qml">src/FlightDisplay/FlyViewVideoUP.qml</file> 
 		<file alias="QGroundControl/Controls/QGCComboBox.qml">src/QmlControls/QGCComboBoxUP.qml</file>
@@ -104,6 +110,7 @@
         <file alias="QGroundControl/FlightDisplay/FlyViewToolStripActionList.qml">src/FlightDisplay/FlyViewToolStripActionListUP.qml</file>
 		<file alias="QGroundControl/FlightDisplay/GuidedActionsController.qml">src/FlightDisplay/GuidedActionsControllerUP.qml</file>
         <file alias="QGroundControl/ScreenTools/ScreenTools.qml">src/QmlControls/ScreenToolsUP.qml</file>
+        <file alias="QGroundControl/FlightMap/MapScale.qml">src/FlightMap/MapScaleUP.qml</file>
     </qresource>
     <qresource prefix="/toolbar">
         <file alias="GPSIndicator.qml">src/ui/toolbar/GPSIndicatorUP.qml</file>
@@ -125,4 +132,7 @@
 		<file alias="Lifeguard.svg">res/Images/Lifeguard.svg</file>
 		<file alias="facade.svg">res/Images/facade.svg</file>
 	</qresource>
+    <qresource prefix="/js">
+        <file alias="MapScaleMath.js">src/FlightMap/MapScaleMath.js</file>
+    </qresource>
 </RCC>

@@ -148,7 +148,8 @@ SOURCES += \
     $$PWD/src/QmlControls/DisplayMetricsAdapter.cpp \
     $$PWD/src/QmlControls/UISizingController.cpp \
     $$PWD/src/QmlControls/UISizingPolicy.cpp \
-    $$PWD/src/Settings/UISizingSettings.cpp
+    $$PWD/src/Settings/UISizingSettings.cpp \
+    $$PWD/src/Telemetry/BatteryTimeController.cpp
 
 HEADERS += \
     $$PWD/src/CustomPlugin.h \
@@ -163,7 +164,8 @@ HEADERS += \
     $$PWD/src/QmlControls/DisplayMetricsAdapter.h \
     $$PWD/src/QmlControls/UISizingController.h \
     $$PWD/src/QmlControls/UISizingPolicy.h \
-    $$PWD/src/Settings/UISizingSettings.h
+    $$PWD/src/Settings/UISizingSettings.h \
+    $$PWD/src/Telemetry/BatteryTimeController.h
 
 INCLUDEPATH += $$PWD/src \
                $$PWD/src/GeoAwareness

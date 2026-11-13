@@ -138,13 +138,6 @@ Item {
             // visible:                currentToolbar === flyViewToolbar
         }
 
-        // TODO: remove from here
-        FlightTimeWidget {
-            id: tf
-            anchors.top:        parent.top
-            anchors.bottom:     parent.bottom
-            visible:            _activeVehicle
-        }
 
     }
 

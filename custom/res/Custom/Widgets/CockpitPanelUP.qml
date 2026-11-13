@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.11
 import QGroundControl.Controls 1.0
 import QGroundControl.Palette 1.0
 import QGroundControl.ScreenTools 1.0
+
 import Custom.Widgets 1.0
 
 Rectangle {
@@ -60,11 +61,7 @@ Rectangle {
     height: implicitHeight
 
     radius: ScreenTools.defaultFontPixelWidth
-    color: Qt.rgba(
-        qgcPal.windowShade.r,
-        qgcPal.windowShade.g,
-        qgcPal.windowShade.b,
-        0.05)
+    color: "transparent"
 
     QGCPalette {
         id: qgcPal

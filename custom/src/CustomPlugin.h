@@ -30,7 +30,7 @@ class CustomFlyViewOptions : public QGCFlyViewOptions
 {
 public:
     CustomFlyViewOptions(CustomOptions* options, QObject* parent = nullptr);
-    bool showInstrumentPanel(void) const final { return false; }
+    bool showInstrumentPanel(void) const final { return true; }
 };
 
 class CustomOptions : public QGCOptions

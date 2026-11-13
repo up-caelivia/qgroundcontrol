@@ -18,7 +18,6 @@ import QGroundControl.Palette       1.0
 import QGroundControl.Controls      1.0
 import QGroundControl.ScreenTools   1.0
 import QGroundControl.FlightDisplay 1.0
-import QGroundControl.FlightMap     1.0
 
 import Custom.Controllers 1.0
 import Custom.Settings 1.0
@@ -36,8 +35,8 @@ ApplicationWindow {
         if (ScreenTools.isMobile || Screen.height / ScreenTools.realPixelDensity < 120) {
             mainWindow.showFullScreen()
         } else {
-            width   = ScreenTools.isMobile ? Screen.width  : Math.min(250 * Screen.pixelDensity, Screen.width)
-            height  = ScreenTools.isMobile ? Screen.height : Math.min(150 * Screen.pixelDensity, Screen.height)
+            width   = Math.min(250 * Screen.pixelDensity, Screen.width)
+            height  = Math.min(150 * Screen.pixelDensity, Screen.height)
         }
 
         // Start the sequence of first run prompt(s)
@@ -97,8 +96,6 @@ ApplicationWindow {
     }
 
     property var                _rgPreventViewSwitch:       [ false ]
-
-    readonly property real      _topBottomMargins:          ScreenTools.defaultFontPixelHeight * 0.5
 
     //-------------------------------------------------------------------------
     //-- Global Scope Variables
@@ -292,7 +289,7 @@ ApplicationWindow {
     header: MainToolBar {
         id:         toolbar
         height:     ScreenTools.toolbarHeight
-        visible:    CustomPlugin.isSAVenabled ? true : !(QGroundControl.videoManager.fullScreen && flightView.visible)
+        visible:    CustomPlugin.isSAVenabled || !(QGroundControl.videoManager.fullScreen && flightView.visible)
     }
 
     footer: LogReplayStatusBar {
@@ -580,7 +577,7 @@ ApplicationWindow {
 
     Popup {
         id:                 criticalVehicleMessagePopup
-        y:                  ScreenTools.defaultFontPixelHeight
+        y:                  ScreenTools.defaultFontPixelHeight + (flightView.visible ? flightView._widgetLayer.totalToolInsets.topEdgeCenterInset : 0)
         x:                  Math.round((mainWindow.width - width) * 0.5)
         width:              mainWindow.width  * 0.55
         height:             criticalVehicleMessageText.contentHeight + ScreenTools.defaultFontPixelHeight * 2
@@ -660,7 +657,9 @@ ApplicationWindow {
                 criticalVehicleMessagePopup.close()
                 if (criticalVehicleMessagePopup.dropMessageIndicatorOnClose) {
                     criticalVehicleMessagePopup.dropMessageIndicatorOnClose = false;
-                    QGroundControl.multiVehicleManager.activeVehicle.resetErrorLevelMessages();
+                    if (globals.activeVehicle) {
+                        globals.activeVehicle.resetErrorLevelMessages();
+                    }
                     toolbar.dropMessageIndicatorTool();
                 }
             }

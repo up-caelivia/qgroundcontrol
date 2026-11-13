@@ -11,17 +11,11 @@
 
 import QtQuick          2.12
 
-import QGroundControl               1.0
 import QGroundControl.Controls      1.0
-import QGroundControl.Controllers   1.0
-import QGroundControl.Palette       1.0
 import QGroundControl.ScreenTools   1.0
-import QGroundControl.FactSystem    1.0
-import QGroundControl.FlightMap     1.0
-import QGroundControl.FlightDisplay 1.0
+
 import Custom.Widgets 1.0
 import CustomAnnouncer 1.0
-import Custom.Controllers 1.0
 
 Item {
     id: root
@@ -30,20 +24,25 @@ Item {
     property var totalToolInsets: _totalToolInsets    // The insets updated for the custom overlay additions
 
     property var vehicle: null
-    property real   _toolsMargin:           ScreenTools.defaultFontPixelWidth * 0.75
+    property real _toolsMargin: ScreenTools.defaultFontPixelWidth * 0.75
+    property bool showInstrumentPanel: true
+    property real cockpitBottomInset: parentToolInsets.bottomEdgeRightInset
+
+    readonly property real cockpitHeight: cockpitPanel.height * cockpitGroup.fitScale
+    readonly property real cockpitCenterY:
+        cockpitGroup.y
+        + (cockpitPanel.y + cockpitPanel.height / 2) * cockpitGroup.fitScale
 
     readonly property real uiScale:
         ScreenTools.defaultFontPointSize / ScreenTools.platformFontPointSize
 
-    readonly property real cockpitLeftClearance: Math.max(
-        parentToolInsets.leftEdgeBottomInset,
-        speedControl.visible ? speedControl.x + speedControl.width : 0
-    )
+    readonly property real cockpitLeftClearance:
+        parentToolInsets.leftEdgeBottomInset
 
     readonly property real cockpitRightClearance: parentToolInsets.rightEdgeBottomInset
 
     readonly property real cockpitBottomClearance: Math.max(
-        parentToolInsets.bottomEdgeRightInset,
+        cockpitBottomInset,
         parentToolInsets.bottomEdgeCenterInset
     )
 
@@ -60,85 +59,49 @@ Item {
         mainWindow.showCriticalVehicleMessage(message)
     }
 
-    Rectangle {
-
+    QtObject {
         property double value: root.vehicle ? (isNaN(root.vehicle.altitudeRelative.value) ? 0.0 : root.vehicle.altitudeRelative.value) : 0.0
         property bool above120: false
 
         onValueChanged: {
-
             if (root.vehicle == null || root.vehicle.altitudeRelative == null)
                 return;
-
             if ((value > 120 && root.vehicle.altitudeRelative.units == "m") || ( value > 393.7 && root.vehicle.altitudeRelative.units == "ft")) {
-
                 if(!above120) {
                     showCriticalVehicleMessage("WARNING : Above 120m")
                     console.log("INFO: Vehicle above 120m");
                     CustomAnnouncer.announceAltitude();
                 }
-
                 above120 = true
-
             } else {
-
                 if(above120 && mainWindow.getCriticalVehicleMessage() == "WARNING : Above 120m") {
                     mainWindow.closeCriticalVehicleMessage()
                 }
-
                 above120 = false
-
             }
         }
     }
 
     QGCToolInsets {
-        id:                     _totalToolInsets
+        id: _totalToolInsets
         leftEdgeTopInset:       parentToolInsets.leftEdgeTopInset
-        //leftEdgeCenterInset:    exampleRectangle.leftEdgeCenterInset
-        leftEdgeCenterInset: parentToolInsets.leftEdgeCenterInset
-        // leftEdgeBottomInset:    parentToolInsets.leftEdgeBottomInset
-        leftEdgeBottomInset: Math.max(
-                                    parentToolInsets.leftEdgeBottomInset,
-                                    speedControl.visible ? speedControl.x + speedControl.width : 0
-        )
+        leftEdgeCenterInset:    parentToolInsets.leftEdgeCenterInset
+        leftEdgeBottomInset:    parentToolInsets.leftEdgeBottomInset
         rightEdgeTopInset:      parentToolInsets.rightEdgeTopInset
         rightEdgeCenterInset:   parentToolInsets.rightEdgeCenterInset
-        //rightEdgeBottomInset:   parent.width - compassBackground.x
         rightEdgeBottomInset:   Math.max(
             parentToolInsets.rightEdgeBottomInset,
-            parent.width - cockpitGroup.x
+            cockpitGroup.visible ? parent.width - cockpitGroup.x : 0
         )
         topEdgeLeftInset:       parentToolInsets.topEdgeLeftInset
-        //topEdgeCenterInset:     compassArrowIndicator.y + compassArrowIndicator.height
-        topEdgeCenterInset: parentToolInsets.topEdgeCenterInset
+        topEdgeCenterInset:     parentToolInsets.topEdgeCenterInset
         topEdgeRightInset:      parentToolInsets.topEdgeRightInset
-        // bottomEdgeLeftInset:    parentToolInsets.bottomEdgeLeftInset
-        bottomEdgeLeftInset: Math.max(
-                                    parentToolInsets.bottomEdgeLeftInset,
-                                    speedControl.visible ? parent.height - speedControl.y : 0
-        )
+        bottomEdgeLeftInset:    parentToolInsets.bottomEdgeLeftInset
         bottomEdgeCenterInset:  parentToolInsets.bottomEdgeCenterInset
-        // bottomEdgeRightInset:   parent.height - attitudeIndicator.y
         bottomEdgeRightInset:   Math.max(
-            parentToolInsets.bottomEdgeRightInset,
-            parent.height - cockpitGroup.y
-        )
-    }
-
-    SpeedSelectorController {
-        id: speedController
-        vehicle: root.vehicle
-    }
-
-    CustomSpeedSelector {
-        id: speedControl
-        anchors.left: parent.left
-        anchors.leftMargin: _toolsMargin + parentToolInsets.leftEdgeBottomInset
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: _toolsMargin + parentToolInsets.bottomEdgeLeftInset
-        controller: speedController
-        visible: speedController.ready
+                                    parentToolInsets.bottomEdgeRightInset,
+                                    cockpitGroup.visible ? parent.height - cockpitGroup.y : 0
+                                )
     }
 
     Item {
@@ -179,6 +142,7 @@ Item {
         transformOrigin: Item.TopLeft
         x: root.width - root.cockpitRightClearance - _toolsMargin - width * fitScale
         y: root.height - root.cockpitBottomClearance - _toolsMargin - height * fitScale
+        visible: root.showInstrumentPanel
 
         CockpitPanelUP {
             id: cockpitPanel
