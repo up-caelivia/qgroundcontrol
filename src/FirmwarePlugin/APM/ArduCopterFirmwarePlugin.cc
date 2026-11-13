@@ -10,6 +10,7 @@
 
 /// @file
 ///     @author Don Gagne <don@thegagnes.com>
+///     @author Francesco Marcon <frmarcon04@gmail.com>
 
 #include "ArduCopterFirmwarePlugin.h"
 #include "QGCApplication.h"
