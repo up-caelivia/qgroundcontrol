@@ -49,6 +49,9 @@ public:
         AUTOROTATE  = 26,
         AUTO_RTL    = 27,
         TURTLE      = 28,
+
+        // Custom mode - EXYN mode
+        EXYN        = 100,
     };
 
     APMCopterMode(uint32_t mode, bool settable);
