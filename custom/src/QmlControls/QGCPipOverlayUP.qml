@@ -144,11 +144,20 @@ Item {
     }
 
     Component.onCompleted: {
+        QGroundControl.saveBoolGlobalSetting(item1IsFullSettingsKey, true)
         _initForItems()
         _animationReady = true
     }
 
     onItem2Changed: _initForItems()
+
+    onShowChanged: {
+        if (!show && item1 && item2
+                && item1.pipState.state === item1.pipState.pipState
+                && item2.pipState.state === item2.pipState.fullState) {
+            _swapPip()
+        }
+    }
 
     function showWindow() {
         window.width = _root.width
@@ -217,7 +226,6 @@ Item {
 
         property real initialX:     0
         property real initialWidth: 0
-
 
         // When we push the mouse button down, we un-anchor the mouse area to prevent a resizing loop
         onPressed: {
