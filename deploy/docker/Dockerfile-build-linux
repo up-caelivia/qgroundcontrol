@@ -7,16 +7,16 @@ LABEL authors="Daniel Agar <daniel@agar.ca>, Patrick José Pereira <patrickelect
 
 ARG QT_VERSION=5.15.2
 
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 
-ENV DISPLAY :99
+ENV DISPLAY=:99
 
-ENV QMAKESPEC linux-g++-64
+ENV QMAKESPEC=linux-g++-64
 
-ENV QT_PATH /opt/Qt
-ENV QT_DESKTOP $QT_PATH/${QT_VERSION}/gcc_64
+ENV QT_PATH=/opt/Qt
+ENV QT_DESKTOP=$QT_PATH/${QT_VERSION}/gcc_64
 
-ENV PATH /usr/lib/ccache:$QT_DESKTOP/bin:$PATH
+ENV PATH=/usr/lib/ccache:$QT_DESKTOP/bin:$PATH
 
 RUN apt-get update && apt-get -y --quiet --no-install-recommends install \
 		apt-utils \
@@ -71,4 +71,4 @@ RUN useradd user --create-home --home-dir /home/user --shell /bin/bash --uid 100
 USER user
 
 WORKDIR /project/build
-CMD qmake /project/source && make -j$(nproc)
+CMD ["/bin/bash", "-c", "qmake /project/source && make -j$(nproc)"]

@@ -1,40 +1,28 @@
-/****************************************************************************
- *
- * (c) 2009-2020 QGROUNDCONTROL PROJECT <http://www.qgroundcontrol.org>
- *
- * QGroundControl is licensed according to the terms in the file
- * COPYING.md in the root of the source code directory.
- *
- ****************************************************************************/
-
 #pragma once
 
 #include <QThread>
+#include <QSet>
 #include <QTcpSocket>
-#include <QGeoCoordinate>
 #include <QUrl>
+#include <QTimer>
 
 #include "Drivers/src/rtcm.h"
-#include "RTCM/RTCMMavlink.h"
-#include "NTRIP.h"
 
-Q_DECLARE_LOGGING_CATEGORY(NTRIPLog)
+class QGCToolbox;
 
-class NTRIPSettings;
-
-class NTRIPTCPLink : public QThread
+class NTRIPConnection : public QThread
 {
     Q_OBJECT
 
 public:
-    NTRIPTCPLink(const QString& hostAddress,
+    NTRIPConnection(const QString& hostAddress,
                  int port,
                  const QString& username,
                  const QString& password,
                  const QString& mountpoint,
                  const QString& whitelist,
                  const bool&    enableVRS);
-    ~NTRIPTCPLink();
+    ~NTRIPConnection();
 
 signals:
     void error(const QString errorMsg);
@@ -92,23 +80,4 @@ private:
     NTRIPState _state;
 
     QGCToolbox*  _toolbox = nullptr;
-};
-
-class NTRIP : public QGCTool {
-    Q_OBJECT
-
-public:
-    NTRIP(QGCApplication* app, QGCToolbox* toolbox);
-
-    // QGCTool overrides
-    void setToolbox(QGCToolbox* toolbox) final;
-
-public slots:
-    void _tcpError          (const QString errorMsg);
-
-private slots:
-
-public:
-    NTRIPTCPLink*                    _tcpLink = nullptr;
-    RTCMMavlink*                     _rtcmMavlink = nullptr;
 };

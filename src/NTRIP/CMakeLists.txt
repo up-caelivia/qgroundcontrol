@@ -1,6 +1,9 @@
 add_library(NTRIP
-    NTRIP.cc
-    NTRIP.h
+    NTRIPConfiguration.h
+    NTRIPConnection.cc
+    NTRIPConnection.h
+    NTRIPManager.cc
+    NTRIPManager.h
 )
 
 target_link_libraries(NTRIP

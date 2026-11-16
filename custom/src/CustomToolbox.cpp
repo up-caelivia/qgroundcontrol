@@ -1,7 +1,8 @@
 #include "CustomToolbox.h"
 #include "QGCApplication.h"
 #include "QGCToolbox.h"
-#include "NTRIP.h"
+#include "NTRIPManager.h"
+#include "NTRIPConnection.h"
 #include "SettingsManager.h"
 #include "NTRIPSettings.h"
 #include "ParseNTRIP.h"
@@ -30,14 +31,14 @@ CustomToolbox::CustomToolbox(QGCApplication* app)
 
             disconnect(ntrip->_tcpLink, SIGNAL(error(QString)), nullptr, nullptr);
 
-            connect(ntrip->_tcpLink, &NTRIPTCPLink::error, this, [this](const QString &info) {
+            connect(ntrip->_tcpLink, &NTRIPConnection::error, this, [this](const QString &info) {
                 if (info.contains("bad mountpoint")) 
                     _parseNTRIP->setmountError(true);
                 _parseNTRIP->setauthError(true);
                 _parseNTRIP->setNtripReceiving(false);
             });
 
-            connect(ntrip->_tcpLink, &NTRIPTCPLink::RTCMDataUpdate, this, [this](const QByteArray &message) {
+            connect(ntrip->_tcpLink, &NTRIPConnection::RTCMDataUpdate, this, [this](const QByteArray &message) {
                 _parseNTRIP->setNtripEnabled(true);
                 _parseNTRIP->setNtripReceiving(true);
                 _parseNTRIP->setauthError(false);

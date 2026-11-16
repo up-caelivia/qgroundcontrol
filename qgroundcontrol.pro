@@ -641,7 +641,9 @@ HEADERS += \
     src/MissionManager/TransectStyleComplexItem.h \
     src/MissionManager/VisualMissionItem.h \
     src/MissionManager/VTOLLandingComplexItem.h \
-    src/NTRIP/NTRIP.h \
+    src/NTRIP/NTRIPConfiguration.h \
+    src/NTRIP/NTRIPConnection.h \
+    src/NTRIP/NTRIPManager.h \
     src/PositionManager/PositionManager.h \
     src/PositionManager/SimulatedPosition.h \
     src/Geo/QGCGeo.h \
@@ -906,7 +908,8 @@ SOURCES += \
     src/MissionManager/TransectStyleComplexItem.cc \
     src/MissionManager/VisualMissionItem.cc \
     src/MissionManager/VTOLLandingComplexItem.cc \
-    src/NTRIP/NTRIP.cc \
+    src/NTRIP/NTRIPConnection.cc \
+    src/NTRIP/NTRIPManager.cc \
     src/PositionManager/PositionManager.cpp \
     src/PositionManager/SimulatedPosition.cc \
     src/Geo/QGCGeo.cc \

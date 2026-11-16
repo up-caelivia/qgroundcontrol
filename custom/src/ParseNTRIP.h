@@ -1,6 +1,5 @@
 #pragma once
 
-#include "NTRIP.h"
 #include "QGCLoggingCategory.h"
 #include "constants.h"
 
