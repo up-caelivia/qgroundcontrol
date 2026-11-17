@@ -1,40 +1,42 @@
 #pragma once
 
-#include <QThread>
-#include <QSet>
+#include <QObject>
+#include <QByteArray>
 #include <QTcpSocket>
 #include <QUrl>
 #include <QTimer>
 
 #include "Drivers/src/rtcm.h"
+#include "NTRIPConfiguration.h"
 
 class QGCToolbox;
 
-class NTRIPConnection : public QThread
+class NTRIPConnection : public QObject 
 {
     Q_OBJECT
 
 public:
-    NTRIPConnection(const QString& hostAddress,
-                 int port,
-                 const QString& username,
-                 const QString& password,
-                 const QString& mountpoint,
-                 const QString& whitelist,
-                 const bool&    enableVRS);
+    explicit NTRIPConnection(const NTRIPConfiguration& configuration, QObject* parent = nullptr);
     ~NTRIPConnection();
+
+    void start();
+    void stop();
 
 signals:
     void error(const QString errorMsg);
     void RTCMDataUpdate(QByteArray message);
-
-protected:
-    void run() final;
+    void closed();
 
 private slots:
     void _readBytes();
 
 private:
+    void _sendNmeaGga();
+    void _hardwareConnect();
+    void _parse(const QByteArray &buffer);
+    QByteArray _dechunk(const QByteArray &data);
+    void _onTcpConnected();
+
     enum class NTRIPState {
         uninitialised,
         waiting_for_http_response,
@@ -42,26 +44,18 @@ private:
         waiting_for_rtcm_header,
         accumulating_rtcm_packet,
     };
+    enum class ChunkState {
+        ReadingSize,
+        ReadingData,
+        ReadingTrailer
+    };
 
-    void _hardwareConnect(void);
-    void _parse(const QByteArray &buffer);
-    QByteArray _dechunk(const QByteArray &data);
-
+    const NTRIPConfiguration _configuration;
     QTcpSocket*     _socket =   nullptr;
-
-    QString         _hostAddress;
-    int             _port;
-    QString         _username;
-    QString         _password;
-    QString         _mountpoint;
-    QSet<int>       _whitelist;
-    bool            _isVRSEnable;
     int             _vrsSendRateMSecs = 3000;
-    bool            _ntripForceV1 = false;
 
     // Chunked transfer encoding
     bool            _isChunked = false;
-    enum class ChunkState { ReadingSize, ReadingData, ReadingTrailer };
     ChunkState      _chunkState = ChunkState::ReadingSize;
     int             _chunkBytesLeft = 0;
     QByteArray      _chunkSizeBuffer;
@@ -69,14 +63,9 @@ private:
     // QUrl
     QUrl            _ntripURL;
 
-    // Send NMEA
-    void _sendNmeaGga();
+    QTimer* _vrsSendTimer = nullptr;
 
-    // VRS Timer
-    QTimer*          _vrsSendTimer;
-    // this is perfectly fine to send VRS data every 30 seconds
-
-    RTCMParsing *_rtcm_parsing{nullptr};
+    RTCMParsing *_rtcm_parsing = nullptr;
     NTRIPState _state;
 
     QGCToolbox*  _toolbox = nullptr;

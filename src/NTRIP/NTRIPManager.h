@@ -9,7 +9,11 @@
 
 #pragma once
 
+#include <QMap>
+#include <QString>
+
 #include "QGCToolbox.h"
+#include "NTRIPConfiguration.h"
 
 class NTRIPConnection;
 class RTCMMavlink;
@@ -20,15 +24,22 @@ class NTRIPManager : public QGCTool {
 public:
     NTRIPManager(QGCApplication* app, QGCToolbox* toolbox);
 
+    Q_INVOKABLE bool connectConfiguration(const QString& connection_id);
+    Q_INVOKABLE void disconnectConnection();
+
     // QGCTool overrides
     void setToolbox(QGCToolbox* toolbox) final;
 
+signals:
+    void rtcmDataReceived(QByteArray message);
+    void errorOccurred(const QString& message);
+
 public slots:
-    void _tcpError          (const QString errorMsg);
+    void tcpError          (const QString errorMsg);
 
-private slots:
+private:
+    QMap<QString, NTRIPConfiguration> _configurations;
 
-public:
     NTRIPConnection* _tcpLink = nullptr;
     RTCMMavlink* _rtcmMavlink = nullptr;
 };

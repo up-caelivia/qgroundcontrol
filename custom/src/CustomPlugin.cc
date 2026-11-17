@@ -13,6 +13,7 @@
 #include "MockLink.h"
 
 #include "CustomPlugin.h"
+#include "NTRIPStatusController.h"
 #include "SpeedController/SpeedSelectorController.h"
 #include "QmlControls/UISizingController.h"
 #include "Settings/UISizingSettings.h"
@@ -29,7 +30,6 @@
 #include "constants.h"
 #include "KmlPolygonLoader.h"
 #include "CustomAnnouncer.h"
-#include "CustomToolbox.h"
 #include <list>
 #include "ParameterManager.h"
 #include "GeoFenceController.h"
@@ -120,7 +120,7 @@ void CustomPlugin::setToolbox(QGCToolbox* toolbox)
             return new CustomAnnouncer();
         });
 
-    _customToolbox = new CustomToolbox(qgcApp());
+    _ntripController = new NTRIPStatusController(*toolbox->ntrip(), this);
 
     connect(qgcApp()->toolbox()->multiVehicleManager(), &MultiVehicleManager::activeVehicleChanged,
         this, &CustomPlugin::onActiveVehicleChanged);

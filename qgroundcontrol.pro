@@ -644,6 +644,7 @@ HEADERS += \
     src/NTRIP/NTRIPConfiguration.h \
     src/NTRIP/NTRIPConnection.h \
     src/NTRIP/NTRIPManager.h \
+    src/NTRIP/NTRIPStatusController.h \
     src/PositionManager/PositionManager.h \
     src/PositionManager/SimulatedPosition.h \
     src/Geo/QGCGeo.h \
@@ -910,6 +911,7 @@ SOURCES += \
     src/MissionManager/VTOLLandingComplexItem.cc \
     src/NTRIP/NTRIPConnection.cc \
     src/NTRIP/NTRIPManager.cc \
+    src/NTRIP/NTRIPStatusController.cc \
     src/PositionManager/PositionManager.cpp \
     src/PositionManager/SimulatedPosition.cc \
     src/Geo/QGCGeo.cc \

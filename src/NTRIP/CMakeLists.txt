@@ -4,6 +4,8 @@ add_library(NTRIP
     NTRIPConnection.h
     NTRIPManager.cc
     NTRIPManager.h
+    NTRIPStatusController.cc
+    NTRIPStatusController.h
 )
 
 target_link_libraries(NTRIP

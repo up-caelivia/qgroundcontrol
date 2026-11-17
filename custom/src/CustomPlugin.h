@@ -15,7 +15,6 @@
 #include "QGCOptions.h"
 #include <QObject>
 #include "QmlComponentInfo.h"
-#include "CustomToolbox.h"
 #include <QGeoCoordinate>
 #include "Vehicle.h"
 #include "Fact.h"
@@ -25,6 +24,7 @@
 class QTimer;
 class CustomOptions;
 class CustomPlugin;
+class NTRIPStatusController;
 
 class CustomFlyViewOptions : public QGCFlyViewOptions
 {
@@ -174,7 +174,7 @@ private:
     QmlComponentInfo* _ntripSettings = nullptr;
     QmlComponentInfo* _aboutSettings = nullptr;
     QVariantList      _customSettingsList;
-    CustomToolbox*    _customToolbox = nullptr;
+    NTRIPStatusController* _ntripController = nullptr;
     QString           _speedMessage;
     uint32_t          _lastTimeBootMs = 0;
     QMetaObject::Connection _vehicleConnection;

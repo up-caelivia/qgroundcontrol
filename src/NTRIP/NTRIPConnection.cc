@@ -3,38 +3,50 @@
 #include "QGCApplication.h"
 #include "QGCLoggingCategory.h"
 #include "QGCToolbox.h"
+#include "qabstractsocket.h"
+#include "qarraydata.h"
+#include "qtcpsocket.h"
 
 QGC_LOGGING_CATEGORY(NTRIPConnectionLog, "NTRIPConnectionLog")
 
-NTRIPConnection::NTRIPConnection(const QString &hostAddress, int port,
-                           const QString &username, const QString &password,
-                           const QString &mountpoint, const QString &whitelist,
-                           const bool &enableVRS)
-    : QThread(), _hostAddress(hostAddress), _port(port), _username(username),
-      _password(password), _mountpoint(mountpoint), _isVRSEnable(enableVRS),
+NTRIPConnection::NTRIPConnection(
+  const NTRIPConfiguration& configuration,
+  QObject* parent)
+    : QObject(parent),
+      _configuration(configuration),
       _toolbox(qgcApp()->toolbox()) {
-  for (const auto &msg : whitelist.split(',')) {
-    int msg_int = msg.toInt();
-    if (msg_int) {
-      _whitelist.insert(msg_int);
-    }
-  }
-  qCDebug(NTRIPConnectionLog) << "whitelist: " << _whitelist;
+
   if (!_rtcm_parsing) {
     _rtcm_parsing = new RTCMParsing();
   }
   _rtcm_parsing->reset();
   _state = NTRIPState::uninitialised;
 
-  // Start TCP Socket
-  moveToThread(this);
-  start();
+  _socket = new QTcpSocket(this);
+
+  _vrsSendTimer = new QTimer(this);
+  _vrsSendTimer->setInterval(_vrsSendRateMSecs);
+  _vrsSendTimer->setSingleShot(false);
+
+  connect(_socket, &QTcpSocket::connected,
+          this, &NTRIPConnection::_onTcpConnected);
+
+  connect(_socket, &QTcpSocket::readyRead,
+          this, &NTRIPConnection::_readBytes);
+
+  connect(_socket, &QTcpSocket::errorOccurred,
+          this, [this](QAbstractSocket::SocketError){
+      emit error(_socket->errorString());
+  });
+
+  connect(_vrsSendTimer, &QTimer::timeout,
+          this, &NTRIPConnection::_sendNmeaGga);
 }
 
 NTRIPConnection::~NTRIPConnection(void) {
   qCDebug(NTRIPConnectionLog) << "NTRIP Thread stopped";
   if (_socket) {
-    if (_isVRSEnable) {
+    if (_configuration.enableVRS) {
       _vrsSendTimer->stop();
       QObject::disconnect(_vrsSendTimer, &QTimer::timeout, this,
                           &NTRIPConnection::_sendNmeaGga);
@@ -51,53 +63,50 @@ NTRIPConnection::~NTRIPConnection(void) {
     delete (_rtcm_parsing);
     _rtcm_parsing = nullptr;
   }
-  quit();
-  wait();
 }
 
-void NTRIPConnection::run(void) {
-  qCDebug(NTRIPConnectionLog) << "NTRIP Thread started";
+// Connection to the host server
+void NTRIPConnection::start()
+{
+  if (_socket->state() != QAbstractSocket::UnconnectedState) {
+    return;
+  }
+  qCDebug(NTRIPConnectionLog)
+    << "Connecting to NTRIP Server: "
+    << _configuration.hostAddress
+    << ":" << _configuration.port;
+
+  _socket->connectToHost(
+    _configuration.hostAddress,
+    _configuration.port);
+}
+
+// Stops the connection to the host server
+void NTRIPConnection::stop()
+{
+  if (_socket) {
+    _socket->close();
+  }
+}
+
+void NTRIPConnection::_onTcpConnected() {
+  qCDebug(NTRIPConnectionLog) << "NTRIP TCP connected";
+
   _hardwareConnect();
 
-  // Init VRS Timer
-  if (_isVRSEnable) {
-    _vrsSendTimer = new QTimer();
-    _vrsSendTimer->setInterval(_vrsSendRateMSecs);
-    _vrsSendTimer->setSingleShot(false);
-    QObject::connect(_vrsSendTimer, &QTimer::timeout, this,
-                     &NTRIPConnection::_sendNmeaGga);
+  if (_configuration.enableVRS) {
     _vrsSendTimer->start();
   }
-
-  exec();
 }
 
 void NTRIPConnection::_hardwareConnect() {
-  qCDebug(NTRIPConnectionLog) << "Connecting to NTRIP Server: " << _hostAddress << ":"
-                    << _port;
-  _socket = new QTcpSocket();
-  QObject::connect(_socket, &QTcpSocket::readyRead, this,
-                   &NTRIPConnection::_readBytes);
-  _socket->connectToHost(_hostAddress, static_cast<quint16>(_port));
+  if (!_configuration.mountpoint.isEmpty()) {
+    qCDebug(NTRIPConnectionLog) << "Sending HTTP request, using mount point: " << _configuration.mountpoint;
 
-  // Give the socket a second to connect to the other side otherwise error out
-  if (!_socket->waitForConnected(1000)) {
-    qCDebug(NTRIPConnectionLog) << "NTRIP Socket failed to connect";
-    emit error(_socket->errorString());
-    delete _socket;
-    _socket = nullptr;
-    return;
-  }
-
-  // If mountpoint is specified, send an http get request for data
-  if (!_mountpoint.isEmpty()) {
-    qCDebug(NTRIPConnectionLog) << "Sending HTTP request, using mount point: "
-                      << _mountpoint;
-
-    QString digest = QString(_username + ":" + _password).toUtf8().toBase64();
+    QString digest = QString(_configuration.username + ":" + _configuration.password).toUtf8().toBase64();
     QString auth = QString("Authorization: Basic %1\r\n").arg(digest);
     QString query;
-    if (_ntripForceV1) {
+    if (_configuration.forceNtripV1) {
       query = "GET /%1 HTTP/1.0\r\n"
               "User-Agent: NTRIP QGroundControl\r\n"
               "%2"
@@ -110,7 +119,7 @@ void NTRIPConnection::_hardwareConnect() {
               "Connection: close\r\n\r\n";
     }
 
-    _socket->write(query.arg(_mountpoint).arg(auth).toUtf8());
+    _socket->write(query.arg(_configuration.mountpoint).arg(auth).toUtf8());
     _state = NTRIPState::waiting_for_http_response;
   } else {
     // If no mountpoint is set, assume we will just get data from the tcp stream
@@ -140,7 +149,7 @@ void NTRIPConnection::_parse(const QByteArray &buffer) {
       qCDebug(NTRIPConnectionLog) << "RTCM message ID " << id;
       qCDebug(NTRIPConnectionLog) << "RTCM message size " << message.size();
 
-      if (_whitelist.empty() || _whitelist.contains(id)) {
+      if (_configuration.whitelist.empty() || _configuration.whitelist.contains(id)) {
         qCDebug(NTRIPConnectionLog) << "Sending message ID [" << id << "] of size "
                           << message.length();
         emit RTCMDataUpdate(message);
@@ -158,25 +167,38 @@ void NTRIPConnection::_readBytes(void) {
     return;
   }
   if (_state == NTRIPState::waiting_for_http_response) {
-    QString line = _socket->readLine();
-    qCDebug(NTRIPConnectionLog) << "Server responded with " << line;
-    if (line.contains("200")) {
-      if (line.contains("SOURCETABLE")) {
-        qCDebug(NTRIPConnectionLog) << "Server responded with SOURCETABLE, not supported";
-        emit error("NTRIP Server responded with SOURCETABLE. Bad mountpoint?");
-        _state = NTRIPState::uninitialised;
-      } else {
-        // Got 200 OK, now consume remaining HTTP headers until empty line
-        _state = NTRIPState::consuming_http_headers;
-      }
-    } else if (line.contains("401")) {
-      qCWarning(NTRIPConnectionLog) << "Server responded with " << line;
-      emit error("NTRIP Server responded with 401 Unauthorized");
-      _state = NTRIPState::uninitialised;
-    } else {
-      qCWarning(NTRIPConnectionLog) << "Server responded with " << line;
-      _state = NTRIPState::consuming_http_headers;
+    if (!_socket->canReadLine()) {
+      return;
     }
+
+    const QByteArray response = _socket->readLine().trimmed();
+    const QList<QByteArray> fields = response.simplified().split(' ');
+
+    qCDebug(NTRIPConnectionLog) << "Server responded with " << response;
+
+    if (response.startsWith("SOURCETABLE")) {
+      _state = NTRIPState::uninitialised;
+      emit error(tr("The caster returned a source table. Check the mountpoint."));
+      return;
+    }
+
+    const bool supportedResponse = 
+      fields.size() >= 2 && (
+        fields[0] == "HTTP/1.0" ||
+        fields[0] == "HTTP/1.1" ||
+        fields[0] == "ICY");
+
+    if (!supportedResponse || fields[1] != "200") {
+      _state = NTRIPState::uninitialised;
+
+      if (supportedResponse && fields[1] == "401") {
+        emit error(tr("NTRIP Server responded with 401 Unauthorized"));
+      } else {
+        emit error(tr("NTRIP request failed: %1").arg(QString::fromLatin1(response)));
+      }
+      return;
+    }
+    _state = NTRIPState::consuming_http_headers;
   }
 
   if (_state == NTRIPState::consuming_http_headers) {
@@ -194,6 +216,10 @@ void NTRIPConnection::_readBytes(void) {
         break;
       }
     }
+  }
+
+  if (_state == NTRIPState::consuming_http_headers) {
+    return;
   }
 
   if (_state == NTRIPState::uninitialised) {
