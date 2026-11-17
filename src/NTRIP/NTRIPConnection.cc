@@ -3,9 +3,6 @@
 #include "QGCApplication.h"
 #include "QGCLoggingCategory.h"
 #include "QGCToolbox.h"
-#include "qabstractsocket.h"
-#include "qarraydata.h"
-#include "qtcpsocket.h"
 
 QGC_LOGGING_CATEGORY(NTRIPConnectionLog, "NTRIPConnectionLog")
 
@@ -37,38 +34,25 @@ NTRIPConnection::NTRIPConnection(
   connect(_socket, &QTcpSocket::errorOccurred,
           this, [this](QAbstractSocket::SocketError){
       emit error(_socket->errorString());
+      stop();
   });
+
+  connect(_socket, &QTcpSocket::disconnected,
+          this, &NTRIPConnection::stop);
 
   connect(_vrsSendTimer, &QTimer::timeout,
           this, &NTRIPConnection::_sendNmeaGga);
 }
 
-NTRIPConnection::~NTRIPConnection(void) {
-  qCDebug(NTRIPConnectionLog) << "NTRIP Thread stopped";
-  if (_socket) {
-    if (_configuration.enableVRS) {
-      _vrsSendTimer->stop();
-      QObject::disconnect(_vrsSendTimer, &QTimer::timeout, this,
-                          &NTRIPConnection::_sendNmeaGga);
-      delete _vrsSendTimer;
-      _vrsSendTimer = nullptr;
-    }
-    QObject::disconnect(_socket, &QTcpSocket::readyRead, this,
-                        &NTRIPConnection::_readBytes);
-    _socket->disconnectFromHost();
-    _socket->deleteLater();
-    _socket = nullptr;
-
-    // Delete Rtcm Parsing instance
-    delete (_rtcm_parsing);
-    _rtcm_parsing = nullptr;
-  }
+NTRIPConnection::~NTRIPConnection()
+{
+  delete _rtcm_parsing;
 }
 
 // Connection to the host server
 void NTRIPConnection::start()
 {
-  if (_socket->state() != QAbstractSocket::UnconnectedState) {
+  if (_closed || _socket->state() != QAbstractSocket::UnconnectedState) {
     return;
   }
   qCDebug(NTRIPConnectionLog)
@@ -84,9 +68,15 @@ void NTRIPConnection::start()
 // Stops the connection to the host server
 void NTRIPConnection::stop()
 {
-  if (_socket) {
-    _socket->close();
+  if (_closed) {
+    return;
   }
+
+  _closed = true;
+  _vrsSendTimer->stop();
+  _state = NTRIPState::uninitialised;
+  _socket->abort();
+  emit closed();
 }
 
 void NTRIPConnection::_onTcpConnected() {
@@ -179,6 +169,7 @@ void NTRIPConnection::_readBytes(void) {
     if (response.startsWith("SOURCETABLE")) {
       _state = NTRIPState::uninitialised;
       emit error(tr("The caster returned a source table. Check the mountpoint."));
+      stop();
       return;
     }
 
@@ -196,6 +187,7 @@ void NTRIPConnection::_readBytes(void) {
       } else {
         emit error(tr("NTRIP request failed: %1").arg(QString::fromLatin1(response)));
       }
+      stop();
       return;
     }
     _state = NTRIPState::consuming_http_headers;

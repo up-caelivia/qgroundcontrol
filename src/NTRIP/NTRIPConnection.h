@@ -69,4 +69,6 @@ private:
     NTRIPState _state;
 
     QGCToolbox*  _toolbox = nullptr;
+
+    bool _closed = false;
 };

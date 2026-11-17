@@ -54,7 +54,8 @@ static bool createConfiguration(
   return true;
 }
 
-bool NTRIPManager::connectConfiguration(const QString &connection_id) {
+bool NTRIPManager::connectConfiguration(const QString &connection_id)
+{
   if (_tcpLink) {
     qgcApp()->showAppMessage(tr("Disconnect the current NTRIP connection first."));
     return false;
@@ -69,25 +70,38 @@ bool NTRIPManager::connectConfiguration(const QString &connection_id) {
     return false;
   }
 
-  _tcpLink = new NTRIPConnection(it.value());
+  NTRIPConnection* connection = new NTRIPConnection(it.value(), this);
+  _tcpLink = connection;
 
-  connect(_tcpLink, &NTRIPConnection::error,
+  connect(connection, &NTRIPConnection::closed,
+          this, [this, connection]() {
+    if (_tcpLink == connection) {
+      _tcpLink = nullptr;
+    }
+
+    connection->deleteLater();
+  });
+
+  connect(connection, &NTRIPConnection::error,
           this, &NTRIPManager::tcpError,
           Qt::QueuedConnection);
-  connect(_tcpLink, &NTRIPConnection::RTCMDataUpdate,
+  connect(connection, &NTRIPConnection::RTCMDataUpdate,
           _rtcmMavlink, &RTCMMavlink::RTCMDataUpdate,
           Qt::QueuedConnection);
-  connect(_tcpLink, &NTRIPConnection::RTCMDataUpdate,
+  connect(connection, &NTRIPConnection::RTCMDataUpdate,
           this, &NTRIPManager::rtcmDataReceived,
           Qt::QueuedConnection);
 
-  _tcpLink->start();
+  connection->start();
 
   return true;
 }
 
-void NTRIPManager::disconnectConnection() {
-  // TODO: still need to be implemented
+void NTRIPManager::disconnectConnection()
+{
+  if (_tcpLink) {
+    _tcpLink->stop();
+  }
 }
 
 void NTRIPManager::setToolbox(QGCToolbox *toolbox) {
