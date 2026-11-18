@@ -9,6 +9,7 @@
 
 #include "Drivers/src/rtcm.h"
 #include "NTRIPConfiguration.h"
+#include "qobjectdefs.h"
 
 class QGCToolbox;
 
@@ -20,13 +21,30 @@ public:
     explicit NTRIPConnection(const NTRIPConfiguration& configuration, QObject* parent = nullptr);
     ~NTRIPConnection();
 
-    void start();
-    void stop();
+    Q_PROPERTY(State state READ state NOTIFY stateChanged)
+    Q_PROPERTY(bool receivingData READ receivingData NOTIFY receivingDataChanged)
+
+    enum State{
+        Disconnected,
+        Connecting,
+        RequestStream,
+        Connected
+    };
+    Q_ENUM(State)
+
+    Q_INVOKABLE void start();
+    Q_INVOKABLE void stop();
+
+    State state() const { return _state; }
+    bool receivingData() const { return _receivingData; }
 
 signals:
     void error(const QString errorMsg);
     void RTCMDataUpdate(QByteArray message);
     void closed();
+
+    void stateChanged();
+    void receivingDataChanged();
 
 private slots:
     void _readBytes();
@@ -46,6 +64,10 @@ private:
         ReadingTrailer
     };
 
+    // QML connection state variables
+    State _state = State::Disconnected;
+    bool _receivingData = false;
+
     // TCP connection and NTRIP request
     void _onTcpConnected();
     void _hardwareConnect();
@@ -63,7 +85,7 @@ private:
     // Connection and session state
     QTcpSocket* _socket = nullptr;
     QUrl _ntripURL;
-    NTRIPState _state;
+    NTRIPState _connectionState;
     bool _closed = false;
 
     // RTCM packet assembly
