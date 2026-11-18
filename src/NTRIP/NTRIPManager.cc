@@ -72,25 +72,57 @@ bool NTRIPManager::connectConfiguration(const QString &connection_id)
 
   NTRIPConnection* connection = new NTRIPConnection(it.value(), this);
   _tcpLink = connection;
+  _activeConnectionId = connection_id;
 
   connect(connection, &NTRIPConnection::closed,
           this, [this, connection]() {
     if (_tcpLink == connection) {
       _tcpLink = nullptr;
+      _activeConnectionId.clear();
+      emit connectionIdChanged();
     }
 
     connection->deleteLater();
   });
 
   connect(connection, &NTRIPConnection::error,
-          this, &NTRIPManager::tcpError,
-          Qt::QueuedConnection);
+          this, [this, connection](const QString& message){
+      if (_tcpLink == connection) {
+        tcpError(message);
+      }
+  });
   connect(connection, &NTRIPConnection::RTCMDataUpdate,
-          _rtcmMavlink, &RTCMMavlink::RTCMDataUpdate,
-          Qt::QueuedConnection);
+          this, [this, connection](const QByteArray& message) {
+      if (_tcpLink == connection) {
+        _rtcmMavlink->RTCMDataUpdate(message);
+      }
+  });
   connect(connection, &NTRIPConnection::RTCMDataUpdate,
-          this, &NTRIPManager::rtcmDataReceived,
-          Qt::QueuedConnection);
+          this, [this, connection](const QByteArray& message){
+      if (_tcpLink == connection) {
+        emit rtcmDataReceived(message);
+      }
+  });
+
+  connect(connection, &NTRIPConnection::stateChanged,
+          this, [this, connection]() {
+      if (_tcpLink == connection) {
+        emit connectionStateChanged();
+      }
+  });
+
+  connect(connection, &NTRIPConnection::receivingDataChanged,
+          this, [this, connection]() {
+      if (_tcpLink == connection) {
+        emit receivingDataChanged();
+      }
+  });
+
+  emit connectionIdChanged();
+
+  if (_tcpLink != connection) {
+    return false;
+  }
 
   connection->start();
 
@@ -102,6 +134,18 @@ void NTRIPManager::disconnectConnection()
   if (_tcpLink) {
     _tcpLink->stop();
   }
+}
+
+NTRIPConnection::State NTRIPManager::connectionState() const {
+  return _tcpLink ? _tcpLink->state() : NTRIPConnection::Disconnected;
+}
+
+bool NTRIPManager::receivingData() const {
+  return _tcpLink && _tcpLink->receivingData();
+}
+
+QString NTRIPManager::connectionId() const {
+  return _activeConnectionId;
 }
 
 void NTRIPManager::setToolbox(QGCToolbox *toolbox) {
