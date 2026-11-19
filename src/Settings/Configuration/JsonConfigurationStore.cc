@@ -1,14 +1,5 @@
 #include "JsonConfigurationStore.h"
 #include "Configuration/ConfigurationStoreInterface.h"
-#include "qfiledevice.h"
-#include "qfileinfo.h"
-#include "qjsondocument.h"
-#include "qjsonobject.h"
-#include "qlockfile.h"
-#include "qmutex.h"
-#include "qobject.h"
-#include "qregularexpression.h"
-#include "qstringliteral.h"
 
 #include <QDir>
 #include <QFile>
@@ -21,6 +12,8 @@
 #include <QObject>
 #include <QRegularExpression>
 #include <QSaveFile>
+
+#include <cmath>
 #include <utility>
 
 namespace {
@@ -316,5 +309,25 @@ bool JsonConfigurationStore::remove(
     const QString &key,
     QString &error)
 {
-    // TODO:: still need definition
+    error.clear();
+
+    QMutexLocker locker(&_mutex);
+
+    QString path;
+
+    if (_preparePath(key, path, error)) {
+        return false;
+    }
+
+    if (!QFileInfo::exists(path)) {
+        return true;
+    }
+
+    if (!QFile::remove(path)) {
+        error = QObject::tr(
+            "Cannot remove the configuration document.");
+        return false;
+    }
+
+    return true;
 }

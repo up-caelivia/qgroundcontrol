@@ -306,11 +306,11 @@ QQmlApplicationEngine* CustomPlugin::createQmlApplicationEngine(QObject* parent)
     qmlRegisterType<SpeedSelectorController>("Custom.Controllers", 1, 0, "SpeedSelectorController");
     qmlRegisterType<UISizingController>("Custom.Controllers", 1, 0, "UISizingController");
     qmlRegisterType<BatteryTimeController>("Custom.Controllers", 1, 0, "BatteryTimeController");
-/*
+
     #ifdef QT_DEBUG     // start with a custom connection only in debug build!
         MockLink::startAPMArduCopterMockLink(false);
     #endif
- */
+
     return qmlEngine;
 }
 
