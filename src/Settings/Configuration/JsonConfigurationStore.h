@@ -3,6 +3,7 @@
 #include "ConfigurationStoreInterface.h"
 
 #include <QMutex>
+
 #include <memory>
 
 class QLockFile;
@@ -16,21 +17,19 @@ public:
     ReadResult read(
         const QString& key,
         QVariantMap& document,
-        QString& error
-    ) const override;
+        QString& error) const override;
 
-    bool load(
+    bool write(
         const QString& key,
-        QVariantMap& document,
-        QString& error
-    ) override;
+        const QVariantMap& document,
+        QString& error) override;
 
     bool remove(
         const QString& key,
-        QString& error
-    ) override;
+        QString& error) override;
 
 private:
+    // Caller must hold _mutex.
     bool _preparePath(
         const QString& key,
         QString& path,

@@ -14,13 +14,11 @@ public:
 
     virtual ~ConfigurationStoreInterface() = default;
 
-    // Implementations must serialize concurrent calls internally.
-    // Individual operations are protected; a read/write sequence is not a transaction
-    //
+    // Implementations must serialize concurrent filesystem operations internally.
+    // Individual operations are protected; a read/write sequence is not a transaction.
     // These methods can block. Call them outside the GUI thread.
-    //
-    // Documents contain JSON-compatible QVariant values
-    // Keys identifies documents, not fs paths
+    // Documents contain JSON-compatible QVariant values.
+    // Keys identify documents, not filesystem paths.
 
     // Only modifies document when Loaded is returned.
     virtual ReadResult read(
@@ -29,9 +27,9 @@ public:
         QString& error) const = 0;
 
     // Success means the replacement has been committed.
-    virtual bool load(
+    virtual bool write(
         const QString& key,
-        QVariantMap& document,
+        const QVariantMap& document,
         QString& error) = 0;
 
     // Removing a missing document succeeds.
