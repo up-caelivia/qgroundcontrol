@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QMap>
 #include <QSet>
 #include <QString>
 #include <QtGlobal>
@@ -20,3 +21,5 @@ struct NTRIPConfiguration
     bool enableVRS = true;
     bool forceNtripV1 = false;
 };
+
+using NTRIPConfigurations = QMap<QString, NTRIPConfiguration>;
