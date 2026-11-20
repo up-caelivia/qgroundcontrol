@@ -217,15 +217,46 @@ ApplicationWindow {
     }
 
     property bool _forceClose: false
+    property bool _configurationClosePending: false
 
     function finishCloseProcess() {
+        if (_forceClose || _configurationClosePending) {
+            return
+        }
+
+        _configurationClosePending = true
+        QGroundControl.ntrip.requestShutdown()
+    }
+
+    function completeCloseProcess() {
         _forceClose = true
         // For some reason on the Qml side Qt doesn't automatically disconnect a signal when an object is destroyed.
         // So we have to do it ourselves otherwise the signal flows through on app shutdown to an object which no longer exists.
         firstRunPromptManager.clearNextPromptSignal()
+        QGroundControl.ntrip.disconnectConnection()
         QGroundControl.linkManager.shutdown()
         QGroundControl.videoManager.stopVideo();
         mainWindow.close()
+    }
+
+    Connections {
+        target: QGroundControl.ntrip
+
+        function onShutdownReady() {
+            if (mainWindow._configurationClosePending) {
+                mainWindow._configurationClosePending = false
+                mainWindow.completeCloseProcess()
+            }
+        }
+
+        function onShutdownFailed(message) {
+            if (mainWindow._configurationClosePending
+                    && !QGroundControl.ntrip.shutdownRequested) {
+                mainWindow._configurationClosePending = false
+                mainWindow.showMessageDialog(mainWindow.closeDialogTitle,
+                                             message, StandardButton.Ok)
+            }
+        }
     }
 
     // On attempting an application close we check for:
@@ -273,7 +304,10 @@ ApplicationWindow {
     onClosing: {
         if (!_forceClose) {
             close.accepted = false
-            checkForUnsavedMission()
+
+            if (!_configurationClosePending) {
+                checkForUnsavedMission()
+            }
         }
     }
 

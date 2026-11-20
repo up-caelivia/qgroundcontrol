@@ -49,6 +49,7 @@
 #include "FTPManagerTest.h"
 #include "MissionCommandTreeEditorTest.h"
 #include "VehicleLinkManagerTest.h"
+#include "NTRIPManagerTest.h"
 #include "LandingComplexItemTest.h"
 #include "InitialConnectTest.h"
 
@@ -59,6 +60,7 @@ UT_REGISTER_TEST(FactSystemTestPX4)
 //UT_REGISTER_TEST(FileDialogTest)
 UT_REGISTER_TEST(GeoTest)
 UT_REGISTER_TEST(VehicleLinkManagerTest)
+UT_REGISTER_TEST(NTRIPManagerTest)
 //UT_REGISTER_TEST(MessageBoxTest)
 UT_REGISTER_TEST(SendMavCommandWithSignallingTest)
 UT_REGISTER_TEST(SendMavCommandWithHandlerTest)

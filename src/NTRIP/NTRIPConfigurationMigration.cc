@@ -1,9 +1,6 @@
 #include "NTRIPConfigurationMigration.h"
 
 #include "NTRIPConfigurationValidation.h"
-#include "qnamespace.h"
-#include "qsettings.h"
-#include "qstringliteral.h"
 
 #include <QFile>
 #include <QJsonArray>

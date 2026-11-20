@@ -1,5 +1,10 @@
 
 add_library(Settings
+    Configuration/ConfigurationStoreInterface.h
+    Configuration/ConfigurationIoExecutor.cc
+    Configuration/ConfigurationIoExecutor.h
+    Configuration/JsonConfigurationStore.cc
+    Configuration/JsonConfigurationStore.h
 	ADSBVehicleManagerSettings.cc
 	ADSBVehicleManagerSettings.h
 	APMMavlinkStreamRateSettings.cc
@@ -42,6 +47,7 @@ target_link_libraries(Settings
 	PUBLIC
 		qgc
 		Qt5::Multimedia
+		Qt5::Concurrent
 )
 
 target_include_directories(Settings PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

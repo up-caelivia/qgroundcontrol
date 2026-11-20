@@ -10,6 +10,8 @@
 #ifndef SettingsManager_H
 #define SettingsManager_H
 
+#include <memory>
+
 #include "QGCLoggingCategory.h"
 #include "Joystick.h"
 #include "MultiVehicleManager.h"
@@ -31,6 +33,9 @@
 #include "GimbalControllerSettings.h"
 #include <QVariantList>
 #include "RemoteIDSettings.h"
+
+class ConfigurationStoreInterface;
+class ConfigurationIoExecutor;
 
 /// Provides access to all app settings
 class SettingsManager : public QGCTool
@@ -79,6 +84,11 @@ public:
     APMMavlinkStreamRateSettings*   apmMavlinkStreamRateSettings(void) { return _apmMavlinkStreamRateSettings; }
 #endif
     RemoteIDSettings*               remoteIDSettings            (void) { return _remoteIDSettings; }
+    std::shared_ptr<ConfigurationStoreInterface> configurationStore() const { return _configurationStore; }
+    ConfigurationIoExecutor*        configurationIo             ()     { return _configurationIo; }
+
+    static QString configurationStoreDirectory();
+
 private:
     AppSettings*                    _appSettings;
     UnitsSettings*                  _unitsSettings;
@@ -98,6 +108,8 @@ private:
     APMMavlinkStreamRateSettings*   _apmMavlinkStreamRateSettings;
 #endif
     RemoteIDSettings*               _remoteIDSettings;
+    std::shared_ptr<ConfigurationStoreInterface> _configurationStore;
+    ConfigurationIoExecutor*        _configurationIo;
 };
 
 #endif

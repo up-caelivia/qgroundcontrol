@@ -8,9 +8,18 @@
  ****************************************************************************/
 
 #include "SettingsManager.h"
+#include "Configuration/ConfigurationIoExecutor.h"
+#include "Configuration/JsonConfigurationStore.h"
+#include "QGCApplication.h"
+#include "qdir.h"
+#include "qstandardpaths.h"
+#include "qstringliteral.h"
 
+#include <QDir>
+#include <QStandardPaths>
 #include <QQmlEngine>
 #include <QtQml>
+#include <memory>
 
 SettingsManager::SettingsManager(QGCApplication* app, QGCToolbox* toolbox)
     : QGCTool(app, toolbox)
@@ -32,8 +41,22 @@ SettingsManager::SettingsManager(QGCApplication* app, QGCToolbox* toolbox)
     , _apmMavlinkStreamRateSettings (nullptr)
 #endif
     , _remoteIDSettings             (nullptr)
+    , _configurationStore           (nullptr)
+    , _configurationIo              (nullptr)
 {
 
+}
+
+QString SettingsManager::configurationStoreDirectory()
+{
+    QString base = QStandardPaths::writableLocation(
+        QStandardPaths::AppConfigLocation);
+
+    if (base.isEmpty()) {
+        return {};
+    }
+
+    return QDir(base).filePath(QStringLiteral("configurations"));
 }
 
 void SettingsManager::setToolbox(QGCToolbox *toolbox)
@@ -60,4 +83,10 @@ void SettingsManager::setToolbox(QGCToolbox *toolbox)
     _apmMavlinkStreamRateSettings = new APMMavlinkStreamRateSettings(this);
 #endif
     _remoteIDSettings =             new RemoteIDSettings            (this);
+
+    _configurationIo = new ConfigurationIoExecutor(this);
+    if (!qgcApp()->runningUnitTests()) {
+        _configurationStore = std::make_shared<JsonConfigurationStore>(
+            configurationStoreDirectory());
+    }
 }

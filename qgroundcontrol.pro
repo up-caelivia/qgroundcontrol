@@ -512,6 +512,7 @@ DebugBuild { PX4FirmwarePlugin { PX4FirmwarePluginFactory { APMFirmwarePlugin { 
         src/Vehicle/SendMavCommandWithHandlerTest.h \
         src/Vehicle/SendMavCommandWithSignallingTest.h \
         src/Vehicle/VehicleLinkManagerTest.h \
+        src/NTRIP/NTRIPManagerTest.h \
         #src/qgcunittest/RadioConfigTest.h \
         #src/AnalyzeView/LogDownloadTest.h \
         #src/qgcunittest/FileDialogTest.h \
@@ -562,6 +563,7 @@ DebugBuild { PX4FirmwarePlugin { PX4FirmwarePluginFactory { APMFirmwarePlugin { 
         src/Vehicle/SendMavCommandWithHandlerTest.cc \
         src/Vehicle/SendMavCommandWithSignallingTest.cc \
         src/Vehicle/VehicleLinkManagerTest.cc \
+        src/NTRIP/NTRIPManagerTest.cc \
         #src/qgcunittest/RadioConfigTest.cc \
         #src/AnalyzeView/LogDownloadTest.cc \
         #src/qgcunittest/FileDialogTest.cc \
@@ -642,6 +644,10 @@ HEADERS += \
     src/MissionManager/VisualMissionItem.h \
     src/MissionManager/VTOLLandingComplexItem.h \
     src/NTRIP/NTRIPConfiguration.h \
+    src/NTRIP/NTRIPConfigurationCodec.h \
+    src/NTRIP/NTRIPConfigurationMigration.h \
+    src/NTRIP/NTRIPConfigurationQmlAdapter.h \
+    src/NTRIP/NTRIPConfigurationValidation.h \
     src/NTRIP/NTRIPConnection.h \
     src/NTRIP/NTRIPManager.h \
     src/NTRIP/NTRIPStatusController.h \
@@ -701,6 +707,9 @@ HEADERS += \
     src/Settings/RTKSettings.h \
     src/Settings/SettingsGroup.h \
     src/Settings/SettingsManager.h \
+    src/Settings/Configuration/ConfigurationStoreInterface.h \
+    src/Settings/Configuration/ConfigurationIoExecutor.h \
+    src/Settings/Configuration/JsonConfigurationStore.h \
     src/Settings/UnitsSettings.h \
     src/Settings/VideoSettings.h \
     src/Settings/GimbalControllerSettings.h \
@@ -909,6 +918,10 @@ SOURCES += \
     src/MissionManager/TransectStyleComplexItem.cc \
     src/MissionManager/VisualMissionItem.cc \
     src/MissionManager/VTOLLandingComplexItem.cc \
+    src/NTRIP/NTRIPConfigurationCodec.cc \
+    src/NTRIP/NTRIPConfigurationMigration.cc \
+    src/NTRIP/NTRIPConfigurationQmlAdapter.cc \
+    src/NTRIP/NTRIPConfigurationValidation.cc \
     src/NTRIP/NTRIPConnection.cc \
     src/NTRIP/NTRIPManager.cc \
     src/NTRIP/NTRIPStatusController.cc \
@@ -966,6 +979,8 @@ SOURCES += \
     src/Settings/RTKSettings.cc \
     src/Settings/SettingsGroup.cc \
     src/Settings/SettingsManager.cc \
+    src/Settings/Configuration/ConfigurationIoExecutor.cc \
+    src/Settings/Configuration/JsonConfigurationStore.cc \
     src/Settings/UnitsSettings.cc \
     src/Settings/VideoSettings.cc \
     src/Settings/GimbalControllerSettings.cc \

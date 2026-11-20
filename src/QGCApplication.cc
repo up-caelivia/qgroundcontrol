@@ -80,6 +80,8 @@
 #include "QGCMapCircle.h"
 #include "ParameterManager.h"
 #include "SettingsManager.h"
+#include "Configuration/ConfigurationIoExecutor.h"
+#include "Configuration/JsonConfigurationStore.h"
 #include "QGCCorePlugin.h"
 #include "QGCCameraManager.h"
 #include "CameraCalc.h"
@@ -303,6 +305,16 @@ QGCApplication::QGCApplication(int &argc, char* argv[], bool unitTesting)
     }
 
     if (fClearSettingsOptions) {
+        if (!_runningUnitTests) {
+            JsonConfigurationStore store(SettingsManager::configurationStoreDirectory());
+            QString error;
+
+            if (!store.remove(QStringLiteral("ntrip"), error)) {
+                _exitWithError(tr("Cannot reset NTRIP configurations: %1").arg(error));
+                return;
+            }
+        }
+
         // User requested settings to be cleared on command line
         settings.clear();
 
@@ -435,6 +447,14 @@ void QGCApplication::setLanguage()
 
 void QGCApplication::_shutdown()
 {
+    // Finish accepted configuration work before destroying QML or its owners.
+    if (_toolbox) {
+        ConfigurationIoExecutor* io = _toolbox->settingsManager()->configurationIo();
+        if (io) {
+            io->stopAndWait();
+        }
+    }
+
     // Close out all Qml before we delete toolbox. This way we don't get all sorts of null reference complaints from Qml.
     delete _qmlAppEngine;
     delete _toolbox;

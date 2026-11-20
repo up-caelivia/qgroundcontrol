@@ -4,18 +4,34 @@
 NTRIPStatusController::NTRIPStatusController(
     NTRIPManager& manager,
     QObject* parent)
-    :  QObject(parent)
+    : QObject(parent)
 {
-    connect(&manager, &NTRIPManager::rtcmDataReceived, 
-            this, [this](const QByteArray& message) {
-        _parser.setNtripEnabled(true);
-        _parser.setauthError(false);
-        _parser.setmountError(false);
-        _parser.handleRTCM(message);
+    const auto updateSession = [this, &manager]() {
+        const bool enabled = !manager.connectionId().isEmpty();
+        _parser.setNtripEnabled(enabled);
+
+        if (!enabled) {
+            _parser.setNtripReceiving(false);
+        } else {
+            _parser.setauthError(false);
+            _parser.setmountError(false);
+        }
+    };
+
+    connect(&manager, &NTRIPManager::connectionIdChanged, this, updateSession);
+
+    connect(&manager, &NTRIPManager::receivingDataChanged,
+            this, [this, &manager]() {
+        _parser.setNtripReceiving(manager.receivingData());
     });
 
-    connect(&manager, &NTRIPManager::errorOccurred,
-        this, [this](const QString&) {
-            _parser.setNtripReceiving(false);
+    connect(&manager, &NTRIPManager::rtcmDataReceived,
+            this, [this](const QByteArray& message) {
+        if (message.size() >= 6) {
+            _parser.handleRTCM(message);
+        }
     });
+
+    updateSession();
+    _parser.setNtripReceiving(manager.receivingData());
 }
