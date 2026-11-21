@@ -375,9 +375,9 @@ Rectangle {
         }
 
         GridLayout {
-            id: actionGroups
             Layout.alignment: Qt.AlignHCenter
-            columns: !_root._editing && _root._panelWidth >= profileActions.implicitWidth
+            visible: !_root._editing
+            columns: _root._panelWidth >= profileActions.implicitWidth
                                     + connectionActions.implicitWidth + columnSpacing ? 2 : 1
             columnSpacing: _root._spacing * 2
             rowSpacing: _root._spacing
@@ -385,7 +385,6 @@ Rectangle {
             GridLayout {
                 id: profileActions
                 Layout.alignment: Qt.AlignHCenter
-                visible: !_root._editing
                 columns: _root._panelWidth >= addButton.implicitWidth + editButton.implicitWidth
                             + deleteButton.implicitWidth + columnSpacing * 2 ? 3 : 1
                 columnSpacing: _root._spacing
@@ -438,7 +437,6 @@ Rectangle {
                     primary: enabled
                     enabled: _root._manager.storageReady && !_root._manager.shutdownRequested
                                 && _root._selectedId.length > 0 && !_root._manager.connectionId.length
-                                && (!_root._editing || settingsLoader.configurationId.length > 0)
                     onClicked: {
                         _root._errorText = ""
                         _root._manager.connectConfiguration(_root._selectedId)
@@ -451,6 +449,28 @@ Rectangle {
                     text: qsTr("Disconnect")
                     enabled: _root._manager.connectionId.length > 0
                     onClicked: _root._manager.disconnectConnection()
+                }
+            }
+        }
+
+        RowLayout {
+            Layout.alignment: Qt.AlignHCenter
+            visible: _root._editing
+            spacing: _root._spacing
+
+            QGCButton {
+                text: qsTr("Save")
+                primary: true
+                enabled: !!settingsLoader.item && settingsLoader.item.canSave
+                onClicked: settingsLoader.item.save()
+            }
+
+            QGCButton {
+                text: qsTr("Cancel")
+                enabled: !_root._pendingOperation.length && !_root._manager.shutdownRequested
+                onClicked: {
+                    _root._errorText = ""
+                    _root.closeEditor()
                 }
             }
         }
@@ -484,6 +504,25 @@ Rectangle {
             readonly property bool _canChangePassword: !_creating && settingsLoader.editingConfiguration.hasPassword
             readonly property bool _changingPassword: _canChangePassword && passwordAction.currentIndex === 1
             readonly property bool _showPasswordField: _creating || _changingPassword
+            readonly property bool canSave: _root._canMutate && nameField.text.trim().length > 0
+                                            && hostField.text.trim().length > 0 && portField.acceptableInput
+                                            && (!_changingPassword || passwordField.text.length > 0)
+
+            function save() {
+                var password = _showPasswordField ? passwordField.text : ""
+                _root.saveConfiguration({
+                    name: nameField.text,
+                    hostAddress: hostField.text,
+                    port: portField.text,
+                    username: usernameField.text,
+                    passwordAction: password.length ? "replace" : "keep",
+                    password: password,
+                    mountpoint: mountpointField.text,
+                    whitelist: whitelistField.text,
+                    enableVRS: vrsCheckBox.checked,
+                    forceNtripV1: ntripV1CheckBox.checked
+                })
+            }
 
             ColumnLayout {
                 id: editorColumn
@@ -612,47 +651,9 @@ Rectangle {
 
                 QGCLabel {
                     Layout.fillWidth: true
-                    visible: settingsLoader.configurationId.length > 0
+                    visible: !profileEditor._creating && settingsLoader.configurationId === _root._manager.connectionId
                     wrapMode: Text.WordWrap
-                    text: settingsLoader.configurationId === _root._manager.connectionId
-                            ? qsTr("Changes apply on the next connection. The active connection keeps its current settings.")
-                            : qsTr("Connect uses the saved settings until you save these changes.")
-                }
-
-                RowLayout {
-                    Layout.alignment: Qt.AlignHCenter
-                    spacing: _root._spacing
-
-                    QGCButton {
-                        text: qsTr("Save")
-                        primary: true
-                        enabled: _root._canMutate && nameField.text.trim().length > 0
-                                    && hostField.text.trim().length > 0 && portField.acceptableInput
-                                    && (!profileEditor._changingPassword || passwordField.text.length > 0)
-                        onClicked: {
-                            var password = profileEditor._showPasswordField ? passwordField.text : ""
-                            _root.saveConfiguration({
-                                name: nameField.text,
-                                hostAddress: hostField.text,
-                                port: portField.text,
-                                username: usernameField.text,
-                                passwordAction: password.length ? "replace" : "keep",
-                                password: password,
-                                mountpoint: mountpointField.text,
-                                whitelist: whitelistField.text,
-                                enableVRS: vrsCheckBox.checked,
-                                forceNtripV1: ntripV1CheckBox.checked
-                            })
-                        }
-                    }
-                    QGCButton {
-                        text: qsTr("Cancel")
-                        enabled: !_root._pendingOperation.length && !_root._manager.shutdownRequested
-                        onClicked: {
-                            _root._errorText = ""
-                            _root.closeEditor()
-                        }
-                    }
+                    text: qsTr("Changes apply on the next connection. The active connection keeps its current settings.")
                 }
             }
         }
