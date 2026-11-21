@@ -26,6 +26,19 @@ NTRIPConnection::NTRIPConnection(
   _vrsSendTimer->setInterval(_vrsSendRateMSecs);
   _vrsSendTimer->setSingleShot(false);
 
+  _handshakeTimer = new QTimer(this);
+  _handshakeTimer->setSingleShot(true);
+  _handshakeTimer->setInterval(10000);
+  connect(
+    _handshakeTimer,
+    &QTimer::timeout,
+    this,
+    [this]() {
+      emit error(tr("Timed out waiting for the NTRIP caster."));
+      stop();
+    }
+  );
+
   connect(_socket, &QTcpSocket::connected,
           this, &NTRIPConnection::_onTcpConnected);
 
@@ -70,6 +83,7 @@ void NTRIPConnection::start()
     return;
   }
 
+  _handshakeTimer->start();
   _socket->connectToHost(
     _configuration.hostAddress,
     _configuration.port);
@@ -83,6 +97,7 @@ void NTRIPConnection::stop()
   }
 
   _closed = true;
+  _handshakeTimer->stop();
   _vrsSendTimer->stop();
   _connectionState = NTRIPState::uninitialised;
   _socket->abort();
@@ -131,20 +146,27 @@ void NTRIPConnection::_hardwareConnect() {
               "User-Agent: NTRIP QGroundControl\r\n"
               "%2"
               "Connection: close\r\n\r\n";
+      query = query.arg(_configuration.mountpoint, auth);
     } else {
       query = "GET /%1 HTTP/1.1\r\n"
               "User-Agent: NTRIP QGroundControl\r\n"
               "Ntrip-Version: Ntrip/2.0\r\n"
-              "%2"
+              "Host: %2\r\n"
+              "%3"
               "Connection: close\r\n\r\n";
+      QString host = _configuration.hostAddress;
+      if (host.contains(QLatin1Char(':'))) {
+        host = QStringLiteral("[%1]").arg(host);
+      }
+
+      const QString entity = QStringLiteral("%1:%2").arg(host, QString::number(_configuration.port));
+      query = query.arg(_configuration.mountpoint, entity, auth);
     }
 
     _connectionState = NTRIPState::waiting_for_http_response;
-    _socket->write(query.arg(_configuration.mountpoint).arg(auth).toUtf8());
+    _socket->write(query.toUtf8());
   } else {
-    _connectionState = NTRIPState::waiting_for_rtcm_header;
-    _state = State::Connected;
-    emit stateChanged();
+    _beginRtcmStream();
   }
 
   qCDebug(NTRIPConnectionLog) << "NTRIP Socket connected";
@@ -195,15 +217,17 @@ void NTRIPConnection::_parse(const QByteArray &buffer) {
 
 void NTRIPConnection::_readBytes(void) {
   qCDebug(NTRIPConnectionLog) << "Reading bytes";
-  if (!_socket) {
+  if (_closed || !_socket) {
     return;
   }
+
   if (_connectionState == NTRIPState::waiting_for_http_response) {
-    if (!_socket->canReadLine()) {
+    QByteArray line;
+    if (!_readHandshakeLine(line)) {
       return;
     }
 
-    const QByteArray response = _socket->readLine().trimmed();
+    const QByteArray response = line.trimmed();
     const QList<QByteArray> fields = response.simplified().split(' ');
 
     qCDebug(NTRIPConnectionLog) << "Server responded with " << response;
@@ -215,7 +239,7 @@ void NTRIPConnection::_readBytes(void) {
       return;
     }
 
-    const bool supportedResponse = 
+    const bool supportedResponse =
       fields.size() >= 2 && (
         fields[0] == "HTTP/1.0" ||
         fields[0] == "HTTP/1.1" ||
@@ -232,33 +256,31 @@ void NTRIPConnection::_readBytes(void) {
       stop();
       return;
     }
-    _connectionState = NTRIPState::consuming_http_headers;
+    if (fields[0] == "ICY") {
+      _beginRtcmStream();
+    } else {
+      _connectionState = NTRIPState::consuming_http_headers;
+    }
   }
 
   if (_connectionState == NTRIPState::consuming_http_headers) {
-    while (_socket->canReadLine()) {
-      QString line = _socket->readLine();
+    QByteArray line;
+    while (_readHandshakeLine(line)) {
       qCDebug(NTRIPConnectionLog) << "HTTP header: " << line.trimmed();
-      if (line.toLower().contains("transfer-encoding") && line.toLower().contains("chunked")) {
+      const QByteArray lowerLine = line.toLower();
+      if (lowerLine.contains("transfer-encoding") && lowerLine.contains("chunked")) {
         _isChunked = true;
         qCDebug(NTRIPConnectionLog) << "Server uses chunked transfer encoding";
       }
       if (line == "\r\n" || line == "\n") {
         qCDebug(NTRIPConnectionLog) << "HTTP headers consumed, starting RTCM parsing";
-        _connectionState = NTRIPState::waiting_for_rtcm_header;
-
-        _state = State::Connected;
-        emit stateChanged();
-        if (_closed) {
-          return;
-        }
-
+        _beginRtcmStream();
         break;
       }
     }
   }
 
-  if (_connectionState == NTRIPState::consuming_http_headers) {
+  if (_closed || _connectionState == NTRIPState::consuming_http_headers) {
     return;
   }
 
@@ -334,4 +356,32 @@ void NTRIPConnection::_sendNmeaGga() {
     _socket->write(gga.toUtf8());
     qCDebug(NTRIPConnectionLog) << "NMEA GGA Message : " << gga;
   }
+}
+
+void NTRIPConnection::_beginRtcmStream() {
+  _handshakeTimer->stop();
+  _connectionState = NTRIPState::waiting_for_rtcm_header;
+  _state = State::Connected;
+  emit stateChanged();
+}
+
+bool NTRIPConnection::_readHandshakeLine(QByteArray& line)
+{
+  constexpr qint64 maxHandshakeBytes = 16 * 1024;
+  const qint64 remaining = maxHandshakeBytes - _handshakeBytesRead;
+
+  if (remaining > 0 && _socket->canReadLine()) {
+      const qint64 bytesToRead = qMin(remaining, _socket->bytesAvailable());
+      line = _socket->readLine(bytesToRead + 1);
+      if (line.endsWith('\n')) {
+          _handshakeBytesRead += line.size();
+          return true;
+      }
+  } else if (_socket->bytesAvailable() < remaining) {
+      return false;
+  }
+
+  emit error(tr("The NTRIP caster response header is too large."));
+  stop();
+  return false;
 }

@@ -9,7 +9,6 @@
 
 #include "Drivers/src/rtcm.h"
 #include "NTRIPConfiguration.h"
-#include "qobjectdefs.h"
 
 class QGCToolbox;
 
@@ -71,6 +70,8 @@ private:
     // TCP connection and NTRIP request
     void _onTcpConnected();
     void _hardwareConnect();
+    bool _readHandshakeLine(QByteArray& line);
+    qint64 _handshakeBytesRead = 0;
 
     // Incoming correction data
     void _parse(const QByteArray& buffer);
@@ -89,7 +90,9 @@ private:
     bool _closed = false;
 
     // RTCM packet assembly
+    void _beginRtcmStream();
     RTCMParsing* _rtcm_parsing = nullptr;
+    QTimer* _handshakeTimer = nullptr;
 
     // HTTP chunk decoding
     bool _isChunked = false;
