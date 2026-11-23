@@ -3,6 +3,7 @@
 #include "QGCApplication.h"
 #include "QGCLoggingCategory.h"
 #include "QGCToolbox.h"
+#include "qstringliteral.h"
 
 QGC_LOGGING_CATEGORY(NTRIPConnectionLog, "NTRIPConnectionLog")
 
@@ -152,8 +153,11 @@ void NTRIPConnection::_hardwareConnect() {
   if (!_configuration.mountpoint.isEmpty()) {
     qCDebug(NTRIPConnectionLog) << "Sending HTTP request, using mount point: " << _configuration.mountpoint;
 
-    QString digest = QString(_configuration.username + ":" + _configuration.password).toUtf8().toBase64();
-    QString auth = QString("Authorization: Basic %1\r\n").arg(digest);
+    QString auth;
+    if (!_configuration.username.isEmpty() || !_configuration.password.isEmpty()) {
+      const QByteArray credentials = (_configuration.username + QLatin1Char(':') + _configuration.password).toUtf8().toBase64();
+      auth = QStringLiteral("Authorization: Basic %1\r\n").arg(QString::fromLatin1(credentials));
+    }
     QString query;
     if (_configuration.forceNtripV1) {
       query = "GET /%1 HTTP/1.0\r\n"
