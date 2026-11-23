@@ -252,16 +252,17 @@ Rectangle {
                                     font.pointSize: ScreenTools.mediumFontPointSize
                                     wrapMode: Text.Wrap
                                 }
+
+                                QGCLabel {
+                                    Layout.fillWidth: true
+                                    visible: _root._manager.connectionId.length > 0
+                                    horizontalAlignment: Text.AlignRight
+                                    wrapMode: Text.Wrap
+                                    text: _root._manager.connectionName
+                                }
                             }
 
-                            QGCLabel {
-                                Layout.fillWidth: true
-                                visible: _root._manager.connectionId.length > 0
-                                horizontalAlignment: Text.AlignHCenter
-                                wrapMode: Text.Wrap
-                                text: _root._manager.connectionName
-                            }
-
+                            // Separator
                             Rectangle {
                                 Layout.fillWidth: true
                                 Layout.preferredHeight: 1
@@ -292,6 +293,15 @@ Rectangle {
                                 QGCLabel { text: Constants.numGLO; Layout.alignment: Qt.AlignRight }
                             }
                         }
+                    }
+
+                    // Separator
+                    Rectangle {
+                        width: parent.width 
+                        height: 1
+                        anchors.topMargin: _root._spacing
+                        anchors.bottomMargin: _root._spacing
+                        color: qgcPal.windowShade
                     }
 
                     QGCLabel {
