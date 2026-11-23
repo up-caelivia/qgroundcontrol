@@ -1,5 +1,6 @@
 #include "NTRIPConfigurationCodec.h"
 
+#include "NTRIPConfiguration.h"
 #include "NTRIPConfigurationValidation.h"
 
 #include <QMetaType>
@@ -60,12 +61,12 @@ bool readNumber(
 namespace NTRIPConfigurationCodec {
 
 QVariantMap encode(
-    const NTRIPConfigurations& configurations)
+    const NTRIPProfileDocument& profileDocument)
 {
     QVariantList profiles;
-    profiles.reserve(configurations.size());
+    profiles.reserve(profileDocument.profiles.size());
 
-    for (const NTRIPConfiguration& configuration : configurations) {
+    for (const NTRIPConfiguration& configuration : profileDocument.profiles) {
         QList<int> ids = configuration.whitelist.values();
         std::sort(ids.begin(), ids.end());
 
@@ -102,16 +103,21 @@ QVariantMap encode(
         });
     }
 
-    return {
+    QVariantMap document {
         {QStringLiteral("fileType"), QStringLiteral("NTRIPProfiles")},
         {QStringLiteral("version"), 1},
-        {QStringLiteral("profiles"), profiles}
+        {QStringLiteral("profiles"), profiles},
     };
+    if (!profileDocument.startupProfileId.isEmpty()) {
+        document.insert(QStringLiteral("startupProfileId"), profileDocument.startupProfileId);
+    }
+
+    return document;
 }
 
 bool decode(
     const QVariantMap& document,
-    NTRIPConfigurations& configurations,
+    NTRIPProfileDocument& profileDocument,
     QString& error)
 {
     error.clear();
@@ -146,7 +152,7 @@ bool decode(
             QObject::tr("The NTRIP document contains too many profiles."));
     }
 
-    NTRIPConfigurations candidate;
+    NTRIPProfileDocument candidate;
 
     const QStringList stringFields = {
         QStringLiteral("id"),
@@ -243,20 +249,27 @@ bool decode(
             configuration.whitelist.insert(id);
         }
 
-        if (candidate.contains(configuration.id)) {
+        if (candidate.profiles.contains(configuration.id)) {
             return fail(
                 error,
                 QObject::tr("The NTRIP document contains duplicated profile IDs."));
         }
 
-        candidate.insert(configuration.id, configuration);
+        candidate.profiles.insert(configuration.id, configuration);
     }
 
-    if (!NTRIPConfigurationValidation::validate(candidate, error)) {
+    if (!NTRIPConfigurationValidation::validate(candidate.profiles, error)) {
         return false;
     }
 
-    configurations = candidate;
+    const QVariant startupValue = document.value(QStringLiteral("startupProfileId"));
+    const QString startupId = startupValue.userType() == QMetaType::QString
+        ? startupValue.toString() : QString{};
+    if (candidate.profiles.contains(startupId)) {
+        candidate.startupProfileId = startupId;
+    }
+
+    profileDocument = candidate;
     return true;
 }
 

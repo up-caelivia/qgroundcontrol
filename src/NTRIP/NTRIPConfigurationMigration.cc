@@ -1,5 +1,6 @@
 #include "NTRIPConfigurationMigration.h"
 
+#include "NTRIPConfiguration.h"
 #include "NTRIPConfigurationValidation.h"
 
 #include <QFile>
@@ -55,12 +56,13 @@ bool readBoolean(const QVariant& value, bool& result)
 namespace NTRIPConfigurationMigration {
 
 bool readLegacy(
-    NTRIPConfigurations& configurations,
+    NTRIPProfileDocument& profileDocument,
     QString& error)
 {
     error.clear();
 
     const QStringList keys = {
+        QStringLiteral("ntripServerConnectEnabled"),
         QStringLiteral("ntripServerHostAddress"),
         QStringLiteral("ntripServerPort"),
         QStringLiteral("ntripUsername"),
@@ -74,8 +76,7 @@ bool readLegacy(
     QSettings settings;
     settings.beginGroup(QStringLiteral("NTRIP"));
 
-    bool found =
-        settings.contains(QStringLiteral("ntripServerConnectEnabled"));
+    bool found = false;
 
     for (const QString& key : keys) {
         found |= settings.contains(key);
@@ -86,7 +87,7 @@ bool readLegacy(
     }
 
     if (!found) {
-        configurations.clear();
+        profileDocument = {};
         return true;
     }
 
@@ -211,14 +212,20 @@ bool readLegacy(
         }
     }
 
-    NTRIPConfigurations candidate;
-    candidate.insert(configuration.id, configuration);
+    NTRIPProfileDocument candidate;
+    candidate.profiles.insert(configuration.id, configuration);
 
-    if (!NTRIPConfigurationValidation::validate(candidate, error)) {
+    if (!NTRIPConfigurationValidation::validate(candidate.profiles, error)) {
         return false;
     }
 
-    configurations = candidate;
+    bool connectAtStartup = false;
+    if (readBoolean(previous.value(QStringLiteral("ntripServerConnectEnabled")), connectAtStartup)
+        && connectAtStartup) {
+        candidate.startupProfileId = configuration.id;
+    }
+
+    profileDocument = candidate;
     return true;
 }
 

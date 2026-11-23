@@ -11,6 +11,7 @@
 
 #include "Configuration/ConfigurationIoExecutor.h"
 #include "Configuration/ConfigurationStoreInterface.h"
+#include "NTRIPConfiguration.h"
 #include "NTRIPConfigurationCodec.h"
 #include "NTRIPConfigurationMigration.h"
 #include "NTRIPConfigurationQmlAdapter.h"
@@ -20,7 +21,9 @@
 #include "RTCM/RTCMMavlink.h"
 #include "SettingsManager.h"
 
+#include <QMetaType>
 #include <QUuid>
+#include <QVariant>
 
 #include <utility>
 
@@ -58,9 +61,9 @@ void NTRIPManager::setToolbox(QGCToolbox* toolbox)
 QVariantList NTRIPManager::configurations() const
 {
     QVariantList result;
-    result.reserve(_configurations.size());
+    result.reserve(_profileDocument.profiles.size());
 
-    for (const NTRIPConfiguration& configuration : _configurations) {
+    for (const NTRIPConfiguration& configuration : _profileDocument.profiles) {
         result.append(QVariantMap {
             {QStringLiteral("id"), configuration.id},
             {QStringLiteral("name"), configuration.name},
@@ -74,11 +77,15 @@ QVariantList NTRIPManager::configurations() const
 
 QVariantMap NTRIPManager::configuration(const QString& id) const
 {
-    const auto it = _configurations.constFind(id);
+    const auto it = _profileDocument.profiles.constFind(id);
 
-    return it == _configurations.cend()
-        ? QVariantMap{}
-        : NTRIPConfigurationQmlAdapter::toValues(it.value());
+    if (it == _profileDocument.profiles.cend()) {
+        return {};
+    }
+
+    QVariantMap values = NTRIPConfigurationQmlAdapter::toValues(it.value());
+    values.insert(QStringLiteral("connectAtStartup"), id == _profileDocument.startupProfileId);
+    return values;
 }
 
 bool NTRIPManager::shutdownRequested() const
@@ -164,7 +171,7 @@ bool NTRIPManager::reloadConfigurations()
             }
 
             // Only confirmed absence permits legacy migration.
-            NTRIPConfigurations imported;
+            NTRIPProfileDocument imported;
 
             if (allowMigration
                 && !NTRIPConfigurationMigration::readLegacy(imported, result.error)) {
@@ -180,14 +187,14 @@ bool NTRIPManager::reloadConfigurations()
             return result;
         },
         [this](const ConfigurationIoResult& result) {
-            NTRIPConfigurations candidate;
+            NTRIPProfileDocument candidate;
             QString error = result.error;
 
             const bool success = result.success
                 && NTRIPConfigurationCodec::decode(result.document, candidate, error);
 
             if (success) {
-                _configurations = candidate;
+                _profileDocument = candidate;
                 _storageReady = true;
                 emit storageReadyChanged();
                 emit configurationsChanged();
@@ -200,6 +207,11 @@ bool NTRIPManager::reloadConfigurations()
             }
 
             _finishStorage(success, error);
+
+            if (success && !_profileDocument.startupProfileId.isEmpty()
+                && !_tcpLink && !shutdownRequested() && _io->isAccepting()) {
+                connectConfiguration(_profileDocument.startupProfileId);
+            }
         });
 
     if (!accepted) {
@@ -225,7 +237,7 @@ NTRIPManager::MutationResult NTRIPManager::addConfiguration(
 
     do {
         id = QUuid::createUuid().toString(QUuid::WithoutBraces);
-    } while (_configurations.contains(id));
+    } while (_profileDocument.profiles.contains(id));
 
     return _prepareAndSave(id, values, nullptr, QStringLiteral("add"));
 }
@@ -240,9 +252,9 @@ NTRIPManager::MutationResult NTRIPManager::updateConfiguration(
         return availability;
     }
 
-    const auto it = _configurations.constFind(id);
+    const auto it = _profileDocument.profiles.constFind(id);
 
-    if (it == _configurations.cend()) {
+    if (it == _profileDocument.profiles.cend()) {
         return _reject(NotFound, tr("The selected NTRIP configuration does not exist."));
     }
 
@@ -279,11 +291,23 @@ NTRIPManager::MutationResult NTRIPManager::_prepareAndSave(
         break;
     }
 
-    NTRIPConfigurations candidate = _configurations;
-    candidate.insert(id, configuration);
+    NTRIPProfileDocument candidate = _profileDocument;
+    candidate.profiles.insert(id, configuration);
 
-    if (!NTRIPConfigurationValidation::validate(candidate, error)) {
+    if (!NTRIPConfigurationValidation::validate(candidate.profiles, error)) {
         return _reject(Invalid, error);
+    }
+
+    const QVariant connectAtStartup = values.value(
+        QStringLiteral("connectAtStartup"), id == candidate.startupProfileId);
+    if (connectAtStartup.userType() != QMetaType::Bool) {
+        return _reject(Invalid, tr("Connect at startup must be a boolean value."));
+    }
+
+    if (connectAtStartup.toBool()) {
+        candidate.startupProfileId = id;
+    } else if (candidate.startupProfileId == id) {
+        candidate.startupProfileId.clear();
     }
 
     return _save(candidate, operation, id);
@@ -297,18 +321,22 @@ NTRIPManager::MutationResult NTRIPManager::removeConfiguration(const QString& id
         return availability;
     }
 
-    if (!_configurations.contains(id)) {
+    if (!_profileDocument.profiles.contains(id)) {
         return _reject(NotFound, tr("The selected NTRIP configuration does not exist."));
     }
 
-    NTRIPConfigurations candidate = _configurations;
-    candidate.remove(id);
+    NTRIPProfileDocument candidate = _profileDocument;
+    candidate.profiles.remove(id);
+
+    if (candidate.startupProfileId == id) {
+        candidate.startupProfileId.clear();
+    }
 
     return _save(candidate, QStringLiteral("remove"), id);
 }
 
 NTRIPManager::MutationResult NTRIPManager::_save(
-    const NTRIPConfigurations& candidate,
+    const NTRIPProfileDocument& candidate,
     const QString& operation,
     const QString& id)
 {
@@ -331,7 +359,7 @@ NTRIPManager::MutationResult NTRIPManager::_save(
 
             if (result.success) {
                 // Publish only the snapshot acknowledged by successful storage.
-                _configurations = candidate;
+                _profileDocument = candidate;
                 emit configurationsChanged();
             } else {
                 if (error.isEmpty()) {
@@ -409,9 +437,9 @@ bool NTRIPManager::connectConfiguration(const QString& id)
         return _reportError(tr("The NTRIP manager is not ready."));
     }
 
-    const auto it = _configurations.constFind(id);
+    const auto it = _profileDocument.profiles.constFind(id);
 
-    if (it == _configurations.cend()) {
+    if (it == _profileDocument.profiles.cend()) {
         return _reportError(tr("The selected NTRIP configuration does not exist."));
     }
 

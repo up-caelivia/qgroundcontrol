@@ -23,3 +23,9 @@ struct NTRIPConfiguration
 };
 
 using NTRIPConfigurations = QMap<QString, NTRIPConfiguration>;
+
+struct NTRIPProfileDocument
+{
+    NTRIPConfigurations profiles;
+    QString startupProfileId;
+};

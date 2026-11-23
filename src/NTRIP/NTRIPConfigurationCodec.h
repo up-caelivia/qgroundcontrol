@@ -6,14 +6,14 @@
 
 namespace NTRIPConfigurationCodec {
 
-// Caller supplies a validated collection.
+// Caller supplies a validated profile document.
 QVariantMap encode(
-    const NTRIPConfigurations& configurations);
+    const NTRIPProfileDocument& profileDocument);
 
-// Leaves configurations unchanged on failure.
+// Leaves profileDocument unchanged on failure.
 bool decode(
     const QVariantMap& document,
-    NTRIPConfigurations& configurations,
+    NTRIPProfileDocument& profileDocument,
     QString& error);
 
 } // namespace NTRIPConfigurationCodec

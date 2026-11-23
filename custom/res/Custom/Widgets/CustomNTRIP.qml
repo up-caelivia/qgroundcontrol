@@ -532,7 +532,8 @@ Rectangle {
                     mountpoint: mountpointField.text,
                     whitelist: whitelistField.text,
                     enableVRS: vrsCheckBox.checked,
-                    forceNtripV1: ntripV1CheckBox.checked
+                    forceNtripV1: ntripV1CheckBox.checked,
+                    connectAtStartup: connectAtStartupCheckbox.checked
                 })
             }
 
@@ -650,6 +651,12 @@ Rectangle {
                             Layout.columnSpan: editorGrid.columns
                             text: qsTr("Force NTRIP v1")
                             checked: settingsLoader.editingConfiguration.forceNtripV1
+                        }
+                        QGCCheckBox {
+                            id: connectAtStartupCheckbox
+                            Layout.columnSpan: editorGrid.columns
+                            text: qsTr("Connect at startup")
+                            checked: settingsLoader.editingConfiguration.connectAtStartup === true
                         }
                     }
                 }

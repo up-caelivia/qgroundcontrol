@@ -5,9 +5,9 @@
 namespace NTRIPConfigurationMigration {
 
 // Reads legacy settings without changing them.
-// Returns an empty collection when no previous values were saved.
+// Returns an empty profile document when no previous values were saved.
 bool readLegacy(
-    NTRIPConfigurations& configurations,
+    NTRIPProfileDocument& profileDocument,
     QString& error);
 
 } // namespace NTRIPConfigurationMigration

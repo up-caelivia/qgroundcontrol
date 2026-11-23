@@ -122,14 +122,14 @@ private:
         const QString& operation);
 
     MutationResult _save(
-        const NTRIPConfigurations& candidate,
+        const NTRIPProfileDocument& candidate,
         const QString& operation,
         const QString& id);
 
     void _finishStorage(bool success, const QString& message);
     void _notifyShutdownReady();
 
-    NTRIPConfigurations _configurations;
+    NTRIPProfileDocument _profileDocument;
 
     std::shared_ptr<ConfigurationStoreInterface> _store;
     ConfigurationIoExecutor* _io = nullptr;
