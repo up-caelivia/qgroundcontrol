@@ -12,7 +12,6 @@
 #include "QGCApplication.h"
 #include "QGCLoggingCategory.h"
 #include "QGCToolbox.h"
-#include "qstringliteral.h"
 
 QGC_LOGGING_CATEGORY(NTRIPConnectionLog, "NTRIPConnectionLog")
 

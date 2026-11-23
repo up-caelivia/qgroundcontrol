@@ -641,6 +641,12 @@ Rectangle {
                         }
 
                         QGCCheckBox {
+                            id: connectAtStartupCheckbox
+                            Layout.columnSpan: editorGrid.columns
+                            text: qsTr("Connect at startup")
+                            checked: settingsLoader.editingConfiguration.connectAtStartup === true
+                        }
+                        QGCCheckBox {
                             id: vrsCheckBox
                             Layout.columnSpan: editorGrid.columns
                             text: qsTr("Send vehicle position (VRS)")
@@ -651,12 +657,6 @@ Rectangle {
                             Layout.columnSpan: editorGrid.columns
                             text: qsTr("Force NTRIP v1")
                             checked: settingsLoader.editingConfiguration.forceNtripV1
-                        }
-                        QGCCheckBox {
-                            id: connectAtStartupCheckbox
-                            Layout.columnSpan: editorGrid.columns
-                            text: qsTr("Connect at startup")
-                            checked: settingsLoader.editingConfiguration.connectAtStartup === true
                         }
                     }
                 }
