@@ -513,7 +513,7 @@ Rectangle {
             readonly property bool _creating: settingsLoader.configurationId.length === 0
             readonly property bool _canChangePassword: !_creating && settingsLoader.editingConfiguration.hasPassword
             readonly property bool _changingPassword: _canChangePassword && passwordAction.currentIndex === 1
-            readonly property bool _showPasswordField: _creating || _changingPassword
+            readonly property bool _showPasswordField: !_canChangePassword || _changingPassword
             readonly property bool canSave: _root._canMutate && nameField.text.trim().length > 0
                                             && hostField.text.trim().length > 0 && portField.acceptableInput
                                             && (!_changingPassword || passwordField.text.length > 0)
@@ -525,7 +525,9 @@ Rectangle {
                     hostAddress: hostField.text,
                     port: portField.text,
                     username: usernameField.text,
-                    passwordAction: password.length ? "replace" : "keep",
+                    passwordAction: _canChangePassword && passwordAction.currentIndex === 2
+                        ? "clear"
+                        : (password.length ? "replace" : "keep"),
                     password: password,
                     mountpoint: mountpointField.text,
                     whitelist: whitelistField.text,
@@ -596,19 +598,13 @@ Rectangle {
                             id: passwordAction
                             Layout.fillWidth: true
                             visible: profileEditor._canChangePassword
-                            model: [qsTr("Keep saved password"), qsTr("Change password")]
+                            model: [qsTr("Keep saved password"), qsTr("Change password"), qsTr("Remove password")]
                             currentIndex: 0
                             onActivated: {
                                 if (index === 0) {
                                     passwordField.text = ""
                                 }
                             }
-                        }
-                        QGCLabel {
-                            Layout.fillWidth: true
-                            visible: !profileEditor._creating && !profileEditor._canChangePassword
-                            text: qsTr("No password set")
-                            wrapMode: Text.Wrap
                         }
 
                         QGCLabel {
@@ -619,7 +615,6 @@ Rectangle {
                             id: passwordField
                             Layout.fillWidth: true
                             visible: profileEditor._showPasswordField
-                            placeholderText: profileEditor._creating ? qsTr("Optional") : ""
                             echoMode: TextInput.Password
                             maximumLength: 4096
                             inputMethodHints: Qt.ImhHiddenText | Qt.ImhSensitiveData | Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase
