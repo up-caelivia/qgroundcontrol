@@ -88,6 +88,7 @@ private:
     QUrl _ntripURL;
     NTRIPState _connectionState;
     bool _closed = false;
+    QTimer* _connectionDropTimer = nullptr;
 
     // RTCM packet assembly
     void _beginRtcmStream();

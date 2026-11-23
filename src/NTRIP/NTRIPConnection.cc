@@ -39,6 +39,19 @@ NTRIPConnection::NTRIPConnection(
     }
   );
 
+  _connectionDropTimer = new QTimer(this);
+  _connectionDropTimer->setSingleShot(true);
+  _connectionDropTimer->setInterval(10000);
+  connect(
+    _connectionDropTimer,
+    &QTimer::timeout,
+    this,
+    [this]() {
+      _receivingData = false;
+      emit receivingDataChanged();
+    }
+  );
+
   connect(_socket, &QTcpSocket::connected,
           this, &NTRIPConnection::_onTcpConnected);
 
@@ -98,6 +111,7 @@ void NTRIPConnection::stop()
 
   _closed = true;
   _handshakeTimer->stop();
+  _connectionDropTimer->stop();
   _vrsSendTimer->stop();
   _connectionState = NTRIPState::uninitialised;
   _socket->abort();
@@ -198,6 +212,7 @@ void NTRIPConnection::_parse(const QByteArray &buffer) {
       if (_configuration.whitelist.empty() || _configuration.whitelist.contains(id)) {
         qCDebug(NTRIPConnectionLog) << "Sending message ID [" << id << "] of size "
                           << message.length();
+        _connectionDropTimer->start();
         if (!_receivingData) {
           _receivingData = true;
           emit receivingDataChanged();
