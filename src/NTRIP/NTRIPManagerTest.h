@@ -32,5 +32,6 @@ private slots:
     void _shutdownWaitsForCommit();
     void _shutdownFailureCanRetry();
     void _connectionDuringPendingDeletion();
+    void _persistsStartupProfile();
     void _unsupportedDocumentIsNotOverwritten();
 };

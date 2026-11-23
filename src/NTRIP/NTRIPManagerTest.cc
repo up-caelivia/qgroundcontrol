@@ -44,9 +44,9 @@ NTRIPConfiguration profile(quint16 port = 2101)
 
 QVariantMap profileDocument(const NTRIPConfiguration& configuration)
 {
-    NTRIPConfigurations profiles;
-    profiles.insert(configuration.id, configuration);
-    return NTRIPConfigurationCodec::encode(profiles);
+    NTRIPProfileDocument document;
+    document.profiles.insert(configuration.id, configuration);
+    return NTRIPConfigurationCodec::encode(document);
 }
 
 class ControlledStore final : public ConfigurationStoreInterface
@@ -266,12 +266,12 @@ void NTRIPManagerTest::_commitsOnlyAfterSuccessfulWrite()
     QCOMPARE(manager.configuration(configuration.id).value(QStringLiteral("name")).toString(),
              QStringLiteral("Updated"));
 
-    NTRIPConfigurations persisted;
+    NTRIPProfileDocument persisted;
     QString error;
     QVERIFY2(NTRIPConfigurationCodec::decode(store->document(), persisted, error),
              qPrintable(error));
-    QCOMPARE(persisted.value(configuration.id).password, configuration.password);
-    QCOMPARE(persisted.value(configuration.id).id, configuration.id);
+    QCOMPARE(persisted.profiles.value(configuration.id).password, configuration.password);
+    QCOMPARE(persisted.profiles.value(configuration.id).id, configuration.id);
     QVERIFY(!manager.configuration(configuration.id).contains(QStringLiteral("password")));
 }
 
@@ -358,11 +358,11 @@ void NTRIPManagerTest::_addsAndRemovesProfiles()
     QVERIFY(addedId != configuration.id);
     QCOMPARE(manager.configurations().size(), 2);
 
-    NTRIPConfigurations persisted;
+    NTRIPProfileDocument persisted;
     QString error;
     QVERIFY2(NTRIPConfigurationCodec::decode(store->document(), persisted, error),
              qPrintable(error));
-    QCOMPARE(persisted.value(addedId).password, QStringLiteral("added-secret"));
+    QCOMPARE(persisted.profiles.value(addedId).password, QStringLiteral("added-secret"));
 
     QCOMPARE(manager.removeConfiguration(addedId), NTRIPManager::Accepted);
     QTRY_COMPARE(finished.count(), 2);
@@ -432,11 +432,11 @@ void NTRIPManagerTest::_passwordActions()
     QTRY_COMPARE(finished.count(), 1);
     QVERIFY(finished.at(0).at(2).toBool());
 
-    NTRIPConfigurations persisted;
+    NTRIPProfileDocument persisted;
     QString error;
     QVERIFY2(NTRIPConfigurationCodec::decode(store->document(), persisted, error),
              qPrintable(error));
-    QCOMPARE(persisted.value(configuration.id).password, expected);
+    QCOMPARE(persisted.profiles.value(configuration.id).password, expected);
     const QVariantMap output = manager.configuration(configuration.id);
     QVERIFY(!output.contains(QStringLiteral("password")));
     QCOMPARE(output.value(QStringLiteral("hasPassword")).toBool(), !expected.isEmpty());
@@ -550,6 +550,59 @@ void NTRIPManagerTest::_connectionDuringPendingDeletion()
     QVERIFY(manager.connectionId().isEmpty());
     QVERIFY(manager.connectionName().isEmpty());
     QCOMPARE(manager.connectionState(), NTRIPConnection::Disconnected);
+}
+
+void NTRIPManagerTest::_persistsStartupProfile()
+{
+    QTcpServer server;
+    QVERIFY(server.listen(QHostAddress::LocalHost, 0));
+
+    const auto configuration = profile(server.serverPort());
+    auto store = std::make_shared<ControlledStore>(profileDocument(configuration));
+    const QString startupOption = QStringLiteral("connectAtStartup");
+    const QString storageKey = QStringLiteral("startupProfileId");
+
+    NTRIPManager manager(qgcApp(), qgcApp()->toolbox(), store);
+    manager.setToolbox(qgcApp()->toolbox());
+    QTRY_VERIFY(manager.storageReady() && !manager.storageBusy());
+    QVERIFY(!manager.configuration(configuration.id).value(startupOption).toBool());
+
+    QVariantMap values = manager.configuration(configuration.id);
+    values.insert(startupOption, true);
+    QCOMPARE(manager.updateConfiguration(configuration.id, values), NTRIPManager::Accepted);
+    QTRY_VERIFY(!manager.storageBusy());
+    QCOMPARE(store->document().value(storageKey).toString(), configuration.id);
+    QCOMPARE(manager.connectionState(), NTRIPConnection::Disconnected);
+
+    QVariantMap otherProfile = values;
+    otherProfile.insert(QStringLiteral("name"), QStringLiteral("Other profile"));
+    otherProfile.insert(startupOption, false);
+    QCOMPARE(manager.addConfiguration(otherProfile), NTRIPManager::Accepted);
+    QTRY_VERIFY(!manager.storageBusy());
+    QCOMPARE(store->document().value(storageKey).toString(), configuration.id);
+
+    NTRIPManager restored(qgcApp(), qgcApp()->toolbox(), store);
+    restored.setToolbox(qgcApp()->toolbox());
+    QTRY_COMPARE(restored.connectionState(), NTRIPConnection::Connected);
+    QCOMPARE(restored.connectionId(), configuration.id);
+    QVERIFY(restored.configuration(configuration.id).value(startupOption).toBool());
+
+    values = restored.configuration(configuration.id);
+    values.insert(startupOption, false);
+    store->pauseNextWrite(true);
+    WriteGate gate(store);
+    QCOMPARE(restored.updateConfiguration(configuration.id, values), NTRIPManager::Accepted);
+    QTRY_VERIFY(store->writeBlocked());
+    gate.release();
+    QTRY_VERIFY(!restored.storageBusy());
+    QVERIFY(restored.configuration(configuration.id).value(startupOption).toBool());
+    QCOMPARE(store->document().value(storageKey).toString(), configuration.id);
+
+    QCOMPARE(restored.removeConfiguration(configuration.id), NTRIPManager::Accepted);
+    QTRY_VERIFY(!restored.storageBusy());
+    QVERIFY(!store->document().contains(storageKey));
+    QCOMPARE(restored.connectionState(), NTRIPConnection::Connected);
+    restored.disconnectConnection();
 }
 
 void NTRIPManagerTest::_unsupportedDocumentIsNotOverwritten()
