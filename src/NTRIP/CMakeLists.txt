@@ -12,8 +12,6 @@ add_library(NTRIP
     NTRIPConnection.h
     NTRIPManager.cc
     NTRIPManager.h
-    NTRIPStatusController.cc
-    NTRIPStatusController.h
 )
 
 if(BUILD_TESTING)

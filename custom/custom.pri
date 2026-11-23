@@ -138,6 +138,7 @@ QML_IMPORT_PATH += \
 SOURCES += \
     $$PWD/src/CustomPlugin.cc \
     $$PWD/src/ParseNTRIP.cpp \
+    $$PWD/src/NTRIPStatusController.cc \
     $$PWD/src/constants.cpp \
     $$PWD/src/CustomAnnouncer.cpp \
     $$PWD/src/VideoStreamControl.cc \
@@ -153,6 +154,7 @@ SOURCES += \
 HEADERS += \
     $$PWD/src/CustomPlugin.h \
     $$PWD/src/ParseNTRIP.h \
+    $$PWD/src/NTRIPStatusController.h \
     $$PWD/src/constants.h \
     $$PWD/src/CustomAnnouncer.h \
     $$PWD/src/VideoStreamControl.h \
