@@ -16,6 +16,7 @@
 #include "NTRIPConfigurationMigration.h"
 #include "NTRIPConfigurationQmlAdapter.h"
 #include "NTRIPConfigurationValidation.h"
+#include "NTRIPConnection.h"
 #include "QGCApplication.h"
 #include "QGCLoggingCategory.h"
 #include "RTCM/RTCMMavlink.h"
@@ -29,6 +30,12 @@
 
 QGC_LOGGING_CATEGORY(NTRIPManagerLog, "NTRIPManagerLog")
 
+namespace {
+
+constexpr int maxRetryStep = 6;
+
+} // namespace
+
 NTRIPManager::NTRIPManager(
     QGCApplication* app,
     QGCToolbox* toolbox,
@@ -36,6 +43,13 @@ NTRIPManager::NTRIPManager(
     : QGCTool(app, toolbox)
     , _store(std::move(store))
 {
+    _retryTimer.setSingleShot(true);
+    connect(
+        &_retryTimer, &QTimer::timeout,
+        this, [this]() {
+            _startConnectionAttempt();
+        }
+    );
 }
 
 void NTRIPManager::setToolbox(QGCToolbox* toolbox)
@@ -145,7 +159,7 @@ bool NTRIPManager::reloadConfigurations()
         return false;
     }
 
-    if (_storageReady || _tcpLink) {
+    if (_storageReady || !_session.profile.id.isEmpty()) {
         return false;
     }
 
@@ -209,7 +223,7 @@ bool NTRIPManager::reloadConfigurations()
             _finishStorage(success, error);
 
             if (success && !_profileDocument.startupProfileId.isEmpty()
-                && !_tcpLink && !shutdownRequested() && _io->isAccepting()) {
+                && _session.profile.id.isEmpty() && !shutdownRequested() && _io->isAccepting()) {
                 connectConfiguration(_profileDocument.startupProfileId);
             }
         });
@@ -396,6 +410,7 @@ void NTRIPManager::_finishStorage(bool success, const QString& message)
 
     if (closeFailed) {
         emit shutdownFailed(message);
+        _scheduleRetry();
     }
 
     // Recheck current state: a notification receiver may have requested shutdown.
@@ -409,6 +424,7 @@ void NTRIPManager::requestShutdown()
     }
 
     _shutdownState = ShutdownState::Waiting;
+    _retryTimer.stop();
     emit shutdownRequestedChanged();
     _notifyShutdownReady();
 }
@@ -429,7 +445,7 @@ bool NTRIPManager::connectConfiguration(const QString& id)
     }
 
     // A pending save does not change the committed connection snapshot.
-    if (_tcpLink) {
+    if (!_session.profile.id.isEmpty()) {
         return _reportError(tr("Disconnect the current NTRIP connection first."));
     }
 
@@ -443,60 +459,90 @@ bool NTRIPManager::connectConfiguration(const QString& id)
         return _reportError(tr("The selected NTRIP configuration does not exist."));
     }
 
-    auto* connection = new NTRIPConnection(it.value(), this);
-    _tcpLink = connection;
-    _activeConnectionId = id;
-    _activeConnectionName = it.value().name;
+    _session.profile = it.value();
+    return _startConnectionAttempt();
+}
 
-    connect(connection, &NTRIPConnection::closed, this, [this, connection]() {
-        if (_tcpLink == connection) {
-            _tcpLink = nullptr;
-            _activeConnectionId.clear();
-            _activeConnectionName.clear();
-            emit connectionIdChanged();
+bool NTRIPManager::_startConnectionAttempt()
+{
+    if (_session.profile.id.isEmpty() || _session.attempt || shutdownRequested()
+        || (_io && !_io->isAccepting())) {
+        return false;
+    }
+
+    auto* connection = new NTRIPConnection(_session.profile, this);
+    _session.attempt = connection;
+
+    using EndReason = NTRIPConnection::EndReason;
+    connect(
+        connection, &NTRIPConnection::connectionEnded,
+        this, [this, connection](EndReason reason, const QString& message) {
+            connection->deleteLater();
+
+            if (_session.attempt != connection) {
+                return;
+            }
+            _session.attempt = nullptr;
+
+            if (reason == EndReason::Retryable) {
+                qCDebug(NTRIPManagerLog) << message;
+                const bool firstFailure = _session.retryStep == 0;
+                _session.retryStep = qMin(_session.retryStep + 1, maxRetryStep);
+                _scheduleRetry();
+                if (firstFailure) {
+                    emit connectionStateChanged();
+                }
+                return;
+            }
+
+            disconnectConnection();
+            if (reason == EndReason::Fatal) {
+                tcpError(message);
+            }
         }
-
-        connection->deleteLater();
-    });
-
-    connect(connection, &NTRIPConnection::error,
-            this, [this, connection](const QString& message) {
-        if (_tcpLink == connection) {
-            tcpError(message);
-        }
-    });
+    );
 
     connect(connection, &NTRIPConnection::RTCMDataUpdate,
             this, [this, connection](const QByteArray& message) {
-        if (_tcpLink == connection) {
+        if (_session.attempt == connection) {
             _rtcmMavlink->RTCMDataUpdate(message);
         }
     });
 
     connect(connection, &NTRIPConnection::RTCMDataUpdate,
             this, [this, connection](const QByteArray& message) {
-        if (_tcpLink == connection) {
+        if (_session.attempt == connection) {
             emit rtcmDataReceived(message);
         }
     });
 
     connect(connection, &NTRIPConnection::stateChanged,
             this, [this, connection]() {
-        if (_tcpLink == connection) {
+        if (_session.attempt == connection && _session.retryStep == 0
+            && connection->state() != NTRIPConnection::Disconnected) {
             emit connectionStateChanged();
         }
     });
 
     connect(connection, &NTRIPConnection::receivingDataChanged,
             this, [this, connection]() {
-        if (_tcpLink == connection) {
+        if (_session.attempt != connection) {
+            return;
+        }
+        if (_session.retryStep > 0 && connection->receivingData()) {
+            _session.retryStep = 0;
+            emit connectionStateChanged();
+        }
+        if (_session.attempt == connection) {
             emit receivingDataChanged();
         }
     });
 
-    emit connectionIdChanged();
+    if (_session.retryStep == 0) {
+        emit connectionIdChanged();
+    }
 
-    if (_tcpLink != connection) {
+    if (_session.attempt != connection) {
         return false;
     }
 
@@ -504,26 +550,55 @@ bool NTRIPManager::connectConfiguration(const QString& id)
     return true;
 }
 
+void NTRIPManager::_scheduleRetry()
+{
+    if (_session.retryStep == 0 || _session.attempt || _retryTimer.isActive()
+        || shutdownRequested() || (_io && !_io->isAccepting())) {
+        return;
+    }
+
+    const int delaySeconds = 1 << (_session.retryStep - 1);
+    _retryTimer.start(delaySeconds * 1000);
+}
+
 void NTRIPManager::disconnectConnection()
 {
-    if (_tcpLink) {
-        _tcpLink->stop();
+    _retryTimer.stop();
+
+    if (_session.profile.id.isEmpty()) {
+        return;
     }
+
+    const bool wasReceiving = receivingData();
+    auto* attempt = _session.attempt;
+    _session = {};
+    if (attempt) {
+        attempt->stop();
+    }
+
+    if (wasReceiving) {
+        emit receivingDataChanged();
+    }
+    emit connectionStateChanged();
+    emit connectionIdChanged();
 }
 
 NTRIPConnection::State NTRIPManager::connectionState() const
 {
-    return _tcpLink ? _tcpLink->state() : NTRIPConnection::Disconnected;
+    if (_session.retryStep > 0) {
+        return NTRIPConnection::Reconnecting;
+    }
+    return _session.attempt ? _session.attempt->state() : NTRIPConnection::Disconnected;
 }
 
 bool NTRIPManager::receivingData() const
 {
-    return _tcpLink && _tcpLink->receivingData();
+    return _session.attempt && _session.attempt->receivingData();
 }
 
 QString NTRIPManager::connectionId() const
 {
-    return _activeConnectionId;
+    return _session.profile.id;
 }
 
 void NTRIPManager::tcpError(const QString& errorMsg)

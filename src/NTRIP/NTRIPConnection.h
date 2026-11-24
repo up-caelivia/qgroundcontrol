@@ -36,9 +36,16 @@ public:
         Disconnected,
         Connecting,
         RequestStream,
+        Reconnecting,
         Connected
     };
     Q_ENUM(State)
+
+    enum class EndReason {
+        Requested,
+        Retryable,
+        Fatal
+    };
 
     Q_INVOKABLE void start();
     Q_INVOKABLE void stop();
@@ -47,9 +54,8 @@ public:
     bool receivingData() const { return _receivingData; }
 
 signals:
-    void error(const QString errorMsg);
     void RTCMDataUpdate(QByteArray message);
-    void closed();
+    void connectionEnded(EndReason, const QString& message);
 
     void stateChanged();
     void receivingDataChanged();
@@ -81,6 +87,7 @@ private:
     void _hardwareConnect();
     bool _readHandshakeLine(QByteArray& line);
     qint64 _handshakeBytesRead = 0;
+    void _terminateTransport(EndReason reason, const QString& message);
 
     // Incoming correction data
     void _parse(const QByteArray& buffer);
@@ -102,7 +109,7 @@ private:
     // RTCM packet assembly
     void _beginRtcmStream();
     RTCMParsing* _rtcm_parsing = nullptr;
-    QTimer* _handshakeTimer = nullptr;
+    QTimer* _attemptTimer = nullptr;
 
     // HTTP chunk decoding
     bool _isChunked = false;

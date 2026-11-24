@@ -73,6 +73,8 @@ Rectangle {
         switch (_manager.connectionState) {
         case NTRIPConnection.Connecting:
             return qsTr("Connecting")
+        case NTRIPConnection.Reconnecting:
+            return qsTr("Reconnecting")
         case NTRIPConnection.RequestStream:
             return qsTr("Requesting corrections")
         case NTRIPConnection.Connected:

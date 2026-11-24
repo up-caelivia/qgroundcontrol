@@ -17,6 +17,7 @@
 #include <QString>
 #include <QVariantList>
 #include <QVariantMap>
+#include <QTimer>
 
 #include <memory>
 
@@ -60,7 +61,7 @@ public:
     NTRIPConnection::State connectionState() const;
     bool receivingData() const;
     QString connectionId() const;
-    QString connectionName() const { return _activeConnectionName; }
+    QString connectionName() const { return _session.profile.name; }
 
     Q_INVOKABLE QVariantMap configuration(const QString& id) const;
 
@@ -138,9 +139,16 @@ private:
     bool _storageBusy = false;
     ShutdownState _shutdownState = ShutdownState::Running;
 
-    NTRIPConnection* _tcpLink = nullptr;
-    RTCMMavlink* _rtcmMavlink = nullptr;
+    struct ConnessionSession {
+        NTRIPConfiguration profile;
+        NTRIPConnection* attempt = nullptr;
+        int retryStep = 0;
+    };
 
-    QString _activeConnectionId;
-    QString _activeConnectionName;
+    bool _startConnectionAttempt();
+    void _scheduleRetry();
+
+    ConnessionSession _session;
+    QTimer _retryTimer;
+    RTCMMavlink* _rtcmMavlink = nullptr;
 };

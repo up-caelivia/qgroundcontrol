@@ -35,16 +35,18 @@ NTRIPConnection::NTRIPConnection(
   _vrsSendTimer->setInterval(_vrsSendRateMSecs);
   _vrsSendTimer->setSingleShot(false);
 
-  _handshakeTimer = new QTimer(this);
-  _handshakeTimer->setSingleShot(true);
-  _handshakeTimer->setInterval(10000);
+  _attemptTimer = new QTimer(this);
+  _attemptTimer->setSingleShot(true);
+  _attemptTimer->setInterval(10000);
   connect(
-    _handshakeTimer,
+    _attemptTimer,
     &QTimer::timeout,
     this,
     [this]() {
-      emit error(tr("Timed out waiting for the NTRIP caster."));
-      stop();
+      const QString message = _state == State::Connected
+        ? tr("Timed out waiting for RTCM corrections.")
+        : tr("Timed out waiting for the NTRIP caster.");
+      _terminateTransport(EndReason::Retryable, message);
     }
   );
 
@@ -68,13 +70,16 @@ NTRIPConnection::NTRIPConnection(
           this, &NTRIPConnection::_readBytes);
 
   connect(_socket, &QTcpSocket::errorOccurred,
-          this, [this](QAbstractSocket::SocketError){
-      emit error(_socket->errorString());
-      stop();
+          this, [this](QAbstractSocket::SocketError error){
+      const bool fatal = error == QAbstractSocket::SocketAccessError
+        || error == QAbstractSocket::UnsupportedSocketOperationError;
+      _terminateTransport(fatal ? EndReason::Fatal : EndReason::Retryable, _socket->errorString());
   });
 
   connect(_socket, &QTcpSocket::disconnected,
-          this, &NTRIPConnection::stop);
+          this, [this]() {
+      _terminateTransport(EndReason::Retryable, tr("The NTRIP caster disconnected."));
+  });
 
   connect(_vrsSendTimer, &QTimer::timeout,
           this, &NTRIPConnection::_sendNmeaGga);
@@ -105,21 +110,25 @@ void NTRIPConnection::start()
     return;
   }
 
-  _handshakeTimer->start();
+  _attemptTimer->start();
   _socket->connectToHost(
     _configuration.hostAddress,
     _configuration.port);
 }
 
-// Stops the connection to the host server
 void NTRIPConnection::stop()
+{
+  _terminateTransport(EndReason::Requested, {});
+}
+
+void NTRIPConnection::_terminateTransport(NTRIPConnection::EndReason reason, const QString& message)
 {
   if (_closed) {
     return;
   }
 
   _closed = true;
-  _handshakeTimer->stop();
+  _attemptTimer->stop();
   _connectionDropTimer->stop();
   _vrsSendTimer->stop();
   _connectionState = NTRIPState::uninitialised;
@@ -135,7 +144,7 @@ void NTRIPConnection::stop()
     emit receivingDataChanged();
   }
 
-  emit closed();
+  emit connectionEnded(reason, message);
 }
 
 void NTRIPConnection::_onTcpConnected() {
@@ -214,6 +223,7 @@ void NTRIPConnection::_parse(const QByteArray &buffer) {
     }
 
     if (_rtcm_parsing->addByte(byte)) {
+      _attemptTimer->start(10000);
       _connectionState = NTRIPState::waiting_for_rtcm_header;
       QByteArray message((char *)_rtcm_parsing->message(),
                          static_cast<int>(_rtcm_parsing->messageLength()));
@@ -261,8 +271,7 @@ void NTRIPConnection::_readBytes(void) {
 
     if (response.startsWith("SOURCETABLE")) {
       _connectionState = NTRIPState::uninitialised;
-      emit error(tr("The caster returned a source table. Check the mountpoint."));
-      stop();
+      _terminateTransport(EndReason::Fatal, tr("The caster returned source table. Check the mountpoint"));
       return;
     }
 
@@ -273,14 +282,13 @@ void NTRIPConnection::_readBytes(void) {
         fields[0] == "ICY");
 
     if (!supportedResponse || fields[1] != "200") {
-      _connectionState = NTRIPState::uninitialised;
+      const int status = supportedResponse ? fields[1].toInt() : 0;
+      const bool retryable = status == 408 || (status >= 500 && status <= 599);
+      const QString message = status == 401
+        ? tr("NTRIP Server responded with 401 Unauthorized")
+        : tr("NTRIP request failed: %1").arg(QString::fromLatin1(response));
 
-      if (supportedResponse && fields[1] == "401") {
-        emit error(tr("NTRIP Server responded with 401 Unauthorized"));
-      } else {
-        emit error(tr("NTRIP request failed: %1").arg(QString::fromLatin1(response)));
-      }
-      stop();
+      _terminateTransport(retryable ? EndReason::Retryable : EndReason::Fatal, message);
       return;
     }
     if (fields[0] == "ICY") {
@@ -386,7 +394,8 @@ void NTRIPConnection::_sendNmeaGga() {
 }
 
 void NTRIPConnection::_beginRtcmStream() {
-  _handshakeTimer->stop();
+  // Give the caster time to send the first RTCM frame.
+  _attemptTimer->start(30000);
   _connectionState = NTRIPState::waiting_for_rtcm_header;
   _state = State::Connected;
   emit stateChanged();
@@ -408,7 +417,8 @@ bool NTRIPConnection::_readHandshakeLine(QByteArray& line)
       return false;
   }
 
-  emit error(tr("The NTRIP caster response header is too large."));
-  stop();
+  _terminateTransport(
+    EndReason::Fatal,
+    tr("The NTRIP caster response header is too large."));
   return false;
 }
