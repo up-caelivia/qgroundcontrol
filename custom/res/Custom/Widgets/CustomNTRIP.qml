@@ -642,6 +642,15 @@ Rectangle {
                             placeholderText: qsTr("Comma-separated IDs; empty to allow all")
                         }
 
+                        Rectangle {
+                            Layout.columnSpan: editorGrid.columns
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 1
+                            Layout.topMargin: _root._spacing
+                            Layout.bottomMargin: _root._spacing
+                            color: qgcPal.windowShadeDark
+                        }
+
                         QGCCheckBox {
                             id: connectAtStartupCheckbox
                             Layout.columnSpan: editorGrid.columns
